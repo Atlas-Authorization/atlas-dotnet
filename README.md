@@ -49,7 +49,7 @@ await foreach (var org in AtlasPagination.PaginateAsync(
 using var atlas = new AtlasClient(new AtlasClientOptions
 {
     SecretKey = Environment.GetEnvironmentVariable("ATLAS_SECRET_KEY")!,
-    ApiUrl    = "https://api.atlas.dev",   // per-instance BAPI origin
+    ApiUrl    = "https://api.atlasauth.net",   // per-instance BAPI origin
     HttpClient = myPooledHttpClient,        // optional; you own its lifetime if you pass it
 });
 ```
@@ -89,7 +89,7 @@ using Atlas.Verification;
 
 var backend = new AtlasBackend(new AtlasBackendOptions
 {
-    JwksUrl = "https://api.atlas.dev/.well-known/jwks.json",
+    JwksUrl = "https://api.atlasauth.net/.well-known/jwks.json",
     Issuer  = "https://your-instance.atlas.dev",
     // Optional azp allowlist — refuse a token minted for a different origin.
     AuthorizedParties = new[] { "https://app.example.com" },
