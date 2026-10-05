@@ -90,7 +90,7 @@ using Atlas.Verification;
 var backend = new AtlasBackend(new AtlasBackendOptions
 {
     JwksUrl = "https://api.atlasauth.net/.well-known/jwks.json",
-    Issuer  = "https://your-instance.atlas.dev",
+    Issuer  = "https://auth.yourdomain.com",
     // Optional azp allowlist — refuse a token minted for a different origin.
     AuthorizedParties = new[] { "https://app.example.com" },
 });
