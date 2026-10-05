@@ -23,6 +23,11 @@ namespace Atlas.Resources
     }
 
     /// <summary>The sign-in-tokens namespace (<c>/v1/sign_in_tokens</c>).</summary>
+    /// <summary>
+    /// Deprecated (Sunset 2026-04-01): POST /v1/sign_in_tokens is superseded by
+    /// SessionsResource.CreateAsync (POST /v1/sessions), which mints a real
+    /// redeemable session in one call.
+    /// </summary>
     public sealed class SignInTokensResource : ResourceBase
     {
         public SignInTokensResource(AtlasTransport transport) : base(transport) { }
