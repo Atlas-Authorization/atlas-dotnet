@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Match the SDK's net8.0 target. ASP.NET Core integration has no reason to
+         ship for netstandard2.1: Microsoft.AspNetCore.App is a shared framework
+         that only exists on net8.0+, so a single TFM here is correct, not a gap. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <RootNamespace>Atlas.AspNetCore</RootNamespace>
+    <AssemblyName>Atlas.AspNetCore</AssemblyName>
+
+    <!-- NuGet package metadata (publishing is a SEPARATE step — not packed here). -->
+    <PackageId>Atlas.AspNetCore</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Atlas</Authors>
+    <Company>Atlas</Company>
+    <Product>Atlas ASP.NET Core Authentication</Product>
+    <Description>Framework-native ASP.NET Core authentication, DI, and authorization for Atlas — an AuthenticationHandler, AddAtlas / AddAtlasAuthentication wiring, and RequireAtlasPermission policies built on the Atlas.Sdk session verifier. The .NET peer of auth0-aspnetcore-authentication.</Description>
+    <PackageTags>atlas;auth;authentication;authorization;aspnetcore;jwt;identity</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/atlas/atlas</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The authentication/authorization abstractions, DI, and the HTTP pipeline
+         all live in the ASP.NET Core shared framework — referenced, never packed. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- We build ON the existing SDK verifier (AtlasBackend) — we never
+         reimplement JWT/JWKS. This is the whole point of the integration. -->
+    <ProjectReference Include="../Atlas/Atlas.csproj" />
+  </ItemGroup>
+
+</Project>

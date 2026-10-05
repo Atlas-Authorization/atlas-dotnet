@@ -8,14 +8,22 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <!-- The ASP.NET Core integration tests drive a real request pipeline in-memory
+       via TestHost, so the test project needs the shared framework too. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.11" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/Atlas/Atlas.csproj" />
+    <ProjectReference Include="../../src/Atlas.AspNetCore/Atlas.AspNetCore.csproj" />
   </ItemGroup>
 
 </Project>
