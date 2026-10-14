@@ -50,7 +50,12 @@ namespace Atlas.Resources
         public bool Deleted { get; init; }
     }
 
-    /// <summary>The BYOK messaging namespace (<c>/v1/messaging_providers</c>).</summary>
+    /// <summary>
+    /// The messaging providers namespace (<c>/v1/messaging_providers</c>) — use your own
+    /// email or SMS provider. Prefer the typed <see cref="EmailProviderConfig"/> /
+    /// <see cref="SmsProviderConfig"/> overloads: each record carries exactly the
+    /// <c>config</c> keys the API accepts for its transport.
+    /// </summary>
     public sealed class MessagingResource : ResourceBase
     {
         public MessagingResource(AtlasTransport transport) : base(transport) { }
@@ -59,9 +64,37 @@ namespace Atlas.Resources
         public Task<MessagingProviders> GetAsync(CancellationToken ct = default)
             => Req<MessagingProviders>(HttpVerb.Get, "/v1/messaging_providers", cancellationToken: ct);
 
+        /// <summary>
+        /// Configure (or update) the email provider with typed, per-transport settings.
+        /// On an update of the same transport, null properties keep their stored values
+        /// (including stored secrets).
+        /// </summary>
+        public Task<MessagingProvider> SetEmailAsync(EmailProviderConfig config, string? fromAddress = null, CancellationToken ct = default)
+            => SetEmailAsync(new MessagingProviderInput
+            {
+                Transport = config.Transport,
+                FromAddress = fromAddress,
+                Config = config.ToConfig(),
+            }, ct);
+
+        /// <summary>
+        /// Configure (or update) the SMS provider with typed, per-transport settings.
+        /// On an update of the same transport, null properties keep their stored values
+        /// (including stored secrets).
+        /// </summary>
+        public Task<MessagingProvider> SetSmsAsync(SmsProviderConfig config, string? fromAddress = null, CancellationToken ct = default)
+            => SetSmsAsync(new MessagingProviderInput
+            {
+                Transport = config.Transport,
+                FromAddress = fromAddress,
+                Config = config.ToConfig(),
+            }, ct);
+
+        /// <summary>Set the email provider from an untyped body. Prefer the <see cref="EmailProviderConfig"/> overload.</summary>
         public Task<MessagingProvider> SetEmailAsync(MessagingProviderInput body, CancellationToken ct = default)
             => Req<MessagingProvider>(HttpVerb.Put, "/v1/messaging_providers/email", body, cancellationToken: ct);
 
+        /// <summary>Set the SMS provider from an untyped body. Prefer the <see cref="SmsProviderConfig"/> overload.</summary>
         public Task<MessagingProvider> SetSmsAsync(MessagingProviderInput body, CancellationToken ct = default)
             => Req<MessagingProvider>(HttpVerb.Put, "/v1/messaging_providers/sms", body, cancellationToken: ct);
 

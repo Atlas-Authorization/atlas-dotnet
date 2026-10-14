@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -34,5 +36,16 @@ namespace Atlas.Resources
 
         public Task<SignInToken> CreateAsync(CreateSignInTokenBody body, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<SignInToken>(HttpVerb.Post, "/v1/sign_in_tokens", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>POST /v1/sign_in_tokens/{id}/revoke</c> — DEPRECATED (Sunset 2027-04-01) — revoke an unused sign-in token before its 60s window elapses.</summary>
+        public Task<RevokedSignInToken> RevokeAsync(string id, CancellationToken ct = default)
+            => Req<RevokedSignInToken>(HttpVerb.Post, $"/v1/sign_in_tokens/{Enc(id)}/revoke", cancellationToken: ct);
+    }
+
+    public sealed class RevokedSignInToken
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public bool Revoked { get; init; }
     }
 }

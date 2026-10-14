@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -136,6 +137,10 @@ namespace Atlas.Resources
 
         public Task<DeleteOAuthClientResult> DeleteAsync(string id, CancellationToken ct = default)
             => Req<DeleteOAuthClientResult>(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(id)}", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/oauth_clients/import</c> — Bulk-import OAuth clients for a migration, optionally with a pre-hashed client secret.</summary>
+        public Task<ListPage<ImportedOAuthClient>> ImportClientsAsync(ImportOAuthClientsBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<ListPage<ImportedOAuthClient>>(HttpVerb.Post, "/v1/oauth_clients/import", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
     }
 
     // ---------------- Resource servers ----------------
@@ -249,8 +254,26 @@ namespace Atlas.Resources
         public bool AllowSignUp { get; init; }
         public List<string> Scopes { get; init; } = new List<string>();
         public long? UpdatedAt { get; init; }
+        public List<string>? ApiScopes { get; init; }
+        /// <summary>The stored non-secret settings (for the wallet providers, the verifier settings such as <c>domain</c> and <c>chain_ids</c>).</summary>
+        public Dictionary<string, string>? SettingValues { get; init; }
+        /// <summary><c>native</c> or <c>redirect</c>.</summary>
+        public string? Mode { get; init; }
+        public List<string>? JavascriptOrigins { get; init; }
+        public string? AtlasCallback { get; init; }
+        public string? CustomRedirectUri { get; init; }
+        /// <summary>The button icon override, when set.</summary>
+        public string? IconUrl { get; init; }
     }
 
+    /// <summary>
+    /// Body for <c>PUT /v1/oauth_providers/:provider</c>. Display-only fields
+    /// (<see cref="DisplayName"/>, <see cref="IconUrl"/>, <see cref="Mode"/>) can be sent on
+    /// their own to re-brand a provider's button. The credential-less wallet providers
+    /// (<c>siwe</c>, <c>siws</c>, <c>siwf</c>) take only their verifier <see cref="Settings"/> plus
+    /// display fields — see <see cref="Siwe"/>, <see cref="Siws"/>, <see cref="Siwf"/>. A setting
+    /// set to <c>null</c> (see <see cref="ClearSetting"/>) or <c>""</c> clears it.
+    /// </summary>
     public sealed class UpsertOAuthProviderBody
     {
         public string? ClientId { get; set; }
@@ -258,7 +281,41 @@ namespace Atlas.Resources
         public string? ClientSecret { get; set; }
         public List<string>? Scopes { get; set; }
         public Dictionary<string, string>? Values { get; set; }
-        public Dictionary<string, string>? Settings { get; set; }
+        public Dictionary<string, string?>? Settings { get; set; }
+        /// <summary>Override the redirect URI registered with the provider.</summary>
+        public string? CustomRedirectUri { get; set; }
+        public bool? Native { get; set; }
+        /// <summary><c>native</c>, <c>redirect</c>, or <c>""</c> to clear the override.</summary>
+        public string? Mode { get; set; }
+        /// <summary>The brand shown on the button (e.g. <c>Discord</c>); empty clears.</summary>
+        public string? DisplayName { get; set; }
+        /// <summary>An http(s) or <c>data:image</c> icon URL for the button; empty clears.</summary>
+        public string? IconUrl { get; set; }
+
+        /// <summary>Set one provider setting (a <c>null</c> value clears it).</summary>
+        public UpsertOAuthProviderBody Setting(string key, string? value)
+        {
+            (Settings ??= new Dictionary<string, string?>())[key] = value;
+            return this;
+        }
+
+        /// <summary>Clear one stored provider setting (sends it as <c>null</c>).</summary>
+        public UpsertOAuthProviderBody ClearSetting(string key) => Setting(key, null);
+
+        /// <summary>Sign in with Ethereum verifier settings: the expected <paramref name="domain"/>, allowed EIP-155 <paramref name="chainIds"/> (comma-separated), and an https <paramref name="rpcUrl"/> for contract wallets. Null leaves one unchanged.</summary>
+        public static UpsertOAuthProviderBody Siwe(string? domain = null, string? chainIds = null, string? rpcUrl = null)
+            => new UpsertOAuthProviderBody().SetIf("domain", domain).SetIf("chain_ids", chainIds).SetIf("rpc_url", rpcUrl);
+
+        /// <summary>Sign in with Solana verifier settings: the expected <paramref name="domain"/> and allowed <paramref name="networks"/> (comma-separated: mainnet, devnet, testnet).</summary>
+        public static UpsertOAuthProviderBody Siws(string? domain = null, string? networks = null)
+            => new UpsertOAuthProviderBody().SetIf("domain", domain).SetIf("networks", networks);
+
+        /// <summary>Sign in with Farcaster verifier settings: <paramref name="domain"/>, <paramref name="chainIds"/>, an https <paramref name="optimismRpcUrl"/> (required to verify FID ownership) and the <paramref name="idRegistryAddress"/>.</summary>
+        public static UpsertOAuthProviderBody Siwf(string? domain = null, string? chainIds = null, string? optimismRpcUrl = null, string? idRegistryAddress = null)
+            => new UpsertOAuthProviderBody().SetIf("domain", domain).SetIf("chain_ids", chainIds)
+                .SetIf("optimism_rpc_url", optimismRpcUrl).SetIf("id_registry_address", idRegistryAddress);
+
+        private UpsertOAuthProviderBody SetIf(string key, string? value) => value == null ? this : Setting(key, value);
     }
 
     public sealed class OAuthConnectionTest
@@ -277,6 +334,10 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "oauth_provider";
         public string Provider { get; init; } = "";
         public bool Configured { get; init; }
+        public bool? Enabled { get; init; }
+        public Dictionary<string, string>? SettingValues { get; init; }
+        public List<string>? UpdatedFields { get; init; }
+        public string? Warning { get; init; }
     }
 
     public sealed class DeleteOAuthProviderResult
@@ -311,6 +372,11 @@ namespace Atlas.Resources
         public Task<ListPage<OAuthProvider>> ListAsync(CancellationToken ct = default)
             => Req<ListPage<OAuthProvider>>(HttpVerb.Get, "/v1/oauth_providers", cancellationToken: ct);
 
+        /// <summary>The catalog narrowed to the given provider keys and/or configured state (null skips a filter).</summary>
+        public Task<ListPage<OAuthProvider>> ListAsync(IEnumerable<string>? providers, bool? configured = null, CancellationToken ct = default)
+            => Req<ListPage<OAuthProvider>>(HttpVerb.Get, "/v1/oauth_providers",
+                query: Q(("provider", providers), ("configured", configured)), cancellationToken: ct);
+
         public Task<OAuthProvider> GetAsync(string provider, CancellationToken ct = default)
             => Req<OAuthProvider>(HttpVerb.Get, $"/v1/oauth_providers/{Enc(provider)}", cancellationToken: ct);
 
@@ -334,5 +400,73 @@ namespace Atlas.Resources
         /// <summary>Verify the stored credentials against the provider's token endpoint, without enabling it.</summary>
         public Task<OAuthConnectionTest> TestAsync(string provider, CancellationToken ct = default)
             => Req<OAuthConnectionTest>(HttpVerb.Post, $"/v1/oauth_providers/{Enc(provider)}/test", cancellationToken: ct);
+    }
+
+    public sealed class ImportOAuthClient
+    {
+        /// <summary>Preserve the existing client_id for a migration.</summary>
+        public string? ClientId { get; set; }
+        /// <summary>Plaintext secret; hashed on import. Write-only.</summary>
+        public string? ClientSecret { get; set; }
+        /// <summary>A pre-computed secret hash to import verbatim (in place of client_secret).</summary>
+        public string? ClientSecretHash { get; set; }
+        public string? Name { get; set; }
+        public List<string>? RedirectUris { get; set; }
+        public List<string>? AllowedScopes { get; set; }
+        public List<string>? GrantTypes { get; set; }
+        public string? TokenEndpointAuthMethod { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public ImportOAuthClient Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    public sealed class ImportOAuthClientsBody
+    {
+        /// <summary>The clients to import; each entry is an OAuth client registration.</summary>
+        public List<ImportOAuthClient>? Clients { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public ImportOAuthClientsBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    public sealed class ImportedOAuthClient
+    {
+        [JsonPropertyName("object")] public string? ObjectType { get; init; }
+        public string? Id { get; init; }
+        public string? ClientId { get; init; }
+        public string? Name { get; init; }
+        public string? LogoUrl { get; init; }
+        public List<string>? RedirectUris { get; init; }
+        public List<string>? AllowedScopes { get; init; }
+        public List<string>? GrantTypes { get; init; }
+        public string? TokenEndpointAuthMethod { get; init; }
+        public string? SecretPrefix { get; init; }
+        public bool? IsPublic { get; init; }
+        public bool? FirstParty { get; init; }
+        public List<string>? PostLogoutRedirectUris { get; init; }
+        public string? BackchannelLogoutUri { get; init; }
+        public bool? BackchannelLogoutSessionRequired { get; init; }
+        public string? FrontchannelLogoutUri { get; init; }
+        public bool? FrontchannelLogoutSessionRequired { get; init; }
+        /// <summary>The client secret — returned ONCE on create (absent when auth method is `none`).</summary>
+        public string? ClientSecret { get; init; }
+        /// <summary>Created (epoch ms).</summary>
+        public long? CreatedAt { get; init; }
+        /// <summary>Updated (epoch ms).</summary>
+        public long? UpdatedAt { get; init; }
     }
 }

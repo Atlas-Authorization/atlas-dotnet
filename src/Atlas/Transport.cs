@@ -28,8 +28,39 @@ namespace Atlas
         /// <summary>Idempotency-Key header (§9.1), when a caller supplies one.</summary>
         public string? IdempotencyKey { get; set; }
 
-        /// <summary>When true, the raw text body is returned instead of parsed JSON (SAML XML).</summary>
+        /// <summary>When true, the raw text body is returned instead of parsed JSON (SAML XML, exports).</summary>
         public bool Raw { get; set; }
+
+        /// <summary>Raw bytes to send instead of a JSON body (an image upload). Requires <see cref="ContentType"/>.</summary>
+        public byte[]? BinaryBody { get; set; }
+
+        /// <summary>The <c>Content-Type</c> of <see cref="BinaryBody"/>, e.g. <c>image/png</c>.</summary>
+        public string? ContentType { get; set; }
+    }
+
+    /// <summary>
+    /// Reported when a write succeeded but the server ignored request-body fields it
+    /// does not accept (the <c>Atlas-Unknown-Fields</c> response header). Nested
+    /// fields are named <c>parent.child</c>. Turn on
+    /// <see cref="AtlasClientOptions.Strict"/> to get a <c>422 UNKNOWN_FIELD</c> instead.
+    /// </summary>
+    public sealed class UnknownFieldsWarning
+    {
+        public UnknownFieldsWarning(string method, string path, IReadOnlyList<string> fields)
+        {
+            Method = method;
+            Path = path;
+            Fields = fields;
+        }
+
+        /// <summary>The HTTP method of the request.</summary>
+        public string Method { get; }
+
+        /// <summary>The request path (no query string).</summary>
+        public string Path { get; }
+
+        /// <summary>The ignored field names, as the server listed them.</summary>
+        public IReadOnlyList<string> Fields { get; }
     }
 
     /// <summary>
@@ -43,19 +74,53 @@ namespace Atlas
     /// </summary>
     public sealed class AtlasTransport
     {
+        /// <summary>The request header that turns unknown body fields into a <c>422 UNKNOWN_FIELD</c>.</summary>
+        public const string StrictHeader = "Atlas-Strict";
+
+        /// <summary>The response header listing body fields the server ignored.</summary>
+        public const string UnknownFieldsHeader = "Atlas-Unknown-Fields";
+
         private readonly string _secretKey;
         private readonly string _baseUrl;
         private readonly HttpClient _http;
+        private readonly bool? _strict;
+        private readonly Action<UnknownFieldsWarning>? _onUnknownFields;
+        private readonly string? _missingKeyMessage;
 
         public AtlasTransport(string secretKey, string baseUrl, HttpClient http)
+            : this(secretKey, baseUrl, http, null, null, null) { }
+
+        /// <param name="secretKey">The bearer key (<c>sk_</c> or <c>psk_</c>).</param>
+        /// <param name="baseUrl">The API origin.</param>
+        /// <param name="http">The shared <see cref="HttpClient"/>.</param>
+        /// <param name="strict"><c>true</c>/<c>false</c> sends <c>Atlas-Strict</c> on every write; <c>null</c> sends nothing.</param>
+        /// <param name="onUnknownFields">Called when a response carries <c>Atlas-Unknown-Fields</c>.</param>
+        /// <param name="missingKeyMessage">The error raised when <paramref name="secretKey"/> is empty.</param>
+        public AtlasTransport(string secretKey, string baseUrl, HttpClient http, bool? strict,
+            Action<UnknownFieldsWarning>? onUnknownFields, string? missingKeyMessage)
         {
             _secretKey = secretKey;
             _baseUrl = baseUrl.TrimEnd('/');
             _http = http;
+            _strict = strict;
+            _onUnknownFields = onUnknownFields;
+            _missingKeyMessage = missingKeyMessage;
         }
+
+        /// <summary>The strict-body setting this transport sends (<c>null</c> = header not sent).</summary>
+        public bool? Strict => _strict;
+
+        /// <summary>A copy of this transport that sends <c>Atlas-Strict: &lt;strict&gt;</c> on writes (<c>null</c> = never).</summary>
+        public AtlasTransport WithStrict(bool? strict) =>
+            new AtlasTransport(_secretKey, _baseUrl, _http, strict, _onUnknownFields, _missingKeyMessage);
 
         public async Task<T?> SendAsync<T>(RequestOptions options, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrEmpty(_secretKey))
+            {
+                throw new InvalidOperationException(_missingKeyMessage ?? "No API key is configured for this call.");
+            }
+
             var url = _baseUrl + (options.Path.StartsWith("/") ? options.Path : "/" + options.Path)
                       + QuerySerializer.Serialize(options.Query);
 
@@ -66,7 +131,19 @@ namespace Atlas
             {
                 request.Headers.TryAddWithoutValidation("Idempotency-Key", options.IdempotencyKey);
             }
-            if (options.Body != null)
+            if (_strict.HasValue && options.Method != HttpVerb.Get)
+            {
+                request.Headers.TryAddWithoutValidation(StrictHeader, _strict.Value ? "true" : "false");
+            }
+            if (options.BinaryBody != null)
+            {
+                if (string.IsNullOrEmpty(options.ContentType))
+                    throw new ArgumentException("ContentType is required for a binary body (e.g. image/png).");
+                var content = new ByteArrayContent(options.BinaryBody);
+                content.Headers.TryAddWithoutValidation("Content-Type", options.ContentType);
+                request.Content = content;
+            }
+            else if (options.Body != null)
             {
                 var json = AtlasJson.Serialize(options.Body);
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -81,6 +158,11 @@ namespace Atlas
 #else
                 await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 #endif
+
+            if (response.Headers.TryGetValues(UnknownFieldsHeader, out var unknownValues))
+            {
+                ReportUnknown(options, string.Join(",", unknownValues));
+            }
 
             if (!response.IsSuccessStatusCode)
             {
@@ -99,6 +181,27 @@ namespace Atlas
             }
 
             return AtlasJson.Deserialize<T>(text);
+        }
+
+        private void ReportUnknown(RequestOptions options, string header)
+        {
+            var fields = new List<string>();
+            foreach (var f in header.Split(','))
+            {
+                var trimmed = f.Trim();
+                if (trimmed.Length > 0) fields.Add(trimmed);
+            }
+            if (fields.Count == 0) return;
+            var warning = new UnknownFieldsWarning(options.Method.ToString().ToUpperInvariant(), options.Path, fields);
+            if (_onUnknownFields != null)
+            {
+                _onUnknownFields(warning);
+            }
+            else
+            {
+                System.Diagnostics.Trace.TraceWarning(
+                    "Atlas ignored unknown body field(s) on {0} {1}: {2}", warning.Method, warning.Path, string.Join(", ", fields));
+            }
         }
 
         private static AtlasException ToException(int status, string text)

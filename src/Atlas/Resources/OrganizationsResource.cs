@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -69,6 +70,44 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "organization_policy";
         public string OrganizationId { get; init; } = "";
         public Dictionary<string, object?> Policy { get; init; } = new Dictionary<string, object?>();
+
+        /// <summary>The policy overrides as a typed <see cref="OrgPolicy"/> (unknown keys land in <see cref="OrgPolicy.Extra"/>).</summary>
+        public OrgPolicy Typed() =>
+            AtlasJson.Deserialize<OrgPolicy>(AtlasJson.Serialize(Policy)) ?? new OrgPolicy();
+    }
+
+    /// <summary>
+    /// An organization's security policy overrides, typed. Only the overrides that are
+    /// set appear (unset fields are null). The wire keys are camelCase.
+    /// </summary>
+    public sealed class OrgPolicy
+    {
+        /// <summary>Members must have MFA enrolled.</summary>
+        [JsonPropertyName("requireMfa")] public bool? RequireMfa { get; init; }
+        /// <summary>Members must sign in through the organization's SSO connection.</summary>
+        [JsonPropertyName("ssoRequired")] public bool? SsoRequired { get; init; }
+        /// <summary>Session idle timeout for members, in milliseconds.</summary>
+        [JsonPropertyName("sessionIdleOverrideMs")] public long? SessionIdleOverrideMs { get; init; }
+        /// <summary>The sign-in methods members may use (e.g. <c>password</c>, <c>passkey</c>, <c>oauth:google</c>, <c>saml</c>). Empty or absent means all.</summary>
+        [JsonPropertyName("allowedSignInMethods")] public List<string>? AllowedSignInMethods { get; init; }
+        /// <summary>CIDR allow-list gating member sign-in.</summary>
+        [JsonPropertyName("ipAllowlist")] public List<string>? IpAllowlist { get; init; }
+        /// <summary>Absolute session lifetime cap for members, in seconds.</summary>
+        [JsonPropertyName("maxSessionAgeSeconds")] public long? MaxSessionAgeSeconds { get; init; }
+        /// <summary>The organization's end-user (reader) pool settings.</summary>
+        [JsonPropertyName("endUserPool")] public EndUserPoolPolicy? EndUserPool { get; init; }
+        /// <summary>Policy keys this SDK version does not model.</summary>
+        [JsonExtensionData] public Dictionary<string, JsonElement>? Extra { get; init; }
+    }
+
+    /// <summary>An organization's end-user (reader) pool policy. The wire keys are camelCase.</summary>
+    public sealed class EndUserPoolPolicy
+    {
+        [JsonPropertyName("enabled")] public bool? Enabled { get; set; }
+        /// <summary>New end users wait for approval before they can sign in.</summary>
+        [JsonPropertyName("requireApproval")] public bool? RequireApproval { get; set; }
+        /// <summary>End users may sign up on the hosted pages.</summary>
+        [JsonPropertyName("allowHostedSignup")] public bool? AllowHostedSignup { get; set; }
     }
 
     public sealed class OrganizationHierarchyNode
@@ -91,8 +130,11 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "organization_entitlements";
         public string OrganizationId { get; init; } = "";
         public string? Plan { get; init; }
-        public Dictionary<string, object?> Features { get; init; } = new Dictionary<string, object?>();
+        /// <summary>The feature keys the organization is entitled to.</summary>
+        public List<string> Features { get; init; } = new List<string>();
         public Dictionary<string, object?> Catalog { get; init; } = new Dictionary<string, object?>();
+        /// <summary>Numeric limits by key (e.g. seats).</summary>
+        public Dictionary<string, JsonElement> Limits { get; init; } = new Dictionary<string, JsonElement>();
     }
 
     public sealed class CreateOrganizationBody
@@ -133,8 +175,21 @@ namespace Atlas.Resources
         [JsonPropertyName("requireMfa")] public bool? RequireMfa { get; set; }
         [JsonPropertyName("ssoRequired")] public bool? SsoRequired { get; set; }
         [JsonPropertyName("sessionIdleOverrideMs")] public long? SessionIdleOverrideMs { get; set; }
+        /// <summary>e.g. <c>password</c>, <c>passkey</c>, <c>oauth:google</c>, <c>saml</c>; an unknown method is a 400.</summary>
+        [JsonPropertyName("allowedSignInMethods")] public List<string>? AllowedSignInMethods { get; set; }
+        /// <summary>CIDR ranges members may sign in from.</summary>
+        [JsonPropertyName("ipAllowlist")] public List<string>? IpAllowlist { get; set; }
+        [JsonPropertyName("maxSessionAgeSeconds")] public long? MaxSessionAgeSeconds { get; set; }
+        [JsonPropertyName("endUserPool")] public EndUserPoolPolicy? EndUserPool { get; set; }
         /// <summary>Any further policy keys, written verbatim at the top level.</summary>
         [JsonExtensionData] public Dictionary<string, object?>? Extra { get; set; }
+
+        /// <summary>Remove a stored override (sends <c>"key": null</c>), e.g. <c>Clear("ipAllowlist")</c>.</summary>
+        public OrganizationPolicyPatch Clear(string key)
+        {
+            (Extra ??= new Dictionary<string, object?>())[key] = null;
+            return this;
+        }
     }
 
     // --- Sub-namespace result shapes ---
@@ -321,5 +376,226 @@ namespace Atlas.Resources
         /// <summary><c>GET /v1/organizations/:id/entitlements</c> — the org's resolved feature set.</summary>
         public Task<OrganizationEntitlements> EntitlementsAsync(string id, CancellationToken ct = default)
             => Req<OrganizationEntitlements>(HttpVerb.Get, $"/v1/organizations/{Enc(id)}/entitlements", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/organizations/{id}/branding</c> — Read an organization's hosted-page branding overlay (display name, logo, primary colour, support URL, custom domain).</summary>
+        public Task<OrganizationBranding> GetBrandingAsync(string id, CancellationToken ct = default)
+            => Req<OrganizationBranding>(HttpVerb.Get, $"/v1/organizations/{Enc(id)}/branding", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/organizations/{id}/branding</c> — Set an organization's hosted-page branding overlay — a partial merge: a provided field overrides the instance brand, null (or empty string) clears it back.</summary>
+        public Task<OrganizationBranding> ReplaceBrandingAsync(string id, OrganizationBrandingBody body, CancellationToken ct = default)
+            => Req<OrganizationBranding>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/branding", body, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/organizations/{orgId}/reader_domain</c> — List the organization's reader domain(s) — the host(s) whose sign-ups join this org's end-user pool, with DNS/certificate status.</summary>
+        public Task<ListPage<ReaderDomain>> ListReaderDomainsAsync(string orgId, CancellationToken ct = default)
+            => Req<ListPage<ReaderDomain>>(HttpVerb.Get, $"/v1/organizations/{Enc(orgId)}/reader_domain", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/organizations/{orgId}/reader_domain</c> — Bind a host to this organization's reader pool: a sign-up on it joins the pool.</summary>
+        public Task<ReaderDomainSetup> SetReaderDomainAsync(string orgId, string? host, CancellationToken ct = default)
+            => Req<ReaderDomainSetup>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/reader_domain", Body(("host", host)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/organizations/{orgId}/reader_domain</c> — Remove the organization's reader domain binding and drop its edge router.</summary>
+        public Task<DeletedObject> RemoveReaderDomainAsync(string orgId, CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, $"/v1/organizations/{Enc(orgId)}/reader_domain", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/organizations/{orgId}/end_users</c> — List an organization's end-user (reader) pool — the B2B2C tier of external users attached to the org, distinct from its staff members.</summary>
+        public Task<CursorPage<OrganizationEndUser>> ListEndUsersAsync(string orgId, ListEndUsersOrganizationsParams? @params = null, CancellationToken ct = default)
+            => Req<CursorPage<OrganizationEndUser>>(HttpVerb.Get, $"/v1/organizations/{Enc(orgId)}/end_users", query: (@params ?? new ListEndUsersOrganizationsParams()).ToQuery(), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/organizations/{orgId}/end_users</c> — Attach an instance user to an organization's end-user pool as a reader (the token-exchange path).</summary>
+        public Task<OrganizationEndUser> AddEndUserAsync(string orgId, AddOrganizationEndUserBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<OrganizationEndUser>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/end_users", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/organizations/{orgId}/end_users/{userId}</c> — Approve (active), gate (pending) or block a reader in an organization end-user pool.</summary>
+        public Task<OrganizationEndUser> UpdateEndUserAsync(string orgId, string userId, string? status, CancellationToken ct = default)
+            => Req<OrganizationEndUser>(HttpVerb.Patch, $"/v1/organizations/{Enc(orgId)}/end_users/{Enc(userId)}", Body(("status", status)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/organizations/{orgId}/end_users/{userId}</c> — Remove a reader from an organization's end-user pool.</summary>
+        public Task<DeletedObject> RemoveEndUserAsync(string orgId, string userId, CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, $"/v1/organizations/{Enc(orgId)}/end_users/{Enc(userId)}", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/organizations/{id}/audit_streams</c> — List an organization's registered audit stream destinations.</summary>
+        public Task<ListPage<OrganizationAuditStream>> ListAuditStreamsAsync(string id, CancellationToken ct = default)
+            => Req<ListPage<OrganizationAuditStream>>(HttpVerb.Get, $"/v1/organizations/{Enc(id)}/audit_streams", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/organizations/{id}/audit_streams</c> — Register an audit stream destination for one organization: an HTTPS SIEM/collector URL plus a shared HMAC signing secret (write-only, stored encrypted, min 16 chars) and an optional format hint.</summary>
+        public Task<OrganizationAuditStream> CreateAuditStreamAsync(string id, CreateOrganizationAuditStreamBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<OrganizationAuditStream>(HttpVerb.Post, $"/v1/organizations/{Enc(id)}/audit_streams", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/organizations/{id}/audit_streams/{streamId}</c> — Delete one of an organization's audit stream destinations.</summary>
+        public Task<DeletedObject> DeleteAuditStreamAsync(string id, string streamId, CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/audit_streams/{Enc(streamId)}", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/organizations/{id}/settings</c> — Fetch one organization's settings values.</summary>
+        public Task<OrganizationSettings> GetSettingsAsync(string id, CancellationToken ct = default)
+            => Req<OrganizationSettings>(HttpVerb.Get, $"/v1/organizations/{Enc(id)}/settings", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/organizations/{id}/settings</c> — Write one organization's settings values.</summary>
+        public Task<OrganizationSettings> ReplaceSettingsAsync(string id, Dictionary<string, object?>? values, CancellationToken ct = default)
+            => Req<OrganizationSettings>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/settings", Body(("values", values)), cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/organizations/{id}/settings</c> — Merge a partial object into an organization's settings values (RFC 7396 shallow merge): a key set to null is REMOVED, any other value sets/overwrites it, untouched keys are preserved — so a single settings key can be removed or changed without…</summary>
+        public Task<OrganizationSettings> UpdateSettingsAsync(string id, Dictionary<string, object?>? values, CancellationToken ct = default)
+            => Req<OrganizationSettings>(HttpVerb.Patch, $"/v1/organizations/{Enc(id)}/settings", Body(("values", values)), cancellationToken: ct);
+    }
+
+    public sealed class OrganizationBrandingBody
+    {
+        public string? DisplayName { get; set; }
+        public string? LogoUrl { get; set; }
+        public string? PrimaryColor { get; set; }
+        public string? SupportUrl { get; set; }
+        public string? CustomDomain { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public OrganizationBrandingBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    public sealed class AddOrganizationEndUserBody
+    {
+        /// <summary>An instance user id to attach as a reader.</summary>
+        public string? UserId { get; set; }
+        /// <summary>Defaults to active. Use pending when the org gates readers behind approval.</summary>
+        public string? Status { get; set; }
+        /// <summary>How the reader entered the pool. Defaults to token_exchange for this API.</summary>
+        public string? Source { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public AddOrganizationEndUserBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    public sealed class CreateOrganizationAuditStreamBody
+    {
+        /// <summary>Public HTTPS endpoint. SSRF-validated at save and at delivery.</summary>
+        public string? Url { get; set; }
+        /// <summary>Shared HMAC-SHA256 signing secret (min 16 chars). Write-only; stored encrypted and never returned.</summary>
+        public string? Secret { get; set; }
+        /// <summary>Optional shape hint for the collector. Default `json`.</summary>
+        public string? Format { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public CreateOrganizationAuditStreamBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    public sealed class OrganizationBranding
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string OrganizationId { get; init; } = "";
+        public string? DisplayName { get; init; }
+        public string? LogoUrl { get; init; }
+        public string? PrimaryColor { get; init; }
+        public string? SupportUrl { get; init; }
+        public string? CustomDomain { get; init; }
+        public long? UpdatedAt { get; init; }
+    }
+
+    /// <summary>A reader-pool custom domain (its `object` const is 'custom_domain').</summary>
+    public sealed class ReaderDomain
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string Role { get; init; } = "";
+        public string Host { get; init; } = "";
+        public string Status { get; init; } = "";
+        public string? Action { get; init; }
+        public bool Live { get; init; }
+        public string? CnameTarget { get; init; }
+        public long? LastCheckedAt { get; init; }
+        public string? LastObservedTarget { get; init; }
+        public string? FailureReason { get; init; }
+        public long? CertificateExpiresAt { get; init; }
+        public string? CookieDomain { get; init; }
+    }
+
+    public sealed class DnsInstruction
+    {
+        public string Role { get; init; } = "";
+        public string Host { get; init; } = "";
+        public string Type { get; init; } = "";
+        public string Target { get; init; } = "";
+        public string Purpose { get; init; } = "";
+    }
+
+    public sealed class ReaderDomainSetup
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string Role { get; init; } = "";
+        public string Host { get; init; } = "";
+        public string Status { get; init; } = "";
+        public string? Action { get; init; }
+        public bool Live { get; init; }
+        public string? CnameTarget { get; init; }
+        public long? LastCheckedAt { get; init; }
+        public string? LastObservedTarget { get; init; }
+        public string? FailureReason { get; init; }
+        public long? CertificateExpiresAt { get; init; }
+        public string? CookieDomain { get; init; }
+        public List<DnsInstruction> Instructions { get; init; } = new List<DnsInstruction>();
+        public string Note { get; init; } = "";
+    }
+
+    public sealed class OrganizationEndUser
+    {
+        [JsonPropertyName("object")] public string? ObjectType { get; init; }
+        public string? Id { get; init; }
+        public string? OrganizationId { get; init; }
+        public string? UserId { get; init; }
+        public string? Status { get; init; }
+        public string? Source { get; init; }
+        public Dictionary<string, object?>? PublicMetadata { get; init; }
+        public long? ApprovedAt { get; init; }
+        /// <summary>Created (epoch ms).</summary>
+        public long? CreatedAt { get; init; }
+        /// <summary>Updated (epoch ms).</summary>
+        public long? UpdatedAt { get; init; }
+    }
+
+    public sealed class OrganizationAuditStream
+    {
+        [JsonPropertyName("object")] public string? ObjectType { get; init; }
+        public string? Id { get; init; }
+        public string? OrganizationId { get; init; }
+        /// <summary>The organization's HTTPS SIEM/collector endpoint.</summary>
+        public string? Url { get; init; }
+        /// <summary>Shape hint for the collector, e.g. `json`.</summary>
+        public string? Format { get; init; }
+        public bool? Active { get; init; }
+        /// <summary>Whether a signing secret is set — never the secret itself.</summary>
+        public bool? HasSecret { get; init; }
+        /// <summary>Created (epoch ms).</summary>
+        public long? CreatedAt { get; init; }
+    }
+
+    public sealed class OrganizationSettings
+    {
+        [JsonPropertyName("object")] public string? ObjectType { get; init; }
+        public string? OrganizationId { get; init; }
+        public Dictionary<string, object?>? Values { get; init; }
+        /// <summary>Monotonic per-org version; 0 when nothing is set yet.</summary>
+        public long? Version { get; init; }
+        public string? UpdatedBy { get; init; }
+        /// <summary>Last write (epoch ms), or null if never set.</summary>
+        public long? UpdatedAt { get; init; }
     }
 }

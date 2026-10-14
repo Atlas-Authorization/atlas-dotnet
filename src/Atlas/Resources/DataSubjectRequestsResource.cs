@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -57,5 +58,33 @@ namespace Atlas.Resources
         public Task<DataSubjectRequest> RejectAsync(string id, string? reason = null, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<DataSubjectRequest>(HttpVerb.Post, $"/v1/data_subject_requests/{Enc(id)}/reject",
                 body: Body(("reason", reason)), idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>POST /v1/data_subject_requests</c> — Create a DSAR (export or erasure) for a user from the backend — the twin of the self-service /client/me flows, for a DSAR orchestrator.</summary>
+        public Task<DataSubjectRequest> CreateAsync(CreateDataSubjectRequestBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<DataSubjectRequest>(HttpVerb.Post, "/v1/data_subject_requests", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>POST /v1/data_subject_requests/{id}/cancel</c> — Cancel a scheduled erasure within its grace window — the sibling to /fulfill (which expedites).</summary>
+        public Task<DataSubjectRequest> CancelAsync(string id, CancellationToken ct = default)
+            => Req<DataSubjectRequest>(HttpVerb.Post, $"/v1/data_subject_requests/{Enc(id)}/cancel", cancellationToken: ct);
+    }
+
+    public sealed class CreateDataSubjectRequestBody
+    {
+        /// <summary>The subject's Atlas id.</summary>
+        public string? UserId { get; set; }
+        /// <summary>The subject's email address (verified, else unverified). Resolves to the user so a rights orchestrator needn't translate email→id itself.</summary>
+        public string? SubjectEmail { get; set; }
+        public string? Type { get; set; }
+        public string? Reason { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public CreateDataSubjectRequestBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 }

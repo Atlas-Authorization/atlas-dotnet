@@ -74,6 +74,31 @@ namespace Atlas.Resources
             return result!;
         }
 
+        /// <summary>Send raw bytes (an image upload) with the given content type; the JSON response is decoded.</summary>
+        protected async Task<T> ReqBytes<T>(
+            HttpVerb method,
+            string path,
+            byte[] data,
+            string contentType,
+            IEnumerable<KeyValuePair<string, object?>>? query = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (string.IsNullOrEmpty(contentType))
+                throw new ArgumentException("contentType is required (e.g. image/png).", nameof(contentType));
+            var result = await Transport.SendAsync<T>(
+                new RequestOptions
+                {
+                    Method = method,
+                    Path = path,
+                    Query = query,
+                    BinaryBody = data,
+                    ContentType = contentType,
+                },
+                cancellationToken).ConfigureAwait(false);
+            return result!;
+        }
+
         /// <summary>Issue a request whose response body is ignored (e.g. a 204 delete).</summary>
         protected Task ReqVoid(
             HttpVerb method,

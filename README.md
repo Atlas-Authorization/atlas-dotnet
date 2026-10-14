@@ -6,7 +6,8 @@ platform. Two surfaces, one package:
 - **`AtlasClient`** — the typed, secret-key **management client** (the peer of the
   TypeScript SDK's `createAtlasClient` and the Python SDK's `AtlasClient`). Users,
   sessions, organizations, roles, SSO, SCIM, FGA, webhooks, billing, and the rest of
-  the Backend API — 45 resource namespaces in all.
+  the Backend API, plus the platform API — every secret-key and platform-key operation
+  in the public API reference.
 - **`AtlasBackend`** — local **session-JWT verification** against your instance's JWKS.
   Fast, offline, and correct within the token lifetime; it never calls Atlas on the hot
   path.
@@ -82,6 +83,113 @@ Subclasses: `AtlasBadRequestException` (400/422), `AtlasAuthenticationException`
 `AtlasConflictException` (409), `AtlasRateLimitException` (429),
 `AtlasServerException` (5xx).
 
+`ErrorCodes` names the stable codes you are most likely to branch on, for example
+`ErrorCodes.UnknownField`, `EmailDeliveryNotConfigured`, `EmailProviderRequired`,
+`PlanInUse`, `WrongKeySurface` and `InvalidKey`:
+
+```csharp
+if (ex.HasCode(ErrorCodes.EmailDeliveryNotConfigured)) { /* set up email first */ }
+```
+
+### Strict request bodies
+
+By default a write that includes a field the endpoint does not accept still succeeds,
+and the server lists the ignored fields in an `Atlas-Unknown-Fields` response header.
+The SDK passes those to `OnUnknownFields` (by default a `Trace` warning):
+
+```csharp
+using var atlas = new AtlasClient(new AtlasClientOptions
+{
+    SecretKey = secret,
+    OnUnknownFields = w => logger.LogWarning("Ignored {Fields} on {Method} {Path}", w.Fields, w.Method, w.Path),
+});
+```
+
+Set `Strict = true` to get a `422` with code `UNKNOWN_FIELD` instead, before anything
+changes. Override it per call with `WithStrict`:
+
+```csharp
+await atlas.WithStrict(true).Users.UpdateAsync("user_123", body);   // just this call
+await atlas.WithStrict(false).Users.UpdateAsync("user_123", body);  // opt out when the instance defaults to strict
+```
+
+### Clearing a field
+
+Unset (null) properties are never sent. To clear a stored value on a partial update,
+send an explicit null with `Set(...)`, which request bodies have (it also reaches fields
+this SDK version does not model yet):
+
+```csharp
+await atlas.Design.UpdateAsync(new AtlasDesign().Set("paletteDark", null));
+await atlas.Organizations.UpdatePolicyAsync("org_1", new OrganizationPolicyPatch().Clear("ipAllowlist"));
+```
+
+### Platform API (platform key)
+
+Provisioning apps and registering "Sign in with Atlas" apps uses a platform key
+(`psk_...`). Set `PlatformKey` (alone, or next to `SecretKey`) and use `atlas.Platform`:
+
+```csharp
+using var atlas = new AtlasClient(new AtlasClientOptions
+{
+    PlatformKey = Environment.GetEnvironmentVariable("ATLAS_PLATFORM_KEY"),
+});
+
+var app = await atlas.Platform.AtlasIdApps.CreateAsync(new CreateAtlasIdAppBody
+{
+    Name = "Acme",
+    RedirectUris = new List<string> { "https://acme.example/callback" },
+    PostLogoutRedirectUris = new List<string> { "https://acme.example/" },
+    BackchannelLogoutUri = "https://acme.example/logout/backchannel",
+    Branding = new AtlasIdAppBrandingInput
+    {
+        AccentColor = "#4f46e5",
+        Copy = new AtlasIdAppCopy { SignInTitle = "Sign in to {app}" },
+    },
+});
+var clientSecret = app.ClientSecret; // shown once; RotateSecretAsync issues a new one
+```
+
+`atlas.Platform.Apps` provisions and manages instances, and
+`atlas.Platform.DesignAssets` holds images for app designs.
+
+### Sign-in page design
+
+`atlas.Design` reads and changes the instance design (`GetAsync`, `ReplaceAsync`,
+`UpdateAsync`, `PreviewAsync`), an organization's override (`GetForOrganizationAsync`,
+…), and the public `CatalogAsync()` of presets and fonts. `AtlasDesign` is fully typed
+(palette, typography, shape, card, layout, buttons, inputs, background, logo); wire keys
+keep their camelCase.
+
+```csharp
+var settings = await atlas.Design.UpdateAsync(new AtlasDesign
+{
+    Preset = "glass",
+    Palette = new AtlasDesignPalette { Primary = "#4f46e5" },
+});
+
+// Images are uploaded as raw bytes with their content type.
+var logo = await atlas.Design.UploadAssetAsync(File.ReadAllBytes("logo.png"), "image/png", kind: "logo");
+await atlas.Design.UpdateAsync(new AtlasDesign { Logo = new AtlasDesignLogo { AssetId = logo.AssetId } });
+```
+
+### Setup checks and more
+
+- `atlas.Instance.PreflightAsync()` lists configuration problems, each with a
+  `Severity`, `Code`, `Message`, `Fix` and `Subject`.
+- `atlas.Instance.GetCookieConsentAsync()` / `ReplaceCookieConsentAsync(...)` /
+  `DeleteCookieConsentAsync()` manage the cookie-consent script on the hosted pages.
+- `atlas.OAuthProviders.ListAsync(new[] { "google" }, configured: true)` filters the
+  catalog; the upsert body takes `DisplayName`, `IconUrl`, `Mode`, and wallet settings
+  (`UpsertOAuthProviderBody.Siwe(...)`, `Siws(...)`, `Siwf(...)`).
+- `atlas.Webhooks.Endpoints` updates endpoints, reveals or rotates the signing secret
+  and sends a test event; `atlas.Webhooks.RedeliverAsync(id, deliveryId)` retries a
+  past delivery.
+- `atlas.EntitlementOverrides` grants a plan, features or limits to a user or
+  organization outside of billing.
+- Machines, connectors, custom audit events, notifications, OpenFGA, analytics,
+  diagnostics, redirect URLs and more each have their own namespace on the client.
+
 ## Verifying session JWTs
 
 ```csharp
@@ -127,6 +235,57 @@ For the rare operation where a 60-second revocation window is unacceptable (dele
 account, moving money), `VerifyOnlineAsync` additionally asks Atlas whether the session
 is still live — it costs a round trip and **fails closed** on an outage. Set
 `SecretKey` and `BapiBaseUrl` in the options to use it.
+
+## Back-channel logout
+
+When a user signs out, Atlas POSTs a signed `logout_token` to your app's
+`backchannel_logout_uri`. `LogoutTokenVerifier` checks it against the instance JWKS
+(signature, `typ`, issuer, audience, `iat`/`exp`, `jti`, the logout event, `sid`/`sub`,
+and no `nonce`):
+
+```csharp
+using Atlas.Verification;
+
+var logout = new LogoutTokenVerifier(new LogoutTokenVerifierOptions
+{
+    JwksUrl  = "https://api.atlasauth.net/v1/jwks",
+    Issuer   = "https://your-issuer.example",
+    ClientId = "your_client_id",
+});
+
+// Framework-agnostic handler: form body in, status code out.
+async Task<int> HandleBackchannelLogout(string formBody, IDictionary<string, string> responseHeaders)
+{
+    responseHeaders["Cache-Control"] = "no-store";
+    try
+    {
+        var claims = await logout.VerifyFormBodyAsync(formBody);
+        if (!await seenJtis.TryAddAsync(claims.Jti)) return 400;  // replayed token
+        if (claims.Sid != null) await sessions.EndBySessionIdAsync(claims.Sid);
+        else await sessions.EndAllForUserAsync(claims.Sub!);
+        return 200;
+    }
+    catch (LogoutTokenException)  // ex.Reason says why
+    {
+        return 400;
+    }
+}
+```
+
+With ASP.NET Core, `Atlas.AspNetCore` maps the whole endpoint (200 or 400, always
+`Cache-Control: no-store`):
+
+```csharp
+app.MapAtlasBackchannelLogout("/logout/backchannel", logout, async (claims, http) =>
+{
+    if (claims.Sid != null) await sessions.EndBySessionIdAsync(claims.Sid);
+    else await sessions.EndAllForUserAsync(claims.Sub!);
+});
+```
+
+The verifier does not remember tokens. To reject replays, keep each `Jti` for a few
+minutes (longer than the token lifetime) in a shared store such as Redis or your
+database, and refuse one you have already seen.
 
 ## ASP.NET Core registration
 

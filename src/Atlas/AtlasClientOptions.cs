@@ -28,5 +28,30 @@ namespace Atlas
         /// if omitted. When you pass your own, you own its lifetime.
         /// </summary>
         public HttpClient? HttpClient { get; set; }
+
+        /// <summary>
+        /// The platform key (<c>psk_...</c>) used by <see cref="AtlasClient.Platform"/> to
+        /// provision apps and register Sign in with Atlas apps. Optional; may be set
+        /// without <see cref="SecretKey"/>. Sent as a Bearer token on platform calls only.
+        /// </summary>
+        public string? PlatformKey { get; set; }
+
+        /// <summary>
+        /// Strict request bodies. <c>true</c> sends <c>Atlas-Strict: true</c> on every
+        /// write, so a body field the endpoint does not accept is a <c>422 UNKNOWN_FIELD</c>
+        /// before anything changes; <c>false</c> sends <c>Atlas-Strict: false</c> to opt
+        /// out of an instance that defaults to strict; <c>null</c> (default) sends no
+        /// header. Override per call with <see cref="AtlasClient.WithStrict"/>.
+        /// </summary>
+        public bool? Strict { get; set; }
+
+        /// <summary>
+        /// Called when a successful write ignored body fields the endpoint does not
+        /// accept (the <c>Atlas-Unknown-Fields</c> response header). Defaults to
+        /// <see cref="System.Diagnostics.Trace.TraceWarning(string)"/>.
+        /// </summary>
+        public System.Action<UnknownFieldsWarning>? OnUnknownFields { get; set; }
+
+        internal AtlasClientOptions Copy() => (AtlasClientOptions)MemberwiseClone();
     }
 }

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -73,5 +74,16 @@ namespace Atlas.Resources
 
         public Task<RevokedSession> RevokeAsync(string id, CancellationToken ct = default)
             => Req<RevokedSession>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/revoke", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/sessions/{id}/tokens/{template}</c> — Mint a named JWT-template token for a session (Clerk SessionApi.getToken).</summary>
+        public Task<SessionTemplateToken> CreateTokenAsync(string id, string template, CancellationToken ct = default)
+            => Req<SessionTemplateToken>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/tokens/{Enc(template)}", cancellationToken: ct);
+    }
+
+    public sealed class SessionTemplateToken
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Jwt { get; init; } = "";
+        public long ExpiresIn { get; init; }
     }
 }

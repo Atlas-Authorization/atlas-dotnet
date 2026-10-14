@@ -1,0 +1,37 @@
+namespace Atlas
+{
+    /// <summary>
+    /// Stable error codes the API returns in <see cref="AtlasErrorItem.Code"/>. Compare
+    /// against <see cref="AtlasException.Code"/> or use <see cref="AtlasException.HasCode"/>.
+    /// Not exhaustive: the server may add codes; branch on the ones you handle.
+    /// </summary>
+    public static class ErrorCodes
+    {
+        /// <summary>The request failed validation; <c>Param</c> names the field.</summary>
+        public const string ValidationFailed = "VALIDATION_FAILED";
+        /// <summary>A strict-mode write sent a body field the endpoint does not accept.</summary>
+        public const string UnknownField = "UNKNOWN_FIELD";
+        public const string NotFound = "NOT_FOUND";
+        public const string RateLimited = "RATE_LIMITED";
+        /// <summary>An Idempotency-Key was reused with different parameters.</summary>
+        public const string IdempotencyConflict = "IDEMPOTENCY_CONFLICT";
+        public const string NotConfigured = "NOT_CONFIGURED";
+        public const string Unauthenticated = "UNAUTHENTICATED";
+        /// <summary>The key is unknown, revoked or malformed.</summary>
+        public const string InvalidKey = "INVALID_KEY";
+        /// <summary>The key is valid but for a different surface (e.g. a platform key on an instance route).</summary>
+        public const string WrongKeySurface = "WRONG_KEY_SURFACE";
+        public const string Forbidden = "FORBIDDEN";
+        /// <summary>The key lacks the scope this route needs.</summary>
+        public const string ScopeMissing = "SCOPE_MISSING";
+        /// <summary>Email sending is not set up for this instance.</summary>
+        public const string EmailDeliveryNotConfigured = "EMAIL_DELIVERY_NOT_CONFIGURED";
+        /// <summary>The operation needs an email provider to be configured first.</summary>
+        public const string EmailProviderRequired = "EMAIL_PROVIDER_REQUIRED";
+        /// <summary>A billing plan cannot be changed or removed while subscriptions use it.</summary>
+        public const string PlanInUse = "PLAN_IN_USE";
+        public const string LastAdmin = "LAST_ADMIN";
+        public const string IdentifierExists = "IDENTIFIER_EXISTS";
+        public const string IdentifierNotFound = "IDENTIFIER_NOT_FOUND";
+    }
+}

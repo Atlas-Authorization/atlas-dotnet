@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -35,5 +37,40 @@ namespace Atlas.Resources
 
         public Task<Invitation> RevokeAsync(string id, CancellationToken ct = default)
             => Req<Invitation>(HttpVerb.Post, $"/v1/invitations/{Enc(id)}/revoke", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/invitations/bulk</c> — Bulk-create instance invitations (≤100).</summary>
+        public Task<DataList<Invitation>> CreateBulkAsync(BulkInvitationsBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<DataList<Invitation>>(HttpVerb.Post, "/v1/invitations/bulk", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+    }
+
+    public sealed class BulkInvitation
+    {
+        public string? EmailAddress { get; set; }
+        public Dictionary<string, object?>? PublicMetadata { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public BulkInvitation Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    public sealed class BulkInvitationsBody
+    {
+        public List<BulkInvitation>? Invitations { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public BulkInvitationsBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 }

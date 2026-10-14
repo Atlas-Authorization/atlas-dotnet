@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -51,5 +52,17 @@ namespace Atlas.Resources
         public Task<WaitlistEntry> DecideAsync(string id, string status, string? note = null, CancellationToken ct = default)
             => Req<WaitlistEntry>(HttpVerb.Post, $"/v1/waitlist_entries/{Enc(id)}/decide",
                 body: Body(("status", status), ("note", note)), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/waitlist_entries</c> — Admin-create a waitlist entry (idempotent on address).</summary>
+        public Task<WaitlistEntry> CreateAsync(string emailAddress, CancellationToken ct = default)
+            => Req<WaitlistEntry>(HttpVerb.Post, "/v1/waitlist_entries", Body(("email_address", emailAddress)), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/waitlist_entries/bulk</c> — Bulk-create waitlist entries (≤100 addresses); per-entry errors returned.</summary>
+        public Task<DataList<WaitlistEntry>> CreateBulkAsync(List<string> emailAddresses, CancellationToken ct = default)
+            => Req<DataList<WaitlistEntry>>(HttpVerb.Post, "/v1/waitlist_entries/bulk", Body(("email_addresses", emailAddresses)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/waitlist_entries/{id}</c> — Delete a waitlist entry.</summary>
+        public Task<DeletedObject> DeleteAsync(string id, CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, $"/v1/waitlist_entries/{Enc(id)}", cancellationToken: ct);
     }
 }

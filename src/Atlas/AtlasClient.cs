@@ -23,15 +23,26 @@ namespace Atlas
         private readonly HttpClient _http;
         private readonly bool _ownsHttp;
 
+        private readonly AtlasClientOptions _options;
+
         public AtlasClient(AtlasClientOptions options)
+            : this(options, null) { }
+
+        private AtlasClient(AtlasClientOptions options, HttpClient? shared)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            if (string.IsNullOrEmpty(options.SecretKey))
-                throw new ArgumentException("AtlasClient requires a SecretKey.", nameof(options));
+            if (string.IsNullOrEmpty(options.SecretKey) && string.IsNullOrEmpty(options.PlatformKey))
+                throw new ArgumentException("AtlasClient requires a SecretKey (sk_...) or a PlatformKey (psk_...).", nameof(options));
 
-            _ownsHttp = options.HttpClient == null;
-            _http = options.HttpClient ?? new HttpClient();
-            var transport = new AtlasTransport(options.SecretKey, options.ApiUrl, _http);
+            _options = options.Copy();
+            _ownsHttp = shared == null && options.HttpClient == null;
+            _http = shared ?? options.HttpClient ?? new HttpClient();
+            var transport = new AtlasTransport(options.SecretKey ?? "", options.ApiUrl, _http, options.Strict,
+                options.OnUnknownFields,
+                "This call needs an instance secret key: set AtlasClientOptions.SecretKey (sk_...).");
+            var platformTransport = new AtlasTransport(options.PlatformKey ?? "", options.ApiUrl, _http, options.Strict,
+                options.OnUnknownFields,
+                "Platform calls need a platform key: set AtlasClientOptions.PlatformKey (psk_...).");
 
             Users = new UsersResource(transport);
             Sessions = new SessionsResource(transport);
@@ -78,6 +89,44 @@ namespace Atlas
             Instance = new InstanceResource(transport);
             InstanceSecurity = new InstanceSecurityResource(transport);
             Tokens = new TokensResource(transport);
+            Design = new DesignResource(transport);
+            Platform = new PlatformResource(platformTransport);
+            EmailAddresses = new EmailAddressesResource(transport);
+            Tickets = new TicketsResource(transport);
+            OrganizationSettingsSchema = new OrganizationSettingsSchemaResource(transport);
+            Notifications = new NotificationsResource(transport);
+            Analytics = new AnalyticsResource(transport);
+            LegacyAuthConnection = new LegacyAuthConnectionResource(transport);
+            Mcp = new McpResource(transport);
+            Pca = new PcaResource(transport);
+            McpConnector = new McpConnectorResource(transport);
+            OrgLdapConnections = new OrgLdapConnectionsResource(transport);
+            SessionExchangeApps = new SessionExchangeAppsResource(transport);
+            Diagnostics = new DiagnosticsResource(transport);
+            ConfigChangelog = new ConfigChangelogResource(transport);
+            RedirectUrls = new RedirectUrlsResource(transport);
+            Machines = new MachinesResource(transport);
+            EntitlementOverrides = new EntitlementOverridesResource(transport);
+            Connectors = new ConnectorsResource(transport);
+            AuditEvents = new AuditEventsResource(transport);
+            Testing = new TestingResource(transport);
+            OpenFga = new OpenFgaResource(transport);
+            Captcha = new CaptchaResource(transport);
+        }
+
+        /// <summary>
+        /// A client that sends <c>Atlas-Strict: &lt;strict&gt;</c> on every write — a per-call
+        /// override of <see cref="AtlasClientOptions.Strict"/>. It shares this client's
+        /// <see cref="HttpClient"/>; disposing it does not dispose that.
+        /// <code>
+        /// await atlas.WithStrict(true).Users.UpdateAsync("user_123", body);
+        /// </code>
+        /// </summary>
+        public AtlasClient WithStrict(bool strict)
+        {
+            var o = _options.Copy();
+            o.Strict = strict;
+            return new AtlasClient(o, _http);
         }
 
         /// <summary>Convenience overload: just a secret key, default API URL.</summary>
@@ -129,6 +178,29 @@ namespace Atlas
         public InstanceResource Instance { get; }
         public InstanceSecurityResource InstanceSecurity { get; }
         public TokensResource Tokens { get; }
+        public DesignResource Design { get; }
+        public PlatformResource Platform { get; }
+        public EmailAddressesResource EmailAddresses { get; }
+        public TicketsResource Tickets { get; }
+        public OrganizationSettingsSchemaResource OrganizationSettingsSchema { get; }
+        public NotificationsResource Notifications { get; }
+        public AnalyticsResource Analytics { get; }
+        public LegacyAuthConnectionResource LegacyAuthConnection { get; }
+        public McpResource Mcp { get; }
+        public PcaResource Pca { get; }
+        public McpConnectorResource McpConnector { get; }
+        public OrgLdapConnectionsResource OrgLdapConnections { get; }
+        public SessionExchangeAppsResource SessionExchangeApps { get; }
+        public DiagnosticsResource Diagnostics { get; }
+        public ConfigChangelogResource ConfigChangelog { get; }
+        public RedirectUrlsResource RedirectUrls { get; }
+        public MachinesResource Machines { get; }
+        public EntitlementOverridesResource EntitlementOverrides { get; }
+        public ConnectorsResource Connectors { get; }
+        public AuditEventsResource AuditEvents { get; }
+        public TestingResource Testing { get; }
+        public OpenFgaResource OpenFga { get; }
+        public CaptchaResource Captcha { get; }
 
         /// <summary>Dispose the underlying <see cref="HttpClient"/>, if this client created it.</summary>
         public void Dispose()

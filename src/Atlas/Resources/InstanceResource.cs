@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Atlas.Resources
 {
@@ -43,6 +44,22 @@ namespace Atlas.Resources
 
         public Task<InstanceUpdateResult> UpdateAsync(UpdateInstanceBody body, CancellationToken ct = default)
             => Req<InstanceUpdateResult>(HttpVerb.Patch, "/v1/instance", body, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/preflight</c> — Check your setup in one call.</summary>
+        public Task<Preflight> PreflightAsync(CancellationToken ct = default)
+            => Req<Preflight>(HttpVerb.Get, "/v1/instance/preflight", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/cookie_consent</c> — Read the cookie-consent CMP injected into the hosted sign-in, sign-up and account pages (enabled:false when none).</summary>
+        public Task<CookieConsent> GetCookieConsentAsync(CancellationToken ct = default)
+            => Req<CookieConsent>(HttpVerb.Get, "/v1/instance/cookie_consent", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/instance/cookie_consent</c> — Set the cookie-consent CMP for the hosted pages (any provider).</summary>
+        public Task<CookieConsent> ReplaceCookieConsentAsync(CookieConsentBody body, CancellationToken ct = default)
+            => Req<CookieConsent>(HttpVerb.Put, "/v1/instance/cookie_consent", body, cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/cookie_consent</c> — Turn off the hosted-page cookie-consent CMP: no script is injected and the CSP goes back to normal.</summary>
+        public Task<CookieConsent> DeleteCookieConsentAsync(CancellationToken ct = default)
+            => Req<CookieConsent>(HttpVerb.Delete, "/v1/instance/cookie_consent", cancellationToken: ct);
     }
 
     // ---------------- Instance security ----------------
@@ -139,5 +156,66 @@ namespace Atlas.Resources
 
         public Task<LdapBindPasswordResult> DeleteLdapBindPasswordAsync(string connectionId, CancellationToken ct = default)
             => Req<LdapBindPasswordResult>(HttpVerb.Delete, $"/v1/instance/ldap_connections/{Enc(connectionId)}/bind_password", cancellationToken: ct);
+    }
+
+    public sealed class CookieConsentBody
+    {
+        /// <summary>Your CMP script URL. Must be https; its origin is added to the page CSP.</summary>
+        public string? ScriptUrl { get; set; }
+        /// <summary>The &lt;script id&gt; some CMPs need.</summary>
+        public string? ScriptId { get; set; }
+        /// <summary>Your CMP site id (sent as data-cbid).</summary>
+        public string? SiteId { get; set; }
+        /// <summary>The CMP prior-blocking mode, e.g. "auto" (sent as data-blockingmode).</summary>
+        public string? BlockingMode { get; set; }
+        /// <summary>Other https URLs the CMP loads from or calls; each origin is added to the page CSP.</summary>
+        public List<string>? ExtraOrigins { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name — including an explicit <c>null</c>, or a field this SDK does not model yet.</summary>
+        public CookieConsentBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    public sealed class PreflightFinding
+    {
+        public string Severity { get; init; } = "";
+        /// <summary>Stable snake_case identifier, e.g. oauth_provider_missing_credentials.</summary>
+        public string Code { get; init; } = "";
+        /// <summary>What is wrong, in a plain sentence.</summary>
+        public string Message { get; init; } = "";
+        /// <summary>What to do about it, in a plain sentence.</summary>
+        public string Fix { get; init; } = "";
+        /// <summary>Ids of what the finding is about (provider, id/client_id, domain_id/host, …).</summary>
+        public Dictionary<string, string>? Subject { get; init; }
+    }
+
+    public sealed class Preflight
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>True when there are no error-severity findings.</summary>
+        public bool Ok { get; init; }
+        /// <summary>When the check ran (epoch ms).</summary>
+        public long CheckedAt { get; init; }
+        /// <summary>Ordered error, then warning, then info.</summary>
+        public List<PreflightFinding> Findings { get; init; } = new List<PreflightFinding>();
+    }
+
+    /// <summary>The consent-management platform (CMP) injected into the hosted pages. enabled:false (and no other fields) when none is set.</summary>
+    public sealed class CookieConsent
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public bool Enabled { get; init; }
+        /// <summary>The CMP script URL (https).</summary>
+        public string? ScriptUrl { get; init; }
+        public string? ScriptId { get; init; }
+        public string? SiteId { get; init; }
+        public string? BlockingMode { get; init; }
+        public List<string>? ExtraOrigins { get; init; }
     }
 }
