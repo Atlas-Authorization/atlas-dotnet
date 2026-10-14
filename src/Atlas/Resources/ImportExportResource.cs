@@ -88,6 +88,8 @@ namespace Atlas.Resources
         public List<ImportUserRow> Users { get; set; } = new List<ImportUserRow>();
         /// <summary>Update an existing user matched by verified email instead of skipping it.</summary>
         public bool? Upsert { get; set; }
+        /// <summary><c>false</c> (the default) guarantees the imported users are sent nothing.</summary>
+        public bool? Notify { get; set; }
     }
 
     /// <summary>The bulk user import/export namespace (<c>/v1/user_imports</c>, <c>/v1/jobs</c>).</summary>

@@ -96,6 +96,8 @@ namespace Atlas.Resources
         public Metadata? PublicMetadata { get; set; }
         public Metadata? PrivateMetadata { get; set; }
         public Metadata? UnsafeMetadata { get; set; }
+        /// <summary><c>false</c> (the default) guarantees no email, SMS or push is sent to the user as a consequence of the create.</summary>
+        public bool? Notify { get; set; }
     }
 
     public sealed class UpdateUserBody

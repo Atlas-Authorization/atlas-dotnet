@@ -33,5 +33,13 @@ namespace Atlas
         public const string LastAdmin = "LAST_ADMIN";
         public const string IdentifierExists = "IDENTIFIER_EXISTS";
         public const string IdentifierNotFound = "IDENTIFIER_NOT_FOUND";
+        /// <summary>A usage debit would exceed one of the API key's spend caps (the <c>Code</c> of a refused debit).</summary>
+        public const string LimitExceeded = "LIMIT_EXCEEDED";
+        /// <summary>The session was revoked.</summary>
+        public const string SessionRevoked = "SESSION_REVOKED";
+        /// <summary>The session timed out from inactivity.</summary>
+        public const string SessionIdleExpired = "SESSION_IDLE_EXPIRED";
+        /// <summary>The session passed its absolute expiry.</summary>
+        public const string SessionExpired = "SESSION_EXPIRED";
     }
 }

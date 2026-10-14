@@ -190,6 +190,60 @@ await atlas.Design.UpdateAsync(new AtlasDesign { Logo = new AtlasDesignLogo { As
 - Machines, connectors, custom audit events, notifications, OpenFGA, analytics,
   diagnostics, redirect URLs and more each have their own namespace on the client.
 
+### API key spend caps
+
+Give an end-user API key caps in your own units, then meter what your API consumed
+against them. A refused debit records nothing and is not an exception, so you
+enforce it inside your own transaction:
+
+```csharp
+var key = await atlas.ApiKeys.CreateAsync(new CreateApiKeyBody
+{
+    SubjectType = "user",
+    SubjectId = "user_123",
+    Name = "CI",
+    Limits = new List<ApiKeyLimit>
+    {
+        new ApiKeyLimit("requests", 10_000, ApiKeyLimitPeriods.Day),       // UTC calendar day
+        new ApiKeyLimit("usd_cents", 500, ApiKeyLimitPeriods.Request),     // caps one debit
+    },
+});
+
+var debit = await atlas.ApiKeys.RecordUsageAsync(key.Id, 1, "requests", idempotencyKey: requestId);
+if (!debit.Allowed)                         // debit.Code == ErrorCodes.LimitExceeded
+    return Results.StatusCode(429);
+
+var usage = await atlas.ApiKeys.GetUsageAsync(key.Id); // caps with Used/Remaining/ResetsAt + counters
+await atlas.ApiKeys.UpdateAsync(key.Id, new UpdateApiKeyBody().ClearLimits());
+```
+
+Periods are `request` (caps a single debit), `day` and `month` (UTC calendar
+windows) and `total` (never resets). Reusing an idempotency key replays the first
+outcome (`IdempotentReplay`) without counting again; reusing it with a different
+unit or amount throws `AtlasConflictException` with `IDEMPOTENCY_CONFLICT`.
+`ApiKeys.VerifyAsync` also returns the key's `Name`, `Scopes`, `Constraints`,
+`Limits` and `Usage`. The `api_key.created`, `api_key.updated` and
+`api_key.limit_reached` webhooks carry the key's configuration; deserialize their
+`Data` as `ApiKeyWebhookData` with `AtlasJson.Options`.
+
+### Session keep-alive
+
+If your app loads Atlas on only some pages, keep the session's inactivity window
+moving from your backend:
+
+```csharp
+var s = await atlas.Sessions.TouchAsync(sessionId);
+// s.Extended: false when a touch within the last minute already moved it
+// s.IdleExpiresAt: epoch ms the session ends from inactivity
+```
+
+It never extends past the absolute expiry and never revives an ended session
+(`AtlasConflictException` with `SESSION_REVOKED`, `SESSION_IDLE_EXPIRED` or
+`SESSION_EXPIRED`). Calling it on every request is safe.
+
+`CreateUserBody.Notify` and `ImportUsersBody.Notify` set to `false` (the default)
+guarantee the user is sent no email, SMS or push as a consequence of the create.
+
 ## Verifying session JWTs
 
 ```csharp

@@ -153,6 +153,7 @@ GET /v1/sessions
 GET /v1/sessions/{id}
 POST /v1/sessions/{id}/revoke
 POST /v1/sessions/{id}/tokens/{template}
+POST /v1/sessions/{id}/touch
 POST /v1/tokens/verify
 GET /v1/roles
 POST /v1/roles
@@ -199,6 +200,8 @@ PATCH /v1/api_keys/{id}
 DELETE /v1/api_keys/{id}
 POST /v1/api_keys/token
 GET /v1/api_keys/revoked
+POST /v1/api_keys/{id}/usage
+GET /v1/api_keys/{id}/usage
 GET /v1/oauth_providers
 GET /v1/oauth_providers/{provider}
 PUT /v1/oauth_providers/{provider}

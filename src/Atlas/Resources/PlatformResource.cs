@@ -9,10 +9,10 @@ namespace Atlas.Resources
     /// <summary>Page text. Plain text only (shown as typed, never as HTML), one line, no control characters; empty or null uses the default. `{app}` is replaced with the app name. Merged per field on PATCH.</summary>
     public sealed class AtlasIdAppCopy
     {
-        /// <summary>Default "Sign in to continue to {app}".</summary>
+        /// <summary>Default "Sign in" (the app is named on the "to continue to {app}" line under it).</summary>
         public string? SignInTitle { get; set; }
         public string? SignInSubtitle { get; set; }
-        /// <summary>Default "Create your account to continue to {app}".</summary>
+        /// <summary>Default "Create your Atlas Account".</summary>
         public string? SignUpTitle { get; set; }
         public string? SignUpSubtitle { get; set; }
         /// <summary>Shown on the consent screen above the list of permissions.</summary>

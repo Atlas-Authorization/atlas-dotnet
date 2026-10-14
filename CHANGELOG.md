@@ -1,5 +1,38 @@
 # Changelog
 
+## Atlas.Sdk 1.3.0
+
+### Added
+
+- `Sessions.TouchAsync(id)` — `POST /v1/sessions/{id}/touch`, backend session
+  keep-alive; returns `SessionTouch` (the session plus `Extended` and `IdleExpiresAt`).
+- `Session.IdleExpiresAt` (epoch ms, nullable).
+- API key spend caps: `ApiKeyLimit` (`Unit`, `Amount`, `Period`: `request` | `day` |
+  `month` | `total`, see `ApiKeyLimitPeriods`), `CreateApiKeyBody.Limits`,
+  `UpdateApiKeyBody.Limits`, `UpdateApiKeyBody.ClearLimits()` (sends `"limits": null`)
+  and `UpdateApiKeyBody.Set(key, value)`.
+- `ApiKey`, `ApiKeyWithSecret`: `Limits` and `Usage` (`List<ApiKeyLimitState>`:
+  `Unit`, `Period`, `Amount`, `Used`, `Remaining`, `WindowStart`, `ResetsAt`).
+- `ApiKeyVerification`: `Name`, `Scopes`, `Constraints`, `Limits`, `Usage`.
+- `ApiKeys.RecordUsageAsync(id, body)` / `RecordUsageAsync(id, amount, unit, idempotencyKey)` —
+  `POST /v1/api_keys/{id}/usage`, returns `ApiKeyUsageDebit` (`KeyId`, `Unit`, `Amount`,
+  `Allowed`, `Code`, `Exceeded`, `Usage`, `Counters`, `IdempotentReplay`); body
+  `RecordApiKeyUsageBody` (`Amount`, `Unit`, `IdempotencyKey`).
+- `ApiKeys.GetUsageAsync(id)` — `GET /v1/api_keys/{id}/usage`, returns `ApiKeyUsage`
+  (`KeyId`, `Limits`, `Usage`, `Counters`); `ApiKeyUsageCounter` (`Unit`, `Period`,
+  `Used`, `WindowStart`, `ResetsAt`).
+- `CreateUserBody.Notify` and `ImportUsersBody.Notify`.
+- `ApiKeyWebhookData` — the `data` of the `api_key.created`, `api_key.updated`,
+  `api_key.revoked` and `api_key.limit_reached` webhook events (`Name`, `Claims`,
+  `Scopes`, `Constraints`, `Limits`, `MaxTokenLifetimeSeconds`, `ExpiresAt`,
+  `CreatedAt`, `UpdatedAt`, and `Limit` on `api_key.limit_reached`).
+- `ErrorCodes.LimitExceeded`, `SessionRevoked`, `SessionIdleExpired`, `SessionExpired`.
+
+### Changed
+
+- `AtlasIdAppCopy.SignInTitle` / `SignUpTitle` XML docs state the current defaults
+  ("Sign in", "Create your Atlas Account"); no API change.
+
 ## Atlas.Sdk 1.2.0 / Atlas.AspNetCore 1.2.0
 
 ### Added
