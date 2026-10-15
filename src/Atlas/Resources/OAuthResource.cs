@@ -22,6 +22,12 @@ namespace Atlas.Resources
         public string? SecretPrefix { get; init; }
         public bool IsPublic { get; init; }
         public bool FirstParty { get; init; }
+        /// <summary>
+        /// When true, RP-initiated logout (<c>/oauth2/logout</c>) with this client's <c>client_id</c> and an exactly
+        /// registered <c>post_logout_redirect_uri</c> ends the session and redirects straight back (with <c>state</c>)
+        /// without the confirmation page. First-party clients only. Defaults to false.
+        /// </summary>
+        public bool SkipLogoutConfirmation { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
     }
@@ -41,6 +47,12 @@ namespace Atlas.Resources
         public string? SecretPrefix { get; init; }
         public bool IsPublic { get; init; }
         public bool FirstParty { get; init; }
+        /// <summary>
+        /// When true, RP-initiated logout (<c>/oauth2/logout</c>) with this client's <c>client_id</c> and an exactly
+        /// registered <c>post_logout_redirect_uri</c> ends the session and redirects straight back (with <c>state</c>)
+        /// without the confirmation page. First-party clients only. Defaults to false.
+        /// </summary>
+        public bool SkipLogoutConfirmation { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
         public string? ClientSecret { get; init; }
@@ -67,6 +79,13 @@ namespace Atlas.Resources
         public string? TokenEndpointAuthMethod { get; set; }
         public string? LogoUrl { get; set; }
         public bool? FirstParty { get; set; }
+        /// <summary>
+        /// Skip the logout confirmation page for RP-initiated logout (<c>/oauth2/logout</c>) with this client's
+        /// <c>client_id</c> and an exactly registered <c>post_logout_redirect_uri</c>: the session ends and the user is
+        /// redirected straight back with <c>state</c>. First-party clients only — on a third-party client the API answers
+        /// 422 <c>VALIDATION_FAILED</c> (param <c>skip_logout_confirmation</c>).
+        /// </summary>
+        public bool? SkipLogoutConfirmation { get; set; }
     }
 
     public sealed class UpdateOAuthClientBody
@@ -77,6 +96,13 @@ namespace Atlas.Resources
         public string? TokenEndpointAuthMethod { get; set; }
         public string? LogoUrl { get; set; }
         public bool? FirstParty { get; set; }
+        /// <summary>
+        /// Skip the logout confirmation page for RP-initiated logout (<c>/oauth2/logout</c>) with this client's
+        /// <c>client_id</c> and an exactly registered <c>post_logout_redirect_uri</c>: the session ends and the user is
+        /// redirected straight back with <c>state</c>. First-party clients only — on a third-party client the API answers
+        /// 422 <c>VALIDATION_FAILED</c> (param <c>skip_logout_confirmation</c>).
+        /// </summary>
+        public bool? SkipLogoutConfirmation { get; set; }
     }
 
     public sealed class DeleteOAuthClientResult

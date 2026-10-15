@@ -85,7 +85,7 @@ Subclasses: `AtlasBadRequestException` (400/422), `AtlasAuthenticationException`
 
 `ErrorCodes` names the stable codes you are most likely to branch on, for example
 `ErrorCodes.UnknownField`, `EmailDeliveryNotConfigured`, `EmailProviderRequired`,
-`PlanInUse`, `WrongKeySurface` and `InvalidKey`:
+`EmailProviderInUse`, `PlanInUse`, `WrongKeySurface` and `InvalidKey`:
 
 ```csharp
 if (ex.HasCode(ErrorCodes.EmailDeliveryNotConfigured)) { /* set up email first */ }
@@ -179,6 +179,32 @@ await atlas.Design.UpdateAsync(new AtlasDesign { Logo = new AtlasDesignLogo { As
   `Severity`, `Code`, `Message`, `Fix` and `Subject`.
 - `atlas.Instance.GetCookieConsentAsync()` / `ReplaceCookieConsentAsync(...)` /
   `DeleteCookieConsentAsync()` manage the cookie-consent script on the hosted pages.
+  `SettingsLink` adds a "Cookie settings" link that reopens your CMP; the response's
+  `SettingsLink.RenderedAttributes` shows what the rendered link carries (your
+  attributes plus the preset's trigger):
+
+  ```csharp
+  await atlas.Instance.ReplaceCookieConsentAsync(new CookieConsentBody
+  {
+      ScriptUrl = "https://consent.cookiebot.com/uc.js",
+      SiteId = "your-cbid",
+      SettingsLink = new CookieConsentSettingsLinkInput
+      {
+          Label = "Cookie settings",
+          Preset = CookieConsentSettingsLinkPresets.Cookiebot,
+          Attributes = new Dictionary<string, string> { ["class"] = "footer-link" },
+      },
+  });
+  ```
+- `atlas.Messaging.DeleteChannelAsync("email")` removes a provider. Removing the
+  email provider while email-dependent features are on (and nothing else would
+  deliver email) throws `AtlasConflictException` with `EMAIL_PROVIDER_IN_USE`; the
+  error's `meta.features` lists those features. `DeleteChannelAsync("email", force: true)`
+  removes it anyway.
+- `CreateOAuthClientBody.SkipLogoutConfirmation` / `UpdateOAuthClientBody.SkipLogoutConfirmation`
+  (first-party clients only): logout through `/oauth2/logout` with the client's
+  `client_id` and an exactly registered `post_logout_redirect_uri` ends the session
+  and redirects straight back, without the confirmation page.
 - `atlas.OAuthProviders.ListAsync(new[] { "google" }, configured: true)` filters the
   catalog; the upsert body takes `DisplayName`, `IconUrl`, `Mode`, and wallet settings
   (`UpsertOAuthProviderBody.Siwe(...)`, `Siws(...)`, `Siwf(...)`).

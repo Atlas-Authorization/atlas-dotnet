@@ -41,10 +41,15 @@ namespace Atlas.Resources
         public string Id { get; init; } = "";
         public string UserId { get; init; } = "";
         public string Status { get; init; } = "";
+        public string? LastActiveOrganizationId { get; init; }
+        /// <summary>The actor id when this session is an impersonation; null otherwise.</summary>
+        public string? ImpersonatedBy { get; init; }
         public long LastActiveAt { get; init; }
         public long ExpireAt { get; init; }
         public long AbandonAt { get; init; }
         public long CreatedAt { get; init; }
+        /// <summary>Epoch ms the session ends from inactivity unless there is activity first (same value as <see cref="AbandonAt"/>).</summary>
+        public long? IdleExpiresAt { get; init; }
     }
 
     /// <summary>One sign-in identity on a user: the base Atlas anchor, or a linked provider.</summary>

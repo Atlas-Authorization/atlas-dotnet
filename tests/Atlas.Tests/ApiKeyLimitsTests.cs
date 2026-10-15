@@ -206,6 +206,39 @@ namespace Atlas.Tests
         }
 
         [Fact]
+        public async Task UserSessions_CarryIdleExpiresAtOrgAndImpersonator()
+        {
+            var h = MockHttpMessageHandler.Json("{\"object\":\"list\",\"data\":[{\"object\":\"session\",\"id\":\"sess_1\","
+                + "\"user_id\":\"user_1\",\"status\":\"active\",\"last_active_organization_id\":\"org_1\",\"impersonated_by\":\"user_admin\","
+                + "\"last_active_at\":5,\"expire_at\":9,\"abandon_at\":7,\"idle_expires_at\":7,\"created_at\":1},"
+                + "{\"object\":\"session\",\"id\":\"sess_2\",\"last_active_organization_id\":null,\"impersonated_by\":null,\"abandon_at\":8}],"
+                + "\"has_more\":false}");
+            using var c = Client(h);
+
+            var page = await c.Users.ListSessionsAsync("user_1");
+
+            Assert.Equal("/v1/users/user_1/sessions", h.Requests[0].Path);
+            var s = page.Data[0];
+            Assert.Equal(7L, s.IdleExpiresAt);
+            Assert.Equal(s.AbandonAt, s.IdleExpiresAt);
+            Assert.Equal("org_1", s.LastActiveOrganizationId);
+            Assert.Equal("user_admin", s.ImpersonatedBy);
+            Assert.Null(page.Data[1].IdleExpiresAt);
+            Assert.Null(page.Data[1].LastActiveOrganizationId);
+            Assert.Null(page.Data[1].ImpersonatedBy);
+        }
+
+        [Fact]
+        public async Task SessionList_CarriesIdleExpiresAt()
+        {
+            var h = MockHttpMessageHandler.Json("{\"object\":\"list\",\"data\":[{\"object\":\"session\",\"id\":\"sess_1\","
+                + "\"abandon_at\":7,\"idle_expires_at\":7,\"created_at\":1}],\"has_more\":false}");
+            using var c = Client(h);
+            var page = await c.Sessions.ListAsync("user_1");
+            Assert.Equal(7L, page.Data[0].IdleExpiresAt);
+        }
+
+        [Fact]
         public async Task UserCreateAndImport_SendNotify()
         {
             var h = MockHttpMessageHandler.Json("{\"object\":\"user\",\"id\":\"user_1\"}");

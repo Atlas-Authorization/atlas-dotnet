@@ -28,6 +28,11 @@ namespace Atlas
         public const string EmailDeliveryNotConfigured = "EMAIL_DELIVERY_NOT_CONFIGURED";
         /// <summary>The operation needs an email provider to be configured first.</summary>
         public const string EmailProviderRequired = "EMAIL_PROVIDER_REQUIRED";
+        /// <summary>
+        /// The email provider cannot be removed while email-dependent features are on and nothing else would deliver
+        /// email; the error's <c>meta.features</c> lists them. Delete with <c>force</c> to remove it anyway.
+        /// </summary>
+        public const string EmailProviderInUse = "EMAIL_PROVIDER_IN_USE";
         /// <summary>A billing plan cannot be changed or removed while subscriptions use it.</summary>
         public const string PlanInUse = "PLAN_IN_USE";
         public const string LastAdmin = "LAST_ADMIN";

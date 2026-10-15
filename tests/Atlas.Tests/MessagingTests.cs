@@ -100,6 +100,55 @@ namespace Atlas.Tests
             Assert.Equal("re_x", Config(doc.RootElement)["api_key"].GetString());
         }
 
+        private const string Deleted = "{\"object\":\"messaging_provider\",\"channel\":\"email\",\"deleted\":true}";
+
+        [Fact]
+        public async Task DeleteChannel_WithoutForce_SendsNoQuery()
+        {
+            var handler = MockHttpMessageHandler.Json(Deleted);
+            using var client = Client(handler);
+
+            var result = await client.Messaging.DeleteChannelAsync("email");
+            await client.Messaging.DeleteChannelAsync("email", force: false);
+
+            Assert.True(result.Deleted);
+            Assert.Equal("email", result.Channel);
+            Assert.Equal("DELETE", handler.Requests[0].Method);
+            Assert.Equal("/v1/messaging_providers/email", handler.Requests[0].Path);
+            Assert.Equal("", handler.Requests[0].Query);
+            Assert.Equal("", handler.Requests[1].Query);
+        }
+
+        [Fact]
+        public async Task DeleteChannel_Force_SendsForceTrue()
+        {
+            var handler = MockHttpMessageHandler.Json(Deleted);
+            using var client = Client(handler);
+
+            var result = await client.Messaging.DeleteChannelAsync("email", force: true);
+
+            Assert.True(result.Deleted);
+            Assert.Equal("/v1/messaging_providers/email", handler.Requests[0].Path);
+            Assert.Equal("?force=true", handler.Requests[0].Query);
+        }
+
+        [Fact]
+        public async Task DeleteChannel_EmailProviderInUse_IsAConflict()
+        {
+            var handler = MockHttpMessageHandler.Json(
+                "{\"errors\":[{\"code\":\"EMAIL_PROVIDER_IN_USE\",\"message\":\"in use\","
+                + "\"meta\":{\"features\":[\"emailCode\",\"passwordReset\"]}}]}", System.Net.HttpStatusCode.Conflict);
+            using var client = Client(handler);
+
+            var ex = await Assert.ThrowsAsync<AtlasConflictException>(() => client.Messaging.DeleteChannelAsync("email"));
+
+            Assert.Equal("EMAIL_PROVIDER_IN_USE", ErrorCodes.EmailProviderInUse);
+            Assert.Equal("EMAIL_PROVIDER_REQUIRED", ErrorCodes.EmailProviderRequired);
+            Assert.True(ex.HasCode(ErrorCodes.EmailProviderInUse));
+            var features = (JsonElement)ex.Errors[0].Meta!["features"]!;
+            Assert.Equal("emailCode", features[0].GetString());
+        }
+
         private static string[] Sorted(IEnumerable<string> keys)
         {
             var list = new List<string>(keys);

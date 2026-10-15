@@ -338,6 +338,98 @@ namespace Atlas.Tests
             Assert.Equal("DELETE", h.Requests[2].Method);
         }
 
+        [Fact]
+        public async Task CookieConsent_SettingsLink_SentAndDecoded()
+        {
+            var h = MockHttpMessageHandler.Json("{\"object\":\"cookie_consent\",\"enabled\":true,\"script_url\":\"https://cmp.test/s.js\","
+                + "\"settings_link\":{\"label\":\"Cookie settings\",\"preset\":\"cookiebot\",\"attributes\":{\"class\":\"footer-link\"},"
+                + "\"rendered_attributes\":{\"class\":\"footer-link\",\"data-cc\":\"c-settings\"}}}");
+            using var c = Client(h);
+            var cc = await c.Instance.ReplaceCookieConsentAsync(new CookieConsentBody
+            {
+                ScriptUrl = "https://cmp.test/s.js",
+                SettingsLink = new CookieConsentSettingsLinkInput
+                {
+                    Label = "Cookie settings",
+                    Preset = CookieConsentSettingsLinkPresets.Cookiebot,
+                    Attributes = new Dictionary<string, string> { ["class"] = "footer-link", ["aria-label"] = "Cookies" },
+                },
+            });
+            var link = Sent(h.Requests[0]).GetProperty("settings_link");
+            Assert.Equal("Cookie settings", link.GetProperty("label").GetString());
+            Assert.Equal("cookiebot", link.GetProperty("preset").GetString());
+            Assert.Equal("Cookies", link.GetProperty("attributes").GetProperty("aria-label").GetString());
+            Assert.Equal("Cookie settings", cc.SettingsLink!.Label);
+            Assert.Equal(CookieConsentSettingsLinkPresets.Cookiebot, cc.SettingsLink.Preset);
+            Assert.Equal("footer-link", cc.SettingsLink.Attributes["class"]);
+            Assert.Equal("c-settings", cc.SettingsLink.RenderedAttributes["data-cc"]);
+            Assert.Equal(new[] { "cookiemunch", "cookiebot", "onetrust", "custom" }, new[]
+            {
+                CookieConsentSettingsLinkPresets.Cookiemunch, CookieConsentSettingsLinkPresets.Cookiebot,
+                CookieConsentSettingsLinkPresets.OneTrust, CookieConsentSettingsLinkPresets.Custom,
+            });
+        }
+
+        [Fact]
+        public async Task CookieConsent_SettingsLink_OmittedByDefault_NullWhenAbsent_UnknownPresetDecodes()
+        {
+            var h = MockHttpMessageHandler.Json("{\"object\":\"cookie_consent\",\"enabled\":true,\"settings_link\":null}");
+            using var c = Client(h);
+            var cc = await c.Instance.ReplaceCookieConsentAsync(new CookieConsentBody { ScriptUrl = "https://cmp.test/s.js" });
+            Assert.False(Sent(h.Requests[0]).TryGetProperty("settings_link", out _));
+            Assert.Null(cc.SettingsLink);
+
+            await c.Instance.ReplaceCookieConsentAsync(new CookieConsentBody { ScriptUrl = "https://cmp.test/s.js" }.Set("settings_link", null));
+            Assert.Equal(JsonValueKind.Null, Sent(h.Requests[1]).GetProperty("settings_link").ValueKind);
+
+            var h2 = MockHttpMessageHandler.Json("{\"object\":\"cookie_consent\",\"enabled\":true,"
+                + "\"settings_link\":{\"label\":\"Privacy\",\"preset\":\"newcmp\",\"attributes\":{},\"rendered_attributes\":{}}}");
+            using var c2 = Client(h2);
+            var got = await c2.Instance.GetCookieConsentAsync();
+            Assert.Equal("newcmp", got.SettingsLink!.Preset);
+            Assert.Empty(got.SettingsLink.Attributes);
+        }
+
+        // ---- oauth clients -----------------------------------------------------
+
+        [Fact]
+        public async Task OAuthClients_SkipLogoutConfirmation()
+        {
+            var h = MockHttpMessageHandler.Json("{\"object\":\"oauth_client\",\"id\":\"oc_1\",\"client_id\":\"cid\",\"first_party\":true,"
+                + "\"skip_logout_confirmation\":true}");
+            using var c = Client(h);
+
+            var created = await c.OAuthClients.CreateAsync(new CreateOAuthClientBody
+            {
+                Name = "Web",
+                RedirectUris = new List<string> { "https://app.test/cb" },
+                FirstParty = true,
+                SkipLogoutConfirmation = true,
+            });
+            Assert.True(Sent(h.Requests[0]).GetProperty("skip_logout_confirmation").GetBoolean());
+            Assert.True(created.SkipLogoutConfirmation);
+
+            var updated = await c.OAuthClients.UpdateAsync("oc_1", new UpdateOAuthClientBody { SkipLogoutConfirmation = false });
+            Assert.Equal("PATCH", h.Requests[1].Method);
+            Assert.False(Sent(h.Requests[1]).GetProperty("skip_logout_confirmation").GetBoolean());
+            Assert.True(updated.SkipLogoutConfirmation);
+
+            await c.OAuthClients.UpdateAsync("oc_1", new UpdateOAuthClientBody { Name = "Web 2" });
+            Assert.False(Sent(h.Requests[2]).TryGetProperty("skip_logout_confirmation", out _));
+
+            var got = await c.OAuthClients.GetAsync("oc_1");
+            Assert.True(got.SkipLogoutConfirmation);
+        }
+
+        [Fact]
+        public async Task OAuthClients_SkipLogoutConfirmation_DefaultsToFalse()
+        {
+            var h = MockHttpMessageHandler.Json("{\"object\":\"list\",\"data\":[{\"object\":\"oauth_client\",\"id\":\"oc_1\"}]}");
+            using var c = Client(h);
+            var page = await c.OAuthClients.ListAsync();
+            Assert.False(page.Data[0].SkipLogoutConfirmation);
+        }
+
         // ---- oauth providers ---------------------------------------------------
 
         [Fact]

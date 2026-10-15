@@ -1,5 +1,35 @@
 # Changelog
 
+## Atlas.Sdk 1.4.0
+
+All changes are backward compatible: new fields are optional or nullable and the new
+method is an overload.
+
+### Added
+
+- `OAuthClient.SkipLogoutConfirmation` and `OAuthClientWithSecret.SkipLogoutConfirmation`
+  (bool, default false); optional `CreateOAuthClientBody.SkipLogoutConfirmation` and
+  `UpdateOAuthClientBody.SkipLogoutConfirmation` (`bool?`). First-party clients only
+  (422 `VALIDATION_FAILED`, param `skip_logout_confirmation`, on a third-party client).
+  When true, RP-initiated logout (`/oauth2/logout`) with the client's `client_id` and an
+  exactly registered `post_logout_redirect_uri` ends the session and redirects straight
+  back with `state`, without the confirmation page.
+- Cookie-consent settings link: `CookieConsentBody.SettingsLink`
+  (`CookieConsentSettingsLinkInput`: `Label`, `Preset`, `Attributes`; null or omitted =
+  no link) and `CookieConsent.SettingsLink` (`CookieConsentSettingsLink`: `Label`,
+  `Preset`, `Attributes`, `RenderedAttributes`). Preset values in
+  `CookieConsentSettingsLinkPresets` (`Cookiemunch`, `Cookiebot`, `OneTrust`, `Custom`);
+  `Preset` stays a string so unknown values decode.
+- `Messaging.DeleteChannelAsync(channel, force, ct)` — sends `?force=true` when `force`
+  is true to remove the email provider even while email-dependent features are on (no
+  query otherwise). The existing `DeleteChannelAsync(channel, ct)` is unchanged.
+- `ErrorCodes.EmailProviderInUse` (`EMAIL_PROVIDER_IN_USE`): 409 when removing the email
+  provider would leave email-dependent features with no delivery; the error's
+  `meta.features` lists them (e.g. `emailCode`, `emailLink`, `emailVerification`,
+  `passwordReset`).
+- `UserSession` (`Users.ListSessionsAsync` items): `IdleExpiresAt` (epoch ms, nullable),
+  `LastActiveOrganizationId` and `ImpersonatedBy` (nullable).
+
 ## Atlas.Sdk 1.3.0
 
 ### Added

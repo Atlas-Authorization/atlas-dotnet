@@ -170,6 +170,11 @@ namespace Atlas.Resources
         public string? BlockingMode { get; set; }
         /// <summary>Other https URLs the CMP loads from or calls; each origin is added to the page CSP.</summary>
         public List<string>? ExtraOrigins { get; set; }
+        /// <summary>
+        /// A "Cookie settings" link on the hosted pages that reopens the CMP. Omitted (or null) = no link; to remove a
+        /// stored link send an explicit null with <c>Set("settings_link", null)</c>.
+        /// </summary>
+        public CookieConsentSettingsLinkInput? SettingsLink { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -180,6 +185,45 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+    }
+
+    /// <summary>Known values of a cookie-consent settings link <c>preset</c> (the CMP whose trigger the link carries).</summary>
+    public static class CookieConsentSettingsLinkPresets
+    {
+        public const string Cookiemunch = "cookiemunch";
+        public const string Cookiebot = "cookiebot";
+        public const string OneTrust = "onetrust";
+        /// <summary>No built-in trigger: the link carries only your own attributes.</summary>
+        public const string Custom = "custom";
+    }
+
+    /// <summary>
+    /// The "Cookie settings" link to render on the hosted pages. It needs a <see cref="Preset"/> or at least one
+    /// attribute (the API answers 400 otherwise).
+    /// </summary>
+    public sealed class CookieConsentSettingsLinkInput
+    {
+        /// <summary>The link text (1-60 characters).</summary>
+        public string Label { get; set; } = "";
+        /// <summary>The CMP trigger to attach, one of <see cref="CookieConsentSettingsLinkPresets"/>; null for none.</summary>
+        public string? Preset { get; set; }
+        /// <summary>
+        /// Extra attributes for the link (at most 10, values up to 200 characters). Allowed names: <c>data-*</c>,
+        /// <c>aria-*</c>, <c>id</c>, <c>class</c> and <c>href</c> (https or a <c>#fragment</c>).
+        /// </summary>
+        public Dictionary<string, string>? Attributes { get; set; }
+    }
+
+    /// <summary>The stored "Cookie settings" link.</summary>
+    public sealed class CookieConsentSettingsLink
+    {
+        public string Label { get; init; } = "";
+        /// <summary>The CMP trigger preset (see <see cref="CookieConsentSettingsLinkPresets"/>), or null.</summary>
+        public string? Preset { get; init; }
+        /// <summary>The attributes you set.</summary>
+        public Dictionary<string, string> Attributes { get; init; } = new Dictionary<string, string>();
+        /// <summary>The attributes the rendered link carries: yours plus the preset's trigger.</summary>
+        public Dictionary<string, string> RenderedAttributes { get; init; } = new Dictionary<string, string>();
     }
 
     public sealed class PreflightFinding
@@ -217,5 +261,7 @@ namespace Atlas.Resources
         public string? SiteId { get; init; }
         public string? BlockingMode { get; init; }
         public List<string>? ExtraOrigins { get; init; }
+        /// <summary>The "Cookie settings" link on the hosted pages, or null when there is none.</summary>
+        public CookieConsentSettingsLink? SettingsLink { get; init; }
     }
 }

@@ -98,8 +98,23 @@ namespace Atlas.Resources
         public Task<MessagingProvider> SetSmsAsync(MessagingProviderInput body, CancellationToken ct = default)
             => Req<MessagingProvider>(HttpVerb.Put, "/v1/messaging_providers/sms", body, cancellationToken: ct);
 
+        /// <summary>
+        /// Remove the channel's provider. Removing the email provider is refused with 409
+        /// <c>EMAIL_PROVIDER_IN_USE</c> (<see cref="ErrorCodes.EmailProviderInUse"/>) while nothing else would deliver
+        /// email and email-dependent features are on (the error's <c>meta.features</c> lists them, e.g.
+        /// <c>emailCode</c>, <c>emailLink</c>, <c>emailVerification</c>, <c>passwordReset</c>); use the
+        /// <c>force</c> overload to remove it anyway.
+        /// </summary>
         public Task<DeletedMessagingProvider> DeleteChannelAsync(string channel, CancellationToken ct = default)
-            => Req<DeletedMessagingProvider>(HttpVerb.Delete, $"/v1/messaging_providers/{Enc(channel)}", cancellationToken: ct);
+            => DeleteChannelAsync(channel, false, ct);
+
+        /// <summary>
+        /// Remove the channel's provider. With <paramref name="force"/> true, sends <c>?force=true</c> so the email
+        /// provider is removed even while email-dependent features are on (otherwise 409 <c>EMAIL_PROVIDER_IN_USE</c>).
+        /// </summary>
+        public Task<DeletedMessagingProvider> DeleteChannelAsync(string channel, bool force, CancellationToken ct = default)
+            => Req<DeletedMessagingProvider>(HttpVerb.Delete, $"/v1/messaging_providers/{Enc(channel)}",
+                query: force ? Q(("force", true)) : null, cancellationToken: ct);
 
         /// <summary>Send a fixed, clearly-marked test message through the channel's provider.</summary>
         public Task<MessagingTestResult> TestAsync(string channel, string to, CancellationToken ct = default)
