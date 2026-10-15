@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.1 (Atlas.Sdk)
+
+### Added
+
+- **Captcha is bring-your-own-keys.** `ErrorCodes.CaptchaKeysRequired` (422) and `ErrorCodes.CaptchaInUse` (409, `meta.flows`).
+- `InstanceSecurity.SetCaptchaSecretAsync(secret, provider)` stores the secret for a named provider before captcha is turned on.
+- `InstanceSecurity.DeleteCaptchaSecretAsync(provider, force)` removes a secret a flow uses and turns those flows off; `CaptchaSecretResult.FlowsTurnedOff`.
+
 ## Atlas.Sdk 1.4.0
 
 All changes are backward compatible: new fields are optional or nullable and the new

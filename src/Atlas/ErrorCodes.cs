@@ -33,6 +33,16 @@ namespace Atlas
         /// email; the error's <c>meta.features</c> lists them. Delete with <c>force</c> to remove it anyway.
         /// </summary>
         public const string EmailProviderInUse = "EMAIL_PROVIDER_IN_USE";
+        /// <summary>
+        /// Captcha is bring-your-own-keys: turning it on (or switching provider) needs that provider's site key and
+        /// secret stored first.
+        /// </summary>
+        public const string CaptchaKeysRequired = "CAPTCHA_KEYS_REQUIRED";
+        /// <summary>
+        /// A captcha key a live flow uses cannot be removed (<c>meta.flows</c>); delete with <c>force</c> to remove it
+        /// anyway.
+        /// </summary>
+        public const string CaptchaInUse = "CAPTCHA_IN_USE";
         /// <summary>A billing plan cannot be changed or removed while subscriptions use it.</summary>
         public const string PlanInUse = "PLAN_IN_USE";
         public const string LastAdmin = "LAST_ADMIN";

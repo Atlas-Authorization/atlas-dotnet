@@ -107,6 +107,8 @@ namespace Atlas.Resources
         public string Provider { get; init; } = "";
         public bool Set { get; init; }
         public bool Deleted { get; init; }
+        /// <summary>The captcha flows a forced delete switched off.</summary>
+        [JsonPropertyName("flows_turned_off")] public List<string>? FlowsTurnedOff { get; init; }
     }
 
     public sealed class KerberosSecretResult
@@ -135,12 +137,30 @@ namespace Atlas.Resources
         public Task<InstanceSecurityResult> UpdateAsync(UpdateInstanceSecurityBody body, CancellationToken ct = default)
             => Req<InstanceSecurityResult>(HttpVerb.Patch, "/v1/instance/security", body, cancellationToken: ct);
 
-        /// <summary>Store the captcha provider secret. Refused while the provider is <c>none</c>.</summary>
+        /// <summary>Store the captcha secret for the configured provider.</summary>
         public Task<CaptchaSecretResult> SetCaptchaSecretAsync(string secret, CancellationToken ct = default)
-            => Req<CaptchaSecretResult>(HttpVerb.Put, "/v1/instance/captcha_secret", body: Body(("secret", secret)), cancellationToken: ct);
+            => SetCaptchaSecretAsync(secret, null, ct);
 
+        /// <summary>
+        /// Store a captcha provider secret. <paramref name="provider"/> (null: the configured one) lets you store it
+        /// BEFORE turning captcha on: captcha is bring-your-own-keys, and enabling it without a site key and secret is
+        /// refused with 422 <c>CAPTCHA_KEYS_REQUIRED</c> (<see cref="ErrorCodes.CaptchaKeysRequired"/>).
+        /// </summary>
+        public Task<CaptchaSecretResult> SetCaptchaSecretAsync(string secret, string? provider, CancellationToken ct = default)
+            => Req<CaptchaSecretResult>(HttpVerb.Put, "/v1/instance/captcha_secret", body: Body(("secret", secret), ("provider", provider)), cancellationToken: ct);
+
+        /// <summary>Remove the configured provider's captcha secret.</summary>
         public Task<CaptchaSecretResult> DeleteCaptchaSecretAsync(CancellationToken ct = default)
-            => Req<CaptchaSecretResult>(HttpVerb.Delete, "/v1/instance/captcha_secret", cancellationToken: ct);
+            => DeleteCaptchaSecretAsync(null, false, ct);
+
+        /// <summary>
+        /// Remove a captcha secret. Refused with 409 <c>CAPTCHA_IN_USE</c> (<see cref="ErrorCodes.CaptchaInUse"/>) while a
+        /// flow uses it (<c>meta.flows</c>); <paramref name="force"/> removes it anyway and turns those flows off
+        /// (<see cref="CaptchaSecretResult.FlowsTurnedOff"/>).
+        /// </summary>
+        public Task<CaptchaSecretResult> DeleteCaptchaSecretAsync(string? provider, bool force, CancellationToken ct = default)
+            => Req<CaptchaSecretResult>(HttpVerb.Delete, "/v1/instance/captcha_secret",
+                query: Q(("provider", provider), ("force", force ? true : null)), cancellationToken: ct);
 
         /// <summary>Store the Kerberos/IWA trusted-proxy secret. Refused while the strategy is off.</summary>
         public Task<KerberosSecretResult> SetKerberosSecretAsync(string secret, CancellationToken ct = default)

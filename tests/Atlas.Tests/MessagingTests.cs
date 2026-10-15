@@ -155,5 +155,42 @@ namespace Atlas.Tests
             list.Sort(System.StringComparer.Ordinal);
             return list.ToArray();
         }
+    
+        [Fact]
+        public async Task CaptchaSecret_IsBringYourOwnKeys()
+        {
+            var handler = MockHttpMessageHandler.Json(
+                "{\"object\":\"captcha_secret\",\"provider\":\"hcaptcha\",\"deleted\":true,\"flows_turned_off\":[\"signUp\"]}");
+            using var client = Client(handler);
+
+            await client.InstanceSecurity.SetCaptchaSecretAsync("s3cret", "turnstile");
+            Assert.Equal("PUT", handler.Requests[0].Method);
+            using (var doc = JsonDocument.Parse(handler.Requests[0].Body))
+            {
+                Assert.Equal("turnstile", doc.RootElement.GetProperty("provider").GetString());
+                Assert.Equal("s3cret", doc.RootElement.GetProperty("secret").GetString());
+            }
+
+            var result = await client.InstanceSecurity.DeleteCaptchaSecretAsync("hcaptcha", force: true);
+            Assert.Equal("DELETE", handler.Requests[1].Method);
+            Assert.Equal("?provider=hcaptcha&force=true", handler.Requests[1].Query);
+            Assert.Equal(new[] { "signUp" }, result.FlowsTurnedOff);
+
+            await client.InstanceSecurity.DeleteCaptchaSecretAsync();
+            Assert.Equal("", handler.Requests[2].Query);
+        }
+
+        [Fact]
+        public async Task CaptchaInUse_IsAConflict()
+        {
+            var handler = MockHttpMessageHandler.Json(
+                "{\"errors\":[{\"code\":\"CAPTCHA_IN_USE\",\"message\":\"in use\",\"meta\":{\"flows\":[\"signUp\"]}}]}",
+                System.Net.HttpStatusCode.Conflict);
+            using var client = Client(handler);
+
+            var ex = await Assert.ThrowsAsync<AtlasConflictException>(() => client.InstanceSecurity.DeleteCaptchaSecretAsync());
+            Assert.True(ex.HasCode(ErrorCodes.CaptchaInUse));
+            Assert.Equal("CAPTCHA_KEYS_REQUIRED", ErrorCodes.CaptchaKeysRequired);
+        }
     }
 }
