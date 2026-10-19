@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -51,7 +52,11 @@ namespace Atlas.Verification
         MissingSubject,
     }
 
-    /// <summary>Thrown by <see cref="LogoutTokenVerifier"/> when a token is not valid. Answer the request with 400.</summary>
+    /// <summary>
+    /// Thrown by <see cref="LogoutTokenVerifier"/> when a token is not valid. Answer the request with 400,
+    /// or with 503 and <c>Retry-After</c> when <see cref="Retryable"/> is true (Atlas then retries the
+    /// delivery; it never retries a 400).
+    /// </summary>
     public sealed class LogoutTokenException : Exception
     {
         public LogoutTokenException(LogoutTokenFailure reason, string message) : base(message)
@@ -61,6 +66,12 @@ namespace Atlas.Verification
 
         /// <summary>Why the token was refused.</summary>
         public LogoutTokenFailure Reason { get; }
+
+        /// <summary>
+        /// True when the failure is temporary and on your side: <see cref="LogoutTokenFailure.NoKeys"/>,
+        /// the issuer's keys could not be fetched (a network error or a JWKS outage).
+        /// </summary>
+        public bool Retryable => Reason == LogoutTokenFailure.NoKeys;
     }
 
     /// <summary>
@@ -169,9 +180,13 @@ namespace Atlas.Verification
                     throw new LogoutTokenException(LogoutTokenFailure.WrongType, "logout_token typ must be logout+jwt");
             }
 
-            var keys = await _jwks.GetAsync(JwksCache.ReadKid(token), ct).ConfigureAwait(false);
+            var kid = JwksCache.ReadKid(token);
+            var keys = await _jwks.GetAsync(kid, ct).ConfigureAwait(false);
             if (keys == null || keys.Count == 0)
                 throw new LogoutTokenException(LogoutTokenFailure.NoKeys, "no signing keys available");
+            // A key Atlas just rotated to, whose refetch failed: temporary.
+            if (kid != null && _jwks.LastOutcome == FetchOutcome.Failed && !keys.Kids.Contains(kid))
+                throw new LogoutTokenException(LogoutTokenFailure.NoKeys, "signing key " + kid + " could not be fetched");
             if (!await SignatureValidAsync(token, keys).ConfigureAwait(false))
                 throw new LogoutTokenException(LogoutTokenFailure.BadSignature, "logout_token signature is invalid");
 

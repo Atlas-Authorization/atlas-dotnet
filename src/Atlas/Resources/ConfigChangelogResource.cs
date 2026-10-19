@@ -30,8 +30,16 @@ namespace Atlas.Resources
         public AuditEventActor? Actor { get; init; }
         public string Action { get; init; } = "";
         public string? Ip { get; init; }
+        /// <summary>The object that changed.</summary>
+        public ConfigChangelogTarget? Target { get; init; }
         public List<ConfigChangelogEntryChanges>? Changes { get; init; }
         public List<string>? Fields { get; init; }
+    }
+
+    public sealed class ConfigChangelogTarget
+    {
+        public string Type { get; init; } = "";
+        public string? Id { get; init; }
     }
 
     public sealed class ConfigChangelogEntryChanges

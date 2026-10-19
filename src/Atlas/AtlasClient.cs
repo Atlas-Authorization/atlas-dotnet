@@ -75,6 +75,7 @@ namespace Atlas
             NetworkAcls = new NetworkAclsResource(transport);
             ManagedWaf = new ManagedWafResource(transport);
             LogStreams = new LogStreamsResource(transport);
+            LogoutNotifyEndpoints = new LogoutNotifyEndpointsResource(transport);
             Branding = new BrandingResource(transport);
             EmailTemplates = new EmailTemplatesResource(transport);
             SmsTemplates = new SmsTemplatesResource(transport);
@@ -164,6 +165,8 @@ namespace Atlas
         public NetworkAclsResource NetworkAcls { get; }
         public ManagedWafResource ManagedWaf { get; }
         public LogStreamsResource LogStreams { get; }
+        /// <summary>Logout fan-out endpoints (<c>/v1/logout_notify_endpoints</c>).</summary>
+        public LogoutNotifyEndpointsResource LogoutNotifyEndpoints { get; }
         public BrandingResource Branding { get; }
         public EmailTemplatesResource EmailTemplates { get; }
         public SmsTemplatesResource SmsTemplates { get; }

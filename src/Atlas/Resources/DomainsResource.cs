@@ -24,6 +24,24 @@ namespace Atlas.Resources
         public Dictionary<string, object?>? Instructions { get; init; }
         /// <summary>Present on <see cref="DomainsResource.VerifyAsync"/>.</summary>
         public bool? Verified { get; init; }
+        /// <summary>DNS automation (the API token is never returned), or null.</summary>
+        public CustomDomainDns? Dns { get; init; }
+    }
+
+    public sealed class CustomDomainDns
+    {
+        public string Provider { get; init; } = "";
+        public bool TokenSet { get; init; }
+    }
+
+    /// <summary>Let Atlas write the domain's DNS record. The token is write-only.</summary>
+    public sealed class CustomDomainDnsInput
+    {
+        /// <summary><c>cloudflare</c>.</summary>
+        public string Provider { get; set; } = "cloudflare";
+        public string ApiToken { get; set; } = "";
+        /// <summary>Replace a conflicting existing record.</summary>
+        public bool? Overwrite { get; set; }
     }
 
     public sealed class CookieCheck
@@ -47,6 +65,8 @@ namespace Atlas.Resources
     {
         public string Host { get; set; } = "";
         public string? Role { get; set; }
+        /// <summary>Optional: have Atlas write the DNS record.</summary>
+        public CustomDomainDnsInput? Dns { get; set; }
     }
 
     /// <summary>The custom-domains namespace (<c>/v1/domains</c>).</summary>

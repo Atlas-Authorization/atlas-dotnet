@@ -216,6 +216,24 @@ await atlas.Design.UpdateAsync(new AtlasDesign { Logo = new AtlasDesignLogo { As
 - Machines, connectors, custom audit events, notifications, OpenFGA, analytics,
   diagnostics, redirect URLs and more each have their own namespace on the client.
 
+### Domain moves, logout fan-out and managed email
+
+```csharp
+// Move every URL from the old origin to the new one. DryRun first shows the diff.
+var preview = await atlas.Instance.MoveOriginAsync(new OriginMoveBody { From = "https://old.example.com", To = "https://example.com", DryRun = true });
+foreach (var c in preview.Changes) Console.WriteLine($"{c.ObjectType} {c.Field}: {c.Before} -> {c.After}");
+
+// Send the same logout_token your OIDC apps get to another service.
+await atlas.LogoutNotifyEndpoints.CreateAsync(new LogoutNotifyEndpointBody { Url = "https://api.example.com/atlas/logout" });
+
+// Send email from your own domain through Atlas, then publish the returned DNS records.
+var managed = await atlas.Messaging.CreateManagedEmailAsync(new ManagedEmailBody { FromAddress = "Acme <no-reply@example.com>" });
+```
+
+With a platform key, `Platform.AtlasIdApps.FindUsersAsync(id, email)` answers a privacy request for one app,
+`RevokeGrantAsync(id, grantId)` revokes one person's approval, and `Platform.AtlasIdPublisher` claims and verifies
+the publisher name shown on consent screens.
+
 ### API key spend caps
 
 Give an end-user API key caps in your own units, then meter what your API consumed

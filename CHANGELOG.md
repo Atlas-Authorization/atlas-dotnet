@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.5.0 (Atlas.Sdk) / 1.3.0 (Atlas.AspNetCore)
+
+### Added
+
+- **Back-channel logout, retryable failures.** `LogoutTokenException.Retryable` is true for
+  `LogoutTokenFailure.NoKeys`: the issuer's keys could not be fetched (a network error, a JWKS outage, or
+  a just-rotated key whose refetch failed). Answer `503` with `Retry-After` then, so Atlas retries the
+  delivery, and `400` otherwise. A token whose `kid` is unknown after a failed JWKS refetch is now
+  `NoKeys` (was `BadSignature`).
+- **Atlas.AspNetCore.** `MapAtlasBackchannelLogout` answers `503` with `Retry-After: 30` for a retryable
+  failure (was `400`).
+## 1.5.0 (Atlas.Sdk)
+
+### Added
+
+- **Webhook verification.** `new WebhookVerifier(secret).Verify(rawBody, headers, nowMs)` (namespace
+  `Atlas.Verification`) returns a `WebhookVerification` (`Verified`, `Reason`, `Event`, `DeliveryId`,
+  `Timestamp`). `DeliveryId` is the signed `atlas-id` header, the same on every retry of one event:
+  deduplicate on it.
+- **Domain moves.** `Instance.MoveOriginAsync(new OriginMoveBody { From, To, DryRun })` returns `OriginMove`;
+  `Platform.AtlasIdApps.MoveOriginAsync(id, body)` does it for one app.
+- **Connections and integrations.** `Instance.ConnectionsAsync()`, and `Instance.Get/Set/DeleteChatlyIntegrationAsync`
+  and `…ForumulateIntegrationAsync`.
+- **Logout fan-out.** New `LogoutNotifyEndpoints` resource: `ListAsync`, `CreateAsync`, `GetAsync`, `UpdateAsync`,
+  `DeleteAsync`, `ListDeliveriesAsync`.
+- **Managed email.** `Messaging.GetManagedEmailAsync`, `CreateManagedEmailAsync`, `VerifyManagedEmailAsync`,
+  `DeleteManagedEmailAsync(force)` (`ManagedEmail`).
+- **Back-channel logout logs.** `OAuthClients.ListBackchannelDeliveriesAsync` / `TestBackchannelLogoutAsync` and the
+  same on `Platform.AtlasIdApps`.
+- **Sign in with Atlas apps.** `Platform.AtlasIdApps.PreflightAsync`, `FindUsersAsync`, `RevokeGrantAsync`,
+  `RotateWebhookSecretAsync`; `AtlasIdApp` gains `WebhookUrl`, `WebhookEvents`, `WebhookActive` (and
+  `AtlasIdAppWithSecret.WebhookSecret`); `UpdateAtlasIdAppBody.WebhookUrl`.
+- **Publisher.** `Platform.AtlasIdPublisher`: `GetAsync`, `SetAsync`, `SetSkipConsentAsync`, `DeleteAsync`,
+  `VerifyAsync`; and `Platform.ConfigChangelogAsync(params)`.
+- **More fields.** `User.Version`; `CookieConsent.Culture` / `DeclaredCookies`; `CookieConsentBody.Culture`;
+  `Preflight.SdkVersionsSeen`; `WebhookDelivery.Error` / `Location`; `WebhookEndpointList.EventCatalog` /
+  `EventAudiences`; `CustomDomain.Dns` and `CreateDomainBody.Dns`; `ConfigChangelogEntry.Target`;
+  `MessagingProviders.ManagedEmail`.
+
 ## 1.4.1 (Atlas.Sdk)
 
 ### Added

@@ -161,9 +161,9 @@ namespace Atlas.Tests
 
         // ---- ASP.NET Core endpoint helper ----------------------------------------
 
-        private TestServer LogoutServer(List<LogoutTokenClaims> ended)
+        private TestServer LogoutServer(List<LogoutTokenClaims> ended, LogoutTokenVerifier? withVerifier = null)
         {
-            var verifier = Verifier();
+            var verifier = withVerifier ?? Verifier();
             var builder = new WebHostBuilder()
                 .ConfigureServices(services => services.AddRouting())
                 .Configure(app =>
@@ -198,6 +198,43 @@ namespace Atlas.Tests
             var res = await server.CreateClient().PostAsync("/logout/backchannel",
                 new FormUrlEncodedContent(new Dictionary<string, string> { ["logout_token"] = Token(c => c["nonce"] = "n") }));
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, res.StatusCode);
+            Assert.True(res.Headers.CacheControl!.NoStore);
+            Assert.Empty(ended);
+        }
+
+        private LogoutTokenVerifier UnreachableVerifier() => new LogoutTokenVerifier(new LogoutTokenVerifierOptions
+        {
+            JwksUrl = "https://jwks.test/keys",
+            Issuer = Issuer,
+            ClientId = ClientId,
+            HttpClient = new HttpClient(MockHttpMessageHandler.Json("down", System.Net.HttpStatusCode.ServiceUnavailable)),
+            Now = () => NowMs,
+        });
+
+        [Fact]
+        public async Task UnreachableJwks_IsNoKeys_AndRetryable()
+        {
+            var e = await Assert.ThrowsAsync<LogoutTokenException>(() => UnreachableVerifier().VerifyAsync(Token(_ => { })));
+            Assert.Equal(LogoutTokenFailure.NoKeys, e.Reason);
+            Assert.True(e.Retryable);
+        }
+
+        [Fact]
+        public async Task BadToken_IsNotRetryable()
+        {
+            var e = await Assert.ThrowsAsync<LogoutTokenException>(() => Verifier().VerifyAsync(Token(c => c["aud"] = "someone-else")));
+            Assert.False(e.Retryable);
+        }
+
+        [Fact]
+        public async Task Endpoint_UnreachableJwks_Is503_WithRetryAfter()
+        {
+            var ended = new List<LogoutTokenClaims>();
+            using var server = LogoutServer(ended, UnreachableVerifier());
+            var res = await server.CreateClient().PostAsync("/logout/backchannel",
+                new FormUrlEncodedContent(new Dictionary<string, string> { ["logout_token"] = Token(_ => { }) }));
+            Assert.Equal(System.Net.HttpStatusCode.ServiceUnavailable, res.StatusCode);
+            Assert.NotNull(res.Headers.RetryAfter);
             Assert.True(res.Headers.CacheControl!.NoStore);
             Assert.Empty(ended);
         }

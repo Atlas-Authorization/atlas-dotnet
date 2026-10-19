@@ -113,6 +113,8 @@ namespace Atlas.Resources
         public List<string>? AllowedScopes { get; set; }
         /// <summary>How the Sign in with Atlas page and consent screen look for this app. On PATCH each field merges with what is stored; a field set to null clears it, and branding: null clears all of them. The Atlas header and the app domain are always shown.</summary>
         public AtlasIdAppBrandingInput? Branding { get; set; }
+        /// <summary>Per-app webhook (public https): user.updated, user.deleted and grant.revoked for this app's users. The first set returns WebhookSecret once; <c>Set("webhook_url", null)</c> removes it.</summary>
+        public string? WebhookUrl { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -229,6 +231,11 @@ namespace Atlas.Resources
         public string? ManagedByInstanceId { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
+        /// <summary>The per-app webhook URL, or null.</summary>
+        public string? WebhookUrl { get; init; }
+        public List<string>? WebhookEvents { get; init; }
+        /// <summary>false once auto-disabled after repeated failures; null without a webhook.</summary>
+        public bool? WebhookActive { get; init; }
     }
 
     public sealed class AtlasIdAppWithSecret
@@ -252,9 +259,16 @@ namespace Atlas.Resources
         public string? ManagedByInstanceId { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
+        /// <summary>The per-app webhook URL, or null.</summary>
+        public string? WebhookUrl { get; init; }
+        public List<string>? WebhookEvents { get; init; }
+        /// <summary>false once auto-disabled after repeated failures; null without a webhook.</summary>
+        public bool? WebhookActive { get; init; }
         /// <summary>Confidential apps only; returned exactly once.</summary>
         public string? ClientSecret { get; init; }
         public string? Note { get; init; }
+        /// <summary>The per-app webhook signing secret, returned exactly once (first set, or rotated).</summary>
+        public string? WebhookSecret { get; init; }
     }
 
     public sealed class PlatformAppProvisioned
@@ -474,6 +488,128 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/rotate_secret</c> — Rotate a confidential app's client_secret.</summary>
         public Task<AtlasIdAppWithSecret> RotateSecretAsync(string id, CancellationToken ct = default)
             => Req<AtlasIdAppWithSecret>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/rotate_secret", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/platform/atlas_id_apps/{id}/backchannel_deliveries</c> — The app's back-channel logout delivery log, newest first.</summary>
+        public Task<CursorPage<BackchannelLogoutDelivery>> ListBackchannelDeliveriesAsync(string id, int? limit = null, string? startingAfter = null, CancellationToken ct = default)
+            => Req<CursorPage<BackchannelLogoutDelivery>>(HttpVerb.Get, $"/v1/platform/atlas_id_apps/{Enc(id)}/backchannel_deliveries",
+                query: Q(("limit", limit), ("starting_after", startingAfter)), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/backchannel_logout/test</c> — Send a test back-channel logout to the app now.</summary>
+        public Task<BackchannelLogoutTest> TestBackchannelLogoutAsync(string id, CancellationToken ct = default)
+            => Req<BackchannelLogoutTest>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/backchannel_logout/test", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/platform/atlas_id_apps/{id}/preflight</c> — Check one app's setup.</summary>
+        public Task<AtlasIdAppPreflight> PreflightAsync(string id, CancellationToken ct = default)
+            => Req<AtlasIdAppPreflight>(HttpVerb.Get, $"/v1/platform/atlas_id_apps/{Enc(id)}/preflight", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/platform/atlas_id_apps/{id}/users</c> — Privacy requests: is this person (verified email, exact match) one of the app's users? Anyone else gets an empty list.</summary>
+        public Task<ListPage<AtlasIdAppUser>> FindUsersAsync(string id, string email, CancellationToken ct = default)
+            => Req<ListPage<AtlasIdAppUser>>(HttpVerb.Get, $"/v1/platform/atlas_id_apps/{Enc(id)}/users", query: Q(("email", email)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/platform/atlas_id_apps/{id}/grants/{grantId}</c> — Revoke one user's grant; the next sign-in shows the consent screen again.</summary>
+        public Task<AtlasIdGrantRevocation> RevokeGrantAsync(string id, string grantId, CancellationToken ct = default)
+            => Req<AtlasIdGrantRevocation>(HttpVerb.Delete, $"/v1/platform/atlas_id_apps/{Enc(id)}/grants/{Enc(grantId)}", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/move_origin</c> — Move the app's URLs from one origin to another.</summary>
+        public Task<OriginMove> MoveOriginAsync(string id, OriginMoveBody body, CancellationToken ct = default)
+            => Req<OriginMove>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/move_origin", body, cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/webhook/rotate_secret</c> — Rotate the app's webhook signing secret (returned once).</summary>
+        public Task<AtlasIdAppWithSecret> RotateWebhookSecretAsync(string id, CancellationToken ct = default)
+            => Req<AtlasIdAppWithSecret>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/webhook/rotate_secret", cancellationToken: ct);
+    }
+
+    public sealed class AtlasIdAppPreflight
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "preflight";
+        public string AppId { get; init; } = "";
+        public bool Ok { get; init; }
+        public long CheckedAt { get; init; }
+        /// <summary>People who have approved the app.</summary>
+        public int UserCount { get; init; }
+        public List<PreflightFinding> Findings { get; init; } = new List<PreflightFinding>();
+    }
+
+    /// <summary>A person who has approved a Sign in with Atlas app.</summary>
+    public sealed class AtlasIdAppUser
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "atlas_id_user";
+        public bool AtlasIdUser { get; init; }
+        /// <summary>The user id as this app sees it (the id_token sub).</summary>
+        public string Sub { get; init; } = "";
+        public string GrantId { get; init; } = "";
+        public List<string> Scopes { get; init; } = new List<string>();
+        public long GrantedAt { get; init; }
+    }
+
+    public sealed class AtlasIdGrantRevocation
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "atlas_id_grant";
+        public string Id { get; init; } = "";
+        public string Sub { get; init; } = "";
+        public bool Revoked { get; init; }
+        public int? TokensRevoked { get; init; }
+        public int? BackchannelLogouts { get; init; }
+    }
+
+    public sealed class AtlasIdPublisherVerification
+    {
+        public string RecordName { get; init; } = "";
+        public string RecordType { get; init; } = "";
+        public string RecordValue { get; init; } = "";
+    }
+
+    /// <summary>The account's Sign in with Atlas publisher (name and DNS-verified domain).</summary>
+    public sealed class AtlasIdPublisher
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "atlas_id_publisher";
+        public string Name { get; init; } = "";
+        public string Domain { get; init; } = "";
+        public bool Verified { get; init; }
+        public long? VerifiedAt { get; init; }
+        /// <summary>Publisher-wide consent for verified apps (openid / email / profile only).</summary>
+        public bool SkipConsent { get; init; }
+        public AtlasIdPublisherVerification? Verification { get; init; }
+        public long? LastCheckedAt { get; init; }
+        public long? CreatedAt { get; init; }
+        public long? UpdatedAt { get; init; }
+        /// <summary>Set by verify: whether the TXT record matched.</summary>
+        public bool? RecordFound { get; init; }
+    }
+
+    public sealed class AtlasIdPublisherBody
+    {
+        /// <summary>Shown on consent screens once verified (up to 100 characters).</summary>
+        public string Name { get; set; } = "";
+        /// <summary>The host your apps' homepage_url lives on, e.g. example.com.</summary>
+        public string Domain { get; set; } = "";
+        public bool? SkipConsent { get; set; }
+    }
+
+    /// <summary>The account's Sign in with Atlas publisher (<c>/v1/platform/atlas_id_publisher</c>).</summary>
+    public sealed class PlatformAtlasIdPublisherResource : ResourceBase
+    {
+        public PlatformAtlasIdPublisherResource(AtlasTransport transport) : base(transport) { }
+
+        /// <summary><c>GET /v1/platform/atlas_id_publisher</c> — The publisher (404 until claimed).</summary>
+        public Task<AtlasIdPublisher> GetAsync(CancellationToken ct = default)
+            => Req<AtlasIdPublisher>(HttpVerb.Get, "/v1/platform/atlas_id_publisher", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/platform/atlas_id_publisher</c> — Claim a publisher name and domain; returns the TXT record to publish.</summary>
+        public Task<AtlasIdPublisher> SetAsync(AtlasIdPublisherBody body, CancellationToken ct = default)
+            => Req<AtlasIdPublisher>(HttpVerb.Put, "/v1/platform/atlas_id_publisher", body, cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/platform/atlas_id_publisher</c> — Turn publisher-wide consent on or off.</summary>
+        public Task<AtlasIdPublisher> SetSkipConsentAsync(bool skipConsent, CancellationToken ct = default)
+            => Req<AtlasIdPublisher>(HttpVerb.Patch, "/v1/platform/atlas_id_publisher", Body(("skip_consent", skipConsent)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/platform/atlas_id_publisher</c> — Remove the publisher claim.</summary>
+        public Task<DeletedObject> DeleteAsync(CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, "/v1/platform/atlas_id_publisher", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/atlas_id_publisher/verify</c> — Look up the TXT record now.</summary>
+        public Task<AtlasIdPublisher> VerifyAsync(CancellationToken ct = default)
+            => Req<AtlasIdPublisher>(HttpVerb.Post, "/v1/platform/atlas_id_publisher/verify", cancellationToken: ct);
     }
 
     /// <summary>Apps (instances) owned by the platform (<c>/v1/platform/apps</c>).</summary>
@@ -558,7 +694,15 @@ namespace Atlas.Resources
             DesignAssets = new PlatformDesignAssetsResource(transport);
             AtlasIdApps = new PlatformAtlasIdAppsResource(transport);
             Apps = new PlatformAppsResource(transport);
+            AtlasIdPublisher = new PlatformAtlasIdPublisherResource(transport);
         }
+
+        /// <summary>The account's Sign in with Atlas publisher (<c>/v1/platform/atlas_id_publisher</c>).</summary>
+        public PlatformAtlasIdPublisherResource AtlasIdPublisher { get; }
+
+        /// <summary><c>GET /v1/platform/config_changelog</c> — Config change history for the account's Sign in with Atlas apps.</summary>
+        public Task<CursorPage<ConfigChangelogEntry>> ConfigChangelogAsync(ListConfigChangelogParams? @params = null, CancellationToken ct = default)
+            => Req<CursorPage<ConfigChangelogEntry>>(HttpVerb.Get, "/v1/platform/config_changelog", query: (@params ?? new ListConfigChangelogParams()).ToQuery(), cancellationToken: ct);
 
         /// <summary>Design images owned by the platform account (<c>/v1/platform/design/assets</c>).</summary>
         public PlatformDesignAssetsResource DesignAssets { get; }

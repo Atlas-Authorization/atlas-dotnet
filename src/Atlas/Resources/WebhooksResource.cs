@@ -46,6 +46,10 @@ namespace Atlas.Resources
         public long? NextRetryAt { get; init; }
         public long? DeliveredAt { get; init; }
         public long CreatedAt { get; init; }
+        /// <summary>Why the attempt failed: <c>webhook_redirect_not_followed</c> (see <see cref="Location"/>), <c>webhook_http_error</c>, <c>webhook_timeout</c>, <c>webhook_network_error</c> or <c>webhook_url_blocked</c>. Null on success or while pending.</summary>
+        public string? Error { get; init; }
+        /// <summary>The absolute <c>Location</c> of a 3xx answer. Not followed.</summary>
+        public string? Location { get; init; }
         public string? EventType { get; init; }
         public int? MaxAttempts { get; init; }
         /// <summary>The JSON payload that was sent.</summary>
@@ -63,6 +67,21 @@ namespace Atlas.Resources
         /// <summary>Delay before each retry, in milliseconds.</summary>
         public List<long> RetryScheduleMs { get; init; } = new List<long>();
         public int MaxAttempts { get; init; }
+        /// <summary>The same events as <see cref="AvailableEvents"/>, each described.</summary>
+        public List<WebhookEventCatalogEntry>? EventCatalog { get; init; }
+        /// <summary>Every value <see cref="WebhookEventCatalogEntry.RelevantFor"/> can hold.</summary>
+        public List<string>? EventAudiences { get; init; }
+    }
+
+    /// <summary>One subscribable webhook event, described.</summary>
+    public sealed class WebhookEventCatalogEntry
+    {
+        public string Name { get; init; } = "";
+        public string Description { get; init; } = "";
+        /// <summary>Who should act on it (rp_sessions, rp_accounts, dsar, …).</summary>
+        public List<string> RelevantFor { get; init; } = new List<string>();
+        /// <summary>Set on a superseded spelling: subscribe to this event instead.</summary>
+        public string? DeprecatedAliasOf { get; init; }
     }
 
     public sealed class CreateWebhookEndpointBody

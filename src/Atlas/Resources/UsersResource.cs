@@ -23,6 +23,8 @@ namespace Atlas.Resources
         public long? LastSignInAt { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
+        /// <summary>Strictly increases with every change to the user; webhook payloads carry the same value. Apply an update only if its version is higher than the one you hold.</summary>
+        public long? Version { get; init; }
     }
 
     public sealed class EmailAddress

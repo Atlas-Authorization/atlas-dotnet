@@ -24,6 +24,91 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "messaging_providers";
         public MessagingProvider? Email { get; init; }
         public MessagingProvider? Sms { get; init; }
+        /// <summary>The Atlas-managed sending domain, or null.</summary>
+        public ManagedEmailSummary? ManagedEmail { get; init; }
+    }
+
+    public sealed class ManagedEmailSummary
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "managed_email";
+        public string FromAddress { get; init; } = "";
+        public string Domain { get; init; } = "";
+        public string Status { get; init; } = "";
+        public bool Verified { get; init; }
+    }
+
+    /// <summary>A DNS record to publish for the managed sending domain.</summary>
+    public sealed class ManagedEmailRecord
+    {
+        /// <summary>dkim, spf, return_path or other.</summary>
+        public string Purpose { get; init; } = "";
+        /// <summary>TXT, MX or CNAME.</summary>
+        public string Type { get; init; } = "";
+        public string Name { get; init; } = "";
+        public string Value { get; init; } = "";
+        public int? Priority { get; init; }
+        public string? Status { get; init; }
+    }
+
+    public sealed class ManagedEmailLimits
+    {
+        public int Hourly { get; init; }
+        public int Daily { get; init; }
+    }
+
+    public sealed class ManagedEmailUsage
+    {
+        public int Sent { get; init; }
+        public int Bounces { get; init; }
+        public int Complaints { get; init; }
+        public long? LastBounceAt { get; init; }
+        public long? LastComplaintAt { get; init; }
+    }
+
+    /// <summary>Atlas-managed email: your own sending domain on Atlas's email account. Email sends only once Verified.</summary>
+    public sealed class ManagedEmail
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "managed_email";
+        public string Id { get; init; } = "";
+        public string FromAddress { get; init; } = "";
+        public string Domain { get; init; } = "";
+        public string Provider { get; init; } = "";
+        public string? Region { get; init; }
+        /// <summary>not_started, pending, verified, failed or temporary_failure.</summary>
+        public string Status { get; init; } = "";
+        public bool Verified { get; init; }
+        public List<ManagedEmailRecord> Records { get; init; } = new List<ManagedEmailRecord>();
+        public ManagedEmailLimits? Limits { get; init; }
+        public ManagedEmailUsage? Usage { get; init; }
+        public string? Reputation { get; init; }
+        /// <summary>DNS automation (the token is never returned), or null.</summary>
+        public CustomDomainDns? Dns { get; init; }
+        public string? FailureReason { get; init; }
+        public long? LastCheckedAt { get; init; }
+        public long? VerifiedAt { get; init; }
+        public long CreatedAt { get; init; }
+        public long UpdatedAt { get; init; }
+        /// <summary>Create only, with Dns: the zone and the records Atlas wrote.</summary>
+        public System.Text.Json.JsonElement? DnsResult { get; init; }
+        public string? NextStep { get; init; }
+    }
+
+    /// <summary>The body of <c>POST /v1/messaging_providers/email/managed</c>.</summary>
+    public sealed class ManagedEmailBody
+    {
+        /// <summary>Bare or "Name &lt;address&gt;"; its domain becomes the sending domain.</summary>
+        public string FromAddress { get; set; } = "";
+        /// <summary>us-east-1, eu-west-1, sa-east-1 or ap-northeast-1.</summary>
+        public string? Region { get; set; }
+        /// <summary>Let Atlas write the DNS records (the token is write-only).</summary>
+        public CustomDomainDnsInput? Dns { get; set; }
+    }
+
+    public sealed class ManagedEmailDeleted
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "managed_email";
+        public string Domain { get; init; } = "";
+        public bool Deleted { get; init; }
     }
 
     public sealed class MessagingProviderInput
@@ -114,6 +199,26 @@ namespace Atlas.Resources
         /// </summary>
         public Task<DeletedMessagingProvider> DeleteChannelAsync(string channel, bool force, CancellationToken ct = default)
             => Req<DeletedMessagingProvider>(HttpVerb.Delete, $"/v1/messaging_providers/{Enc(channel)}",
+                query: force ? Q(("force", true)) : null, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/messaging_providers/email/managed</c> — The Atlas-managed sending domain (404 when none).</summary>
+        public Task<ManagedEmail> GetManagedEmailAsync(CancellationToken ct = default)
+            => Req<ManagedEmail>(HttpVerb.Get, "/v1/messaging_providers/email/managed", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/messaging_providers/email/managed</c> — Send from your own domain through Atlas's email account; returns the DNS records to publish.</summary>
+        public Task<ManagedEmail> CreateManagedEmailAsync(ManagedEmailBody body, CancellationToken ct = default)
+            => Req<ManagedEmail>(HttpVerb.Post, "/v1/messaging_providers/email/managed", body, cancellationToken: ct);
+
+        /// <summary><c>POST /v1/messaging_providers/email/managed/verify</c> — Re-check the DNS records now.</summary>
+        public Task<ManagedEmail> VerifyManagedEmailAsync(CancellationToken ct = default)
+            => Req<ManagedEmail>(HttpVerb.Post, "/v1/messaging_providers/email/managed/verify", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>DELETE /v1/messaging_providers/email/managed</c> — Stop using managed email (DNS records stay). With
+        /// <paramref name="force"/> true, sends <c>?force=true</c> (otherwise 409 <c>EMAIL_PROVIDER_IN_USE</c> while it is the only way to send email).
+        /// </summary>
+        public Task<ManagedEmailDeleted> DeleteManagedEmailAsync(bool force = false, CancellationToken ct = default)
+            => Req<ManagedEmailDeleted>(HttpVerb.Delete, "/v1/messaging_providers/email/managed",
                 query: force ? Q(("force", true)) : null, cancellationToken: ct);
 
         /// <summary>Send a fixed, clearly-marked test message through the channel's provider.</summary>

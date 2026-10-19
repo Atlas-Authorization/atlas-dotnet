@@ -19,8 +19,9 @@ namespace Atlas.AspNetCore
         /// <summary>
         /// Map <c>POST <paramref name="pattern"/></c> to verify the form field
         /// <c>logout_token</c> with <paramref name="verifier"/> and then call
-        /// <paramref name="onLogout"/>. Responds <c>200</c> on success and <c>400</c> on an
-        /// invalid token, always with <c>Cache-Control: no-store</c>.
+        /// <paramref name="onLogout"/>. Responds <c>200</c> on success, <c>400</c> on an
+        /// invalid token, and <c>503</c> with <c>Retry-After</c> when the issuer's keys could not be
+        /// fetched (so Atlas retries), always with <c>Cache-Control: no-store</c>.
         /// <code>
         /// var logout = new LogoutTokenVerifier(new LogoutTokenVerifierOptions { JwksUrl = ..., Issuer = ..., ClientId = ... });
         /// app.MapAtlasBackchannelLogout("/logout/backchannel", logout, async (claims, http) =>
@@ -53,6 +54,12 @@ namespace Atlas.AspNetCore
                 try
                 {
                     claims = await verifier.VerifyFormBodyAsync(body, http.RequestAborted).ConfigureAwait(false);
+                }
+                catch (LogoutTokenException e) when (e.Retryable)
+                {
+                    http.Response.Headers.RetryAfter = "30";
+                    http.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                    return;
                 }
                 catch (LogoutTokenException)
                 {

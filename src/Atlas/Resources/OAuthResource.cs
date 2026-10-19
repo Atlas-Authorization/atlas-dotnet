@@ -137,6 +137,48 @@ namespace Atlas.Resources
     }
 
     /// <summary>The OAuth-clients namespace (<c>/v1/oauth_clients</c>).</summary>
+    /// <summary>One back-channel logout attempt. Atlas never follows redirects: a 3xx fails with error <c>backchannel_redirect_not_followed</c> and its Location.</summary>
+    public sealed class BackchannelLogoutDelivery
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "backchannel_logout_delivery";
+        public string Id { get; init; } = "";
+        public string? OauthClientId { get; init; }
+        /// <summary>The ended session (<c>sid_test_…</c> for a test); null for "sign out everywhere".</summary>
+        public string? Sid { get; init; }
+        /// <summary>Sent by the test call; never retried.</summary>
+        public bool Test { get; init; }
+        /// <summary>pending, success or failed.</summary>
+        public string Status { get; init; } = "";
+        public int AttemptNumber { get; init; }
+        public int MaxAttempts { get; init; }
+        public int? HttpStatus { get; init; }
+        public int? LatencyMs { get; init; }
+        public string? Error { get; init; }
+        public string? Location { get; init; }
+        public string? ResponseSnippet { get; init; }
+        public long? NextRetryAt { get; init; }
+        public long? AttemptedAt { get; init; }
+        public long? DeliveredAt { get; init; }
+        public long CreatedAt { get; init; }
+    }
+
+    /// <summary>The result of a test back-channel logout, recorded in the delivery log with Test true.</summary>
+    public sealed class BackchannelLogoutTest
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "backchannel_logout_test";
+        public string DeliveryId { get; init; } = "";
+        /// <summary>True when the receiver answered 2xx.</summary>
+        public bool Ok { get; init; }
+        public string Sid { get; init; } = "";
+        public int? Status { get; init; }
+        public int? LatencyMs { get; init; }
+        public string? Error { get; init; }
+        public string? Location { get; init; }
+        /// <summary>Set when nothing was sent (private, loopback or non-https address).</summary>
+        public string? BlockedReason { get; init; }
+        public string? BodyExcerpt { get; init; }
+    }
+
     public sealed class OAuthClientsResource : ResourceBase
     {
         public OAuthClientsResource(AtlasTransport transport) : base(transport)
@@ -160,6 +202,15 @@ namespace Atlas.Resources
 
         public Task<OAuthClientWithSecret> RotateSecretAsync(string id, CancellationToken ct = default)
             => Req<OAuthClientWithSecret>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/rotate_secret", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/oauth_clients/{id}/backchannel_deliveries</c> — The client's back-channel logout delivery log, newest first.</summary>
+        public Task<CursorPage<BackchannelLogoutDelivery>> ListBackchannelDeliveriesAsync(string id, int? limit = null, string? startingAfter = null, CancellationToken ct = default)
+            => Req<CursorPage<BackchannelLogoutDelivery>>(HttpVerb.Get, $"/v1/oauth_clients/{Enc(id)}/backchannel_deliveries",
+                query: Q(("limit", limit), ("starting_after", startingAfter)), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/oauth_clients/{id}/backchannel_logout/test</c> — Send a test back-channel logout now and return what the receiver answered.</summary>
+        public Task<BackchannelLogoutTest> TestBackchannelLogoutAsync(string id, CancellationToken ct = default)
+            => Req<BackchannelLogoutTest>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/backchannel_logout/test", cancellationToken: ct);
 
         public Task<DeleteOAuthClientResult> DeleteAsync(string id, CancellationToken ct = default)
             => Req<DeleteOAuthClientResult>(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(id)}", cancellationToken: ct);

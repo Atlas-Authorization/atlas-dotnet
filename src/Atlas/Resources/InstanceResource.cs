@@ -49,6 +49,38 @@ namespace Atlas.Resources
         public Task<Preflight> PreflightAsync(CancellationToken ct = default)
             => Req<Preflight>(HttpVerb.Get, "/v1/instance/preflight", cancellationToken: ct);
 
+        /// <summary><c>POST /v1/instance/move_origin</c> — Move every URL that points at one origin to another (a domain move), across the instance, its OAuth clients, webhooks, redirect URLs and Sign in with Atlas apps. DryRun writes nothing.</summary>
+        public Task<OriginMove> MoveOriginAsync(OriginMoveBody body, CancellationToken ct = default)
+            => Req<OriginMove>(HttpVerb.Post, "/v1/instance/move_origin", body, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/connections</c> — The instance's links to other platforms and their health. Read-only.</summary>
+        public Task<InstanceConnections> ConnectionsAsync(CancellationToken ct = default)
+            => Req<InstanceConnections>(HttpVerb.Get, "/v1/instance/connections", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/integrations/chatly</c> — The Chatly connection.</summary>
+        public Task<ChatlyIntegration> GetChatlyIntegrationAsync(CancellationToken ct = default)
+            => Req<ChatlyIntegration>(HttpVerb.Get, "/v1/instance/integrations/chatly", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/instance/integrations/chatly</c> — Connect a Chatly channel (its public id).</summary>
+        public Task<ChatlyIntegration> SetChatlyIntegrationAsync(string channel, CancellationToken ct = default)
+            => Req<ChatlyIntegration>(HttpVerb.Put, "/v1/instance/integrations/chatly", Body(("channel", channel)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/integrations/chatly</c> — Remove the Chatly connection.</summary>
+        public Task<ChatlyIntegration> DeleteChatlyIntegrationAsync(CancellationToken ct = default)
+            => Req<ChatlyIntegration>(HttpVerb.Delete, "/v1/instance/integrations/chatly", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/integrations/forumulate</c> — The Forumulate connection.</summary>
+        public Task<ForumulateIntegration> GetForumulateIntegrationAsync(CancellationToken ct = default)
+            => Req<ForumulateIntegration>(HttpVerb.Get, "/v1/instance/integrations/forumulate", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/instance/integrations/forumulate</c> — Connect Forumulate spaces (replaces the whole connection).</summary>
+        public Task<ForumulateIntegration> SetForumulateIntegrationAsync(ForumulateIntegrationBody body, CancellationToken ct = default)
+            => Req<ForumulateIntegration>(HttpVerb.Put, "/v1/instance/integrations/forumulate", body, cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/integrations/forumulate</c> — Remove the Forumulate connection.</summary>
+        public Task<ForumulateIntegration> DeleteForumulateIntegrationAsync(CancellationToken ct = default)
+            => Req<ForumulateIntegration>(HttpVerb.Delete, "/v1/instance/integrations/forumulate", cancellationToken: ct);
+
         /// <summary><c>GET /v1/instance/cookie_consent</c> — Read the cookie-consent CMP injected into the hosted sign-in, sign-up and account pages (enabled:false when none).</summary>
         public Task<CookieConsent> GetCookieConsentAsync(CancellationToken ct = default)
             => Req<CookieConsent>(HttpVerb.Get, "/v1/instance/cookie_consent", cancellationToken: ct);
@@ -195,6 +227,8 @@ namespace Atlas.Resources
         /// stored link send an explicit null with <c>Set("settings_link", null)</c>.
         /// </summary>
         public CookieConsentSettingsLinkInput? SettingsLink { get; set; }
+        /// <summary><c>page</c> (default: the script tag carries the page language) or <c>browser</c>.</summary>
+        public string? Culture { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -268,6 +302,30 @@ namespace Atlas.Resources
         public long CheckedAt { get; init; }
         /// <summary>Ordered error, then warning, then info.</summary>
         public List<PreflightFinding> Findings { get; init; } = new List<PreflightFinding>();
+        /// <summary>Atlas browser SDK versions seen in the last 7 days, with their advisories.</summary>
+        public List<SdkVersionSeen>? SdkVersionsSeen { get; init; }
+    }
+
+    public sealed class SdkVersionSeen
+    {
+        public string Package { get; init; } = "";
+        public string Version { get; init; } = "";
+        public long LastSeenAt { get; init; }
+        public List<SdkAdvisory> Advisories { get; init; } = new List<SdkAdvisory>();
+    }
+
+    public sealed class SdkAdvisory
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "sdk_advisory";
+        public string Package { get; init; } = "";
+        public string Affected { get; init; } = "";
+        public string FixedIn { get; init; } = "";
+        /// <summary>Stable code, e.g. <c>email_code_sign_in</c>.</summary>
+        public string Reason { get; init; } = "";
+        /// <summary>critical, high, medium or low.</summary>
+        public string Severity { get; init; } = "";
+        public string Summary { get; init; } = "";
+        public string PublishedAt { get; init; } = "";
     }
 
     /// <summary>The consent-management platform (CMP) injected into the hosted pages. enabled:false (and no other fields) when none is set.</summary>
@@ -283,5 +341,144 @@ namespace Atlas.Resources
         public List<string>? ExtraOrigins { get; init; }
         /// <summary>The "Cookie settings" link on the hosted pages, or null when there is none.</summary>
         public CookieConsentSettingsLink? SettingsLink { get; init; }
+        /// <summary><c>page</c> or <c>browser</c>.</summary>
+        public string? Culture { get; init; }
+        /// <summary>Every cookie and browser-storage key Atlas writes for this instance, for your cookie policy.</summary>
+        public List<DeclaredCookie>? DeclaredCookies { get; init; }
+    }
+
+    /// <summary>A cookie or browser-storage key Atlas writes (all strictly necessary).</summary>
+    public sealed class DeclaredCookie
+    {
+        /// <summary>The exact name, or null when <see cref="Pattern"/> describes a family of keys.</summary>
+        public string? Name { get; init; }
+        public string? Pattern { get; init; }
+        /// <summary>cookie, localStorage, sessionStorage or indexedDB.</summary>
+        public string Store { get; init; } = "";
+        public string Domain { get; init; } = "";
+        /// <summary>Null = browser session (cookie) or until cleared (storage).</summary>
+        public long? LifetimeSeconds { get; init; }
+        public string Lifetime { get; init; } = "";
+        public bool HttpOnly { get; init; }
+        public string Category { get; init; } = "";
+        public string Purpose { get; init; } = "";
+        public string WrittenWhen { get; init; } = "";
+        /// <summary>atlas_frontend_api or atlas_sdk.</summary>
+        public string SetBy { get; init; } = "";
+    }
+
+    /// <summary>The body of an origin move: <c>from</c> and <c>to</c> are <c>scheme://host[:port]</c> origins.</summary>
+    public sealed class OriginMoveBody
+    {
+        public string From { get; set; } = "";
+        public string To { get; set; } = "";
+        /// <summary>true reports the diff and any problems and writes nothing.</summary>
+        public bool? DryRun { get; set; }
+    }
+
+    /// <summary>One field an origin move rewrites; Before/After are a URL, a list of URLs, or null.</summary>
+    public sealed class OriginMoveChange
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string Field { get; init; } = "";
+        public JsonElement? Before { get; init; }
+        public JsonElement? After { get; init; }
+    }
+
+    public sealed class OriginMoveProblem
+    {
+        [JsonPropertyName("object")] public string? ObjectType { get; init; }
+        public string? Id { get; init; }
+        public string? Field { get; init; }
+        public string? Url { get; init; }
+        public string? Message { get; init; }
+    }
+
+    /// <summary>The before → after diff of an origin move. A repeated run returns no changes.</summary>
+    public sealed class OriginMove
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "origin_move";
+        public string From { get; init; } = "";
+        public string To { get; init; } = "";
+        public bool DryRun { get; init; }
+        /// <summary>True when this run wrote changes.</summary>
+        public bool Applied { get; init; }
+        public List<OriginMoveChange> Changes { get; init; } = new List<OriginMoveChange>();
+        /// <summary>Values the field would refuse; a real run with problems is a 422 and writes nothing.</summary>
+        public List<OriginMoveProblem> Problems { get; init; } = new List<OriginMoveProblem>();
+        /// <summary>Platform app twin only: the app after the move.</summary>
+        public JsonElement? App { get; init; }
+    }
+
+    public sealed class InstanceConnection
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "connection";
+        /// <summary>privacy_webhook, cmp, atlas_id_app or jwt_template.</summary>
+        public string Kind { get; init; } = "";
+        public string Check { get; init; } = "";
+        public bool Ok { get; init; }
+        /// <summary>error, warning or info.</summary>
+        public string Severity { get; init; } = "";
+        public Dictionary<string, string> Subject { get; init; } = new Dictionary<string, string>();
+        public string? FixHint { get; init; }
+        public long LastCheckedAt { get; init; }
+        /// <summary>Kind-specific facts.</summary>
+        public JsonElement? Details { get; init; }
+    }
+
+    /// <summary>The instance's links to other platforms. Ok is false when a warning- or error-severity row fails.</summary>
+    public sealed class InstanceConnections
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "instance_connections";
+        public bool Ok { get; init; }
+        public long CheckedAt { get; init; }
+        public List<InstanceConnection> Data { get; init; } = new List<InstanceConnection>();
+    }
+
+    /// <summary>The Chatly connection (Enabled false and nothing else when none is set).</summary>
+    public sealed class ChatlyIntegration
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "chatly_integration";
+        public bool Enabled { get; init; }
+        public string? Channel { get; init; }
+        /// <summary>The template name to pass to getToken({ template: 'chatly' }).</summary>
+        public string? Template { get; init; }
+        public string? Audience { get; init; }
+        public string? Issuer { get; init; }
+        public string? JwksUrl { get; init; }
+        public int? TokenTtlSeconds { get; init; }
+        public Dictionary<string, string>? IdentityVerification { get; init; }
+    }
+
+    public sealed class ForumulateSpace
+    {
+        public string Id { get; init; } = "";
+        public string? RedeemUrl { get; init; }
+    }
+
+    /// <summary>The Forumulate connection (Enabled false and nothing else when none is set).</summary>
+    public sealed class ForumulateIntegration
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "forumulate_integration";
+        public bool Enabled { get; init; }
+        public string? OrgId { get; init; }
+        public List<ForumulateSpace>? Spaces { get; init; }
+        public string? Audience { get; init; }
+        public string? Issuer { get; init; }
+        public string? JwksUrl { get; init; }
+        public int? TokenTtlSeconds { get; init; }
+        /// <summary>The external_jwt provider to store on each space.</summary>
+        public JsonElement? ReaderAuthProvider { get; init; }
+    }
+
+    /// <summary>The body of <c>PUT /v1/instance/integrations/forumulate</c>; replaces the whole connection.</summary>
+    public sealed class ForumulateIntegrationBody
+    {
+        public string OrgId { get; set; } = "";
+        /// <summary>1-50 space ids (strings), or objects with <c>id</c> and <c>redeem_url</c>.</summary>
+        public List<object> Spaces { get; set; } = new List<object>();
+        /// <summary>The token aud. Default <c>forumulate:&lt;org_id&gt;</c>.</summary>
+        public string? Audience { get; set; }
     }
 }
