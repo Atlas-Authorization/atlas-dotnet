@@ -226,9 +226,34 @@ foreach (var c in preview.Changes) Console.WriteLine($"{c.ObjectType} {c.Field}:
 // Send the same logout_token your OIDC apps get to another service.
 await atlas.LogoutNotifyEndpoints.CreateAsync(new LogoutNotifyEndpointBody { Url = "https://api.example.com/atlas/logout" });
 
-// Send email from your own domain through Atlas, then publish the returned DNS records.
-var managed = await atlas.Messaging.CreateManagedEmailAsync(new ManagedEmailBody { FromAddress = "Acme <no-reply@example.com>" });
+// Set your domain up on your own Resend or Brevo account, then publish the returned DNS records.
+var managed = await atlas.Messaging.CreateManagedEmailAsync(new ManagedEmailBody
+{
+    FromAddress = "Acme <no-reply@example.com>",
+    Transport = "resend",
+    Config = new ManagedEmailProviderKey { ApiKey = Environment.GetEnvironmentVariable("RESEND_API_KEY")! },
+});
+
+// A development instance can send sign-in emails through your provider without a verified domain.
+await atlas.Messaging.EnableDevelopmentEmailAsync(new DevelopmentEmailBody { ProviderId = "mp_123" });
+await atlas.Messaging.DisableDevelopmentEmailAsync();
 ```
+
+### OAuth client secret rotation
+
+The previous secret keeps working for `OverlapSeconds` (default 24 hours, at most 7 days), so you can deploy the
+new one without downtime. Pass `0` to revoke it now, for example after a leak:
+
+```csharp
+var rotated = await atlas.OAuthClients.RotateSecretAsync(clientId, new RotateOAuthClientSecretBody { OverlapSeconds = 3600 });
+// rotated.ClientSecret is shown once; rotated.PreviousSecretExpiresAt says when the old one stops.
+```
+
+### Webhooks
+
+`WebhookVerifier` accepts an `atlas-signature` header that carries several signatures separated by spaces
+(`v1,<sig> v1,<sig>`). While an endpoint secret rotates, Atlas may sign each delivery with the old and the new
+secret; the delivery verifies when any one signature matches.
 
 With a platform key, `Platform.AtlasIdApps.FindUsersAsync(id, email)` answers a privacy request for one app,
 `RevokeGrantAsync(id, grantId)` revokes one person's approval, and `Platform.AtlasIdPublisher` claims and verifies

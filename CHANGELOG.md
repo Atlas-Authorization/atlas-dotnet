@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.6.0 (Atlas.Sdk)
+
+### Added
+
+- **OAuth client secret rotation with overlap.** `OAuthClients.RotateSecretAsync(id, RotateOAuthClientSecretBody, idempotencyKey?)`
+  takes `OverlapSeconds` (default 86400, `0` revokes the old secret now, at most 604800). `OAuthClientWithSecret` gains
+  `PreviousSecretExpiresAt` and `OverlapSeconds`; `OAuthClient` gains `PreviousSecretExpiresAt`.
+- **Development email sender.** `Messaging.GetDevelopmentEmailAsync`, `EnableDevelopmentEmailAsync(DevelopmentEmailBody)` and
+  `DisableDevelopmentEmailAsync` (`DevelopmentEmail`, `DevelopmentEmailDisabled`). `MessagingProviders` gains
+  `DevelopmentEmail` (`DevelopmentEmailSummary`).
+- **Managed email on your own provider account.** `ManagedEmailBody` gains `Transport`, `Config` (`ManagedEmailProviderKey`)
+  and `ProviderId`. `ManagedEmail` gains `Backend`, `ProviderId` and `FeedbackWebhook`; `Limits` is now null and
+  `Reputation` is `your_provider_account`. `ManagedEmailDeleted` gains `ProviderRemoved`.
+- **Provider mode.** `MessagingProvider` gains `Id` and `Mode`; `MessagingProviderInput` gains `Mode`; new
+  `Messaging.SetEmailAsync(EmailProviderConfig, fromAddress, mode)`.
+- **Allowed origins with an integration.** `WithAllowedOriginEntries(IEnumerable<AllowedOriginEntry>)` on
+  `UpdateInstanceBody`, `CreatePlatformAppBody`, `UpdatePlatformAppBody`, `CreatePlatformInstanceBody` and
+  `CreateAccountlessAppBody` (`AllowedOriginEntry.Redirect`, `Embedded`, `Auto`). `UpdateInstanceBody` gains `Set`.
+- **Issuer and verification endpoints.** `Instance` gains `Issuer`, `DiscoveryUrl`, `JwksUri` and
+  `AllowedOriginIntegrations`; `InstanceUpdateResult` gains `AllowedOriginIntegrations`; `PlatformApp`,
+  `PlatformAppWithSecret`, `PlatformAppProvisioned` and `AcceptedPlatformApp` gain `FrontendApiHost`, `Issuer`,
+  `DiscoveryUrl`, `JwksUri` and `AllowedOriginIntegrations`.
+- **Login readiness.** `LoginReadiness` gains `Integration` (`LoginReadinessIntegration`); `LoginReadinessChecks` gains `Applies`.
+- **Email verification.** `EmailAddress` gains `Verification` (`EmailAddressVerification`: `Status`, `Strategy`).
+- **Branding audiences.** `Branding` and `ResolvedBranding` gain `Audiences` (`BrandingAudience`).
+- **Error codes.** `ErrorCodes.ReadOnlyField`, `DevelopmentEmailNotAllowed`, `DevelopmentEmailUnavailable`,
+  `DevelopmentEmailLimitReached`, `DevelopmentEmailTemplateNotAllowed`.
+- **Webhooks, several signatures.** `WebhookVerifier` accepts an `atlas-signature` header with several space-separated
+  `v1,<signature>` entries and verifies when any one matches (each compared in constant time). A single signature works
+  as before.
+
 ## 1.5.0 (Atlas.Sdk) / 1.3.0 (Atlas.AspNetCore)
 
 ### Added

@@ -12,14 +12,29 @@ namespace Atlas.Resources
         public string Origin { get; init; } = "";
         public bool Live { get; init; }
         public string? DataRegion { get; init; }
+        /// <summary>Every check that applies to the assumed integration passes.</summary>
         public bool Ready { get; init; }
+        /// <summary>The integration the checks assumed for the origin, and why (null from older servers).</summary>
+        public LoginReadinessIntegration? Integration { get; init; }
         public List<LoginReadinessChecks> Checks { get; init; } = new List<LoginReadinessChecks>();
+    }
+
+    public sealed class LoginReadinessIntegration
+    {
+        /// <summary><c>redirect</c> (hosted-redirect OIDC: the <c>cors</c> and <c>session_cookie</c> checks do not apply) or <c>embedded</c>.</summary>
+        public string Assumed { get; init; } = "";
+        /// <summary><c>declared</c>, <c>embedded_traffic</c>, <c>redirect_clients</c> or <c>default</c>.</summary>
+        public string Source { get; init; } = "";
+        /// <summary>A plain sentence saying why.</summary>
+        public string Reason { get; init; } = "";
     }
 
     public sealed class LoginReadinessChecks
     {
         public string? Name { get; init; }
         public bool? Pass { get; init; }
+        /// <summary>False when the check does not matter for the assumed integration (it then never makes <c>Ready</c> false); null from older servers.</summary>
+        public bool? Applies { get; init; }
         public JsonElement? Observed { get; init; }
         public string? Detail { get; init; }
     }

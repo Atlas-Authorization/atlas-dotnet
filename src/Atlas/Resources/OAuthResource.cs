@@ -20,6 +20,8 @@ namespace Atlas.Resources
         public List<string> GrantTypes { get; init; } = new List<string>();
         public string TokenEndpointAuthMethod { get; init; } = "";
         public string? SecretPrefix { get; init; }
+        /// <summary>After a rotation with overlap: when the previous secret stops working (epoch ms); null when only the current secret is accepted.</summary>
+        public long? PreviousSecretExpiresAt { get; init; }
         public bool IsPublic { get; init; }
         public bool FirstParty { get; init; }
         /// <summary>
@@ -45,6 +47,8 @@ namespace Atlas.Resources
         public List<string> GrantTypes { get; init; } = new List<string>();
         public string TokenEndpointAuthMethod { get; init; } = "";
         public string? SecretPrefix { get; init; }
+        /// <summary>After a rotation with overlap: when the previous secret stops working (epoch ms); null when only the current secret is accepted.</summary>
+        public long? PreviousSecretExpiresAt { get; init; }
         public bool IsPublic { get; init; }
         public bool FirstParty { get; init; }
         /// <summary>
@@ -57,6 +61,15 @@ namespace Atlas.Resources
         public long UpdatedAt { get; init; }
         public string? ClientSecret { get; init; }
         public string Note { get; init; } = "";
+        /// <summary>On a rotation: how long the previous secret keeps working, in seconds (echoed).</summary>
+        public int? OverlapSeconds { get; init; }
+    }
+
+    /// <summary>The body of <c>POST /v1/oauth_clients/{id}/rotate_secret</c>.</summary>
+    public sealed class RotateOAuthClientSecretBody
+    {
+        /// <summary>How long the previous secret keeps working, in seconds. Null uses the default, 86400 (24 hours); 0 revokes it now; at most 604800 (7 days).</summary>
+        public int? OverlapSeconds { get; set; }
     }
 
     public sealed class ClientGrant
@@ -200,8 +213,16 @@ namespace Atlas.Resources
         public Task<OAuthClient> UpdateAsync(string id, UpdateOAuthClientBody body, CancellationToken ct = default)
             => Req<OAuthClient>(HttpVerb.Patch, $"/v1/oauth_clients/{Enc(id)}", body, cancellationToken: ct);
 
+        /// <summary>Rotate the client secret (revealed once). The previous secret keeps working for the default overlap (24 hours).</summary>
         public Task<OAuthClientWithSecret> RotateSecretAsync(string id, CancellationToken ct = default)
             => Req<OAuthClientWithSecret>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/rotate_secret", cancellationToken: ct);
+
+        /// <summary>
+        /// Rotate the client secret with a chosen overlap: the previous secret keeps working for <c>OverlapSeconds</c>
+        /// (0 revokes it now, e.g. after a leak). <see cref="OAuthClientWithSecret.PreviousSecretExpiresAt"/> says when it stops.
+        /// </summary>
+        public Task<OAuthClientWithSecret> RotateSecretAsync(string id, RotateOAuthClientSecretBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<OAuthClientWithSecret>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/rotate_secret", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
 
         /// <summary><c>GET /v1/oauth_clients/{id}/backchannel_deliveries</c> — The client's back-channel logout delivery log, newest first.</summary>
         public Task<CursorPage<BackchannelLogoutDelivery>> ListBackchannelDeliveriesAsync(string id, int? limit = null, string? startingAfter = null, CancellationToken ct = default)

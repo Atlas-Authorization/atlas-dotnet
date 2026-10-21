@@ -113,6 +113,11 @@ namespace Atlas.Resources
         [JsonPropertyName("copy")] public BrandingCopy? Copy { get; set; }
         [JsonPropertyName("socialButtons")] public BrandingSocialButtons? SocialButtons { get; set; }
         [JsonPropertyName("codeInput")] public string? CodeInput { get; set; }
+        /// <summary>
+        /// Per-audience hosted-page branding keyed by audience hint (<c>[a-z0-9_-]{1,32}</c>, at most 20). A sign-in
+        /// started with <c>audience_hint=&lt;hint&gt;</c> uses that entry. An update merges per hint; a null entry deletes it.
+        /// </summary>
+        [JsonPropertyName("audiences")] public Dictionary<string, BrandingAudience?>? Audiences { get; set; }
         [JsonPropertyName("card")] public BrandingCard? Card { get; set; }
         [JsonPropertyName("typography")] public BrandingTypography? Typography { get; set; }
         [JsonPropertyName("buttonShape")] public string? ButtonShape { get; set; }
@@ -141,6 +146,21 @@ namespace Atlas.Resources
         [JsonPropertyName("colorBackground")] public string ColorBackground { get; init; } = "";
         [JsonPropertyName("colorText")] public string ColorText { get; init; } = "";
         [JsonPropertyName("supportEmail")] public string? SupportEmail { get; init; }
+        /// <summary>Every audience the hosted page can theme for, as it reads them.</summary>
+        [JsonPropertyName("audiences")] public Dictionary<string, BrandingAudience>? Audiences { get; init; }
+    }
+
+    /// <summary>The hosted-page branding for one audience hint.</summary>
+    public sealed class BrandingAudience
+    {
+        /// <summary>Replaces the card heading (up to 120 characters).</summary>
+        [JsonPropertyName("heading")] public string? Heading { get; set; }
+        /// <summary>Replaces the line under the heading (up to 240 characters).</summary>
+        [JsonPropertyName("subheading")] public string? Subheading { get; set; }
+        /// <summary>Replaces the logo (https).</summary>
+        [JsonPropertyName("logoUrl")] public string? LogoUrl { get; set; }
+        /// <summary>Replaces the primary colour (hex, rgb() or a CSS colour name).</summary>
+        [JsonPropertyName("primaryColor")] public string? PrimaryColor { get; set; }
     }
 
     /// <summary>

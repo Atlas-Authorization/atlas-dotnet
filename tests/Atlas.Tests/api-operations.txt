@@ -481,3 +481,6 @@ POST /v1/platform/atlas_id_publisher/verify
 PUT /v1/instance/integrations/chatly
 PUT /v1/instance/integrations/forumulate
 PUT /v1/platform/atlas_id_publisher
+DELETE /v1/messaging_providers/email/development
+GET /v1/messaging_providers/email/development
+POST /v1/messaging_providers/email/development

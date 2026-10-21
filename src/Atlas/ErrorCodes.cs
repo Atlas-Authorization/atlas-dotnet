@@ -11,6 +11,8 @@ namespace Atlas
         public const string ValidationFailed = "VALIDATION_FAILED";
         /// <summary>A strict-mode write sent a body field the endpoint does not accept.</summary>
         public const string UnknownField = "UNKNOWN_FIELD";
+        /// <summary>The body set a field that is not writable on this endpoint (<c>param</c> names it).</summary>
+        public const string ReadOnlyField = "READ_ONLY_FIELD";
         public const string NotFound = "NOT_FOUND";
         public const string RateLimited = "RATE_LIMITED";
         /// <summary>An Idempotency-Key was reused with different parameters.</summary>
@@ -43,6 +45,14 @@ namespace Atlas
         /// anyway.
         /// </summary>
         public const string CaptchaInUse = "CAPTCHA_IN_USE";
+        /// <summary>The development email sender is not available on a production instance (409).</summary>
+        public const string DevelopmentEmailNotAllowed = "DEVELOPMENT_EMAIL_NOT_ALLOWED";
+        /// <summary>The development email sender is not available on this deployment (503).</summary>
+        public const string DevelopmentEmailUnavailable = "DEVELOPMENT_EMAIL_UNAVAILABLE";
+        /// <summary>The development sender's daily or per-recipient hourly cap is spent (429; <c>meta.window</c>, <c>meta.retry_after_seconds</c>).</summary>
+        public const string DevelopmentEmailLimitReached = "DEVELOPMENT_EMAIL_LIMIT_REACHED";
+        /// <summary>The development sender sends only Atlas's own sign-in emails (422).</summary>
+        public const string DevelopmentEmailTemplateNotAllowed = "DEVELOPMENT_EMAIL_TEMPLATE_NOT_ALLOWED";
         /// <summary>A billing plan cannot be changed or removed while subscriptions use it.</summary>
         public const string PlanInUse = "PLAN_IN_USE";
         public const string LastAdmin = "LAST_ADMIN";

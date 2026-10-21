@@ -50,7 +50,9 @@ namespace Atlas.Verification
     /// delivery: <c>atlas-signature: v1,&lt;base64&gt;</c> is HMAC-SHA256 over
     /// <c>&lt;id&gt;.&lt;timestamp&gt;.&lt;raw body&gt;</c> keyed with the endpoint secret (<c>whsec_…</c>),
     /// sent with <c>atlas-id</c> and <c>atlas-timestamp</c> (epoch ms). A delivery more than five
-    /// minutes from now, in either direction, is refused. Verify the RAW body, before any JSON parse.
+    /// minutes from now, in either direction, is refused. The header may carry several space-separated
+    /// <c>v1,&lt;base64&gt;</c> entries (one per secret while a secret rotates with an overlap); the delivery
+    /// verifies when any one matches. Verify the RAW body, before any JSON parse.
     /// </summary>
     public sealed class WebhookVerifier
     {
@@ -76,10 +78,9 @@ namespace Atlas.Verification
             if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(tsRaw) || string.IsNullOrEmpty(signature))
                 return WebhookVerification.Failure("missing_headers");
 
-            var comma = signature!.IndexOf(',');
-            if (comma < 0 || signature.Substring(0, comma) != "v1" || comma == signature.Length - 1)
+            var provided = Signatures(signature!);
+            if (provided.Count == 0)
                 return WebhookVerification.Failure("malformed_signature");
-            var provided = signature.Substring(comma + 1);
 
             if (!long.TryParse(tsRaw!.Trim(), System.Globalization.NumberStyles.AllowLeadingSign,
                     System.Globalization.CultureInfo.InvariantCulture, out var timestamp))
@@ -93,9 +94,15 @@ namespace Atlas.Verification
             Buffer.BlockCopy(rawBody, 0, signed, prefix.Length, rawBody.Length);
             string expected;
             using (var hmac = new HMACSHA256(_secret)) expected = Convert.ToBase64String(hmac.ComputeHash(signed));
+            // Compare every entry (no early exit), each in constant time.
             var a = Encoding.UTF8.GetBytes(expected);
-            var b = Encoding.UTF8.GetBytes(provided);
-            if (a.Length != b.Length || !CryptographicOperations.FixedTimeEquals(a, b))
+            var matched = false;
+            foreach (var candidate in provided)
+            {
+                var b = Encoding.UTF8.GetBytes(candidate);
+                if (a.Length == b.Length && CryptographicOperations.FixedTimeEquals(a, b)) matched = true;
+            }
+            if (!matched)
                 return WebhookVerification.Failure("signature_mismatch");
 
             JsonElement? evt = null;
@@ -109,6 +116,21 @@ namespace Atlas.Verification
                 // A valid signature over a non-JSON body: verified, with no event.
             }
             return new WebhookVerification(true, null, evt, id, timestamp);
+        }
+
+        // The v1 signatures in an atlas-signature header: one "v1,<base64>" entry, or several separated by
+        // spaces (while an endpoint secret rotates, Atlas signs with the old and the new secret). Entries of
+        // another version are skipped.
+        private static List<string> Signatures(string header)
+        {
+            var list = new List<string>();
+            foreach (var entry in header.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var comma = entry.IndexOf(',');
+                if (comma > 0 && comma < entry.Length - 1 && entry.Substring(0, comma) == "v1")
+                    list.Add(entry.Substring(comma + 1));
+            }
+            return list;
         }
 
         private static string? Header(IEnumerable<KeyValuePair<string, string>> headers, string name)

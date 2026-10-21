@@ -144,6 +144,13 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+
+        /// <summary>Send <c>allowed_origins</c> as entries that may also declare how each origin signs in (<see cref="AllowedOriginEntry"/>); replaces <see cref="AllowedOrigins"/>.</summary>
+        public CreatePlatformAppBody WithAllowedOriginEntries(IEnumerable<AllowedOriginEntry> entries)
+        {
+            AllowedOrigins = null;
+            return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
+        }
     }
 
     public sealed class UpdatePlatformAppBody
@@ -161,6 +168,13 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+
+        /// <summary>Send <c>allowed_origins</c> as entries that may also declare how each origin signs in (<see cref="AllowedOriginEntry"/>); replaces <see cref="AllowedOrigins"/>.</summary>
+        public UpdatePlatformAppBody WithAllowedOriginEntries(IEnumerable<AllowedOriginEntry> entries)
+        {
+            AllowedOrigins = null;
+            return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
+        }
     }
 
     public sealed class CreatePlatformInstanceBody
@@ -176,6 +190,13 @@ namespace Atlas.Resources
         {
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
+        }
+
+        /// <summary>Send <c>allowed_origins</c> as entries that may also declare how each origin signs in (<see cref="AllowedOriginEntry"/>); replaces <see cref="AllowedOrigins"/>.</summary>
+        public CreatePlatformInstanceBody WithAllowedOriginEntries(IEnumerable<AllowedOriginEntry> entries)
+        {
+            AllowedOrigins = null;
+            return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
         }
     }
 
@@ -193,6 +214,13 @@ namespace Atlas.Resources
         {
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
+        }
+
+        /// <summary>Send <c>allowed_origins</c> as entries that may also declare how each origin signs in (<see cref="AllowedOriginEntry"/>); replaces <see cref="AllowedOrigins"/>.</summary>
+        public CreateAccountlessAppBody WithAllowedOriginEntries(IEnumerable<AllowedOriginEntry> entries)
+        {
+            AllowedOrigins = null;
+            return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
         }
     }
 
@@ -278,7 +306,17 @@ namespace Atlas.Resources
         public string Name { get; init; } = "";
         public string Environment { get; init; } = "";
         public string PublishableKey { get; init; } = "";
+        /// <summary>The Frontend API host: the default per-app host, or the custom domain once it is active.</summary>
+        public string? FrontendApiHost { get; init; }
+        /// <summary>The <c>iss</c> the app's session tokens carry. It changes when a custom domain goes active.</summary>
+        public string? Issuer { get; init; }
+        /// <summary>The OpenID discovery document whose <c>issuer</c> equals <see cref="Issuer"/>.</summary>
+        public string? DiscoveryUrl { get; init; }
+        /// <summary>The JWKS holding the app's signing keys.</summary>
+        public string? JwksUri { get; init; }
         public List<string> AllowedOrigins { get; init; } = new List<string>();
+        /// <summary>The declared integration per allowed origin (<c>redirect</c> or <c>embedded</c>).</summary>
+        public Dictionary<string, string>? AllowedOriginIntegrations { get; init; }
         /// <summary>X8 housekeeping labels (≤20, each ≤40 chars).</summary>
         public List<string> Tags { get; init; } = new List<string>();
         /// <summary>X8 housekeeping: hidden from the default listing. A pure visibility flag — the app still serves auth.</summary>
@@ -304,7 +342,17 @@ namespace Atlas.Resources
         public string Name { get; init; } = "";
         public string Environment { get; init; } = "";
         public string PublishableKey { get; init; } = "";
+        /// <summary>The Frontend API host: the default per-app host, or the custom domain once it is active.</summary>
+        public string? FrontendApiHost { get; init; }
+        /// <summary>The <c>iss</c> the app's session tokens carry. It changes when a custom domain goes active.</summary>
+        public string? Issuer { get; init; }
+        /// <summary>The OpenID discovery document whose <c>issuer</c> equals <see cref="Issuer"/>.</summary>
+        public string? DiscoveryUrl { get; init; }
+        /// <summary>The JWKS holding the app's signing keys.</summary>
+        public string? JwksUri { get; init; }
         public List<string> AllowedOrigins { get; init; } = new List<string>();
+        /// <summary>The declared integration per allowed origin (<c>redirect</c> or <c>embedded</c>).</summary>
+        public Dictionary<string, string>? AllowedOriginIntegrations { get; init; }
         /// <summary>X8 housekeeping labels (≤20, each ≤40 chars).</summary>
         public List<string> Tags { get; init; } = new List<string>();
         /// <summary>X8 housekeeping: hidden from the default listing. A pure visibility flag — the app still serves auth.</summary>
@@ -329,7 +377,17 @@ namespace Atlas.Resources
         public string Name { get; init; } = "";
         public string Environment { get; init; } = "";
         public string PublishableKey { get; init; } = "";
+        /// <summary>The Frontend API host: the default per-app host, or the custom domain once it is active.</summary>
+        public string? FrontendApiHost { get; init; }
+        /// <summary>The <c>iss</c> the app's session tokens carry. It changes when a custom domain goes active.</summary>
+        public string? Issuer { get; init; }
+        /// <summary>The OpenID discovery document whose <c>issuer</c> equals <see cref="Issuer"/>.</summary>
+        public string? DiscoveryUrl { get; init; }
+        /// <summary>The JWKS holding the app's signing keys.</summary>
+        public string? JwksUri { get; init; }
         public List<string> AllowedOrigins { get; init; } = new List<string>();
+        /// <summary>The declared integration per allowed origin (<c>redirect</c> or <c>embedded</c>).</summary>
+        public Dictionary<string, string>? AllowedOriginIntegrations { get; init; }
         /// <summary>X8 housekeeping labels (≤20, each ≤40 chars).</summary>
         public List<string> Tags { get; init; } = new List<string>();
         /// <summary>X8 housekeeping: hidden from the default listing. A pure visibility flag — the app still serves auth.</summary>
@@ -419,7 +477,17 @@ namespace Atlas.Resources
         public string Name { get; init; } = "";
         public string Environment { get; init; } = "";
         public string PublishableKey { get; init; } = "";
+        /// <summary>The Frontend API host: the default per-app host, or the custom domain once it is active.</summary>
+        public string? FrontendApiHost { get; init; }
+        /// <summary>The <c>iss</c> the app's session tokens carry. It changes when a custom domain goes active.</summary>
+        public string? Issuer { get; init; }
+        /// <summary>The OpenID discovery document whose <c>issuer</c> equals <see cref="Issuer"/>.</summary>
+        public string? DiscoveryUrl { get; init; }
+        /// <summary>The JWKS holding the app's signing keys.</summary>
+        public string? JwksUri { get; init; }
         public List<string> AllowedOrigins { get; init; } = new List<string>();
+        /// <summary>The declared integration per allowed origin (<c>redirect</c> or <c>embedded</c>).</summary>
+        public Dictionary<string, string>? AllowedOriginIntegrations { get; init; }
         /// <summary>X8 housekeeping labels (≤20, each ≤40 chars).</summary>
         public List<string> Tags { get; init; } = new List<string>();
         /// <summary>X8 housekeeping: hidden from the default listing. A pure visibility flag — the app still serves auth.</summary>

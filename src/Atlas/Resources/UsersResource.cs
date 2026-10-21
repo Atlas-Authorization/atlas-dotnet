@@ -32,9 +32,20 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "email_address";
         public string Id { get; init; } = "";
         [JsonPropertyName("email_address")] public string Address { get; init; } = "";
+        /// <summary>True only when the address was proven. An address that signed up while <c>requireEmailVerification</c> was false is false.</summary>
         public bool Verified { get; init; }
+        /// <summary>Whether and how the address was proven (null from older servers).</summary>
+        public EmailAddressVerification? Verification { get; init; }
         public bool Primary { get; init; }
         public long CreatedAt { get; init; }
+    }
+
+    public sealed class EmailAddressVerification
+    {
+        /// <summary><c>verified</c> or <c>unverified</c>; mirrors <see cref="EmailAddress.Verified"/>.</summary>
+        public string Status { get; init; } = "";
+        /// <summary><c>email_code</c>, <c>email_link</c>, <c>oauth</c>, <c>admin</c>, <c>import</c>, <c>scim</c> or <c>lti</c>; <c>skipped</c> for an address held for sign-in but never proven; null when not verified.</summary>
+        public string? Strategy { get; init; }
     }
 
     public sealed class UserSession

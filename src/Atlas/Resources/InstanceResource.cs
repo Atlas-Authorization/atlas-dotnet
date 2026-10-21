@@ -13,16 +13,78 @@ namespace Atlas.Resources
         public string Environment { get; init; } = "";
         public string PublishableKey { get; init; } = "";
         public string FrontendApiHost { get; init; } = "";
+        /// <summary>The <c>iss</c> the instance's session tokens carry. It changes when a custom domain goes active, so read it rather than hard-coding it.</summary>
+        public string? Issuer { get; init; }
+        /// <summary>The OpenID discovery document whose <c>issuer</c> equals <see cref="Issuer"/>.</summary>
+        public string? DiscoveryUrl { get; init; }
+        /// <summary>The JWKS holding the instance's signing keys.</summary>
+        public string? JwksUri { get; init; }
         public List<string> AllowedOrigins { get; init; } = new List<string>();
+        /// <summary>The declared integration per allowed origin (<c>redirect</c> or <c>embedded</c>). An origin not listed is inferred.</summary>
+        public Dictionary<string, string>? AllowedOriginIntegrations { get; init; }
         public Metadata AuthConfig { get; init; } = new Metadata();
         public long CreatedAt { get; init; }
+    }
+
+    /// <summary>
+    /// One <c>allowed_origins</c> entry that may also declare how the origin signs in. With no
+    /// integration it is sent as the plain origin string (keeping the hint the origin already had);
+    /// otherwise as <c>{ origin, integration }</c>.
+    /// </summary>
+    public sealed class AllowedOriginEntry
+    {
+        /// <summary>Hosted-redirect OIDC: the app never runs the embedded components.</summary>
+        public const string Redirect = "redirect";
+        /// <summary>The sign-in components run on the origin.</summary>
+        public const string Embedded = "embedded";
+        /// <summary>Clear the declared integration; Atlas infers it.</summary>
+        public const string Auto = "auto";
+
+        public AllowedOriginEntry(string origin, string? integration = null)
+        {
+            Origin = origin;
+            Integration = integration;
+        }
+
+        public string Origin { get; }
+        /// <summary><see cref="Redirect"/>, <see cref="Embedded"/>, <see cref="Auto"/>, or null to keep the current hint.</summary>
+        public string? Integration { get; }
+
+        internal static List<object> ToWire(IEnumerable<AllowedOriginEntry> entries)
+        {
+            var list = new List<object>();
+            foreach (var e in entries)
+            {
+                if (e.Integration == null) list.Add(e.Origin);
+                else list.Add(new Dictionary<string, object?> { ["origin"] = e.Origin, ["integration"] = e.Integration });
+            }
+            return list;
+        }
     }
 
     public sealed class UpdateInstanceBody
     {
         /// <summary>Exact origins only — a wildcard or a path is rejected (§13.1).</summary>
         public List<string>? AllowedOrigins { get; set; }
+        /// <summary>Also takes <c>strictRequestBodies</c>, <c>dangerouslyReportSkippedEmailsAsVerified</c> and <c>branding.audiences</c>.</summary>
         public Dictionary<string, object?>? AuthConfig { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/>, written as-is.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name, including one this SDK does not model yet.</summary>
+        public UpdateInstanceBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+
+        /// <summary>Send <c>allowed_origins</c> as entries that may also declare how each origin signs in; replaces <see cref="AllowedOrigins"/>.</summary>
+        public UpdateInstanceBody WithAllowedOriginEntries(IEnumerable<AllowedOriginEntry> entries)
+        {
+            AllowedOrigins = null;
+            return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
+        }
     }
 
     /// <summary><c>PATCH /v1/instance</c> echoes only the mutable fields, not a full Instance.</summary>
@@ -31,6 +93,7 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "instance";
         public string Id { get; init; } = "";
         public List<string> AllowedOrigins { get; init; } = new List<string>();
+        public Dictionary<string, string>? AllowedOriginIntegrations { get; init; }
         public Metadata AuthConfig { get; init; } = new Metadata();
     }
 

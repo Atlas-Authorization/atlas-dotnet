@@ -53,5 +53,22 @@ namespace Atlas.Tests
             bad["Atlas-Signature"] = "v2,abc";
             Assert.Equal("malformed_signature", Verify(Body, bad).Reason);
         }
+    
+        [Fact]
+        public void SeveralSignaturesVerifyWhenOneMatches()
+        {
+            var headers = Sign("evt_1", Now, Body);
+            var fresh = headers["Atlas-Signature"];
+            var stale = Sign("evt_1", Now, Body, "whsec_old_secret")["Atlas-Signature"];
+            foreach (var value in new[] { stale + " " + fresh, fresh + " " + stale, "v2,abc " + fresh })
+            {
+                headers["Atlas-Signature"] = value;
+                Assert.True(Verify(Body, headers).Verified, value);
+            }
+            headers["Atlas-Signature"] = stale + " " + stale;
+            Assert.Equal("signature_mismatch", Verify(Body, headers).Reason);
+            headers["Atlas-Signature"] = "v2,abc v0,def";
+            Assert.Equal("malformed_signature", Verify(Body, headers).Reason);
+        }
     }
 }
