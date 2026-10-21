@@ -213,6 +213,48 @@ namespace Atlas.Resources
         public bool Deleted { get; init; }
     }
 
+    /// <summary>
+    /// The trusted reverse proxy secret's state, never the secret. A proxy that serves the Frontend API from your own origin
+    /// sends the secret in <c>X-Atlas-Proxy-Secret</c> and the browser's IP in <c>X-Atlas-Client-IP</c>; Atlas then uses that
+    /// IP for rate limits, lockout, risk signals, geo, audit logs and session metadata.
+    /// </summary>
+    public class ProxySecret
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "proxy_secret";
+        /// <summary>Whether a proxy secret is set.</summary>
+        public bool Set { get; init; }
+        /// <summary>When the current secret was created (epoch ms), or null.</summary>
+        public long? CreatedAt { get; init; }
+        /// <summary>After a rotation: when the replaced secret stops working (epoch ms), or null.</summary>
+        public long? PreviousExpiresAt { get; init; }
+        /// <summary><c>X-Atlas-Proxy-Secret</c>.</summary>
+        public string SecretHeader { get; init; } = "";
+        /// <summary><c>X-Atlas-Client-IP</c>.</summary>
+        [JsonPropertyName("client_ip_header")] public string ClientIpHeader { get; init; } = "";
+    }
+
+    /// <summary>Create / rotate result: the secret, shown only here.</summary>
+    public sealed class ProxySecretCreated : ProxySecret
+    {
+        /// <summary><c>aps_...</c>, returned once. Store it in your proxy's environment; Atlas keeps only a hash.</summary>
+        public string Secret { get; init; } = "";
+        /// <summary>true when an existing secret was replaced.</summary>
+        public bool Rotated { get; init; }
+    }
+
+    /// <summary>The body of <c>POST /v1/instance/proxy_secret</c>.</summary>
+    public sealed class CreateProxySecretBody
+    {
+        /// <summary>On a rotation: how long the replaced secret keeps working, in seconds. Null uses the default, 86400 (24 hours); 0 stops it now; at most 604800 (7 days).</summary>
+        public int? OverlapSeconds { get; set; }
+    }
+
+    public sealed class ProxySecretDeleted
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "proxy_secret";
+        public bool Deleted { get; init; }
+    }
+
     public sealed class LdapBindPasswordResult
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "ldap_bind_password";
@@ -263,6 +305,21 @@ namespace Atlas.Resources
 
         public Task<KerberosSecretResult> DeleteKerberosSecretAsync(CancellationToken ct = default)
             => Req<KerberosSecretResult>(HttpVerb.Delete, "/v1/instance/kerberos_secret", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/proxy_secret</c> — Whether a trusted reverse proxy secret is set, and since when (never the secret).</summary>
+        public Task<ProxySecret> GetProxySecretAsync(CancellationToken ct = default)
+            => Req<ProxySecret>(HttpVerb.Get, "/v1/instance/proxy_secret", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/instance/proxy_secret</c> — Create, or rotate, the trusted reverse proxy secret; it is returned once. On a
+        /// rotation the replaced secret keeps working for <c>OverlapSeconds</c> (default 86400, 0 stops it now, at most 604800).
+        /// </summary>
+        public Task<ProxySecretCreated> CreateProxySecretAsync(CreateProxySecretBody? body = null, CancellationToken ct = default)
+            => Req<ProxySecretCreated>(HttpVerb.Post, "/v1/instance/proxy_secret", body ?? new CreateProxySecretBody(), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/proxy_secret</c> — Remove the proxy secret: <c>X-Atlas-Client-IP</c> is ignored again.</summary>
+        public Task<ProxySecretDeleted> DeleteProxySecretAsync(CancellationToken ct = default)
+            => Req<ProxySecretDeleted>(HttpVerb.Delete, "/v1/instance/proxy_secret", cancellationToken: ct);
 
         /// <summary>Store an LDAP connection's service-account bind password (connection must already exist).</summary>
         public Task<LdapBindPasswordResult> SetLdapBindPasswordAsync(string connectionId, string bindPassword, CancellationToken ct = default)

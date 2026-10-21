@@ -264,6 +264,12 @@ namespace Atlas.Resources
         public List<string>? WebhookEvents { get; init; }
         /// <summary>false once auto-disabled after repeated failures; null without a webhook.</summary>
         public bool? WebhookActive { get; init; }
+        /// <summary>While a webhook secret rotation overlap is open: when the previous secret stops signing (epoch ms); else null.</summary>
+        public long? WebhookPreviousSecretExpiresAt { get; init; }
+        /// <summary>After a client secret rotation with an overlap: when the previous secret stops working (epoch ms); else null.</summary>
+        public long? PreviousSecretExpiresAt { get; init; }
+        /// <summary>When the current client secret was issued (epoch ms); null for a public app.</summary>
+        public long? SecretIssuedAt { get; init; }
     }
 
     public sealed class AtlasIdAppWithSecret
@@ -297,6 +303,21 @@ namespace Atlas.Resources
         public string? Note { get; init; }
         /// <summary>The per-app webhook signing secret, returned exactly once (first set, or rotated).</summary>
         public string? WebhookSecret { get; init; }
+        /// <summary>While a webhook secret rotation overlap is open: when the previous secret stops signing (epoch ms); else null.</summary>
+        public long? WebhookPreviousSecretExpiresAt { get; init; }
+        /// <summary>After a client secret rotation with an overlap: when the previous secret stops working (epoch ms); else null.</summary>
+        public long? PreviousSecretExpiresAt { get; init; }
+        /// <summary>When the current client secret was issued (epoch ms); null for a public app.</summary>
+        public long? SecretIssuedAt { get; init; }
+        /// <summary>On a rotation: the overlap applied, in seconds.</summary>
+        public int? OverlapSeconds { get; init; }
+    }
+
+    /// <summary>The body of the Sign in with Atlas app rotate calls (client secret and webhook secret).</summary>
+    public sealed class RotateAtlasIdAppSecretBody
+    {
+        /// <summary>How long the previous secret keeps working, in seconds; at most 604800 (7 days). Null uses the default: 86400 (24 hours) for the client secret, 0 (it stops at once) for the webhook secret. 0 stops it now.</summary>
+        public int? OverlapSeconds { get; set; }
     }
 
     public sealed class PlatformAppProvisioned
@@ -444,9 +465,25 @@ namespace Atlas.Resources
     public sealed class PlatformInstanceSecret
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>Never sent by the API; read <see cref="InstanceId"/>.</summary>
+        [System.Obsolete("Never sent by the API; read InstanceId.")]
         public string Id { get; init; } = "";
+        public string AppId { get; init; } = "";
+        public string InstanceId { get; init; } = "";
+        /// <summary>The new secret key, revealed exactly once.</summary>
         public string Secret { get; init; } = "";
+        /// <summary>The overlap applied, in seconds.</summary>
+        public long OverlapSeconds { get; init; }
+        /// <summary>When the prior keys stop working (epoch ms); null on a hard cut.</summary>
+        public long? PreviousKeysExpireAt { get; init; }
         public string Note { get; init; } = "";
+    }
+
+    /// <summary>The body of <c>POST /v1/platform/apps/{id}/instances/{instanceId}/rotate_secret</c>.</summary>
+    public sealed class RotatePlatformSecretBody
+    {
+        /// <summary>How long the prior keys keep working, in seconds. Null uses the default, 259200 (72 hours); 0 revokes them now; at most 604800 (7 days).</summary>
+        public int? OverlapSeconds { get; set; }
     }
 
     public sealed class AccountlessApp
@@ -553,9 +590,13 @@ namespace Atlas.Resources
         public Task<DeletedObject> DeleteAsync(string id, CancellationToken ct = default)
             => Req<DeletedObject>(HttpVerb.Delete, $"/v1/platform/atlas_id_apps/{Enc(id)}", cancellationToken: ct);
 
-        /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/rotate_secret</c> — Rotate a confidential app's client_secret.</summary>
+        /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/rotate_secret</c> — Rotate a confidential app's client_secret; the previous one keeps working for 24 hours.</summary>
         public Task<AtlasIdAppWithSecret> RotateSecretAsync(string id, CancellationToken ct = default)
             => Req<AtlasIdAppWithSecret>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/rotate_secret", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/rotate_secret</c> — Rotate the client_secret with a chosen overlap (default 86400; 0 revokes the previous one now).</summary>
+        public Task<AtlasIdAppWithSecret> RotateSecretAsync(string id, RotateAtlasIdAppSecretBody body, CancellationToken ct = default)
+            => Req<AtlasIdAppWithSecret>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/rotate_secret", body, cancellationToken: ct);
 
         /// <summary><c>GET /v1/platform/atlas_id_apps/{id}/backchannel_deliveries</c> — The app's back-channel logout delivery log, newest first.</summary>
         public Task<CursorPage<BackchannelLogoutDelivery>> ListBackchannelDeliveriesAsync(string id, int? limit = null, string? startingAfter = null, CancellationToken ct = default)
@@ -585,6 +626,13 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/webhook/rotate_secret</c> — Rotate the app's webhook signing secret (returned once).</summary>
         public Task<AtlasIdAppWithSecret> RotateWebhookSecretAsync(string id, CancellationToken ct = default)
             => Req<AtlasIdAppWithSecret>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/webhook/rotate_secret", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/platform/atlas_id_apps/{id}/webhook/rotate_secret</c> — Rotate the webhook signing secret with a chosen
+        /// overlap: the previous secret signs each delivery too until <see cref="AtlasIdAppWithSecret.WebhookPreviousSecretExpiresAt"/>.
+        /// </summary>
+        public Task<AtlasIdAppWithSecret> RotateWebhookSecretAsync(string id, RotateAtlasIdAppSecretBody body, CancellationToken ct = default)
+            => Req<AtlasIdAppWithSecret>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/webhook/rotate_secret", body, cancellationToken: ct);
     }
 
     public sealed class AtlasIdAppPreflight
@@ -733,9 +781,16 @@ namespace Atlas.Resources
         public Task<CursorPage<PlatformApp>> ListInstancesAsync(string id, CancellationToken ct = default)
             => Req<CursorPage<PlatformApp>>(HttpVerb.Get, $"/v1/platform/apps/{Enc(id)}/instances", cancellationToken: ct);
 
-        /// <summary><c>POST /v1/platform/apps/{id}/instances/{instanceId}/rotate_secret</c> — Rotate one specific instance's secret under an owned app: revoke its prior keys and mint a new one, revealed once.</summary>
+        /// <summary><c>POST /v1/platform/apps/{id}/instances/{instanceId}/rotate_secret</c> — Mint a new secret key for one instance under an owned app, revealed once; the prior keys stay valid for the default overlap (72 hours).</summary>
         public Task<PlatformInstanceSecret> RotateInstanceSecretAsync(string id, string instanceId, CancellationToken ct = default)
             => Req<PlatformInstanceSecret>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/instances/{Enc(instanceId)}/rotate_secret", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/platform/apps/{id}/instances/{instanceId}/rotate_secret</c> — Rotate one instance's secret key with a chosen
+        /// overlap: the prior keys stay valid for <c>OverlapSeconds</c> (default 259200, at most 604800; 0 revokes them now).
+        /// </summary>
+        public Task<PlatformInstanceSecret> RotateInstanceSecretAsync(string id, string instanceId, RotatePlatformSecretBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<PlatformInstanceSecret>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/instances/{Enc(instanceId)}/rotate_secret", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
 
         /// <summary><c>POST /v1/platform/accountless_apps</c> — Mint an app owned by no platform and return a one-time claim_token (hashed at rest, single-use, expiring).</summary>
         public Task<AccountlessApp> CreateAccountlessAsync(CreateAccountlessAppBody body, string? idempotencyKey = null, CancellationToken ct = default)

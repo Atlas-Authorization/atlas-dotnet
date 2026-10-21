@@ -222,6 +222,9 @@ PUT /v1/instance/captcha_secret
 DELETE /v1/instance/captcha_secret
 PUT /v1/instance/kerberos_secret
 DELETE /v1/instance/kerberos_secret
+GET /v1/instance/proxy_secret
+POST /v1/instance/proxy_secret
+DELETE /v1/instance/proxy_secret
 PUT /v1/instance/ldap_connections/{connectionId}/bind_password
 DELETE /v1/instance/ldap_connections/{connectionId}/bind_password
 GET /v1/lti_platforms

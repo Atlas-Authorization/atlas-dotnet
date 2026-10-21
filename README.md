@@ -255,6 +255,33 @@ var rotated = await atlas.OAuthClients.RotateSecretAsync(clientId, new RotateOAu
 (`v1,<sig> v1,<sig>`). While an endpoint secret rotates, Atlas may sign each delivery with the old and the new
 secret; the delivery verifies when any one signature matches.
 
+A rotation stops the old secret at once by default. Pass an overlap (at most 7 days) to keep it signing each
+delivery next to the new one while you deploy; choose an overlap only once every receiver accepts several
+signatures:
+
+```csharp
+var rotated = await atlas.Webhooks.Endpoints.RotateSecretAsync(endpointId, new RotateWebhookSecretBody { OverlapSeconds = 3600 });
+// rotated.PreviousSecretExpiresAt says when the old secret stops signing.
+```
+
+### Trusted reverse proxy
+
+If a reverse proxy serves the Frontend API from your own origin, give it a proxy secret. It sends the secret in
+`X-Atlas-Proxy-Secret` and the browser's IP in `X-Atlas-Client-IP`; Atlas then uses that IP for rate limits,
+lockout, risk signals and audit logs.
+
+```csharp
+var created = await atlas.InstanceSecurity.CreateProxySecretAsync();
+// created.Secret is shown once; store it in your proxy's environment.
+var state = await atlas.InstanceSecurity.GetProxySecretAsync(); // Set, CreatedAt, PreviousExpiresAt (never the secret)
+await atlas.InstanceSecurity.CreateProxySecretAsync(new CreateProxySecretBody { OverlapSeconds = 3600 }); // rotate
+await atlas.InstanceSecurity.DeleteProxySecretAsync();
+```
+
+Platform rotations take an overlap too: `Platform.Apps.RotateInstanceSecretAsync(appId, instanceId, new RotatePlatformSecretBody
+{ OverlapSeconds = 0 })` (default 72 hours), `Platform.AtlasIdApps.RotateSecretAsync(id, new RotateAtlasIdAppSecretBody { ... })`
+(default 24 hours) and `Platform.AtlasIdApps.RotateWebhookSecretAsync(id, body)` (default 0).
+
 With a platform key, `Platform.AtlasIdApps.FindUsersAsync(id, email)` answers a privacy request for one app,
 `RevokeGrantAsync(id, grantId)` revokes one person's approval, and `Platform.AtlasIdPublisher` claims and verifies
 the publisher name shown on consent screens.

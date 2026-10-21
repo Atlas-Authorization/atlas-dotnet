@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.7.0 (Atlas.Sdk)
+
+### Added
+
+- **Trusted reverse proxy secret.** `InstanceSecurity.GetProxySecretAsync()` (`ProxySecret`: `Set`, `CreatedAt`,
+  `PreviousExpiresAt`, `SecretHeader`, `ClientIpHeader`), `CreateProxySecretAsync(CreateProxySecretBody?)`
+  (`OverlapSeconds` on a rotation: default 86400, `0` stops the old secret now, at most 604800; returns
+  `ProxySecretCreated` with `Secret`, shown once, and `Rotated`) and `DeleteProxySecretAsync()` (`ProxySecretDeleted`).
+- **Webhook secret rotation with an overlap.** `Webhooks.Endpoints.RotateSecretAsync(id, RotateWebhookSecretBody)`
+  (`OverlapSeconds`, default 0, at most 604800). `WebhookSecret` gains `Warning`, `OverlapSeconds` and
+  `PreviousSecretExpiresAt`; `WebhookEndpoint` gains `PreviousSecretExpiresAt`.
+- **Per-instance platform rotation with an overlap.** `Platform.Apps.RotateInstanceSecretAsync(id, instanceId,
+  RotatePlatformSecretBody, idempotencyKey?)` (`OverlapSeconds`, default 259200, `0` revokes the prior keys now).
+  `PlatformInstanceSecret` gains `AppId`, `InstanceId`, `OverlapSeconds` and `PreviousKeysExpireAt`.
+- **Sign in with Atlas apps.** `Platform.AtlasIdApps.RotateSecretAsync(id, RotateAtlasIdAppSecretBody)` (default
+  24 hours) and `RotateWebhookSecretAsync(id, RotateAtlasIdAppSecretBody)` (default 0). `AtlasIdApp` and
+  `AtlasIdAppWithSecret` gain `PreviousSecretExpiresAt`, `SecretIssuedAt` and `WebhookPreviousSecretExpiresAt`;
+  `AtlasIdAppWithSecret` also gains `OverlapSeconds`.
+
+### Changed
+
+- `PlatformInstanceSecret.Id` is obsolete: the API never sent it; read `InstanceId`.
+- `Platform.Apps.RotateInstanceSecretAsync(id, instanceId)` now keeps the prior keys valid for 72 hours (the
+  server's new default). Pass `new RotatePlatformSecretBody { OverlapSeconds = 0 }` for the old behaviour.
+
 ## 1.6.0 (Atlas.Sdk)
 
 ### Added

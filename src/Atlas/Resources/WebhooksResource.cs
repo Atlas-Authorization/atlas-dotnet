@@ -17,6 +17,8 @@ namespace Atlas.Resources
         public long CreatedAt { get; init; }
         /// <summary>Epoch ms since deliveries started failing, or null while healthy.</summary>
         public long? FailingSince { get; init; }
+        /// <summary>While a secret rotation overlap is open: when the previous secret stops signing deliveries (epoch ms); else null.</summary>
+        public long? PreviousSecretExpiresAt { get; init; }
     }
 
     /// <summary>Create reveals the signing secret (<c>whsec_...</c>) exactly once.</summary>
@@ -121,6 +123,13 @@ namespace Atlas.Resources
         public Task<WebhookSecret> RotateSecretAsync(string id, CancellationToken ct = default)
             => Req<WebhookSecret>(HttpVerb.Post, $"/v1/webhook_endpoints/{Enc(id)}/rotate_secret", cancellationToken: ct);
 
+        /// <summary>
+        /// <c>POST /v1/webhook_endpoints/{id}/rotate_secret</c> — Rotate the signing secret with a chosen overlap: for
+        /// <c>OverlapSeconds</c> every delivery is signed with both secrets, so a verifier holding either passes.
+        /// </summary>
+        public Task<WebhookSecret> RotateSecretAsync(string id, RotateWebhookSecretBody body, CancellationToken ct = default)
+            => Req<WebhookSecret>(HttpVerb.Post, $"/v1/webhook_endpoints/{Enc(id)}/rotate_secret", body, cancellationToken: ct);
+
         /// <summary><c>POST /v1/webhook_endpoints/{id}/test</c> — Send a synthetic webhook.test event to this endpoint only.</summary>
         public Task<WebhookDeliveryQueued> TestAsync(string id, CancellationToken ct = default)
             => Req<WebhookDeliveryQueued>(HttpVerb.Post, $"/v1/webhook_endpoints/{Enc(id)}/test", cancellationToken: ct);
@@ -172,6 +181,19 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         /// <summary>The current whsec_ signing secret.</summary>
         public string Secret { get; init; } = "";
+        /// <summary>On a rotation: what happens to the old secret.</summary>
+        public string? Warning { get; init; }
+        /// <summary>On a rotation: the overlap applied, in seconds.</summary>
+        public int? OverlapSeconds { get; init; }
+        /// <summary>On a rotation: when the previous secret stops signing deliveries (epoch ms), or null when it already has.</summary>
+        public long? PreviousSecretExpiresAt { get; init; }
+    }
+
+    /// <summary>The body of <c>POST /v1/webhook_endpoints/{id}/rotate_secret</c>.</summary>
+    public sealed class RotateWebhookSecretBody
+    {
+        /// <summary>How long the previous secret keeps signing deliveries (as a second <c>atlas-signature</c> entry), in seconds. Null or 0: it stops at once (the default); at most 604800 (7 days). Set it only once every receiver verifies with a verifier that accepts several signatures (1.6.0+).</summary>
+        public int? OverlapSeconds { get; set; }
     }
 
     public sealed class WebhookDeliveryQueued
