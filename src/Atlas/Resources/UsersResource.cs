@@ -25,6 +25,67 @@ namespace Atlas.Resources
         public long UpdatedAt { get; init; }
         /// <summary>Strictly increases with every change to the user; webhook payloads carry the same value. Apply an update only if its version is higher than the one you hold.</summary>
         public long? Version { get; init; }
+        /// <summary>How the user arrived through a referral program, or null (not referred, not answered yet, or referrals off).</summary>
+        public UserReferral? Referral { get; init; }
+        /// <summary>The user's own referral code, when they are a referrer.</summary>
+        public string? ReferralCode { get; init; }
+        /// <summary>The user's own referral link, when they are a referrer.</summary>
+        public string? ReferralLink { get; init; }
+    }
+
+    /// <summary>The inbound referral the referral platform matched for a user.</summary>
+    public sealed class UserReferral
+    {
+        /// <summary>The platform's id for the referring partner.</summary>
+        public string? PartnerId { get; init; }
+        /// <summary>The referrer as the platform knows them (your external id for that user, or their Atlas id).</summary>
+        public string? ReferrerExternalId { get; init; }
+        /// <summary>The referrer's Atlas user id, when they are a user of this instance.</summary>
+        public string? ReferrerUserId { get; init; }
+        /// <summary>How the platform matched the referral, e.g. code, click, coupon.</summary>
+        public string? MatchedVia { get; init; }
+        /// <summary>The platform's own status for the referral.</summary>
+        public string? Status { get; init; }
+        /// <summary>low, medium or high when Atlas assessed the sign-up.</summary>
+        public string? RiskLevel { get; init; }
+        /// <summary>True once an admin marked the referral fraudulent.</summary>
+        public bool Flagged { get; init; }
+    }
+
+    /// <summary>An imported referral on <c>POST /v1/users</c>. Each id is 3-64 characters of <c>A-Z a-z 0-9 _ -</c>.</summary>
+    public sealed class CreateUserReferral
+    {
+        public string? Code { get; set; }
+        public string? ClickId { get; set; }
+        public string? AnonId { get; set; }
+    }
+
+    /// <summary>The result of <c>POST /v1/users/:id/referral/flag</c>.</summary>
+    public sealed class UserReferralFlag
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "user_referral";
+        public string UserId { get; init; } = "";
+        public string Status { get; init; } = "";
+        public bool Flagged { get; init; }
+        public string? FlagReason { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long? FlaggedAt { get; init; }
+        public string? RiskLevel { get; init; }
+    }
+
+    /// <summary>The <c>data</c> of a <c>user.referral_attributed</c> webhook: the referral platform answered after <c>user.created</c> was sent.</summary>
+    public sealed class UserReferralAttributedEvent
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "user_referral";
+        public string UserId { get; init; } = "";
+        /// <summary>attributed, not_referred (no referrer found), failed, ...</summary>
+        public string AttributionStatus { get; init; } = "";
+        public UserReferral? Referral { get; init; }
+        public string? ReferralCode { get; init; }
+        public string? ReferralLink { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long SignedUpAt { get; init; }
+        public long UpdatedAt { get; init; }
     }
 
     public sealed class EmailAddress
@@ -116,6 +177,10 @@ namespace Atlas.Resources
         public Metadata? UnsafeMetadata { get; set; }
         /// <summary><c>false</c> (the default) guarantees no email, SMS or push is sent to the user as a consequence of the create.</summary>
         public bool? Notify { get; set; }
+        /// <summary>Import a referral (how the user arrived); with referral attribution on, the user is reported to the referral platform.</summary>
+        public CreateUserReferral? Referral { get; set; }
+        /// <summary>The user's own referral code, unique per instance (409 <c>REFERRAL_CODE_TAKEN</c>).</summary>
+        public string? ReferralCode { get; set; }
     }
 
     public sealed class UpdateUserBody
@@ -124,6 +189,25 @@ namespace Atlas.Resources
         public string? LastName { get; set; }
         public Metadata? PublicMetadata { get; set; }
         public Metadata? PrivateMetadata { get; set; }
+        /// <summary>The user's own referral code, unique per instance (409 <c>REFERRAL_CODE_TAKEN</c>).</summary>
+        public string? ReferralCode { get; set; }
+
+        /// <summary>Fields set with <see cref="Set"/> or <see cref="ClearReferralCode"/>, written as-is.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name, including an explicit <c>null</c>.</summary>
+        public UpdateUserBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+
+        /// <summary>Remove the user's referral code (sends <c>"referral_code": null</c>).</summary>
+        public UpdateUserBody ClearReferralCode()
+        {
+            ReferralCode = null;
+            return Set("referral_code", null);
+        }
     }
 
     public sealed class ReplaceUserMetadataBody
@@ -243,6 +327,15 @@ namespace Atlas.Resources
 
         public Task<User> UnlockAsync(string id, CancellationToken ct = default)
             => Req<User>(HttpVerb.Post, $"/v1/users/{Enc(id)}/unlock", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/users/:id/referral/flag</c> — mark the user's referral fraudulent. The referral reads <c>Flagged</c>,
+        /// the referral platform is sent a <c>fraud_confirmed</c> signal (when referrals are on) and the action is audited;
+        /// the account is not changed. 404 when the user has no referral. <paramref name="reason"/> (at most 500
+        /// characters) is sent to the platform.
+        /// </summary>
+        public Task<UserReferralFlag> FlagReferralAsync(string id, string? reason = null, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<UserReferralFlag>(HttpVerb.Post, $"/v1/users/{Enc(id)}/referral/flag", Body(("reason", reason)), idempotencyKey: idempotencyKey, cancellationToken: ct);
 
         public Task<DeletedObject> DeleteAsync(string id, CancellationToken ct = default)
             => Req<DeletedObject>(HttpVerb.Delete, $"/v1/users/{Enc(id)}", cancellationToken: ct);

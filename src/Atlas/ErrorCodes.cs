@@ -53,6 +53,10 @@ namespace Atlas
         public const string DevelopmentEmailLimitReached = "DEVELOPMENT_EMAIL_LIMIT_REACHED";
         /// <summary>The development sender sends only Atlas's own sign-in emails (422).</summary>
         public const string DevelopmentEmailTemplateNotAllowed = "DEVELOPMENT_EMAIL_TEMPLATE_NOT_ALLOWED";
+        /// <summary>Referrals cannot be enabled until the provider's needs are set (422; <c>meta</c> names what is missing).</summary>
+        public const string ReferralsNotConfigured = "REFERRALS_NOT_CONFIGURED";
+        /// <summary>Another user on the instance already holds that referral code (409).</summary>
+        public const string ReferralCodeTaken = "REFERRAL_CODE_TAKEN";
         /// <summary>A billing plan cannot be changed or removed while subscriptions use it.</summary>
         public const string PlanInUse = "PLAN_IN_USE";
         public const string LastAdmin = "LAST_ADMIN";

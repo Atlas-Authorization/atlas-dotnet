@@ -25,6 +25,7 @@ DELETE /v1/users/{id}/directives
 POST /v1/users/{id}/unban
 POST /v1/users/{id}/lock
 POST /v1/users/{id}/unlock
+POST /v1/users/{id}/referral/flag
 POST /v1/users/{id}/reset_mfa
 DELETE /v1/users/{id}/mfa/{factorId}
 DELETE /v1/users/{id}/passkeys/{passkeyId}
@@ -225,6 +226,11 @@ DELETE /v1/instance/kerberos_secret
 GET /v1/instance/proxy_secret
 POST /v1/instance/proxy_secret
 DELETE /v1/instance/proxy_secret
+GET /v1/instance/referrals
+PATCH /v1/instance/referrals
+POST /v1/instance/referrals/test
+GET /v1/instance/referrals/calls
+POST /v1/instance/referrals/calls/{id}/retry
 PUT /v1/instance/ldap_connections/{connectionId}/bind_password
 DELETE /v1/instance/ldap_connections/{connectionId}/bind_password
 GET /v1/lti_platforms

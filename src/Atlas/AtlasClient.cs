@@ -89,6 +89,7 @@ namespace Atlas
             LtiPlatforms = new LtiPlatformsResource(transport);
             Instance = new InstanceResource(transport);
             InstanceSecurity = new InstanceSecurityResource(transport);
+            Referrals = new ReferralsResource(transport);
             Tokens = new TokensResource(transport);
             Design = new DesignResource(transport);
             Platform = new PlatformResource(platformTransport);
@@ -180,6 +181,8 @@ namespace Atlas
         public LtiPlatformsResource LtiPlatforms { get; }
         public InstanceResource Instance { get; }
         public InstanceSecurityResource InstanceSecurity { get; }
+        /// <summary>Referral attribution: the instance's referral platform connection, connection test and call log.</summary>
+        public ReferralsResource Referrals { get; }
         public TokensResource Tokens { get; }
         public DesignResource Design { get; }
         public PlatformResource Platform { get; }

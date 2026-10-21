@@ -286,6 +286,31 @@ With a platform key, `Platform.AtlasIdApps.FindUsersAsync(id, email)` answers a 
 `RevokeGrantAsync(id, grantId)` revokes one person's approval, and `Platform.AtlasIdPublisher` claims and verifies
 the publisher name shown on consent screens.
 
+### Referral attribution
+
+With referral attribution on, Atlas reports every interactive sign-up to your referral platform before
+`user.created` is sent. `User` gains `Referral` (who referred them, or null), `ReferralCode` and `ReferralLink`.
+
+```csharp
+await atlas.Referrals.UpdateAsync(new UpdateReferralSettingsBody
+{
+    Enabled = true,
+    Provider = "webhook", // the Atlas referral protocol; or a built-in vendor adapter
+    EndpointUrl = "https://referrals.example.com/atlas",
+    SigningSecret = Environment.GetEnvironmentVariable("REFERRAL_SIGNING_SECRET"),
+    Security = new UpdateReferralSecurityBody { OnHighRisk = "hold" },
+}.Clear("link_template")); // sent as null
+var test = await atlas.Referrals.TestAsync(); // Ok, HttpStatus, LatencyMs, Error
+var failed = await atlas.Referrals.ListCallsAsync(limit: 20, status: "failed");
+await atlas.Referrals.RetryCallAsync(failed.Data[0].Id);
+
+await atlas.Users.UpdateAsync("user_123", new UpdateUserBody { ReferralCode = "ada-1" }); // 409 REFERRAL_CODE_TAKEN if held
+await atlas.Users.FlagReferralAsync("user_123", "self-referral");
+```
+
+Enabling without what the provider needs is `422 REFERRALS_NOT_CONFIGURED`. A late answer from the platform arrives
+as the `user.referral_attributed` webhook (`UserReferralAttributedEvent`).
+
 ### API key spend caps
 
 Give an end-user API key caps in your own units, then meter what your API consumed

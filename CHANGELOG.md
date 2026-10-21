@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.8.0 (Atlas.Sdk)
+
+### Added
+
+- **Referral attribution settings.** New `Referrals` namespace: `GetAsync()` and `UpdateAsync(UpdateReferralSettingsBody,
+  idempotencyKey)` (`GET`/`PATCH /v1/instance/referrals`; `ReferralSettings` with `Connection`, `Providers` and
+  `Security` as `ReferralSecuritySettings`; `UpdateReferralSecurityBody` on write; `Clear(key)` sends a nullable field
+  as null), `TestAsync()` (`ReferralConnectionTest`), `ListCallsAsync(limit, status, kind, userId)` (`ReferralCall`,
+  `ReferralRisk`) and `RetryCallAsync(id, idempotencyKey)`.
+- **Users.** `User` gains `Referral` (`UserReferral`: `PartnerId`, `ReferrerExternalId`, `ReferrerUserId`,
+  `MatchedVia`, `Status`, `RiskLevel`, `Flagged`), `ReferralCode` and `ReferralLink`. `CreateUserBody` gains
+  `Referral` (`CreateUserReferral`: `Code`, `ClickId`, `AnonId`) and `ReferralCode`; `UpdateUserBody` gains
+  `ReferralCode`, `ClearReferralCode()` and `Set(key, value)`. New `Users.FlagReferralAsync(id, reason,
+  idempotencyKey)` (`UserReferralFlag`).
+- **Webhooks.** `UserReferralAttributedEvent` types the `data` of the new `user.referral_attributed` event.
+- **Error codes.** `ErrorCodes.ReferralsNotConfigured` (422) and `ErrorCodes.ReferralCodeTaken` (409). Preflight can
+  report `referrals_enabled_unverified` and `referrals_without_bot_protection`.
+
 ## 1.7.0 (Atlas.Sdk)
 
 ### Added
