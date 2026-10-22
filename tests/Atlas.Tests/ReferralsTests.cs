@@ -184,6 +184,38 @@ namespace Atlas.Tests
             }
         }
 
+        [Fact]
+        public async Task BrowserCaptureFields()
+        {
+            var handler = MockHttpMessageHandler.Json("{\"object\":\"referral_settings\",\"enabled\":true,\"provider\":\"dub\",\"signing_secret_set\":false,\"api_key_set\":true,"
+                + "\"url_params\":[\"ref\"],\"browser_sources\":[\"rewardful\",\"dub\"],\"browser_sources_default\":false,\"consent_provider\":\"onetrust\",\"providers\":[]}");
+            using var client = Client(handler);
+            var view = await client.Referrals.GetAsync();
+            Assert.Equal(new System.Collections.Generic.List<string> { "rewardful", "dub" }, view.BrowserSources);
+            Assert.False(view.BrowserSourcesDefault);
+            Assert.Equal("onetrust", view.ConsentProvider);
+
+            await client.Referrals.UpdateAsync(new UpdateReferralSettingsBody
+            {
+                BrowserSources = new System.Collections.Generic.List<string> { "rewardful", "dub" },
+                ConsentProvider = "app",
+            });
+            using (var doc = JsonDocument.Parse(handler.Requests[1].Body))
+            {
+                var root = doc.RootElement;
+                Assert.Equal(2, root.GetProperty("browser_sources").GetArrayLength());
+                Assert.Equal("dub", root.GetProperty("browser_sources")[1].GetString());
+                Assert.Equal("app", root.GetProperty("consent_provider").GetString());
+                Assert.False(root.TryGetProperty("inbound_secret", out _));
+            }
+
+            await client.Referrals.UpdateAsync(new UpdateReferralSettingsBody().Clear("browser_sources"));
+            using (var doc = JsonDocument.Parse(handler.Requests[2].Body))
+            {
+                Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("browser_sources").ValueKind);
+            }
+        }
+
             [Fact]
         public async Task V2_SettingsFields_PingTest_AndCallPaging()
         {

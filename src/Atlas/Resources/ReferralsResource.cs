@@ -171,6 +171,19 @@ namespace Atlas.Resources
         public string? CodeLookupUrl { get; init; }
         /// <summary>Show an optional "Referral code" field on hosted sign-up.</summary>
         public bool SignupCodeField { get; init; }
+        /// <summary>
+        /// The referral programs whose script or cookie the browser reads, in order (<c>referally</c>, <c>rewardful</c>,
+        /// <c>tolt</c>, <c>promotekit</c>, <c>firstpromoter</c>, <c>partnerstack</c>, <c>dub</c>); the provider's default unless set.
+        /// </summary>
+        public List<string>? BrowserSources { get; init; }
+        /// <summary>Whether <c>BrowserSources</c> is the provider's default.</summary>
+        public bool BrowserSourcesDefault { get; init; }
+        /// <summary>
+        /// Which consent manager decides on the tracking cookie's ids: <c>auto</c> (any common one), one manager
+        /// (<c>cookiemunch</c>, <c>onetrust</c>, <c>cookiebot</c>, <c>didomi</c>, <c>usercentrics</c>, <c>osano</c>, <c>cookieyes</c>,
+        /// <c>complianz</c>, <c>klaro</c>, <c>tcf</c>, <c>consent_mode</c>), or <c>app</c> (only the app's own decision).
+        /// </summary>
+        public string? ConsentProvider { get; init; }
         /// <summary>Forward email, name and suspension changes to the platform (default true).</summary>
         public bool ForwardLifecycle { get; init; }
         /// <summary>Mirror the result into <c>public_metadata.referral</c> (default false).</summary>
@@ -225,6 +238,10 @@ namespace Atlas.Resources
         /// <summary>An https URL template containing <c>{code}</c>.</summary>
         public string? CodeLookupUrl { get; set; }
         public bool? SignupCodeField { get; set; }
+        /// <summary>The programs to read, in order; <c>Clear("browser_sources")</c> goes back to the provider's default.</summary>
+        public List<string>? BrowserSources { get; set; }
+        /// <summary><c>auto</c>, one consent manager, or <c>app</c>.</summary>
+        public string? ConsentProvider { get; set; }
         public bool? ForwardLifecycle { get; set; }
         public bool? MirrorToPublicMetadata { get; set; }
         public bool? IncludeReferralClaims { get; set; }
@@ -243,7 +260,7 @@ namespace Atlas.Resources
         /// Clear a nullable field by its wire name (<c>endpoint_url</c>, <c>program_id</c>, <c>connection_id</c>,
         /// <c>signing_secret</c>, <c>api_key</c>, <c>inbound_secret</c>, <c>inbound_endpoint_id</c>,
         /// <c>context_cookie</c>, <c>consent_fallback_category</c>,
-        /// <c>link_template</c>, <c>tracking_token</c>, <c>code_lookup_url</c>): it is sent as <c>null</c>.
+        /// <c>link_template</c>, <c>tracking_token</c>, <c>code_lookup_url</c>, <c>browser_sources</c>): it is sent as <c>null</c>.
         /// </summary>
         public UpdateReferralSettingsBody Clear(string key) => Set(key, null);
     }

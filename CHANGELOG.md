@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.0 (Atlas.Sdk)
+
+### Added
+
+- Referral settings carry browser capture: `browser_sources` (the referral programs whose script or cookie the browser reads; null on update resets to the provider's default), `browser_sources_default`, and `consent_provider` (`auto`, one consent manager, or `app`).
+
 ## 1.10.0 (Atlas.Sdk)
 
 ### Added
