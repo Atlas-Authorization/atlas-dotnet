@@ -26,6 +26,7 @@ POST /v1/users/{id}/unban
 POST /v1/users/{id}/lock
 POST /v1/users/{id}/unlock
 POST /v1/users/{id}/referral/flag
+GET /v1/users/{id}/referral
 POST /v1/users/{id}/reset_mfa
 DELETE /v1/users/{id}/mfa/{factorId}
 DELETE /v1/users/{id}/passkeys/{passkeyId}
@@ -231,6 +232,13 @@ PATCH /v1/instance/referrals
 POST /v1/instance/referrals/test
 GET /v1/instance/referrals/calls
 POST /v1/instance/referrals/calls/{id}/retry
+POST /v1/instance/referrals/calls/retry_failed
+POST /v1/instance/referrals/simulate
+POST /v1/instance/referrals/backfill
+GET /v1/instance/referrals/backfill/{id}
+GET /v1/instance/hooks/before_user_create
+PATCH /v1/instance/hooks/before_user_create
+POST /v1/instance/hooks/before_user_create/test
 PUT /v1/instance/ldap_connections/{connectionId}/bind_password
 DELETE /v1/instance/ldap_connections/{connectionId}/bind_password
 GET /v1/lti_platforms

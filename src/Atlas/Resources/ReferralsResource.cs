@@ -14,16 +14,22 @@ namespace Atlas.Resources
         public bool Partner { get; init; }
         public bool AutoEnroll { get; init; }
         public bool Signal { get; init; }
+        /// <summary>Re-keys a customer whose external id changed after sign-up.</summary>
+        public bool Alias { get; init; }
+        /// <summary>Takes user lifecycle updates (email, name, suspension).</summary>
+        public bool User { get; init; }
+        /// <summary>Answers a ping for the connection test (org, program, clock).</summary>
+        public bool Ping { get; init; }
     }
 
     /// <summary>A referral provider Atlas supports.</summary>
     public sealed class ReferralProvider
     {
-        /// <summary><c>webhook</c> (the Atlas referral protocol) or a vendor adapter id.</summary>
+        /// <summary><c>webhook</c> (the Atlas referral protocol), <c>referally</c> or another vendor adapter id.</summary>
         public string Id { get; init; } = "";
         public string Name { get; init; } = "";
         public ReferralProviderCapabilities Capabilities { get; init; } = new ReferralProviderCapabilities();
-        /// <summary>What must be set before <c>enabled</c> can be true: endpoint_url, signing_secret, api_key, connection_id.</summary>
+        /// <summary>What must be set before <c>enabled</c> can be true: endpoint_url, signing_secret, api_key, connection_id, tracking_token.</summary>
         public List<string> Needs { get; init; } = new List<string>();
         public string? DefaultContextCookie { get; init; }
         public string? DocsUrl { get; init; }
@@ -61,10 +67,50 @@ namespace Atlas.Resources
         public string? Error { get; init; }
     }
 
+    /// <summary>What a referral platform answered to a ping (the connection test, where supported).</summary>
+    public sealed class ReferralPing
+    {
+        public bool Ok { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long? At { get; init; }
+        public int? HttpStatus { get; init; }
+        /// <summary>e.g. signature_rejected, connection_paused, timeout, network_error, ping_not_ok.</summary>
+        public string? ErrorCode { get; init; }
+        public string? Error { get; init; }
+        public int? LatencyMs { get; init; }
+        public string? ConnectionId { get; init; }
+        public string? ProgramId { get; init; }
+        public string? ProgramName { get; init; }
+        public string? OrgName { get; init; }
+        /// <summary>The platform connection's own auto-enrol setting.</summary>
+        public bool? AutoEnrollUsers { get; init; }
+        /// <summary>The platform's clock, as it reported it.</summary>
+        public string? ServerTime { get; init; }
+        /// <summary>The platform's clock minus Atlas's, in ms. Signed calls fail past 5 minutes.</summary>
+        public long? ClockSkewMs { get; init; }
+        /// <summary>True when the skew is over 60 seconds.</summary>
+        public bool ClockSkewWarning { get; init; }
+    }
+
+    /// <summary>Delivery is blocked on something only a person can fix. Show it as a banner.</summary>
+    public sealed class ReferralAlert
+    {
+        /// <summary><c>signature_rejected</c> (the platform answered 401: a rotated secret or clock skew) or <c>connection_paused</c>.</summary>
+        public string Code { get; init; } = "";
+        public string Message { get; init; } = "";
+        /// <summary>Epoch ms.</summary>
+        public long At { get; init; }
+        public string? CallId { get; init; }
+    }
+
     /// <summary>The connection's health.</summary>
     public sealed class ReferralConnectionStatus
     {
         public ReferralLastTest? LastTest { get; init; }
+        /// <summary>The last ping, when the provider answers one.</summary>
+        public ReferralPing? LastPing { get; init; }
+        /// <summary>Set while delivery is blocked on something only a person can fix.</summary>
+        public ReferralAlert? Alert { get; init; }
         /// <summary>Calls that failed permanently in the last 7 days.</summary>
         [JsonPropertyName("failed_calls_7d")] public int FailedCalls7d { get; init; }
         /// <summary>Calls waiting for a retry.</summary>
@@ -77,7 +123,7 @@ namespace Atlas.Resources
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_settings";
         public bool Enabled { get; init; }
-        /// <summary><c>webhook</c> (the Atlas referral protocol) or a built-in vendor adapter id.</summary>
+        /// <summary><c>webhook</c> (the Atlas referral protocol), <c>referally</c> or another built-in vendor adapter id.</summary>
         public string Provider { get; init; } = "";
         public string? EndpointUrl { get; init; }
         public string? ProgramId { get; init; }
@@ -94,6 +140,18 @@ namespace Atlas.Resources
         public string? LinkTemplate { get; init; }
         public int TimeoutMs { get; init; }
         public ReferralSecuritySettings Security { get; init; } = new ReferralSecuritySettings();
+        /// <summary>Public tracking token (the <c>referally</c> provider derives the code lookup from it). Not a secret.</summary>
+        public string? TrackingToken { get; init; }
+        /// <summary>Public, CORS-enabled URL template with <c>{code}</c> for "X invited you" on hosted sign-up.</summary>
+        public string? CodeLookupUrl { get; init; }
+        /// <summary>Show an optional "Referral code" field on hosted sign-up.</summary>
+        public bool SignupCodeField { get; init; }
+        /// <summary>Forward email, name and suspension changes to the platform (default true).</summary>
+        public bool ForwardLifecycle { get; init; }
+        /// <summary>Mirror the result into <c>public_metadata.referral</c> (default false).</summary>
+        public bool MirrorToPublicMetadata { get; init; }
+        /// <summary>Add the user's own code as a <c>referral_code</c> claim to session and ID tokens (default false).</summary>
+        public bool IncludeReferralClaims { get; init; }
         /// <summary>What the chosen provider still needs before referrals can be enabled.</summary>
         public List<string>? Missing { get; init; }
         public ReferralConnectionStatus? Connection { get; init; }
@@ -128,6 +186,14 @@ namespace Atlas.Resources
         /// <summary>100-5000.</summary>
         public int? TimeoutMs { get; set; }
         public UpdateReferralSecurityBody? Security { get; set; }
+        /// <summary>1-128 of <c>A-Z a-z 0-9 _ -</c>.</summary>
+        public string? TrackingToken { get; set; }
+        /// <summary>An https URL template containing <c>{code}</c>.</summary>
+        public string? CodeLookupUrl { get; set; }
+        public bool? SignupCodeField { get; set; }
+        public bool? ForwardLifecycle { get; set; }
+        public bool? MirrorToPublicMetadata { get; set; }
+        public bool? IncludeReferralClaims { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/> or <see cref="Clear"/>, written as-is.</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -142,7 +208,7 @@ namespace Atlas.Resources
         /// <summary>
         /// Clear a nullable field by its wire name (<c>endpoint_url</c>, <c>program_id</c>, <c>connection_id</c>,
         /// <c>signing_secret</c>, <c>api_key</c>, <c>context_cookie</c>, <c>consent_fallback_category</c>,
-        /// <c>link_template</c>): it is sent as <c>null</c>.
+        /// <c>link_template</c>, <c>tracking_token</c>, <c>code_lookup_url</c>): it is sent as <c>null</c>.
         /// </summary>
         public UpdateReferralSettingsBody Clear(string key) => Set(key, null);
     }
@@ -155,13 +221,141 @@ namespace Atlas.Resources
         public string Message { get; init; } = "";
     }
 
-    /// <summary><c>POST /v1/instance/referrals/test</c>: ok on 2xx or 404 from the platform.</summary>
+    /// <summary>
+    /// <c>POST /v1/instance/referrals/test</c>: a ping where the provider answers one (<see cref="Method"/> ping), else a
+    /// signed probe (ok on 2xx or 404 from the platform).
+    /// </summary>
     public sealed class ReferralConnectionTest
     {
         public bool Ok { get; init; }
         public int? HttpStatus { get; init; }
         public int? LatencyMs { get; init; }
         public ReferralTestError? Error { get; init; }
+        /// <summary><c>ping</c> or <c>probe</c>.</summary>
+        public string? Method { get; init; }
+        /// <summary>The ping answer, when the provider supports ping.</summary>
+        public ReferralPing? Ping { get; init; }
+        /// <summary>e.g. a clock more than 60 seconds off.</summary>
+        public List<string>? Warnings { get; init; }
+    }
+
+    /// <summary>The matched referral in a <see cref="ReferralSimulateResult"/>.</summary>
+    public sealed class ReferralSimulationMatch
+    {
+        public string? PartnerId { get; init; }
+        public string? PartnerExternalRef { get; init; }
+        public string? MatchedVia { get; init; }
+        public string? Status { get; init; }
+    }
+
+    /// <summary>The made-up user's own partner record, when the platform enrolled them.</summary>
+    public sealed class ReferralSimulationPartner
+    {
+        public string? Id { get; init; }
+        public string? Code { get; init; }
+        public string? Link { get; init; }
+    }
+
+    /// <summary>The platform's answer to a simulation, normalised.</summary>
+    public sealed class ReferralSimulationResult
+    {
+        public ReferralSimulationMatch? Referral { get; init; }
+        public ReferralSimulationPartner? Partner { get; init; }
+        public List<string> Notes { get; init; } = new List<string>();
+    }
+
+    /// <summary><c>POST /v1/instance/referrals/simulate</c>: a sign-up call for a made-up user. No user is created.</summary>
+    public sealed class ReferralSimulateResult
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_simulation";
+        public bool Ok { get; init; }
+        /// <summary>The logged call, in the delivery log.</summary>
+        public string? CallId { get; init; }
+        /// <summary><c>atlas_test_&lt;random&gt;</c>.</summary>
+        public string CustomerRef { get; init; } = "";
+        public int? HttpStatus { get; init; }
+        public int? LatencyMs { get; init; }
+        /// <summary>The platform's answer, normalised; null when the call failed.</summary>
+        public ReferralSimulationResult? Result { get; init; }
+        /// <summary>The platform's raw answer, personal fields removed.</summary>
+        public Dictionary<string, object?>? Response { get; init; }
+        public ReferralTestError? Error { get; init; }
+    }
+
+    /// <summary><c>POST /v1/instance/referrals/calls/retry_failed</c>.</summary>
+    public sealed class ReferralRetryFailedResult
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_retry";
+        /// <summary>How many failed calls were queued to send now.</summary>
+        public int Requeued { get; init; }
+    }
+
+    /// <summary>Body of <c>POST /v1/instance/referrals/backfill</c>.</summary>
+    public sealed class ReferralBackfillBody
+    {
+        /// <summary>ISO 8601 date or date-time: users created at or after it. Required.</summary>
+        public string Since { get; set; } = "";
+        /// <summary>customerRef (external id or user id) to referral code, up to 10,000. Wins over <see cref="CodeMetadataPath"/>.</summary>
+        public Dictionary<string, string>? Codes { get; set; }
+        /// <summary>Where each user keeps the code they arrived with, e.g. <c>public_metadata.referral_code</c>.</summary>
+        public string? CodeMetadataPath { get; set; }
+    }
+
+    /// <summary>Where a backfill's queued calls stand.</summary>
+    public sealed class ReferralBackfillCalls
+    {
+        public int Pending { get; init; }
+        public int Succeeded { get; init; }
+        public int Failed { get; init; }
+        public int Skipped { get; init; }
+        public int Held { get; init; }
+    }
+
+    /// <summary>A referral backfill job. Users already reported are skipped.</summary>
+    public sealed class ReferralBackfillJob
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_backfill";
+        public string Id { get; init; } = "";
+        /// <summary><c>running</c> while any queued call is still to be sent, then <c>completed</c>.</summary>
+        public string Status { get; init; } = "";
+        /// <summary>Epoch ms.</summary>
+        public long Since { get; init; }
+        public string? CodeMetadataPath { get; init; }
+        /// <summary>How many codes were given in <c>codes</c>.</summary>
+        public int? CodesGiven { get; init; }
+        public int UsersScanned { get; init; }
+        /// <summary>Already reported, or no code while auto-enrol is off.</summary>
+        public int UsersSkipped { get; init; }
+        public int CallsQueued { get; init; }
+        /// <summary>More users matched than one backfill takes: run again from <see cref="NextSince"/>.</summary>
+        public bool Truncated { get; init; }
+        /// <summary>Epoch ms, when truncated.</summary>
+        public long? NextSince { get; init; }
+        public ReferralBackfillCalls Calls { get; init; } = new ReferralBackfillCalls();
+        public long CreatedAt { get; init; }
+        public long? FinishedAt { get; init; }
+    }
+
+    /// <summary>Filters for <see cref="ReferralsResource.ListCallsAsync(ListReferralCallsQuery, CancellationToken)"/>. Null filters are omitted.</summary>
+    public sealed class ListReferralCallsQuery
+    {
+        /// <summary>1-1000 (default 50; servers before referral attribution v2 take at most 200), newest first.</summary>
+        public int? Limit { get; set; }
+        public string? Status { get; set; }
+        public string? Kind { get; set; }
+        public string? UserId { get; set; }
+        /// <summary>Only calls whose last failure had this code, e.g. <c>signature_rejected</c>.</summary>
+        public string? ErrorCode { get; set; }
+        /// <summary>The id of the last call of the previous page.</summary>
+        public string? StartingAfter { get; set; }
+    }
+
+    /// <summary>How the platform matched a sign-up's referral, and its notes.</summary>
+    public sealed class ReferralCallHighlights
+    {
+        public string? MatchedVia { get; init; }
+        public string? PartnerExternalRef { get; init; }
+        public List<string> Notes { get; init; } = new List<string>();
     }
 
     /// <summary>The risk verdict sent with a sign-up (camelCase on the wire, as on the referral protocol).</summary>
@@ -184,7 +378,7 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_call";
         /// <summary>Also the signed <c>atlas-id</c> header of every attempt.</summary>
         public string Id { get; init; } = "";
-        /// <summary>signup, erase, export, partner, signal or test.</summary>
+        /// <summary>signup, erase, export, partner, signal, alias, user, ping or test.</summary>
         public string Kind { get; init; } = "";
         /// <summary>pending, succeeded, retrying, failed, held or skipped.</summary>
         public string Status { get; init; } = "";
@@ -202,13 +396,29 @@ namespace Atlas.Resources
         public Dictionary<string, object?>? Payload { get; init; }
         public long CreatedAt { get; init; }
         public long? UpdatedAt { get; init; }
+        /// <summary>Round trip of the last attempt, in ms.</summary>
+        public int? LatencyMs { get; init; }
+        /// <summary>
+        /// Why the last attempt failed, e.g. signature_rejected (401, not retried), connection_paused (not retried),
+        /// rate_limited, timeout, network_error, alias_conflict, http_&lt;status&gt;.
+        /// </summary>
+        public string? ErrorCode { get; init; }
+        /// <summary>The platform's last answer, personal fields removed.</summary>
+        public Dictionary<string, object?>? Response { get; init; }
+        /// <summary>Sign-up calls: how the platform matched the referral and why.</summary>
+        public ReferralCallHighlights? Highlights { get; init; }
+        /// <summary>The platform's request id for its last answer.</summary>
+        public string? RequestId { get; init; }
+        /// <summary>The backfill job that queued the call.</summary>
+        public string? BatchId { get; init; }
     }
 
     /// <summary>
     /// The referral attribution namespace (<c>/v1/instance/referrals</c>): the instance's connection to a referral
     /// platform, the connection test and the call log. With referrals on, every interactive sign-up is reported to the
     /// platform before <c>user.created</c> is sent; the answer lands on the user (<c>Referral</c>, <c>ReferralCode</c>,
-    /// <c>ReferralLink</c>). A late answer arrives as the <c>user.referral_attributed</c> webhook.
+    /// <c>ReferralLink</c>). A late answer arrives as the <c>user.referral_resolved</c> webhook, whose <c>data</c> is the
+    /// full <see cref="User"/> (and <c>user.referral_attributed</c> when it attributes the user).
     /// </summary>
     public sealed class ReferralsResource : ResourceBase
     {
@@ -222,13 +432,18 @@ namespace Atlas.Resources
         public Task<ReferralSettings> UpdateAsync(UpdateReferralSettingsBody body, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<ReferralSettings>(HttpVerb.Patch, "/v1/instance/referrals", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
 
-        /// <summary><c>POST /v1/instance/referrals/test</c> — a signed probe: ok on 2xx or 404; <c>signature_rejected</c> on 401/403.</summary>
+        /// <summary>
+        /// <c>POST /v1/instance/referrals/test</c> — a ping where the provider answers one (<c>Method</c> ping, with
+        /// <c>Ping</c> and <c>Warnings</c> such as clock skew), else a signed probe (ok on 2xx or 404);
+        /// <c>signature_rejected</c> on 401/403.
+        /// </summary>
         public Task<ReferralConnectionTest> TestAsync(CancellationToken ct = default)
             => Req<ReferralConnectionTest>(HttpVerb.Post, "/v1/instance/referrals/test", cancellationToken: ct);
 
         /// <summary>
         /// <c>GET /v1/instance/referrals/calls</c> — the call log, newest first. Filters may be null: <paramref name="limit"/>
-        /// 1-200 (default 50), <paramref name="status"/>, <paramref name="kind"/>, <paramref name="userId"/>.
+        /// 1-1000 (default 50), <paramref name="status"/>, <paramref name="kind"/>, <paramref name="userId"/>. For
+        /// <c>error_code</c> and <c>starting_after</c> paging, pass a <see cref="ListReferralCallsQuery"/>.
         /// </summary>
         public Task<ListPage<ReferralCall>> ListCallsAsync(int? limit = null, string? status = null, string? kind = null, string? userId = null, CancellationToken ct = default)
             => Req<ListPage<ReferralCall>>(HttpVerb.Get, "/v1/instance/referrals/calls",
@@ -237,5 +452,49 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/instance/referrals/calls/:id/retry</c> — retry a failed, retrying or skipped call now.</summary>
         public Task<ReferralCall> RetryCallAsync(string id, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<ReferralCall>(HttpVerb.Post, $"/v1/instance/referrals/calls/{Enc(id)}/retry", idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary>
+        /// <c>GET /v1/instance/referrals/calls</c> — the call log with every filter, including <c>ErrorCode</c> and
+        /// <c>StartingAfter</c> (the id of the last call of the previous page, while <c>HasMore</c>).
+        /// </summary>
+        public Task<ListPage<ReferralCall>> ListCallsAsync(ListReferralCallsQuery query, CancellationToken ct = default)
+            => Req<ListPage<ReferralCall>>(HttpVerb.Get, "/v1/instance/referrals/calls",
+                query: Q(("limit", query.Limit), ("status", query.Status), ("kind", query.Kind), ("user_id", query.UserId),
+                    ("error_code", query.ErrorCode), ("starting_after", query.StartingAfter)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/instance/referrals/calls/retry_failed</c> — re-queue every failed call (not tests) to send now.
+        /// Filters may be null: <paramref name="kind"/>, <paramref name="errorCode"/> (e.g. signature_rejected after
+        /// replacing the secret).
+        /// </summary>
+        public Task<ReferralRetryFailedResult> RetryFailedAsync(string? kind = null, string? errorCode = null, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<ReferralRetryFailedResult>(HttpVerb.Post, "/v1/instance/referrals/calls/retry_failed", Body(("kind", kind), ("error_code", errorCode)),
+                idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/instance/referrals/simulate</c> — send a sign-up call for a made-up user (<c>atlas_test_&lt;random&gt;</c>;
+        /// no user is created) with an optional code, and return what the platform answered.
+        /// </summary>
+        public Task<ReferralSimulateResult> SimulateAsync(string? code = null, CancellationToken ct = default)
+            => Req<ReferralSimulateResult>(HttpVerb.Post, "/v1/instance/referrals/simulate", Body(("code", code)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/instance/referrals/backfill</c> — queue sign-up calls for existing users created at or after
+        /// <c>Since</c>, with their real sign-up time. Users already reported are skipped. Referrals must be on (422
+        /// <c>REFERRALS_NOT_CONFIGURED</c> otherwise). Poll <see cref="GetBackfillAsync"/>.
+        /// </summary>
+        public Task<ReferralBackfillJob> BackfillAsync(ReferralBackfillBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<ReferralBackfillJob>(HttpVerb.Post, "/v1/instance/referrals/backfill", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/referrals/backfill/:id</c> — a backfill job and where its calls stand.</summary>
+        public Task<ReferralBackfillJob> GetBackfillAsync(string id, CancellationToken ct = default)
+            => Req<ReferralBackfillJob>(HttpVerb.Get, $"/v1/instance/referrals/backfill/{Enc(id)}", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>GET /v1/users/:id/referral</c> — the stored result for one user (who referred them, how, their own code),
+        /// with no call to the platform. 404 when the user was never reported.
+        /// </summary>
+        public Task<UserReferralResult> GetForUserAsync(string userId, CancellationToken ct = default)
+            => Req<UserReferralResult>(HttpVerb.Get, $"/v1/users/{Enc(userId)}/referral", cancellationToken: ct);
     }
 }

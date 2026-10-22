@@ -289,13 +289,15 @@ the publisher name shown on consent screens.
 ### Referral attribution
 
 With referral attribution on, Atlas reports every interactive sign-up to your referral platform before
-`user.created` is sent. `User` gains `Referral` (who referred them, or null), `ReferralCode` and `ReferralLink`.
+`user.created` is sent. `User` gains `Referral` (where attribution stands and, once attributed, who referred them;
+null when never reported), `ReferralCode` and `ReferralLink`. `Referral.Status` is `pending`, `attributed`, `none`,
+`failed`, `held` or `flagged`; the platform's own status is `Referral.ReferralStatus`.
 
 ```csharp
 await atlas.Referrals.UpdateAsync(new UpdateReferralSettingsBody
 {
     Enabled = true,
-    Provider = "webhook", // the Atlas referral protocol; or a built-in vendor adapter
+    Provider = "webhook", // the Atlas referral protocol; or "referally" or another built-in adapter
     EndpointUrl = "https://referrals.example.com/atlas",
     SigningSecret = Environment.GetEnvironmentVariable("REFERRAL_SIGNING_SECRET"),
     Security = new UpdateReferralSecurityBody { OnHighRisk = "hold" },
@@ -306,10 +308,34 @@ await atlas.Referrals.RetryCallAsync(failed.Data[0].Id);
 
 await atlas.Users.UpdateAsync("user_123", new UpdateUserBody { ReferralCode = "ada-1" }); // 409 REFERRAL_CODE_TAKEN if held
 await atlas.Users.FlagReferralAsync("user_123", "self-referral");
+
+await atlas.Referrals.SimulateAsync("ACME10");                          // a made-up user; nothing is stored
+await atlas.Referrals.RetryFailedAsync(errorCode: "signature_rejected"); // after pasting the new secret
+await atlas.Referrals.ListCallsAsync(new ListReferralCallsQuery { Limit = 1000, ErrorCode = "timeout", StartingAfter = "rfc_123" });
+var job = await atlas.Referrals.BackfillAsync(new ReferralBackfillBody { Since = "2026-01-01", CodeMetadataPath = "public_metadata.referral_code" });
+await atlas.Referrals.GetBackfillAsync(job.Id);                         // running, then completed
+await atlas.Referrals.GetForUserAsync("user_123");                      // the stored result, no call to the platform
+await atlas.Users.SetExternalIdAsync("user_123", "cust_42");            // forwarded to the platform as an alias
 ```
 
-Enabling without what the provider needs is `422 REFERRALS_NOT_CONFIGURED`. A late answer from the platform arrives
-as the `user.referral_attributed` webhook (`UserReferralAttributedEvent`).
+Enabling without what the provider needs is `422 REFERRALS_NOT_CONFIGURED`. When the platform has not answered by the
+time `user.created` is sent, `Referral.Status` is `pending` and the `user.referral_resolved` webhook follows; its `data`
+is the full user (deserialize it as `User`), with `attributed`, `none` or `failed`. `user.referral_attributed`
+(`UserReferralAttributedEvent`) still fires for a late attribution.
+
+To give each user your own id before the first referral call, turn on the `before_user_create` hook. Atlas then sends
+your endpoint a signed `POST` (verify it like a webhook) of type `user.before_create` for every self-service sign-up,
+and stamps the `external_id` and metadata you answer:
+
+```csharp
+await atlas.UserHooks.UpdateBeforeUserCreateAsync(new UpdateBeforeUserCreateHookBody
+{
+    Enabled = true,
+    Url = "https://app.example.com/hooks/before-create",
+    SigningSecret = Environment.GetEnvironmentVariable("BEFORE_CREATE_SECRET"),
+});
+var tested = await atlas.UserHooks.TestBeforeUserCreateAsync(); // Ok, Answer, Error
+```
 
 ### API key spend caps
 

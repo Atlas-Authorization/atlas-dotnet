@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.9.0 (Atlas.Sdk)
+
+### Added
+
+- **Referral attribution v2.** `Referrals.RetryFailedAsync(kind, errorCode, idempotencyKey)`
+  (`POST /v1/instance/referrals/calls/retry_failed`, `ReferralRetryFailedResult` with `Requeued`),
+  `Referrals.SimulateAsync(code)` (`POST /v1/instance/referrals/simulate`, `ReferralSimulateResult`: `CallId`,
+  `CustomerRef`, `Result`, `Response`), `Referrals.BackfillAsync(ReferralBackfillBody, idempotencyKey)` and
+  `Referrals.GetBackfillAsync(id)` (`POST /v1/instance/referrals/backfill`, `GET /v1/instance/referrals/backfill/{id}`;
+  `ReferralBackfillBody`: `Since`, `Codes`, `CodeMetadataPath`; `ReferralBackfillJob`: `UsersScanned`, `UsersSkipped`,
+  `CallsQueued`, `Truncated`, `NextSince`, `Calls`), and `Referrals.GetForUserAsync(userId)`
+  (`GET /v1/users/{id}/referral`, `UserReferralResult`).
+- **Settings.** `ReferralSettings` gains `TrackingToken`, `CodeLookupUrl`, `SignupCodeField`, `ForwardLifecycle`,
+  `MirrorToPublicMetadata` and `IncludeReferralClaims`; `UpdateReferralSettingsBody` gains the same (`Clear` takes
+  `tracking_token` and `code_lookup_url`). `Provider` can be `referally`. `ReferralProviderCapabilities` gains `Alias`,
+  `User` and `Ping`. `ReferralConnectionStatus` gains `LastPing` (`ReferralPing`) and `Alert` (`ReferralAlert`:
+  `signature_rejected` or `connection_paused`). `ReferralConnectionTest` gains `Method` (`ping` or `probe`), `Ping` and
+  `Warnings`.
+- **Call log.** New `ListCallsAsync(ListReferralCallsQuery)` with `ErrorCode` and `StartingAfter`; `Limit` goes up to
+  1000. `ReferralCall.Kind` adds `alias`, `user` and `ping`; calls gain `LatencyMs`, `ErrorCode`, `Response`,
+  `Highlights` (`ReferralCallHighlights`), `RequestId` and `BatchId`.
+- **Users.** `Users.SetExternalIdAsync(id, externalId)` (`PATCH /v1/users/{id}`; null clears; with referrals on, the
+  change is forwarded to the platform as an alias). `UpdateUserBody` gains `ExternalId` and `ClearExternalId()`;
+  `User` gains `ExternalId`. `UserReferral` gains `PartnerExternalRef`, `ReferralStatus` and `Notes`. The new
+  `user.referral_resolved` webhook carries the full user as `data` (deserialize it as `User`).
+- **before_user_create hook.** New `UserHooks` namespace: `GetBeforeUserCreateAsync()`,
+  `UpdateBeforeUserCreateAsync(UpdateBeforeUserCreateHookBody, idempotencyKey)` and `TestBeforeUserCreateAsync()`
+  (`/v1/instance/hooks/before_user_create`; `BeforeUserCreateHook`, `BeforeUserCreateHookTest`). The hook call is
+  signed like a webhook with type `user.before_create`.
+- **Preflight** can report `referrals_secret_invalid`, `referrals_program_inactive`, `referrals_unreachable`,
+  `referrals_clock_skew` and `referrals_external_id_unset`.
+
+### Changed
+
+- On the server, `User.Referral.Status` is now where attribution stands (`pending`, `attributed`, `none`, `failed`,
+  `held`, `flagged`); the platform's own status moved to `ReferralStatus`. `user.created` carries `status: "pending"`
+  while the platform has not answered.
+
 ## 1.8.0 (Atlas.Sdk)
 
 ### Added

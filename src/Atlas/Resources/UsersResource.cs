@@ -15,6 +15,8 @@ namespace Atlas.Resources
         public string? FirstName { get; init; }
         public string? LastName { get; init; }
         public string? ImageUrl { get; init; }
+        /// <summary>Your own id for the user, if set (<see cref="UsersResource.SetExternalIdAsync"/>).</summary>
+        public string? ExternalId { get; init; }
         public Metadata PublicMetadata { get; init; } = new Metadata();
         public bool MfaEnabled { get; init; }
         public bool Banned { get; init; }
@@ -25,7 +27,7 @@ namespace Atlas.Resources
         public long UpdatedAt { get; init; }
         /// <summary>Strictly increases with every change to the user; webhook payloads carry the same value. Apply an update only if its version is higher than the one you hold.</summary>
         public long? Version { get; init; }
-        /// <summary>How the user arrived through a referral program, or null (not referred, not answered yet, or referrals off).</summary>
+        /// <summary>Where the user's referral stands, or null when the user was never reported to the referral platform.</summary>
         public UserReferral? Referral { get; init; }
         /// <summary>The user's own referral code, when they are a referrer.</summary>
         public string? ReferralCode { get; init; }
@@ -33,7 +35,7 @@ namespace Atlas.Resources
         public string? ReferralLink { get; init; }
     }
 
-    /// <summary>The inbound referral the referral platform matched for a user.</summary>
+    /// <summary>Where a user's inbound referral stands and, once attributed, who referred them.</summary>
     public sealed class UserReferral
     {
         /// <summary>The platform's id for the referring partner.</summary>
@@ -44,8 +46,18 @@ namespace Atlas.Resources
         public string? ReferrerUserId { get; init; }
         /// <summary>How the platform matched the referral, e.g. code, click, coupon.</summary>
         public string? MatchedVia { get; init; }
-        /// <summary>The platform's own status for the referral.</summary>
+        /// <summary>
+        /// Where attribution stands: pending (the platform has not answered yet), attributed, none, failed, held or
+        /// flagged. Servers before referral attribution v2 sent the platform's own status here; that is now
+        /// <see cref="ReferralStatus"/>.
+        /// </summary>
         public string? Status { get; init; }
+        /// <summary>The referrer as the platform knows them (same value as <see cref="ReferrerExternalId"/>).</summary>
+        public string? PartnerExternalRef { get; init; }
+        /// <summary>The platform's own status for the referral, e.g. active.</summary>
+        public string? ReferralStatus { get; init; }
+        /// <summary>The platform's reasoning notes (why it matched, or why not).</summary>
+        public List<string>? Notes { get; init; }
         /// <summary>low, medium or high when Atlas assessed the sign-up.</summary>
         public string? RiskLevel { get; init; }
         /// <summary>True once an admin marked the referral fraudulent.</summary>
@@ -83,6 +95,40 @@ namespace Atlas.Resources
         public UserReferral? Referral { get; init; }
         public string? ReferralCode { get; init; }
         public string? ReferralLink { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long SignedUpAt { get; init; }
+        public long UpdatedAt { get; init; }
+    }
+
+    /// <summary>
+    /// <c>GET /v1/users/:id/referral</c>: the stored result of a user's referral calls, with no call to the platform.
+    /// 404 when the user was never reported.
+    /// </summary>
+    public sealed class UserReferralResult
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "user_referral";
+        public string UserId { get; init; } = "";
+        /// <summary>pending, attributed, none, failed, held or flagged.</summary>
+        public string Status { get; init; } = "";
+        /// <summary>The id the platform knows the user by: their external id, else the Atlas user id.</summary>
+        public string CustomerRef { get; init; } = "";
+        public string? PartnerId { get; init; }
+        /// <summary>The referrer as the platform knows them.</summary>
+        public string? PartnerExternalRef { get; init; }
+        public string? ReferrerUserId { get; init; }
+        public string? MatchedVia { get; init; }
+        /// <summary>The platform's own status for the referral.</summary>
+        public string? ReferralStatus { get; init; }
+        /// <summary>The platform's reasoning notes.</summary>
+        public List<string> Notes { get; init; } = new List<string>();
+        public string? ReferralCode { get; init; }
+        public string? ReferralLink { get; init; }
+        /// <summary>The referral captured at sign-up, as sent (camelCase).</summary>
+        public Dictionary<string, object?>? Context { get; init; }
+        public string? RiskLevel { get; init; }
+        public bool Flagged { get; init; }
+        /// <summary>Why the sign-up report is held, while held.</summary>
+        public string? HoldReason { get; init; }
         /// <summary>Epoch ms.</summary>
         public long SignedUpAt { get; init; }
         public long UpdatedAt { get; init; }
@@ -191,6 +237,11 @@ namespace Atlas.Resources
         public Metadata? PrivateMetadata { get; set; }
         /// <summary>The user's own referral code, unique per instance (409 <c>REFERRAL_CODE_TAKEN</c>).</summary>
         public string? ReferralCode { get; set; }
+        /// <summary>
+        /// Your own id for the user. With referral attribution on, a change after sign-up is forwarded to the referral
+        /// platform as an alias.
+        /// </summary>
+        public string? ExternalId { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/> or <see cref="ClearReferralCode"/>, written as-is.</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -200,6 +251,13 @@ namespace Atlas.Resources
         {
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
+        }
+
+        /// <summary>Remove the user's external id (sends <c>"external_id": null</c>).</summary>
+        public UpdateUserBody ClearExternalId()
+        {
+            ExternalId = null;
+            return Set("external_id", null);
         }
 
         /// <summary>Remove the user's referral code (sends <c>"referral_code": null</c>).</summary>
@@ -310,6 +368,13 @@ namespace Atlas.Resources
 
         public Task<User> UpdateAsync(string id, UpdateUserBody body, CancellationToken ct = default)
             => Req<User>(HttpVerb.Patch, $"/v1/users/{Enc(id)}", body, cancellationToken: ct);
+
+        /// <summary>
+        /// <c>PATCH /v1/users/:id</c> — set (or clear with null) the user's external id. With referral attribution on,
+        /// Atlas forwards the change to the referral platform as an alias (old id, or the Atlas user id, to the new one).
+        /// </summary>
+        public Task<User> SetExternalIdAsync(string id, string? externalId, CancellationToken ct = default)
+            => Req<User>(HttpVerb.Patch, $"/v1/users/{Enc(id)}", new Dictionary<string, object?> { ["external_id"] = externalId }, cancellationToken: ct);
 
         /// <summary><c>PUT /v1/users/:id/metadata</c> — replaces the named bags wholesale.</summary>
         public Task<User> ReplaceMetadataAsync(string id, ReplaceUserMetadataBody body, CancellationToken ct = default)

@@ -90,6 +90,7 @@ namespace Atlas
             Instance = new InstanceResource(transport);
             InstanceSecurity = new InstanceSecurityResource(transport);
             Referrals = new ReferralsResource(transport);
+            UserHooks = new UserHooksResource(transport);
             Tokens = new TokensResource(transport);
             Design = new DesignResource(transport);
             Platform = new PlatformResource(platformTransport);
@@ -183,6 +184,8 @@ namespace Atlas
         public InstanceSecurityResource InstanceSecurity { get; }
         /// <summary>Referral attribution: the instance's referral platform connection, connection test and call log.</summary>
         public ReferralsResource Referrals { get; }
+        /// <summary>The <c>before_user_create</c> hook: settings and a test call.</summary>
+        public UserHooksResource UserHooks { get; }
         public TokensResource Tokens { get; }
         public DesignResource Design { get; }
         public PlatformResource Platform { get; }
