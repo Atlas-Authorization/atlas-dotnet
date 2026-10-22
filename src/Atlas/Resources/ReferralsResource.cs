@@ -20,6 +20,8 @@ namespace Atlas.Resources
         public bool User { get; init; }
         /// <summary>Answers a ping for the connection test (org, program, clock).</summary>
         public bool Ping { get; init; }
+        /// <summary>Sends referral changes made after sign-up to Atlas (two-way sync).</summary>
+        public bool Inbound { get; init; }
     }
 
     /// <summary>A referral provider Atlas supports.</summary>
@@ -118,7 +120,30 @@ namespace Atlas.Resources
         public long? LastSuccessAt { get; init; }
     }
 
-    /// <summary><c>GET /v1/instance/referrals</c>. Secrets are never returned, only <c>SigningSecretSet</c> / <c>ApiKeySet</c>.</summary>
+    /// <summary>The latest event a platform sent to the inbound URL.</summary>
+    public sealed class ReferralInboundEvent
+    {
+        /// <summary>When Atlas received it (epoch ms).</summary>
+        public long At { get; init; }
+        public string Type { get; init; } = "";
+        /// <summary><c>applied</c>, <c>unchanged</c>, <c>stale</c>, <c>unknown_customer</c>, <c>other_program</c> or <c>ignored</c>.</summary>
+        public string Outcome { get; init; } = "";
+    }
+
+    /// <summary>Two-way sync: where the platform sends referral changes made after sign-up, and the latest one received.</summary>
+    public sealed class ReferralInboundStatus
+    {
+        /// <summary>Give this URL to the platform; null when the provider sends no events.</summary>
+        public string? Url { get; init; }
+        /// <summary>Whether an inbound secret is stored (the value is never returned).</summary>
+        public bool SecretSet { get; init; }
+        /// <summary>The platform's id for Atlas's event subscription, kept for reference.</summary>
+        public string? EndpointId { get; init; }
+        /// <summary>The latest event received, or null.</summary>
+        public ReferralInboundEvent? LastEvent { get; init; }
+    }
+
+    /// <summary><c>GET /v1/instance/referrals</c>. Secrets are never returned, only <c>SigningSecretSet</c> / <c>ApiKeySet</c> / <c>Inbound.SecretSet</c>.</summary>
     public sealed class ReferralSettings
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_settings";
@@ -155,6 +180,8 @@ namespace Atlas.Resources
         /// <summary>What the chosen provider still needs before referrals can be enabled.</summary>
         public List<string>? Missing { get; init; }
         public ReferralConnectionStatus? Connection { get; init; }
+        /// <summary>Two-way sync: the URL the platform sends referral changes to, and the latest one received.</summary>
+        public ReferralInboundStatus? Inbound { get; init; }
         public List<ReferralProvider> Providers { get; init; } = new List<ReferralProvider>();
         public long? UpdatedAt { get; init; }
     }
@@ -176,6 +203,13 @@ namespace Atlas.Resources
         public string? SigningSecret { get; set; }
         /// <summary>Write-only vendor API key.</summary>
         public string? ApiKey { get; set; }
+        /// <summary>
+        /// Write-only, 16-512 characters: verifies the platform's events to <c>inbound.url</c> (two-way sync).
+        /// Optional for the Atlas referral protocol (the signing secret is used when unset).
+        /// </summary>
+        public string? InboundSecret { get; set; }
+        /// <summary>The platform's id for Atlas's event subscription, kept for reference.</summary>
+        public string? InboundEndpointId { get; set; }
         public List<string>? UrlParams { get; set; }
         public string? ContextCookie { get; set; }
         public string? ConsentCategory { get; set; }
@@ -207,7 +241,8 @@ namespace Atlas.Resources
 
         /// <summary>
         /// Clear a nullable field by its wire name (<c>endpoint_url</c>, <c>program_id</c>, <c>connection_id</c>,
-        /// <c>signing_secret</c>, <c>api_key</c>, <c>context_cookie</c>, <c>consent_fallback_category</c>,
+        /// <c>signing_secret</c>, <c>api_key</c>, <c>inbound_secret</c>, <c>inbound_endpoint_id</c>,
+        /// <c>context_cookie</c>, <c>consent_fallback_category</c>,
         /// <c>link_template</c>, <c>tracking_token</c>, <c>code_lookup_url</c>): it is sent as <c>null</c>.
         /// </summary>
         public UpdateReferralSettingsBody Clear(string key) => Set(key, null);

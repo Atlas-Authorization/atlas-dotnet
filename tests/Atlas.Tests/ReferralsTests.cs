@@ -143,6 +143,47 @@ namespace Atlas.Tests
             Assert.Equal(ErrorCodes.ReferralCodeTaken, e.Code);
             Assert.Equal("REFERRALS_NOT_CONFIGURED", ErrorCodes.ReferralsNotConfigured);
         }
+        [Fact]
+        public async Task Inbound_TwoWaySyncFields()
+        {
+            var handler = MockHttpMessageHandler.Json("{\"object\":\"referral_settings\",\"enabled\":true,\"provider\":\"webhook\",\"signing_secret_set\":true,\"api_key_set\":false,"
+                + "\"url_params\":[\"ref\"],"
+                + "\"inbound\":{\"url\":\"https://api.example.test/v1/webhooks/referrals/ins_1\",\"secret_set\":true,\"endpoint_id\":\"we_1\","
+                + "\"last_event\":{\"at\":1700000000000,\"type\":\"referral.updated\",\"outcome\":\"applied\"}},"
+                + "\"providers\":[{\"id\":\"webhook\",\"capabilities\":{\"signup\":true,\"erase\":true,\"export\":true,\"partner\":true,\"auto_enroll\":true,\"signal\":true,\"inbound\":true},"
+                + "\"needs\":[\"endpoint_url\",\"signing_secret\"]}]}");
+            using var client = Client(handler);
+            var view = await client.Referrals.GetAsync();
+            Assert.Equal("https://api.example.test/v1/webhooks/referrals/ins_1", view.Inbound!.Url);
+            Assert.True(view.Inbound.SecretSet);
+            Assert.Equal("we_1", view.Inbound.EndpointId);
+            Assert.Equal(1700000000000L, view.Inbound.LastEvent!.At);
+            Assert.Equal("referral.updated", view.Inbound.LastEvent.Type);
+            Assert.Equal("applied", view.Inbound.LastEvent.Outcome);
+            Assert.True(view.Providers[0].Capabilities.Inbound);
+
+            await client.Referrals.UpdateAsync(new UpdateReferralSettingsBody
+            {
+                InboundSecret = "whsec_" + new string('y', 32),
+                InboundEndpointId = "we_1",
+            });
+            using (var doc = JsonDocument.Parse(handler.Requests[1].Body))
+            {
+                var root = doc.RootElement;
+                Assert.Equal("whsec_" + new string('y', 32), root.GetProperty("inbound_secret").GetString());
+                Assert.Equal("we_1", root.GetProperty("inbound_endpoint_id").GetString());
+                Assert.False(root.TryGetProperty("signing_secret", out _));
+            }
+
+            await client.Referrals.UpdateAsync(new UpdateReferralSettingsBody().Clear("inbound_secret").Clear("inbound_endpoint_id"));
+            using (var doc = JsonDocument.Parse(handler.Requests[2].Body))
+            {
+                var root = doc.RootElement;
+                Assert.Equal(JsonValueKind.Null, root.GetProperty("inbound_secret").ValueKind);
+                Assert.Equal(JsonValueKind.Null, root.GetProperty("inbound_endpoint_id").ValueKind);
+            }
+        }
+
             [Fact]
         public async Task V2_SettingsFields_PingTest_AndCallPaging()
         {
