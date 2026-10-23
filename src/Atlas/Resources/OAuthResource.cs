@@ -32,6 +32,15 @@ namespace Atlas.Resources
         public bool SkipLogoutConfirmation { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
+        /// <summary>Every OAuth flow for the client is refused while true.</summary>
+        public bool Disabled { get; init; }
+        /// <summary>PKCE is required for this confidential client too.</summary>
+        public bool RequirePkce { get; init; }
+        /// <summary><c>public</c> (sub = the user id) or <c>pairwise</c> (a per-sector sub).</summary>
+        public string? SubjectType { get; init; }
+        public string? SectorIdentifierUri { get; init; }
+        /// <summary>When the current secret stops authenticating (epoch ms); null = never.</summary>
+        public long? ClientSecretExpiresAt { get; init; }
     }
 
     /// <summary>Create/rotate reveal the secret exactly once, alongside the client.</summary>
@@ -99,6 +108,12 @@ namespace Atlas.Resources
         /// 422 <c>VALIDATION_FAILED</c> (param <c>skip_logout_confirmation</c>).
         /// </summary>
         public bool? SkipLogoutConfirmation { get; set; }
+        /// <summary>Lifetime of the issued secret (reported as <c>client_secret_expires_at</c>); null = never expires.</summary>
+        public long? SecretExpiresInSeconds { get; set; }
+        /// <summary><c>public</c> (default) or <c>pairwise</c>.</summary>
+        public string? SubjectType { get; set; }
+        /// <summary>An https URL listing every redirect_uri; required for a pairwise client spanning hosts.</summary>
+        public string? SectorIdentifierUri { get; set; }
     }
 
     public sealed class UpdateOAuthClientBody
@@ -116,6 +131,16 @@ namespace Atlas.Resources
         /// 422 <c>VALIDATION_FAILED</c> (param <c>skip_logout_confirmation</c>).
         /// </summary>
         public bool? SkipLogoutConfirmation { get; set; }
+        /// <summary>Lifetime of the issued secret (reported as <c>client_secret_expires_at</c>); null = never expires.</summary>
+        public long? SecretExpiresInSeconds { get; set; }
+        /// <summary><c>public</c> (default) or <c>pairwise</c>.</summary>
+        public string? SubjectType { get; set; }
+        /// <summary>An https URL listing every redirect_uri; required for a pairwise client spanning hosts.</summary>
+        public string? SectorIdentifierUri { get; set; }
+        /// <summary>Refuse (true) or re-allow (false) every OAuth flow for the client.</summary>
+        public bool? Disabled { get; set; }
+        /// <summary>Require PKCE for this confidential client too.</summary>
+        public bool? RequirePkce { get; set; }
     }
 
     public sealed class DeleteOAuthClientResult
@@ -260,6 +285,8 @@ namespace Atlas.Resources
         public string SigningAlg { get; init; } = "";
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
+        /// <summary>Atlas serves the RFC 9728 protected-resource metadata document for this API.</summary>
+        public bool PublishResourceMetadata { get; init; }
     }
 
     public sealed class CreateResourceServerBody
@@ -270,6 +297,8 @@ namespace Atlas.Resources
         public List<object>? Scopes { get; set; }
         public int? TokenTtlSeconds { get; set; }
         public string? SigningAlg { get; set; }
+        /// <summary>Serve the RFC 9728 protected-resource metadata document for this API.</summary>
+        public bool? PublishResourceMetadata { get; set; }
     }
 
     public sealed class UpdateResourceServerBody
@@ -280,6 +309,8 @@ namespace Atlas.Resources
         public string? SigningAlg { get; set; }
         /// <summary>Immutable — supplying a different value is rejected.</summary>
         public string? Identifier { get; set; }
+        /// <summary>Serve the RFC 9728 protected-resource metadata document for this API.</summary>
+        public bool? PublishResourceMetadata { get; set; }
     }
 
     public sealed class DeletedResourceServer

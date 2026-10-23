@@ -90,7 +90,7 @@ namespace Atlas.Verification
                 {
                     // Pinned. Without this, a token whose header says `alg: none` — or
                     // any algorithm the key material can be coerced into — verifies.
-                    ValidAlgorithms = new[] { "RS256" },
+                    ValidAlgorithms = SigningAlgs.All,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKeys = signingKeys,
                     ValidateIssuer = true,

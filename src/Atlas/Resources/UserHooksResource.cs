@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -95,5 +96,10 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/instance/hooks/before_user_create/test</c> — send the hook a sample draft; nothing is stored.</summary>
         public Task<BeforeUserCreateHookTest> TestBeforeUserCreateAsync(CancellationToken ct = default)
             => Req<BeforeUserCreateHookTest>(HttpVerb.Post, Path + "/test", cancellationToken: ct);
+
+        /// <summary>The hook's delivery log, newest first (kept 30 days). <paramref name="status"/>: ok, failed, timeout, error or invalid_response.</summary>
+        public Task<JsonElement> ListBeforeUserCreateCallsAsync(int? limit = null, string? status = null, bool? test = null, string? startingAfter = null, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, "/v1/instance/hooks/before_user_create/calls",
+                query: Q(("limit", limit), ("status", status), ("test", test), ("starting_after", startingAfter)), cancellationToken: ct);
     }
 }

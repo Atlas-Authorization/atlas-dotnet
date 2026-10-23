@@ -25,6 +25,16 @@ namespace Atlas.Verification
         [JsonPropertyName("org_slug")] public string? OrgSlug { get; init; }
         [JsonPropertyName("org_role")] public string? OrgRole { get; init; }
         [JsonPropertyName("org_permissions")] public List<string>? OrgPermissions { get; init; }
+        /// <summary>The user's instance-wide app roles (<c>app_roles</c>).</summary>
+        [JsonPropertyName("app_roles")] public List<string>? AppRoles { get; init; }
+        /// <summary>The union of the user's app roles' permissions (<c>app_permissions</c>).</summary>
+        [JsonPropertyName("app_permissions")] public List<string>? AppPermissions { get; init; }
+
+        /// <summary>Whether the user holds the app role (no active organization needed).</summary>
+        public bool HasAppRole(string role) => AppRoles != null && AppRoles.Contains(role);
+
+        /// <summary>Whether the user's app roles grant the permission (no active organization needed).</summary>
+        public bool HasAppPermission(string permission) => AppPermissions != null && AppPermissions.Contains(permission);
 
         /// <summary>Every claim without a named member above (incl. <c>token_use</c>, <c>aud</c>).</summary>
         [JsonExtensionData] public Dictionary<string, JsonElement> Extra { get; init; } = new Dictionary<string, JsonElement>();

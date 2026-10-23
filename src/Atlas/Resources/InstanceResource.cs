@@ -328,6 +328,15 @@ namespace Atlas.Resources
 
         public Task<LdapBindPasswordResult> DeleteLdapBindPasswordAsync(string connectionId, CancellationToken ct = default)
             => Req<LdapBindPasswordResult>(HttpVerb.Delete, $"/v1/instance/ldap_connections/{Enc(connectionId)}/bind_password", cancellationToken: ct);
+
+        /// <summary>The published token-signing keys: <c>current</c> and, inside a rotation's grace window, <c>previous</c>.</summary>
+        public Task<JsonElement> ListSigningKeysAsync(CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, "/v1/instance/signing_keys", cancellationToken: ct);
+
+        /// <summary>Rotate the instance signing key, optionally switching <paramref name="alg"/> (RS256 or ES256).</summary>
+        public Task<JsonElement> RotateSigningKeyAsync(string? alg = null, long? gracePeriodSeconds = null, bool? emergency = null, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Post, "/v1/instance/signing_keys/rotate",
+                body: Body(("alg", alg), ("grace_period_seconds", gracePeriodSeconds), ("emergency", emergency)), cancellationToken: ct);
     }
 
     public sealed class CookieConsentBody

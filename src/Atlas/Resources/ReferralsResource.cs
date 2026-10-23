@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -548,5 +549,9 @@ namespace Atlas.Resources
         /// </summary>
         public Task<UserReferralResult> GetForUserAsync(string userId, CancellationToken ct = default)
             => Req<UserReferralResult>(HttpVerb.Get, $"/v1/users/{Enc(userId)}/referral", cancellationToken: ct);
+
+        /// <summary>One call of the delivery log, by its id or the platform's request id.</summary>
+        public Task<JsonElement> GetCallAsync(string id, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, $"/v1/instance/referrals/calls/{Enc(id)}", cancellationToken: ct);
     }
 }

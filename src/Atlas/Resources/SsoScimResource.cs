@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -174,6 +175,13 @@ namespace Atlas.Resources
 
         public Task<RevokedObject> RevokeAsync(string id, CancellationToken ct = default)
             => Req<RevokedObject>(HttpVerb.Post, $"/v1/scim_tokens/{Enc(id)}/revoke", cancellationToken: ct);
+
+        /// <summary>
+        /// Change a SCIM token's <c>name</c>, <c>scopes</c> (<c>["read"]</c> = read-only) or <c>role_mappings</c>
+        /// (<c>[{value, role}]</c>). The secret is unchanged.
+        /// </summary>
+        public Task<JsonElement> UpdateAsync(string id, Dictionary<string, object?> body, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Patch, $"/v1/scim_tokens/{Enc(id)}", body, cancellationToken: ct);
     }
 
     // ---------------- SSO onboarding (self-service) ----------------

@@ -289,6 +289,10 @@ namespace Atlas.Resources
 
         public Task<RevokeOrgInvitationResult> RevokeAsync(string orgId, string invitationId, CancellationToken ct = default)
             => Req<RevokeOrgInvitationResult>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/invitations/{Enc(invitationId)}/revoke", cancellationToken: ct);
+
+        /// <summary>Resend a pending invitation: same id and role, a fresh expiry.</summary>
+        public Task<JsonElement> ResendAsync(string orgId, string invitationId, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/invitations/{Enc(invitationId)}/resend", cancellationToken: ct);
     }
 
     /// <summary>Nested organization-domains namespace.</summary>
@@ -331,12 +335,26 @@ namespace Atlas.Resources
             Invitations = new OrganizationInvitationsResource(transport);
             Domains = new OrganizationDomainsResource(transport);
             GroupRoles = new OrganizationGroupRolesResource(transport);
+            Teams = new OrganizationTeamsResource(transport);
+            Roles = new OrganizationRolesResource(transport);
         }
 
         public OrganizationMembershipsResource Memberships { get; }
         public OrganizationInvitationsResource Invitations { get; }
         public OrganizationDomainsResource Domains { get; }
         public OrganizationGroupRolesResource GroupRoles { get; }
+        /// <summary>Teams inside an organization.</summary>
+        public OrganizationTeamsResource Teams { get; }
+        /// <summary>The roles an organization can assign, and its own custom roles.</summary>
+        public OrganizationRolesResource Roles { get; }
+
+        /// <summary>Fetch an organization by slug (case-insensitive).</summary>
+        public Task<Organization> GetBySlugAsync(string slug, CancellationToken ct = default)
+            => Req<Organization>(HttpVerb.Get, $"/v1/organizations/by_slug/{Enc(slug)}", cancellationToken: ct);
+
+        /// <summary>Whether a slug is valid and free: <c>{ slug, valid, available }</c>.</summary>
+        public Task<JsonElement> CheckSlugAsync(string slug, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, "/v1/organizations/check_slug", query: Q(("slug", slug)), cancellationToken: ct);
 
         public Task<CursorPage<Organization>> ListAsync(CursorParams? @params = null, CancellationToken ct = default)
             => Req<CursorPage<Organization>>(HttpVerb.Get, "/v1/organizations", query: (@params ?? new CursorParams()).ToQuery(), cancellationToken: ct);

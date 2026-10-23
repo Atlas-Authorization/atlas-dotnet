@@ -24,6 +24,13 @@ namespace Atlas.Resources
         public List<ApiKeyLimit>? Limits { get; init; }
         /// <summary>Each cap with its current-window usage (empty when the key has no caps).</summary>
         public List<ApiKeyLimitState> Usage { get; init; } = new List<ApiKeyLimitState>();
+        /// <summary>False for a disabled key (it verifies as invalid until re-enabled).</summary>
+        public bool? Enabled { get; init; }
+        /// <summary>The per-key verify throttle, or null.</summary>
+        public ApiKeyRateLimit? RateLimit { get; init; }
+        /// <summary>Uses left (each successful verify spends one); null = unlimited.</summary>
+        public long? Remaining { get; init; }
+        public List<string>? Scopes { get; init; }
     }
 
     /// <summary>The mint response: the key plus its secret, revealed exactly once.</summary>
@@ -58,6 +65,23 @@ namespace Atlas.Resources
         public long? ExpiresAt { get; set; }
         /// <summary>Per-key spend caps, metered with <see cref="ApiKeysResource.RecordUsageAsync(string, RecordApiKeyUsageBody, CancellationToken)"/>.</summary>
         public List<ApiKeyLimit>? Limits { get; set; }
+        /// <summary>Alternative to <c>ExpiresAt</c>; without either the instance default lifetime applies.</summary>
+        public long? ExpiresInSeconds { get; set; }
+        /// <summary>A custom secret prefix, e.g. <c>acme</c> gives <c>acme_&lt;id&gt;_&lt;secret&gt;</c>.</summary>
+        public string? Prefix { get; set; }
+        /// <summary>False mints the key disabled.</summary>
+        public bool? Enabled { get; set; }
+        public ApiKeyRateLimit? RateLimit { get; set; }
+        /// <summary>A use budget each successful verify spends.</summary>
+        public long? Remaining { get; set; }
+        public List<string>? Scopes { get; set; }
+    }
+
+    /// <summary>A per-key verify throttle: at most <see cref="Max"/> verifies per <see cref="WindowSeconds"/>.</summary>
+    public sealed class ApiKeyRateLimit
+    {
+        public long Max { get; set; }
+        public long WindowSeconds { get; set; }
     }
 
     public sealed class UpdateApiKeyBody
@@ -84,6 +108,13 @@ namespace Atlas.Resources
             Limits = null;
             return Set("limits", null);
         }
+        /// <summary>False disables the key without revoking it; true re-enables it.</summary>
+        public bool? Enabled { get; set; }
+        /// <summary>Set the verify throttle; remove it with <c>Set("rate_limit", null)</c>.</summary>
+        public ApiKeyRateLimit? RateLimit { get; set; }
+        /// <summary>Set the use budget; make it unlimited with <c>Set("remaining", null)</c>.</summary>
+        public long? Remaining { get; set; }
+        public List<string>? Scopes { get; set; }
     }
 
     /// <summary>Spend-cap periods for <see cref="ApiKeyLimit.Period"/>.</summary>
@@ -249,6 +280,14 @@ namespace Atlas.Resources
         public List<ApiKeyLimit>? Limits { get; init; }
         /// <summary>Each cap with its current-window usage.</summary>
         public List<ApiKeyLimitState>? Usage { get; init; }
+        /// <summary>On a refusal of a LIVE key by its own policy: <c>insufficient_scope</c>, <c>rate_limited</c> or <c>usage_exhausted</c>; null otherwise.</summary>
+        public string? Code { get; init; }
+        /// <summary>With <c>insufficient_scope</c>: the required scopes the key lacks.</summary>
+        public List<string>? MissingScopes { get; init; }
+        /// <summary>With <c>rate_limited</c>: when to retry (ms).</summary>
+        public long? RetryAfterMs { get; init; }
+        /// <summary>Uses left after this verify; null = unlimited.</summary>
+        public long? Remaining { get; init; }
     }
 
     public sealed class ListApiKeysParams
@@ -279,6 +318,14 @@ namespace Atlas.Resources
         /// <summary>Check a presented secret. Rate-limited — it is an online credential check.</summary>
         public Task<ApiKeyVerification> VerifyAsync(string secret, CancellationToken ct = default)
             => Req<ApiKeyVerification>(HttpVerb.Post, "/v1/api_keys/verify", body: Body(("secret", secret)), cancellationToken: ct);
+
+        /// <summary>
+        /// Verify requiring <paramref name="requiredScopes"/>. A LIVE key refused by its own policy answers
+        /// <c>Valid == false</c> with a <see cref="ApiKeyVerification.Code"/>.
+        /// </summary>
+        public Task<ApiKeyVerification> VerifyAsync(string secret, IEnumerable<string> requiredScopes, CancellationToken ct = default)
+            => Req<ApiKeyVerification>(HttpVerb.Post, "/v1/api_keys/verify",
+                body: Body(("secret", secret), ("required_scopes", new List<string>(requiredScopes))), cancellationToken: ct);
 
         public Task<ApiKey> GetAsync(string id, CancellationToken ct = default)
             => Req<ApiKey>(HttpVerb.Get, $"/v1/api_keys/{Enc(id)}", cancellationToken: ct);

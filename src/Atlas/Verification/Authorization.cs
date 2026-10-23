@@ -22,6 +22,12 @@ namespace Atlas.Verification
 
         /// <summary>Require ALL of these permissions.</summary>
         public IReadOnlyList<string>? AllPermissions { get; set; }
+
+        /// <summary>Require this app role (<c>app_roles</c>; no active organization needed).</summary>
+        public string? AppRole { get; set; }
+
+        /// <summary>Require this app permission (<c>app_permissions</c>).</summary>
+        public string? AppPermission { get; set; }
     }
 
     /// <summary>The outcome of evaluating a <see cref="ProtectCondition"/> against claims.</summary>
@@ -104,6 +110,12 @@ namespace Atlas.Verification
                     if (!permissions.Contains(p)) return ProtectOutcome.Deny("forbidden");
                 }
             }
+
+            if (condition.AppRole != null && !claims.HasAppRole(condition.AppRole))
+                return ProtectOutcome.Deny("forbidden");
+
+            if (condition.AppPermission != null && !claims.HasAppPermission(condition.AppPermission))
+                return ProtectOutcome.Deny("forbidden");
 
             return ProtectOutcome.Allow;
         }

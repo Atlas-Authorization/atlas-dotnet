@@ -51,6 +51,8 @@ namespace Atlas
             Permissions = new PermissionsResource(transport);
             OAuthClients = new OAuthClientsResource(transport);
             ResourceServers = new ResourceServersResource(transport);
+            AppRoles = new AppRolesResource(transport);
+            OAuthInitialAccessTokens = new OAuthInitialAccessTokensResource(transport);
             SsoConnections = new SsoConnectionsResource(transport);
             ScimTokens = new ScimTokensResource(transport);
             Domains = new DomainsResource(transport);
@@ -143,6 +145,10 @@ namespace Atlas
         public PermissionsResource Permissions { get; }
         public OAuthClientsResource OAuthClients { get; }
         public ResourceServersResource ResourceServers { get; }
+        /// <summary><c>/v1/app_roles</c> — instance-wide user roles.</summary>
+        public AppRolesResource AppRoles { get; }
+        /// <summary><c>/v1/oauth_initial_access_tokens</c> — OAuth dynamic client registration gating.</summary>
+        public OAuthInitialAccessTokensResource OAuthInitialAccessTokens { get; }
         public SsoConnectionsResource SsoConnections { get; }
         public ScimTokensResource ScimTokens { get; }
         public DomainsResource Domains { get; }

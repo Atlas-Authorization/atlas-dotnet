@@ -171,8 +171,8 @@ namespace Atlas.Verification
                 throw new LogoutTokenException(LogoutTokenFailure.Malformed, "logout_token could not be parsed");
             }
 
-            if (!header.TryGetValue("alg", out var alg) || alg.ValueKind != JsonValueKind.String || alg.GetString() != "RS256")
-                throw new LogoutTokenException(LogoutTokenFailure.BadAlgorithm, "logout_token must be signed with RS256");
+            if (!header.TryGetValue("alg", out var alg) || alg.ValueKind != JsonValueKind.String || System.Array.IndexOf(SigningAlgs.All, alg.GetString()) < 0)
+                throw new LogoutTokenException(LogoutTokenFailure.BadAlgorithm, "logout_token must be signed with RS256 or ES256");
             if (header.TryGetValue("typ", out var typ))
             {
                 var t = typ.ValueKind == JsonValueKind.String ? typ.GetString()!.ToLowerInvariant() : "";
@@ -237,7 +237,7 @@ namespace Atlas.Verification
             {
                 var parameters = new TokenValidationParameters
                 {
-                    ValidAlgorithms = new[] { "RS256" },
+                    ValidAlgorithms = SigningAlgs.All,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKeys = new JsonWebKeySet(keys.Raw).GetSigningKeys(),
                     // Claims are checked one by one above/below so each failure has a reason.

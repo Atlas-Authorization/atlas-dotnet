@@ -33,6 +33,8 @@ namespace Atlas.Resources
         public string? ReferralCode { get; init; }
         /// <summary>The user's own referral link, when they are a referrer.</summary>
         public string? ReferralLink { get; init; }
+        /// <summary>When a timed ban lifts (epoch ms); null for a permanent ban or no ban.</summary>
+        public long? BanExpiresAt { get; init; }
     }
 
     /// <summary>Where a user's inbound referral stands and, once attributed, who referred them.</summary>
@@ -209,7 +211,50 @@ namespace Atlas.Resources
         public bool Refreshed { get; init; }
     }
 
-    public sealed class ListUsersParams : CursorParams { }
+    /// <summary>
+    /// Search and filters for <c>GET /v1/users</c>. Every filter combines with AND. Page by cursor
+    /// (<see cref="CursorParams.StartingAfter"/>) or, with <see cref="Offset"/>, by offset.
+    /// </summary>
+    public sealed class ListUsersParams : CursorParams
+    {
+        public int? Offset { get; set; }
+        /// <summary>Free-text search over email, username, names, phone and ids.</summary>
+        public string? Query { get; set; }
+        public string? EmailAddress { get; set; }
+        public string? Username { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? ExternalId { get; set; }
+        /// <summary>Banned right now (a lapsed timed ban does not count).</summary>
+        public bool? Banned { get; set; }
+        public bool? EmailVerified { get; set; }
+        public string? OrganizationId { get; set; }
+        /// <summary>Epoch ms.</summary>
+        public long? CreatedAfter { get; set; }
+        /// <summary>Epoch ms.</summary>
+        public long? CreatedBefore { get; set; }
+        /// <summary><c>created_at</c>, <c>-created_at</c>, <c>last_sign_in_at</c> or <c>-last_sign_in_at</c>.</summary>
+        public string? OrderBy { get; set; }
+        /// <summary>Adds <c>total_count</c> to the page.</summary>
+        public bool? IncludeTotalCount { get; set; }
+
+        public override IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            foreach (var kv in base.ToQuery()) yield return kv;
+            yield return new KeyValuePair<string, object?>("offset", Offset);
+            yield return new KeyValuePair<string, object?>("query", Query);
+            yield return new KeyValuePair<string, object?>("email_address", EmailAddress);
+            yield return new KeyValuePair<string, object?>("username", Username);
+            yield return new KeyValuePair<string, object?>("phone_number", PhoneNumber);
+            yield return new KeyValuePair<string, object?>("external_id", ExternalId);
+            yield return new KeyValuePair<string, object?>("banned", Banned);
+            yield return new KeyValuePair<string, object?>("email_verified", EmailVerified);
+            yield return new KeyValuePair<string, object?>("organization_id", OrganizationId);
+            yield return new KeyValuePair<string, object?>("created_after", CreatedAfter);
+            yield return new KeyValuePair<string, object?>("created_before", CreatedBefore);
+            yield return new KeyValuePair<string, object?>("order_by", OrderBy);
+            yield return new KeyValuePair<string, object?>("include_total_count", IncludeTotalCount);
+        }
+    }
 
     public sealed class CreateUserBody
     {
@@ -382,6 +427,16 @@ namespace Atlas.Resources
 
         public Task<User> BanAsync(string id, CancellationToken ct = default)
             => Req<User>(HttpVerb.Post, $"/v1/users/{Enc(id)}/ban", cancellationToken: ct);
+
+        /// <summary>
+        /// Ban with a reason, note or expiry. A non-null <paramref name="expiresInSeconds"/> or
+        /// <paramref name="expiresAt"/> (epoch ms) makes a timed ban that lifts itself.
+        /// </summary>
+        public Task<User> BanAsync(string id, string? reason, string? note, long? expiresInSeconds, long? expiresAt, CancellationToken ct = default)
+        {
+            var body = Body(("reason", reason), ("note", note), ("expires_in_seconds", expiresInSeconds), ("expires_at", expiresAt));
+            return Req<User>(HttpVerb.Post, $"/v1/users/{Enc(id)}/ban", body: body.Count == 0 ? null : body, cancellationToken: ct);
+        }
 
         public Task<User> UnbanAsync(string id, CancellationToken ct = default)
             => Req<User>(HttpVerb.Post, $"/v1/users/{Enc(id)}/unban", cancellationToken: ct);

@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.12.0 (Atlas.Sdk) / 1.4.0 (Atlas.AspNetCore) — 2026-10-23
+
+### Added
+
+- **App roles.** `AppRoles`: `ListAsync`, `CreateAsync`, `GetAsync`, `UpdateAsync`, `DeleteAsync`, `ListUsersAsync`, `GetForUserAsync`, `SetForUserAsync` (replace), `ChangeForUserAsync` (add/remove), `RemoveFromUserAsync`. `SessionClaims.AppRoles` / `AppPermissions` / `HasAppRole` / `HasAppPermission` and `ProtectCondition.AppRole` / `AppPermission` (no active organization needed).
+- **Organization teams and custom roles.** `Organizations.Teams` (list, create, get, update, delete, members list/add/remove) and `Organizations.Roles` (the roles an org can assign; create/update/delete its own, `reassignTo`). `Organizations.GetBySlugAsync`, `CheckSlugAsync`, `Invitations.ResendAsync`.
+- **User search and timed bans.** `ListUsersParams`: `Offset`, `Query`, `EmailAddress`, `Username`, `PhoneNumber`, `ExternalId`, `Banned`, `EmailVerified`, `OrganizationId`, `CreatedAfter` / `CreatedBefore`, `OrderBy`, `IncludeTotalCount`. `Users.BanAsync(id, reason, note, expiresInSeconds, expiresAt)`; `User.BanExpiresAt`.
+- **API key controls.** `CreateApiKeyBody` `ExpiresInSeconds`, `Prefix`, `Enabled`, `RateLimit` (`ApiKeyRateLimit`), `Remaining`, `Scopes`; `UpdateApiKeyBody` `Enabled`, `RateLimit`, `Remaining`, `Scopes`. `ApiKeys.VerifyAsync(secret, requiredScopes)`; `ApiKeyVerification.Code` (`insufficient_scope`, `rate_limited`, `usage_exhausted`), `MissingScopes`, `RetryAfterMs`, `Remaining`. `ApiKey` reports `Enabled`, `RateLimit`, `Remaining`, `Scopes`.
+- **Billing providers (bring your own key).** `Billing.ListProvidersAsync`, `GetProviderAsync`, `SetProviderAsync`, `TestProviderAsync`, `DeleteProviderAsync(force)`, `ChangeSubscriptionAsync`, `CancelSubscriptionAsync(immediately)`, `RestoreSubscriptionAsync`. Plans carry `Provider`, `ProviderPriceId`, `AnnualPriceId`, `AnnualAmount`; subscriptions the provider, account, interval, scheduled change, trial and cancellation fields.
+- **OAuth server administration.** `InstanceSecurity.ListSigningKeysAsync` / `RotateSigningKeyAsync(alg, gracePeriodSeconds, emergency)`; `OAuthInitialAccessTokens` (list, create, revoke). OAuth client bodies take `Disabled`, `RequirePkce`, `SubjectType`, `SectorIdentifierUri`, `SecretExpiresInSeconds` and `OAuthClient` reports them (with `ClientSecretExpiresAt`); resource servers take and report `PublishResourceMetadata`.
+- **Access-token verification for your API.** `AccessTokenVerifier` checks an Atlas-issued OAuth access token locally (issuer, expiry, `token_use`, audience, scopes) and returns the RFC 6750 / RFC 9728 `WWW-Authenticate` challenge on refusal; `BuildWwwAuthenticate`, `ProtectedResourceMetadata`, `ProtectedResourceMetadataPath`. Atlas.AspNetCore: `app.UseAtlasAccessToken(verifier, scopes)` and `HttpContext.GetAtlasAccessToken()`. DPoP-bound tokens are refused.
+- `ScimTokens.UpdateAsync`, `UserHooks.ListBeforeUserCreateCallsAsync`, `Referrals.GetCallAsync`.
+
+### Changed
+
+- Session and logout-token verification accept **ES256** as well as RS256 (`SigningAlgs.All`), and nothing else.
+
 ## 1.11.0 (Atlas.Sdk)
 
 ### Added

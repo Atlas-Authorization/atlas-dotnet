@@ -16,7 +16,7 @@
 
     <!-- NuGet package metadata (publishing is a SEPARATE step — not packed here). -->
     <PackageId>Atlas.AspNetCore</PackageId>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Authors>Atlas</Authors>
     <Company>Atlas</Company>
     <Product>Atlas ASP.NET Core Authentication</Product>
