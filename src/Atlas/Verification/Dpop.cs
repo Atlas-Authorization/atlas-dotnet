@@ -281,7 +281,7 @@ namespace Atlas.Verification
             return null;
         }
 
-        private static bool VerifySignature(JsonElement jwk, string alg, byte[] data, byte[] sig)
+        internal static bool VerifySignature(JsonElement jwk, string alg, byte[] data, byte[] sig)
         {
             var keyAlg = Str(jwk, "alg");
             if (!string.IsNullOrEmpty(keyAlg) && keyAlg != alg) return false;

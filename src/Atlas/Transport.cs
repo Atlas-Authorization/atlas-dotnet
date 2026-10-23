@@ -36,6 +36,9 @@ namespace Atlas
 
         /// <summary>The <c>Content-Type</c> of <see cref="BinaryBody"/>, e.g. <c>image/png</c>.</summary>
         public string? ContentType { get; set; }
+
+        /// <summary>Extra request headers (e.g. the end user's forwarded IP). <c>Authorization</c> is never replaced.</summary>
+        public IReadOnlyDictionary<string, string>? Headers { get; set; }
     }
 
     /// <summary>
@@ -130,6 +133,14 @@ namespace Atlas
             if (!string.IsNullOrEmpty(options.IdempotencyKey))
             {
                 request.Headers.TryAddWithoutValidation("Idempotency-Key", options.IdempotencyKey);
+            }
+            if (options.Headers != null)
+            {
+                foreach (var h in options.Headers)
+                {
+                    if (string.Equals(h.Key, "Authorization", StringComparison.OrdinalIgnoreCase)) continue;
+                    request.Headers.TryAddWithoutValidation(h.Key, h.Value);
+                }
             }
             if (_strict.HasValue && options.Method != HttpVerb.Get)
             {

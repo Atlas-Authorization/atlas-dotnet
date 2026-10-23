@@ -56,6 +56,12 @@ namespace Atlas.AspNetCore
         /// <summary>An optional clock override (epoch milliseconds) for tests.</summary>
         public Func<long>? Now { get; set; }
 
+        /// <summary>
+        /// Cutover from Better Auth: also accept JWTs from these old issuers until each one's <c>Until</c>
+        /// (see <see cref="AtlasBackendOptions.LegacyIssuers"/>; needs <see cref="SecretKey"/> or a <c>ResolveSubject</c>).
+        /// </summary>
+        public IReadOnlyList<LegacyIssuer>? LegacyIssuers { get; set; }
+
         // The verifier is built once from these options and cached. IOptionsMonitor
         // hands out one options instance per scheme, so this lazily becomes a single
         // verifier per scheme — the handler is transient but the JWKS cache it leans
@@ -82,6 +88,7 @@ namespace Atlas.AspNetCore
                     BapiBaseUrl = BapiBaseUrl,
                     HttpClient = HttpClient,
                     Now = Now,
+                    LegacyIssuers = LegacyIssuers,
                 });
             }
         }

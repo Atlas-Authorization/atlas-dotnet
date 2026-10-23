@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.14.0 (Atlas.Sdk) / 1.6.0 (Atlas.AspNetCore) — 2026-10-24
+
+### Added
+
+- **Migrate from Better Auth: sealed-bundle imports.** `BetterAuthImports` (`BetterAuthImportsResource`): `GetPublicKeyAsync`, `RotatePublicKeyAsync`, `CreateAsync`, `ListAsync`, `GetAsync`, `UploadPartAsync` (string, or raw bytes as `text/plain`), `FinalizeAsync`, `DryRunAsync`, `ApplyAsync` (resumes a failed import; `confirmConflicts`), `DeleteAsync`, `ListJwksAsync`, `DeleteJwkAsync`. Helpers: `UploadAsync(bundle, options, partBytes, onPart)` creates the import, uploads the bundle in line-aligned parts of at most 8 MiB (`SplitBundleParts`, `PartBytes`) and finalizes it; `WaitForAsync(id, interval, timeout, onProgress)` polls until the import leaves `analyzing` / `queued` / `applying`. Typed `BetterAuthImport`, `BetterAuthImportKey`, `BetterAuthImportOptions` (with `Set`), `ImportedJwk`.
+- **Better Auth session bridge.** `BetterAuthBridge` (`BetterAuthBridgeResource`): `GetAsync` / `UpdateAsync` / `DeleteAsync` (migration window, cookie prefix, live fallback; the old app's secret is write-only, `Set("secret", null)` clears it) and `ExchangeAsync(token, clientIp, userAgent, remember)` on the secret-key Backend API route, forwarding the end user's IP and user agent (`X-Atlas-Client-IP`, `X-Atlas-Client-User-Agent`). `BetterAuthExchange.ExchangeAsync` classifies the outcome (`Session`, `NeedsMfa`, `Refused` with the `bridge_outcome`; never throws for an Atlas or transport failure). `BetterAuthSessionBridge` turns a request's cookies into a `BridgeDecision` (Atlas cookies to set, Better Auth cookies to clear only on a final refusal, `ContinuationUrl` for a second factor); `BetterAuthCookies`, `BridgeCookie.Serialize`. Atlas.AspNetCore: `app.UseAtlasBetterAuthBridge(client, o => o.SignInUrl = "/sign-in")` exchanges a GET/HEAD that carries a Better Auth cookie and no Atlas session once, sets `__session` / `__atlas_rt`, clears the old cookies and redirects to the same URL (second factor: to `SignInUrl` with `__atlas_attempt` / `__atlas_status`).
+- **Better Auth JWTs during the cutover.** `AtlasBackendOptions.LegacyIssuers` (also `AtlasAuthenticationOptions.LegacyIssuers`): `new LegacyIssuer { Issuer, Until, Jwks | JwksUrl, Audiences, Algorithms, ResolveSubject }`. A token from that issuer, inside its window, is verified against that issuer's keys only (EdDSA, ES256, ES512, RS256, PS256; `exp` required) and its `sub` is mapped to the Atlas user id through `external_id` (Backend API lookup with `SecretKey`, cached 5 minutes, at most 10 000 entries; failures are not cached). The claims carry `external_id` and `legacy` in `SessionClaims.Extra`.
+- `RequestOptions.Headers` for extra per-call request headers (never replaces `Authorization`).
+- API coverage list: 604 operations.
+
 ## 1.13.0 (Atlas.Sdk) / 1.5.0 (Atlas.AspNetCore) — 2026-10-24
 
 ### Added

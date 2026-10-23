@@ -548,6 +548,28 @@ app.Use(async (context, next) =>
 });
 ```
 
+## Moving from Better Auth
+
+Import the sealed export, then keep returning users signed in during the cutover.
+
+```csharp
+// 1. Import the bundle the Better Auth exporter produced.
+var key = await atlas.BetterAuthImports.GetPublicKeyAsync();       // key.Compact is what the exporter's --public-key takes
+var import = await atlas.BetterAuthImports.UploadAsync(File.ReadAllText("bundle.ndjson"));
+import = await atlas.BetterAuthImports.WaitForAsync(import.Id!);    // ready / invalid
+// read import.Report, then:
+await atlas.BetterAuthImports.ApplyAsync(import.Id!);
+await atlas.BetterAuthImports.WaitForAsync(import.Id!);
+
+// 2. Turn the session bridge on for the migration window.
+await atlas.BetterAuthBridge.UpdateAsync(new UpdateBetterAuthBridgeBody { Enabled = true, EndsAt = "2026-12-01T00:00:00Z" });
+
+// 3. ASP.NET Core: exchange a returning user's Better Auth cookie once (before UseAuthentication).
+app.UseAtlasBetterAuthBridge(atlas, o => o.SignInUrl = "/sign-in");
+```
+
+The middleware forwards the visitor's IP (`HttpContext.Connection.RemoteIpAddress`: behind a proxy add `UseForwardedHeaders`) and user agent, so Atlas's guards and risk checks see the user rather than your server. To keep accepting the old app's JWTs for a while, add `LegacyIssuers = new[] { new LegacyIssuer { Issuer = "https://app.example.com/api/auth", Until = ..., JwksUrl = "https://app.example.com/api/auth/jwks" } }` to `AtlasBackendOptions` / `AddAtlasAuthentication` (with `SecretKey`, or a `ResolveSubject`).
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).

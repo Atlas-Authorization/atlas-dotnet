@@ -58,7 +58,8 @@ namespace Atlas.Resources
             IEnumerable<KeyValuePair<string, object?>>? query = null,
             string? idempotencyKey = null,
             bool raw = false,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            IReadOnlyDictionary<string, string>? headers = null)
         {
             var result = await Transport.SendAsync<T>(
                 new RequestOptions
@@ -69,6 +70,7 @@ namespace Atlas.Resources
                     Query = query,
                     IdempotencyKey = idempotencyKey,
                     Raw = raw,
+                    Headers = headers,
                 },
                 cancellationToken).ConfigureAwait(false);
             return result!;

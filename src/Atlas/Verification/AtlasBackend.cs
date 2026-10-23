@@ -37,6 +37,15 @@ namespace Atlas.Verification
 
         /// <summary>An optional clock override (epoch milliseconds) for tests.</summary>
         public Func<long>? Now { get; set; }
+
+        /// <summary>
+        /// Cutover from another auth provider (Better Auth): ALSO accept JWTs from these <see cref="LegacyIssuer"/> entries until
+        /// each one's <c>Until</c>, verified against that issuer's own key set, with <c>sub</c> mapped to the Atlas user id (the
+        /// old id is the user's <c>external_id</c>). The claims then carry <c>sub</c> = the Atlas id, <c>external_id</c> = the old
+        /// id and <c>legacy</c> = <c>{kind, issuer, sub}</c> (in <see cref="SessionClaims.Extra"/>). Atlas tokens are unaffected.
+        /// The default subject lookup uses <see cref="SecretKey"/> and <see cref="BapiBaseUrl"/>.
+        /// </summary>
+        public IReadOnlyList<LegacyIssuer>? LegacyIssuers { get; set; }
     }
 
     /// <summary>
@@ -52,6 +61,7 @@ namespace Atlas.Verification
         private readonly AtlasBackendOptions _options;
         private readonly JwksCache _jwks;
         private readonly HttpClient _http;
+        private readonly LegacyIssuerVerifier? _legacy;
 
         public AtlasBackend(AtlasBackendOptions options)
         {
@@ -62,6 +72,8 @@ namespace Atlas.Verification
             _options = options;
             _http = options.HttpClient ?? new HttpClient();
             _jwks = new JwksCache(options.JwksUrl, _http, options.Now);
+            if (options.LegacyIssuers != null && options.LegacyIssuers.Count > 0)
+                _legacy = new LegacyIssuerVerifier(options.LegacyIssuers, options, _http);
         }
 
         private DateTime NowUtc()
@@ -77,6 +89,23 @@ namespace Atlas.Verification
         {
             if (string.IsNullOrEmpty(token) || CountSegments(token) != 3)
                 return VerifyResult.Failure(VerifyFailureReason.Malformed);
+
+            // A token from a configured legacy issuer (inside its window) is verified against THAT issuer's keys only —
+            // never the Atlas keys; the `iss` routes, the signature decides.
+            if (_legacy != null)
+            {
+                var entry = _legacy.Match(LegacyIssuerVerifier.PeekIssuer(token));
+                if (entry != null)
+                {
+                    var (failure, legacyClaims) = await _legacy.VerifyAsync(token, entry, ct).ConfigureAwait(false);
+                    if (failure == VerifyFailureReason.NoKeys) return VerifyResult.Failure(VerifyFailureReason.NoKeys);
+                    if (legacyClaims == null) return VerifyResult.Failure(VerifyFailureReason.Invalid);
+                    if (_options.AuthorizedParties != null && _options.AuthorizedParties.Count > 0
+                        && !string.IsNullOrEmpty(legacyClaims.Azp) && !Contains(_options.AuthorizedParties, legacyClaims.Azp!))
+                        return VerifyResult.Failure(VerifyFailureReason.UnauthorizedParty);
+                    return VerifyResult.Success(new AuthorizedSession(legacyClaims));
+                }
+            }
 
             var keys = await _jwks.GetAsync(JwksCache.ReadKid(token), ct).ConfigureAwait(false);
             if (keys == null || keys.Count == 0)

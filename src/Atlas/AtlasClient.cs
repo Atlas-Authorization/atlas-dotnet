@@ -105,6 +105,8 @@ namespace Atlas
             Notifications = new NotificationsResource(transport);
             Analytics = new AnalyticsResource(transport);
             LegacyAuthConnection = new LegacyAuthConnectionResource(transport);
+            BetterAuthImports = new BetterAuthImportsResource(transport);
+            BetterAuthBridge = new BetterAuthBridgeResource(transport);
             Mcp = new McpResource(transport);
             Pca = new PcaResource(transport);
             McpConnector = new McpConnectorResource(transport);
@@ -210,6 +212,10 @@ namespace Atlas
         public NotificationsResource Notifications { get; }
         public AnalyticsResource Analytics { get; }
         public LegacyAuthConnectionResource LegacyAuthConnection { get; }
+        /// <summary>Migrate from Better Auth: sealed-bundle imports.</summary>
+        public BetterAuthImportsResource BetterAuthImports { get; }
+        /// <summary>Migrate from Better Auth: the session bridge settings and secret-key exchange.</summary>
+        public BetterAuthBridgeResource BetterAuthBridge { get; }
         public McpResource Mcp { get; }
         public PcaResource Pca { get; }
         public McpConnectorResource McpConnector { get; }
