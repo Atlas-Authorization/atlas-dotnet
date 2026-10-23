@@ -95,6 +95,8 @@ namespace Atlas
             Instance = new InstanceResource(transport);
             InstanceSecurity = new InstanceSecurityResource(transport);
             Referrals = new ReferralsResource(transport);
+            Policies = new PoliciesResource(transport);
+            PolicySource = new PolicySourceResource(transport);
             UserHooks = new UserHooksResource(transport);
             Tokens = new TokensResource(transport);
             Design = new DesignResource(transport);
@@ -201,6 +203,10 @@ namespace Atlas
         public InstanceSecurityResource InstanceSecurity { get; }
         /// <summary>Referral attribution: the instance's referral platform connection, connection test and call log.</summary>
         public ReferralsResource Referrals { get; }
+        /// <summary>Policy acceptance: policies and versions, acceptances, a user's standing and the <c>pol</c> claim setting.</summary>
+        public PoliciesResource Policies { get; }
+        /// <summary>The external policy source: endpoint, sync mode, write-only secret, test, sync and delivery log.</summary>
+        public PolicySourceResource PolicySource { get; }
         /// <summary>The <c>before_user_create</c> hook: settings and a test call.</summary>
         public UserHooksResource UserHooks { get; }
         public TokensResource Tokens { get; }

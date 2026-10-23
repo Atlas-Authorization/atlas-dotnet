@@ -286,6 +286,32 @@ With a platform key, `Platform.AtlasIdApps.FindUsersAsync(id, email)` answers a 
 `RevokeGrantAsync(id, grantId)` revokes one person's approval, and `Platform.AtlasIdPublisher` claims and verifies
 the publisher name shown on consent screens.
 
+### Policy acceptance
+
+Terms of service, a privacy policy or any policy your users accept at sign-up (and again at sign-in when a new
+version takes effect) are managed with `client.Policies`:
+
+```csharp
+await client.Policies.CreateAsync(new CreatePolicyBody
+{
+    Key = "tos", Title = "Terms of service", Display = "scroll", Required = true,
+    AppliesTo = "sign_in_and_sign_up", Reaccept = "grace", GraceDays = 14,
+});
+await client.Policies.CreateVersionAsync("tos", new CreatePolicyVersionBody { Version = "2026-10-24", ContentMarkdown = "# Terms ..." });
+await client.Policies.PublishVersionAsync("tos", "2026-10-24", DateTimeOffset.UtcNow.AddDays(7).ToUnixTimeMilliseconds());
+var standing = await client.Policies.ForUserAsync("user_123");
+```
+
+`ListAcceptancesAsync` / `ExportAcceptancesCsvAsync` list who accepted which version, with the reading evidence.
+`client.Policies.UpdateSettingsAsync(true)` puts the `pol` claim (accepted versions of required policies) on session
+tokens; read it with `SessionClaims.Pol()` / `HasAcceptedPolicy(key, version)`.
+
+To serve policy content from your own system, connect it with `client.PolicySource` (`UpdateAsync` takes the endpoint,
+sync mode and a write-only signing secret; `TestAsync` and `SyncAsync` try it) and use `PolicySourceProtocol`:
+`VerifyFeedRequest(method, pathAndQuery, name => Request.Headers[name], secret)` checks Atlas's signed feed request,
+and `SignPublished(key, version, secret)` / `SignRetired(key, secret)` produce the signed event body and headers to
+POST to the source's `WebhookUrl`.
+
 ### Referral attribution
 
 With referral attribution on, Atlas reports every interactive sign-up to your referral platform before

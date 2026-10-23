@@ -33,5 +33,11 @@ namespace Atlas
 
         /// <summary>The security notice sent when a dormant account signs in again.</summary>
         public const string EmailTemplateAccountReactivated = "account_reactivated";
+
+        /// <summary>A user accepted a policy version (payload: the policy acceptance with its evidence).</summary>
+        public const string WebhookEventUserPolicyAccepted = "user.policy_accepted";
+
+        /// <summary>A policy version was published.</summary>
+        public const string WebhookEventPolicyVersionPublished = "policy.version_published";
     }
 }

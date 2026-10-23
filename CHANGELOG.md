@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.15.0 (Atlas.Sdk) — 2026-10-24
+
+### Added
+
+- **Policy acceptance.** `Policies` (`PoliciesResource`): `ListAsync`, `CreateAsync`, `GetAsync`, `UpdateAsync`, `DeleteAsync` (a never-published policy is deleted, one with history is retired), `ListVersionsAsync`, `CreateVersionAsync` (a draft, or `Publish` with `EffectiveAt`), `GetVersionAsync`, `UpdateVersionAsync` / `DeleteVersionAsync` (drafts only), `PublishVersionAsync` (optional `effective_at`, epoch ms) / `PublishVersionAtAsync` (ISO 8601), `RetireVersionAsync`, `ListAcceptancesAsync` and `ExportAcceptancesCsvAsync`, `ForUserAsync` (a user's standing on every policy), `GetSettingsAsync` / `UpdateSettingsAsync` (the `pol` session claim). Typed `Policy`, `PolicyVersion`, `PolicyAcceptance`, `PolicyStanding`, `PolicySettings`. `PolicySource` (`PolicySourceResource`): `GetAsync`, `UpdateAsync` (the signing secret is write-only), `DeleteAsync`, `TestAsync`, `SyncAsync`, `ListDeliveriesAsync`.
+- **Policy source protocol helpers.** `Atlas.Verification.PolicySourceProtocol`: `VerifyFeedRequest` checks Atlas's signed `GET {endpoint_url}/policies` (`atlas-signature` `v1,<base64 HMAC-SHA256>` over `{id}.{timestamp}.GET\n{path+query}`, millisecond timestamps, several `v1` values accepted, 5-minute window; the result carries the `key` query parameter), and `SignPublished` / `SignRetired` / `SignEvent` sign `policy.published` / `policy.retired` events for Atlas. Cross-checked against the TypeScript reference vectors.
+- `SessionClaims.Pol()` and `HasAcceptedPolicy(key, version)` read the `pol` claim. `AtlasConstants.WebhookEventUserPolicyAccepted` and `WebhookEventPolicyVersionPublished`.
+- API coverage list: 626 operations.
+
 ## 1.14.0 (Atlas.Sdk) / 1.6.0 (Atlas.AspNetCore) — 2026-10-24
 
 ### Added

@@ -36,6 +36,24 @@ namespace Atlas.Verification
         /// <summary>Whether the user's app roles grant the permission (no active organization needed).</summary>
         public bool HasAppPermission(string permission) => AppPermissions != null && AppPermissions.Contains(permission);
 
+        /// <summary>
+        /// The <c>pol</c> claim: the accepted version of every required policy, keyed by policy key. Present only when the
+        /// instance turned on the policy session claim; empty otherwise.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> Pol()
+        {
+            var result = new Dictionary<string, string>();
+            if (Extra != null && Extra.TryGetValue("pol", out var el) && el.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var prop in el.EnumerateObject())
+                    result[prop.Name] = prop.Value.ValueKind == JsonValueKind.String ? prop.Value.GetString() ?? "" : prop.Value.ToString();
+            }
+            return result;
+        }
+
+        /// <summary>Whether the token records acceptance of <paramref name="version"/> of the policy <paramref name="key"/>.</summary>
+        public bool HasAcceptedPolicy(string key, string version) => Pol().TryGetValue(key, out var v) && v == version;
+
         /// <summary>Every claim without a named member above (incl. <c>token_use</c>, <c>aud</c>).</summary>
         [JsonExtensionData] public Dictionary<string, JsonElement> Extra { get; init; } = new Dictionary<string, JsonElement>();
     }
