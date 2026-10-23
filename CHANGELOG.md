@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.13.0 (Atlas.Sdk) / 1.5.0 (Atlas.AspNetCore) — 2026-10-24
+
+### Added
+
+- **DPoP (RFC 9449) on the access-token verifier.** A DPoP-bound token (`cnf.jkt`) is accepted only with the DPoP scheme and a valid proof (never as Bearer): `typ` `dpop+jwt`, `Dpop.Algs` (ES256/384/512, RS256/384/512, PS256/384/512, EdDSA via a built-in RFC 8032 `Ed25519` verifier, since the BCL has none), public embedded JWK, signature, `htm`, normalised `htu` (`Dpop.NormalizeHtu`; `PublicOrigin` for path-only URLs), `iat` window, `ath`, `jti` replay via an `IDpopReplayStore` (`MemoryDpopReplayStore` by default), RFC 7638 `Dpop.JwkThumbprint` match. `RequireDpop` refuses unbound tokens; `DpopNonces` (`HmacDpopNonceSource`) demands a server nonce (`use_dpop_nonce`, `AccessTokenResult.DpopNonce` for the `DPoP-Nonce` header). `VerifyRequestAsync(AccessTokenRequest)`; `AccessTokenResult.DpopBound`. Challenges use the `DPoP` scheme with `algs` (`BuildWwwAuthenticate(..., scheme)`). Atlas.AspNetCore: `UseAtlasAccessToken` checks the proof against the request and sets `DPoP-Nonce`. Metadata advertises `dpop_signing_alg_values_supported`; `ProtectedResourceMetadata(..., dpopBoundAccessTokensRequired)`.
+- **Billing: several subscriptions per subject, add-ons, Chargebee / Autumn / Commet.** `Billing.GetSubscriptionAsync`, `SyncPlanEntitlementsAsync`, `GetSettingsAsync` / `UpdateSettingsAsync` (`BillingSettings`, limit merge `max` / `sum`), `CheckFeatureAsync` (`BillingFeatureCheck`). `BillingPlan` gains `Limits`, `Kind`, `SeatFeatureId`; `BillingSubscription` gains `Entitlements`; plan bodies take `Kind`, `Limits`, `SeatFeatureId` (and `Set(key, null)`); `ReportBillingUsageBody` takes `Feature` and `SubscriptionId`. `AtlasConstants.BillingProviders`.
+- **Custom OAuth / OIDC providers.** `CustomOAuthProviders`: `ListAsync`, `GetAsync`, `CreateAsync` / `UpdateAsync` (`CustomOAuthProviderBody`), `DeleteAsync`, `DiscoverAsync`, `PreviewProfileMappingAsync` (ad hoc or by id), `ListSigningKeysAsync` / `RotateSigningKeyAsync` / `RetireSigningKeyAsync`. SSO connections gain `PreviewProfileMappingAsync` and the signing-key methods; their bodies take the relying-party settings and `SsoConnection` reports them plus `UpstreamUrls`.
+- **Actions gallery.** `ActionGallery` (`ListAsync`, `GetAsync`, `InstallAsync`, `InstallsAsync`, `UpdateAsync`) and `ActionTemplates` (`ListAsync`, `CreateAsync` / `UpdateAsync` with `ActionTemplateBody`, `GetAsync`, `DeleteAsync`, `AddVersionAsync`, `SubmitVersionAsync`, `DeleteVersionAsync`, `PublishAsync`, `UnlistAsync`). `ActionTestResult.HttpRequests`; sample events take `Organizations` and `Country`.
+- **Session custom data.** `Sessions.SetCustomDataAsync` (replace; null clears) and `UpdateCustomDataAsync` (merge; null removes a key); `Session.CustomData`, `CreateSessionBody.CustomData`. `AtlasConstants.WebhookEventSessionUpdated`.
+- **Sign-in settings.** `InstanceSecurity.SetWalletRpcSecretAsync`; rate-limit `Rules` (`RateLimitRule`) plus the verify / LDAP budgets and the group catalog; `Instance.SetAccountLinkingTrustAsync`, `Instance.SetCaptchaConfigAsync`; `AtlasConstants.CaptchaProviders` (incl. `captchafox`, `vercel_botid`), `LinkingTrustLevels`.
+- **Vercel BotID attestations.** `BotId.CreateAttestation(secret, isBot, isVerifiedBot, ttlSeconds, nowSeconds)` in Atlas's `atlas_botid.v1` format.
+- **Enterprise SSO.** SAML Single Logout and encrypted-assertion fields on SSO bodies and `SsoConnection`; `SamlMetadata.SloUrl`; `SsoConnections.GetSamlEncryptionKeyAsync`, `CreateSamlEncryptionKeyAsync`, `RetirePreviousSamlEncryptionKeyAsync`, `DeleteSamlEncryptionKeyAsync`. Attack protection `DormantAccounts` (`DormantAccountsSettings`); risk weight / signal `DormantAccount`; `AtlasConstants.WebhookEventUserReactivated`, `EmailTemplateAccountReactivated`.
+- **Atlas as OAuth provider.** OAuth clients: `AccessTokenFormat`, `TokenLifetimes` (`OAuthTokenLifetimes`); resource servers: `AccessTokenFormat`, refresh lifetimes, `IntrospectionClientIds`. `InstanceSecurity.GetSigningKeyProviderAsync` / `SetSigningKeyProviderAsync` / `RemoveSigningKeyProviderAsync` (AWS KMS, Google Cloud KMS, Azure Key Vault).
+- **Opaque access tokens.** `AccessTokenVerifierOptions.Introspection` (`IntrospectionOptions`) validates non-JWT access tokens at Atlas's RFC 7662 endpoint with your API's client credentials, cached by token hash (TTL, negative TTL, never past `exp`, bounded); `IntrospectJwts` checks JWTs live too. `Introspector` is public. `UseAtlasAccessToken` uses it through the verifier it is given.
+- **Device sign-in approval.** `new DeviceAuthorizations(frontendApi, sessionToken)`: `LookupAsync`, `ApproveAsync`, `DenyAsync` with the user's session token; `DeviceAuthorizationException` (`NeedsReverification`, `IsInvalidCode`); `FormatUserCode`, `UserCodeFromUrl`.
+- The API coverage list now holds all 588 Backend and Platform API operations.
+
+### Changed
+
+- Without `Introspection`, a token that is not a JWT is refused with "configure Introspection to accept opaque tokens" instead of "malformed".
+
 ## 1.12.0 (Atlas.Sdk) / 1.4.0 (Atlas.AspNetCore) — 2026-10-23
 
 ### Added

@@ -20,6 +20,8 @@ namespace Atlas.Resources
         public long CreatedAt { get; init; }
         /// <summary>Epoch ms the session ends from inactivity unless there is activity first (same value as <see cref="AbandonAt"/>).</summary>
         public long? IdleExpiresAt { get; init; }
+        /// <summary>Custom per-session data your backend (or a post_login Action) attached; null when none.</summary>
+        public Dictionary<string, JsonElement>? CustomData { get; init; }
     }
 
     /// <summary>The session after a keep-alive touch (<c>POST /v1/sessions/{id}/touch</c>).</summary>
@@ -52,6 +54,8 @@ namespace Atlas.Resources
         public string UserId { get; set; } = "";
         /// <summary>Optional impersonation actor — records who is acting as the user.</summary>
         public SessionActor? Actor { get; set; }
+        /// <summary>Custom per-session data to attach (a JSON object, at most 2 KB).</summary>
+        public Dictionary<string, object?>? CustomData { get; set; }
     }
 
     /// <summary>
@@ -68,6 +72,7 @@ namespace Atlas.Resources
         public string RefreshToken { get; init; } = "";
         public int ExpiresIn { get; init; }
         public SessionActor? ImpersonatedBy { get; init; }
+        public Dictionary<string, JsonElement>? CustomData { get; init; }
     }
 
     public sealed class RevokedSession
@@ -109,6 +114,18 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/sessions/{id}/tokens/{template}</c> — Mint a named JWT-template token for a session (Clerk SessionApi.getToken).</summary>
         public Task<SessionTemplateToken> CreateTokenAsync(string id, string template, CancellationToken ct = default)
             => Req<SessionTemplateToken>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/tokens/{Enc(template)}", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>PUT /v1/sessions/{id}/custom_data</c> — replace the session's custom data (null clears it).
+        /// At most 2 KB; only an active session can be changed. Not for secrets: the signed-in user can
+        /// read it. Sends the <c>session.updated</c> webhook.
+        /// </summary>
+        public Task<Session> SetCustomDataAsync(string id, Dictionary<string, object?>? customData, CancellationToken ct = default)
+            => Req<Session>(HttpVerb.Put, $"/v1/sessions/{Enc(id)}/custom_data", new Dictionary<string, object?> { ["custom_data"] = customData }, cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/sessions/{id}/custom_data</c> — merge keys; a key set to null is removed.</summary>
+        public Task<Session> UpdateCustomDataAsync(string id, Dictionary<string, object?> patch, CancellationToken ct = default)
+            => Req<Session>(HttpVerb.Patch, $"/v1/sessions/{Enc(id)}/custom_data", new Dictionary<string, object?> { ["custom_data"] = patch }, cancellationToken: ct);
     }
 
     public sealed class SessionTemplateToken

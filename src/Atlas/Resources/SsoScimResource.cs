@@ -40,6 +40,29 @@ namespace Atlas.Resources
         public string? DefaultRoleId { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
+        /// <summary>SAML Single Logout is on for the connection.</summary>
+        public bool SamlSingleLogout { get; init; }
+        /// <summary>The IdP SingleLogoutService Location / ResponseLocation; binding <c>redirect</c> or <c>post</c>.</summary>
+        public string? SamlIdpSloUrl { get; init; }
+        public string? SamlIdpSloResponseUrl { get; init; }
+        public string? SamlIdpSloBinding { get; init; }
+        /// <summary>The IdP SOAP SingleLogoutService — the back channel for sessions ended server-side.</summary>
+        public string? SamlIdpSloSoapUrl { get; init; }
+        /// <summary>Assertions not encrypted to the connection's key are refused.</summary>
+        public bool SamlRequireEncryptedAssertions { get; init; }
+        /// <summary>An SP encryption key pair is set up (the private key is never returned).</summary>
+        public bool HasSamlEncryptionKey { get; init; }
+        /// <summary>A key rotation is in progress (the previous key is still accepted).</summary>
+        public bool HasPreviousSamlEncryptionKey { get; init; }
+        public long? SamlEncryptionRotatedAt { get; init; }
+        /// <summary>OIDC relying-party settings (see <see cref="CustomOAuthProvidersResource"/>).</summary>
+        public JsonElement? ProfileMapping { get; init; }
+        public string? TokenEndpointAuthMethod { get; init; }
+        public string? ClientAssertionAudience { get; init; }
+        public JsonElement? Logout { get; init; }
+        public JsonElement? IdpInitiatedLogin { get; init; }
+        /// <summary>OIDC connections: the URLs to register at the IdP.</summary>
+        public UpstreamUrls? UpstreamUrls { get; init; }
     }
 
     /// <summary>SP SAML metadata: the EntityDescriptor XML carried as a string in a JSON envelope.</summary>
@@ -49,6 +72,8 @@ namespace Atlas.Resources
         public string SpEntityId { get; init; } = "";
         public string AcsUrl { get; init; } = "";
         public string MetadataXml { get; init; } = "";
+        /// <summary>Our SingleLogoutService URL (both bindings), when Single Logout is on.</summary>
+        public string? SloUrl { get; init; }
     }
 
     public sealed class CreateSsoConnectionBody
@@ -73,6 +98,36 @@ namespace Atlas.Resources
         public List<string>? AllowedDomains { get; set; }
         public List<ClaimRoleMapping>? ClaimRoleMappings { get; set; }
         public string? DefaultRoleId { get; set; }
+        /// <summary>SAML Single Logout on/off.</summary>
+        public bool? SamlSingleLogout { get; set; }
+        /// <summary>The IdP SingleLogoutService URL (https); clear with <c>Set("saml_idp_slo_url", null)</c>.</summary>
+        public string? SamlIdpSloUrl { get; set; }
+        public string? SamlIdpSloResponseUrl { get; set; }
+        /// <summary><c>redirect</c> or <c>post</c>.</summary>
+        public string? SamlIdpSloBinding { get; set; }
+        /// <summary>The IdP SOAP SingleLogoutService (https): the back channel for sessions ended server-side.</summary>
+        public string? SamlIdpSloSoapUrl { get; set; }
+        /// <summary>Refuse assertions not encrypted to the connection's key (needs an encryption key first).</summary>
+        public bool? SamlRequireEncryptedAssertions { get; set; }
+        /// <summary>OIDC: declarative profile mapping (<c>fields</c>, <c>public_metadata</c>, <c>private_metadata</c>, <c>update_on_sign_in</c>).</summary>
+        public Dictionary<string, object?>? ProfileMapping { get; set; }
+        /// <summary>OIDC: client_secret_basic, client_secret_post, client_secret_jwt, private_key_jwt or none.</summary>
+        public string? TokenEndpointAuthMethod { get; set; }
+        public string? ClientAssertionAudience { get; set; }
+        /// <summary>OIDC: rp_initiated, post_logout_redirect_url, backchannel, frontchannel, frontchannel_session_required, end_session_endpoint.</summary>
+        public Dictionary<string, object?>? Logout { get; set; }
+        /// <summary>OIDC: enabled, allowed_targets, default_target.</summary>
+        public Dictionary<string, object?>? IdpInitiatedLogin { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public CreateSsoConnectionBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     /// <summary>PATCH accepts everything create does except <c>type</c>, which is immutable.</summary>
@@ -95,6 +150,36 @@ namespace Atlas.Resources
         public List<string>? AllowedDomains { get; set; }
         public List<ClaimRoleMapping>? ClaimRoleMappings { get; set; }
         public string? DefaultRoleId { get; set; }
+        /// <summary>SAML Single Logout on/off.</summary>
+        public bool? SamlSingleLogout { get; set; }
+        /// <summary>The IdP SingleLogoutService URL (https); clear with <c>Set("saml_idp_slo_url", null)</c>.</summary>
+        public string? SamlIdpSloUrl { get; set; }
+        public string? SamlIdpSloResponseUrl { get; set; }
+        /// <summary><c>redirect</c> or <c>post</c>.</summary>
+        public string? SamlIdpSloBinding { get; set; }
+        /// <summary>The IdP SOAP SingleLogoutService (https): the back channel for sessions ended server-side.</summary>
+        public string? SamlIdpSloSoapUrl { get; set; }
+        /// <summary>Refuse assertions not encrypted to the connection's key (needs an encryption key first).</summary>
+        public bool? SamlRequireEncryptedAssertions { get; set; }
+        /// <summary>OIDC: declarative profile mapping (<c>fields</c>, <c>public_metadata</c>, <c>private_metadata</c>, <c>update_on_sign_in</c>).</summary>
+        public Dictionary<string, object?>? ProfileMapping { get; set; }
+        /// <summary>OIDC: client_secret_basic, client_secret_post, client_secret_jwt, private_key_jwt or none.</summary>
+        public string? TokenEndpointAuthMethod { get; set; }
+        public string? ClientAssertionAudience { get; set; }
+        /// <summary>OIDC: rp_initiated, post_logout_redirect_url, backchannel, frontchannel, frontchannel_session_required, end_session_endpoint.</summary>
+        public Dictionary<string, object?>? Logout { get; set; }
+        /// <summary>OIDC: enabled, allowed_targets, default_target.</summary>
+        public Dictionary<string, object?>? IdpInitiatedLogin { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public UpdateSsoConnectionBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     /// <summary>The SSO-connections namespace (<c>/v1/sso_connections</c>).</summary>
@@ -120,6 +205,41 @@ namespace Atlas.Resources
         /// <summary>SP SAML metadata for a connection (JSON envelope carrying the XML).</summary>
         public Task<SamlMetadata> SamlMetadataAsync(string id, CancellationToken ct = default)
             => Req<SamlMetadata>(HttpVerb.Get, $"/v1/sso_connections/{Enc(id)}/saml_metadata", cancellationToken: ct);
+
+        /// <summary>OIDC: run the connection's profile mapping (or the body's) against a pasted sample.</summary>
+        public Task<ProfileMappingPreview> PreviewProfileMappingAsync(string id, Dictionary<string, object?> body, CancellationToken ct = default)
+            => Req<ProfileMappingPreview>(HttpVerb.Post, $"/v1/sso_connections/{Enc(id)}/profile_mapping/preview", body, cancellationToken: ct);
+
+        /// <summary>OIDC: the connection's private_key_jwt signing keys.</summary>
+        public Task<ListPage<UpstreamSigningKey>> ListSigningKeysAsync(string id, CancellationToken ct = default)
+            => Req<ListPage<UpstreamSigningKey>>(HttpVerb.Get, $"/v1/sso_connections/{Enc(id)}/signing_keys", cancellationToken: ct);
+
+        /// <summary>Generate a new active key (<c>RS256</c>, <c>PS256</c> or <c>ES256</c>); the previous one turns <c>retiring</c>.</summary>
+        public Task<UpstreamSigningKey> RotateSigningKeyAsync(string id, string? alg = null, CancellationToken ct = default)
+            => Req<UpstreamSigningKey>(HttpVerb.Post, $"/v1/sso_connections/{Enc(id)}/signing_keys", Body(("alg", alg)), cancellationToken: ct);
+
+        /// <summary>Retire a non-active key (it leaves the JWKS).</summary>
+        public Task<UpstreamSigningKey> RetireSigningKeyAsync(string id, string kid, CancellationToken ct = default)
+            => Req<UpstreamSigningKey>(HttpVerb.Post, $"/v1/sso_connections/{Enc(id)}/signing_keys/{Enc(kid)}/retire", cancellationToken: ct);
+
+        /// <summary>The SAML connection's SP encryption certificate(s).</summary>
+        public Task<SamlEncryptionKey> GetSamlEncryptionKeyAsync(string id, CancellationToken ct = default)
+            => Req<SamlEncryptionKey>(HttpVerb.Get, $"/v1/sso_connections/{Enc(id)}/saml_encryption_key", cancellationToken: ct);
+
+        /// <summary>
+        /// Generate the SP encryption key pair, or ROTATE it when one exists: the current pair becomes the previous
+        /// one (still advertised and accepted until <see cref="RetirePreviousSamlEncryptionKeyAsync"/>).
+        /// </summary>
+        public Task<SamlEncryptionKey> CreateSamlEncryptionKeyAsync(string id, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<SamlEncryptionKey>(HttpVerb.Post, $"/v1/sso_connections/{Enc(id)}/saml_encryption_key", idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary>Finish a rotation: stop accepting the previous encryption key.</summary>
+        public Task<SamlEncryptionKey> RetirePreviousSamlEncryptionKeyAsync(string id, CancellationToken ct = default)
+            => Req<SamlEncryptionKey>(HttpVerb.Delete, $"/v1/sso_connections/{Enc(id)}/saml_encryption_key/previous", cancellationToken: ct);
+
+        /// <summary>Turn assertion encryption off (refused while encrypted assertions are required).</summary>
+        public Task<SamlEncryptionKey> DeleteSamlEncryptionKeyAsync(string id, CancellationToken ct = default)
+            => Req<SamlEncryptionKey>(HttpVerb.Delete, $"/v1/sso_connections/{Enc(id)}/saml_encryption_key", cancellationToken: ct);
     }
 
     // ---------------- SCIM tokens (inbound) ----------------
@@ -385,5 +505,19 @@ namespace Atlas.Resources
         public Task<ScimProvisioningGroupSyncResult> SyncGroupAsync(string id, string organizationId, CancellationToken ct = default)
             => Req<ScimProvisioningGroupSyncResult>(HttpVerb.Post, $"/v1/scim_provisioning_targets/{Enc(id)}/sync_group",
                 body: Body(("organization_id", organizationId)), cancellationToken: ct);
+    }
+
+    /// <summary>A SAML connection's SP encryption key pair — certificates only.</summary>
+    public sealed class SamlEncryptionKey
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "sso_saml_encryption_key";
+        public string ConnectionId { get; init; } = "";
+        /// <summary>The current certificate (PEM), published in SP metadata; null when encryption is off.</summary>
+        public string? Certificate { get; init; }
+        /// <summary>The previous certificate during a rotation.</summary>
+        public string? PreviousCertificate { get; init; }
+        /// <summary>When the current key was installed (epoch ms).</summary>
+        public long? RotatedAt { get; init; }
+        public bool RequireEncryptedAssertions { get; init; }
     }
 }

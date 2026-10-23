@@ -13,7 +13,7 @@
 
     <!-- NuGet package metadata -->
     <PackageId>Atlas.Sdk</PackageId>
-    <Version>1.12.0</Version>
+    <Version>1.13.0</Version>
     <Authors>Atlas</Authors>
     <Company>Atlas</Company>
     <Product>Atlas Backend SDK</Product>
@@ -24,6 +24,10 @@
     <RepositoryUrl>https://github.com/atlas/atlas</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Atlas.Tests" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />

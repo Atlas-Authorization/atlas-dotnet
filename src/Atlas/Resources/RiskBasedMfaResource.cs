@@ -12,6 +12,8 @@ namespace Atlas.Resources
         [JsonPropertyName("newIp")] public double NewIp { get; set; }
         [JsonPropertyName("velocity")] public double Velocity { get; set; }
         [JsonPropertyName("impossibleTravel")] public double ImpossibleTravel { get; set; }
+        /// <summary>The account was idle past the dormant-account threshold before this sign-in.</summary>
+        [JsonPropertyName("dormantAccount")] public double DormantAccount { get; set; }
     }
 
     /// <summary>Per-signal on/off toggles. camelCase on the wire.</summary>
@@ -22,6 +24,7 @@ namespace Atlas.Resources
         [JsonPropertyName("newIp")] public bool NewIp { get; set; }
         [JsonPropertyName("velocity")] public bool Velocity { get; set; }
         [JsonPropertyName("impossibleTravel")] public bool ImpossibleTravel { get; set; }
+        [JsonPropertyName("dormantAccount")] public bool DormantAccount { get; set; }
     }
 
     public sealed class RiskBasedMfa

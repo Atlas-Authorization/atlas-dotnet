@@ -68,6 +68,7 @@ namespace Atlas
             JwtTemplates = new JwtTemplatesResource(transport);
             ApiKeys = new ApiKeysResource(transport);
             OAuthProviders = new OAuthProvidersResource(transport);
+            CustomOAuthProviders = new CustomOAuthProvidersResource(transport);
             SsoOnboarding = new SsoOnboardingResource(transport);
             ScimProvisioning = new ScimProvisioningResource(transport);
             Fga = new FgaResource(transport);
@@ -83,6 +84,8 @@ namespace Atlas
             SmsTemplates = new SmsTemplatesResource(transport);
             Localizations = new LocalizationsResource(transport);
             Actions = new ActionsResource(transport);
+            ActionGallery = new ActionGalleryResource(transport);
+            ActionTemplates = new ActionTemplatesResource(transport);
             Billing = new BillingResource(transport);
             Messaging = new MessagingResource(transport);
             ImportExport = new ImportExportResource(transport);
@@ -164,6 +167,8 @@ namespace Atlas
         public JwtTemplatesResource JwtTemplates { get; }
         public ApiKeysResource ApiKeys { get; }
         public OAuthProvidersResource OAuthProviders { get; }
+        /// <summary>Your own upstream OAuth / OIDC login providers.</summary>
+        public CustomOAuthProvidersResource CustomOAuthProviders { get; }
         public SsoOnboardingResource SsoOnboarding { get; }
         public ScimProvisioningResource ScimProvisioning { get; }
         public FgaResource Fga { get; }
@@ -180,6 +185,10 @@ namespace Atlas
         public SmsTemplatesResource SmsTemplates { get; }
         public LocalizationsResource Localizations { get; }
         public ActionsResource Actions { get; }
+        /// <summary>The community Actions gallery: browse, install and update templates.</summary>
+        public ActionGalleryResource ActionGallery { get; }
+        /// <summary>Action templates this instance publishes to the gallery.</summary>
+        public ActionTemplatesResource ActionTemplates { get; }
         public BillingResource Billing { get; }
         public MessagingResource Messaging { get; }
         public ImportExportResource ImportExport { get; }

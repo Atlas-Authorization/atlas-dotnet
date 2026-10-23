@@ -155,6 +155,22 @@ namespace Atlas.Resources
         /// <summary><c>DELETE /v1/instance/cookie_consent</c> — Turn off the hosted-page cookie-consent CMP: no script is injected and the CSP goes back to normal.</summary>
         public Task<CookieConsent> DeleteCookieConsentAsync(CancellationToken ct = default)
             => Req<CookieConsent>(HttpVerb.Delete, "/v1/instance/cookie_consent", cancellationToken: ct);
+
+        /// <summary>
+        /// Write <c>auth_config.accountLinkingTrust</c>: keys are an exact provider key, a <c>prefix*</c> or <c>*</c>;
+        /// values <c>always</c> (vouch for the provider's email, for linking only), <c>verified</c> or <c>never</c>
+        /// (refused with 409 <c>IDENTITY_ALREADY_LINKED</c>). An account that never proved its email is never linked.
+        /// </summary>
+        public Task<InstanceUpdateResult> SetAccountLinkingTrustAsync(Dictionary<string, string> trust, CancellationToken ct = default)
+            => Req<InstanceUpdateResult>(HttpVerb.Patch, "/v1/instance", new Dictionary<string, object?> { ["auth_config"] = new Dictionary<string, object?> { ["accountLinkingTrust"] = trust } }, cancellationToken: ct);
+
+        /// <summary>
+        /// Merge <c>auth_config.captcha</c>: <c>provider</c> (see <see cref="AtlasConstants.CaptchaProviders"/>),
+        /// <c>siteKey</c>, <c>widget</c>, <c>minScore</c>, per-flow / per-action overrides and, for Vercel BotID,
+        /// <c>attestationUrl</c> (https or a root-relative path). Keys are camelCase, as in auth_config.
+        /// </summary>
+        public Task<InstanceUpdateResult> SetCaptchaConfigAsync(Dictionary<string, object?> captcha, CancellationToken ct = default)
+            => Req<InstanceUpdateResult>(HttpVerb.Patch, "/v1/instance", new Dictionary<string, object?> { ["auth_config"] = new Dictionary<string, object?> { ["captcha"] = captcha } }, cancellationToken: ct);
     }
 
     // ---------------- Instance security ----------------
@@ -337,6 +353,32 @@ namespace Atlas.Resources
         public Task<JsonElement> RotateSigningKeyAsync(string? alg = null, long? gracePeriodSeconds = null, bool? emergency = null, CancellationToken ct = default)
             => Req<JsonElement>(HttpVerb.Post, "/v1/instance/signing_keys/rotate",
                 body: Body(("alg", alg), ("grace_period_seconds", gracePeriodSeconds), ("emergency", emergency)), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/signing_key_provider</c> — the KMS the signing key lives in (<c>local</c> when none).</summary>
+        public Task<SigningKeyProviderSettings> GetSigningKeyProviderAsync(CancellationToken ct = default)
+            => Req<SigningKeyProviderSettings>(HttpVerb.Get, "/v1/instance/signing_key_provider", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>PUT /v1/instance/signing_key_provider</c> — sign every token with a key in your own KMS
+        /// (<c>aws_kms</c>, <c>gcp_kms</c>, <c>azure_key_vault</c>). aws_kms: config <c>{region, key_id?, alg?}</c>,
+        /// credentials <c>{access_key_id, secret_access_key, session_token?}</c>; gcp_kms: config
+        /// <c>{crypto_key, key_version?}</c>, credentials <c>{service_account_json}</c>; azure_key_vault: config
+        /// <c>{vault_url, key_name, key_version?, alg?}</c>, credentials <c>{tenant_id, client_id, client_secret}</c>.
+        /// Without a key id / version Atlas creates a new key version in the KMS.
+        /// </summary>
+        public Task<SigningKeyProviderSettings> SetSigningKeyProviderAsync(string provider, Dictionary<string, object?> config, Dictionary<string, object?> credentials, long? gracePeriodSeconds = null, bool? emergency = null, CancellationToken ct = default)
+            => Req<SigningKeyProviderSettings>(HttpVerb.Put, "/v1/instance/signing_key_provider", Body(("provider", provider), ("config", config), ("credentials", credentials), ("grace_period_seconds", gracePeriodSeconds), ("emergency", emergency)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/signing_key_provider</c> — rotate back to a key Atlas holds and forget the KMS credentials.</summary>
+        public Task<SigningKeyProviderSettings> RemoveSigningKeyProviderAsync(long? gracePeriodSeconds = null, bool? emergency = null, CancellationToken ct = default)
+            => Req<SigningKeyProviderSettings>(HttpVerb.Delete, "/v1/instance/signing_key_provider", Body(("grace_period_seconds", gracePeriodSeconds), ("emergency", emergency)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>PUT /v1/instance/wallet_rpc_secret</c> — store (write-only, encrypted) the wallet RPC endpoint for an
+        /// EIP-155 chain, used by wallet token gating and the Sign in with Ethereum ENS lookup. An empty url removes it.
+        /// </summary>
+        public Task<JsonElement> SetWalletRpcSecretAsync(long chainId, string url, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Put, "/v1/instance/wallet_rpc_secret", Body(("chain_id", chainId), ("url", url)), cancellationToken: ct);
     }
 
     public sealed class CookieConsentBody
@@ -609,5 +651,26 @@ namespace Atlas.Resources
         public List<object> Spaces { get; set; } = new List<object>();
         /// <summary>The token aud. Default <c>forumulate:&lt;org_id&gt;</c>.</summary>
         public string? Audience { get; set; }
+    }
+
+    /// <summary>
+    /// Where the token-signing key lives (<c>local</c>, <c>aws_kms</c>, <c>gcp_kms</c> or <c>azure_key_vault</c>).
+    /// Never carries credentials. <see cref="Rotation"/> is set on a PUT or DELETE.
+    /// </summary>
+    public sealed class SigningKeyProviderSettings
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "signing_key_provider";
+        public string? Id { get; init; }
+        public string Provider { get; init; } = "local";
+        public Dictionary<string, JsonElement>? Config { get; init; }
+        /// <summary>True when the current main key is in this KMS.</summary>
+        public bool Active { get; init; }
+        /// <summary>The KMS key version tokens are signed with (ARN, resource name or key id).</summary>
+        public string? KeyVersion { get; init; }
+        public long? LastVerifiedAt { get; init; }
+        public long? CreatedAt { get; init; }
+        public long? UpdatedAt { get; init; }
+        public JsonElement? Rotation { get; init; }
+        public bool Deleted { get; init; }
     }
 }

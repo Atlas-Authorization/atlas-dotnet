@@ -43,6 +43,8 @@ namespace Atlas.Resources
         public string? Email { get; set; }
         [JsonPropertyName("emailVerified")] public bool? EmailVerified { get; set; }
         public Dictionary<string, object?>? Metadata { get; set; }
+        /// <summary>The user's organization memberships (<c>id</c>, <c>slug</c>, <c>name</c>, <c>role</c>), as <c>event.user.organizations</c>.</summary>
+        public List<Dictionary<string, string>>? Organizations { get; set; }
     }
 
     public sealed class ActionTestEventConnection
@@ -54,6 +56,8 @@ namespace Atlas.Resources
     {
         public string? Ip { get; set; }
         [JsonPropertyName("user_agent")] public string? UserAgent { get; set; }
+        /// <summary>The ISO code <c>event.request.country</c> should carry.</summary>
+        public string? Country { get; set; }
     }
 
     /// <summary>The sample event a dry-run runs against; every field has a stand-in default.</summary>
@@ -75,6 +79,8 @@ namespace Atlas.Resources
         public Dictionary<string, object?> AppMetadata { get; init; } = new Dictionary<string, object?>();
         public List<string> Logs { get; init; } = new List<string>();
         public string? Error { get; init; }
+        /// <summary>What the code queued with <c>api.http</c>; sent only on a real post_login / post_user_registration run.</summary>
+        public List<ActionTestHttpRequest>? HttpRequests { get; init; }
     }
 
     /// <summary>The ordered binding list for a trigger, replaced atomically as a set.</summary>
@@ -118,5 +124,17 @@ namespace Atlas.Resources
         public Task<ActionBindingList> SetBindingsAsync(string trigger, IEnumerable<string> actionIds, CancellationToken ct = default)
             => Req<ActionBindingList>(HttpVerb.Put, $"/v1/actions/bindings/{Enc(trigger)}",
                 body: Body(("action_ids", new List<string>(actionIds))), cancellationToken: ct);
+    }
+
+    /// <summary>An outbound request an action queued with <c>api.http</c> (a dry run sends nothing).</summary>
+    public sealed class ActionTestHttpRequest
+    {
+        public string Method { get; init; } = "";
+        /// <summary>Query values are masked.</summary>
+        public string Url { get; init; } = "";
+        /// <summary>Header names only; values are never echoed.</summary>
+        public List<string> HeaderNames { get; init; } = new List<string>();
+        public bool HasBody { get; init; }
+        public string? SaveResponseAs { get; init; }
     }
 }

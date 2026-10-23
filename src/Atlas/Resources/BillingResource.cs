@@ -26,6 +26,12 @@ namespace Atlas.Resources
         public string? ProviderPriceId { get; init; }
         public string? AnnualPriceId { get; init; }
         public string? AnnualAmount { get; init; }
+        /// <summary>Numeric limits the plan grants (the <c>ent.limits</c> claim); -1 = unlimited.</summary>
+        public Dictionary<string, JsonElement>? Limits { get; init; }
+        /// <summary><c>base</c> (the subject's main plan) or <c>addon</c> (bought alongside it).</summary>
+        public string? Kind { get; init; }
+        /// <summary>Autumn plans: the feature whose usage follows the organization's member count.</summary>
+        public string? SeatFeatureId { get; init; }
     }
 
     public sealed class BillingSubscription
@@ -57,6 +63,8 @@ namespace Atlas.Resources
         public long? CanceledAt { get; init; }
         /// <summary>On a change response: true when the switch waits for the period end.</summary>
         public bool Scheduled { get; init; }
+        /// <summary>What an entitlement provider (Autumn, Commet) reports this subscription grants.</summary>
+        public BillingEntitlements? Entitlements { get; init; }
     }
 
     public sealed class CreateBillingPlanBody
@@ -78,6 +86,22 @@ namespace Atlas.Resources
         public string? ProviderPriceId { get; set; }
         public string? AnnualPriceId { get; set; }
         public string? AnnualAmount { get; set; }
+        /// <summary>Numeric limits the plan grants (-1 = unlimited).</summary>
+        public Dictionary<string, object?>? Limits { get; set; }
+        /// <summary><c>base</c> (default) or <c>addon</c>.</summary>
+        public string? Kind { get; set; }
+        /// <summary>Autumn plans: one of the plan's features; its usage follows the org's member count. Clear it with <c>Set("seat_feature_id", null)</c>.</summary>
+        public string? SeatFeatureId { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public CreateBillingPlanBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     public sealed class UpdateBillingPlanBody
@@ -97,6 +121,22 @@ namespace Atlas.Resources
         public string? ProviderPriceId { get; set; }
         public string? AnnualPriceId { get; set; }
         public string? AnnualAmount { get; set; }
+        /// <summary>Numeric limits the plan grants (-1 = unlimited).</summary>
+        public Dictionary<string, object?>? Limits { get; set; }
+        /// <summary><c>base</c> (default) or <c>addon</c>.</summary>
+        public string? Kind { get; set; }
+        /// <summary>Autumn plans: one of the plan's features; its usage follows the org's member count. Clear it with <c>Set("seat_feature_id", null)</c>.</summary>
+        public string? SeatFeatureId { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public UpdateBillingPlanBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     public sealed class ListSubscriptionsParams
@@ -185,6 +225,30 @@ namespace Atlas.Resources
         public Task<JsonElement> DeleteProviderAsync(string provider, bool force = false, CancellationToken ct = default)
             => Req<JsonElement>(HttpVerb.Delete, $"/v1/billing/providers/{Enc(provider)}",
                 query: Q(("force", force ? "true" : null)), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/billing/subscriptions/{id}</c> — one subscription (a subject may hold several: a base plan plus add-ons).</summary>
+        public Task<BillingSubscription> GetSubscriptionAsync(string id, CancellationToken ct = default)
+            => Req<BillingSubscription>(HttpVerb.Get, $"/v1/billing/subscriptions/{Enc(id)}", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/billing/plans/{id}/sync_entitlements</c> — mirror a plan's features and limits from its provider (Autumn, Commet).</summary>
+        public Task<BillingPlan> SyncPlanEntitlementsAsync(string id, CancellationToken ct = default)
+            => Req<BillingPlan>(HttpVerb.Post, $"/v1/billing/plans/{Enc(id)}/sync_entitlements", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/billing/settings</c> — how numeric limits merge across a subject's subscriptions.</summary>
+        public Task<BillingSettings> GetSettingsAsync(CancellationToken ct = default)
+            => Req<BillingSettings>(HttpVerb.Get, "/v1/billing/settings", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/billing/settings</c> — <paramref name="defaultLimitMerge"/> is <c>max</c> or <c>sum</c>; <paramref name="limitMerge"/> replaces the stored per-key map.</summary>
+        public Task<BillingSettings> UpdateSettingsAsync(string? defaultLimitMerge = null, Dictionary<string, string>? limitMerge = null, CancellationToken ct = default)
+            => Req<BillingSettings>(HttpVerb.Put, "/v1/billing/settings", Body(("default_limit_merge", defaultLimitMerge), ("limit_merge", limitMerge)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/billing/check</c> — may a subject use a feature? <paramref name="required"/> is the units
+        /// about to be used (default 1). Asked live of Autumn/Commet when the subject is on one, otherwise from the
+        /// resolved entitlement and this period's usage.
+        /// </summary>
+        public Task<BillingFeatureCheck> CheckFeatureAsync(string subjectType, string subjectId, string feature, double? required = null, CancellationToken ct = default)
+            => Req<BillingFeatureCheck>(HttpVerb.Post, "/v1/billing/check", Body(("subject_type", subjectType), ("subject_id", subjectId), ("feature", feature), ("required", required)), cancellationToken: ct);
     }
 
     public sealed class ImportSubscriptionBody
@@ -222,6 +286,10 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+        /// <summary>Count against this provider feature (an Autumn feature id / Commet feature code).</summary>
+        public string? Feature { get; set; }
+        /// <summary>Attribute to this subscription when the subject holds several.</summary>
+        public string? SubscriptionId { get; set; }
     }
 
     public sealed class BillingUsageRecorded
@@ -238,5 +306,35 @@ namespace Atlas.Resources
         public string SubjectType { get; init; } = "";
         public string SubjectId { get; init; } = "";
         public long Quantity { get; init; }
+    }
+
+    /// <summary>What an entitlement provider (Autumn, Commet) reports a subscription grants.</summary>
+    public sealed class BillingEntitlements
+    {
+        public List<string> Features { get; init; } = new List<string>();
+        public Dictionary<string, double> Limits { get; init; } = new Dictionary<string, double>();
+    }
+
+    /// <summary>How numeric limits merge when a subject holds several entitling subscriptions.</summary>
+    public sealed class BillingSettings
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "billing_settings";
+        /// <summary><c>max</c> (default) or <c>sum</c>.</summary>
+        public string DefaultLimitMerge { get; init; } = "max";
+        public Dictionary<string, string> LimitMerge { get; init; } = new Dictionary<string, string>();
+    }
+
+    /// <summary>May a subject use a feature? <c>source</c> is <c>provider</c> (asked live) or <c>atlas</c>.</summary>
+    public sealed class BillingFeatureCheck
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "billing_feature_check";
+        public string Feature { get; init; } = "";
+        public bool Allowed { get; init; }
+        public string Source { get; init; } = "";
+        public string? Provider { get; init; }
+        public double? Remaining { get; init; }
+        public double? Granted { get; init; }
+        public double? Usage { get; init; }
+        public bool Unlimited { get; init; }
     }
 }

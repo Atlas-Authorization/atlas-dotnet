@@ -41,6 +41,10 @@ namespace Atlas.Resources
         public string? SectorIdentifierUri { get; init; }
         /// <summary>When the current secret stops authenticating (epoch ms); null = never.</summary>
         public long? ClientSecretExpiresAt { get; init; }
+        /// <summary><c>jwt</c> or <c>opaque</c> access tokens for this client; null inherits from the API / instance.</summary>
+        public string? AccessTokenFormat { get; init; }
+        /// <summary>This client's token lifetime overrides (seconds); a null field is inherited.</summary>
+        public OAuthTokenLifetimes? TokenLifetimes { get; init; }
     }
 
     /// <summary>Create/rotate reveal the secret exactly once, alongside the client.</summary>
@@ -114,6 +118,20 @@ namespace Atlas.Resources
         public string? SubjectType { get; set; }
         /// <summary>An https URL listing every redirect_uri; required for a pairwise client spanning hosts.</summary>
         public string? SectorIdentifierUri { get; set; }
+        /// <summary><c>jwt</c> or <c>opaque</c>; clear it with <c>Set("access_token_format", null)</c>.</summary>
+        public string? AccessTokenFormat { get; set; }
+        /// <summary>Replaces the lifetime overrides; clear them with <c>Set("token_lifetimes", null)</c>.</summary>
+        public OAuthTokenLifetimes? TokenLifetimes { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public CreateOAuthClientBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     public sealed class UpdateOAuthClientBody
@@ -141,6 +159,20 @@ namespace Atlas.Resources
         public bool? Disabled { get; set; }
         /// <summary>Require PKCE for this confidential client too.</summary>
         public bool? RequirePkce { get; set; }
+        /// <summary><c>jwt</c> or <c>opaque</c>; clear it with <c>Set("access_token_format", null)</c>.</summary>
+        public string? AccessTokenFormat { get; set; }
+        /// <summary>Replaces the lifetime overrides; clear them with <c>Set("token_lifetimes", null)</c>.</summary>
+        public OAuthTokenLifetimes? TokenLifetimes { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public UpdateOAuthClientBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     public sealed class DeleteOAuthClientResult
@@ -287,6 +319,13 @@ namespace Atlas.Resources
         public long UpdatedAt { get; init; }
         /// <summary>Atlas serves the RFC 9728 protected-resource metadata document for this API.</summary>
         public bool PublishResourceMetadata { get; init; }
+        /// <summary><c>jwt</c> or <c>opaque</c> access tokens for this API; null inherits.</summary>
+        public string? AccessTokenFormat { get; init; }
+        /// <summary>Refresh-token lifetimes for grants issued for this API (seconds); null inherits.</summary>
+        public long? RefreshTokenAbsoluteTtlSeconds { get; init; }
+        public long? RefreshTokenIdleTtlSeconds { get; init; }
+        /// <summary>client_ids of the confidential clients allowed to introspect this API's tokens.</summary>
+        public List<string>? IntrospectionClientIds { get; init; }
     }
 
     public sealed class CreateResourceServerBody
@@ -299,6 +338,24 @@ namespace Atlas.Resources
         public string? SigningAlg { get; set; }
         /// <summary>Serve the RFC 9728 protected-resource metadata document for this API.</summary>
         public bool? PublishResourceMetadata { get; set; }
+        /// <summary><c>jwt</c> or <c>opaque</c>; clear it with <c>Set("access_token_format", null)</c>.</summary>
+        public string? AccessTokenFormat { get; set; }
+        /// <summary>300–31536000 seconds.</summary>
+        public long? RefreshTokenAbsoluteTtlSeconds { get; set; }
+        /// <summary>300–31536000 seconds, at most the absolute lifetime.</summary>
+        public long? RefreshTokenIdleTtlSeconds { get; set; }
+        /// <summary>client_ids of confidential clients (e.g. this API's backend) that may introspect its tokens.</summary>
+        public List<string>? IntrospectionClientIds { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public CreateResourceServerBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     public sealed class UpdateResourceServerBody
@@ -311,6 +368,24 @@ namespace Atlas.Resources
         public string? Identifier { get; set; }
         /// <summary>Serve the RFC 9728 protected-resource metadata document for this API.</summary>
         public bool? PublishResourceMetadata { get; set; }
+        /// <summary><c>jwt</c> or <c>opaque</c>; clear it with <c>Set("access_token_format", null)</c>.</summary>
+        public string? AccessTokenFormat { get; set; }
+        /// <summary>300–31536000 seconds.</summary>
+        public long? RefreshTokenAbsoluteTtlSeconds { get; set; }
+        /// <summary>300–31536000 seconds, at most the absolute lifetime.</summary>
+        public long? RefreshTokenIdleTtlSeconds { get; set; }
+        /// <summary>client_ids of confidential clients (e.g. this API's backend) that may introspect its tokens.</summary>
+        public List<string>? IntrospectionClientIds { get; set; }
+
+        /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name (snake_case), including <c>null</c> to clear it.</summary>
+        public UpdateResourceServerBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     public sealed class DeletedResourceServer
@@ -597,5 +672,20 @@ namespace Atlas.Resources
         public long? CreatedAt { get; init; }
         /// <summary>Updated (epoch ms).</summary>
         public long? UpdatedAt { get; init; }
+    }
+
+    /// <summary>
+    /// Token lifetimes in seconds. A null field inherits the API's, then the instance's, then Atlas's default.
+    /// Bounds: access / id token 60–86400; refresh token 300–31536000 (idle ≤ absolute); authorization code
+    /// 10–600; device code 60–1800.
+    /// </summary>
+    public sealed class OAuthTokenLifetimes
+    {
+        public long? AccessTokenTtlSeconds { get; set; }
+        public long? IdTokenTtlSeconds { get; set; }
+        public long? RefreshTokenAbsoluteTtlSeconds { get; set; }
+        public long? RefreshTokenIdleTtlSeconds { get; set; }
+        public long? AuthorizationCodeTtlSeconds { get; set; }
+        public long? DeviceCodeTtlSeconds { get; set; }
     }
 }
