@@ -36,6 +36,13 @@ namespace Atlas.Verification
         [JsonPropertyName("orgs")] public List<OrgMembershipClaim>? Orgs { get; init; }
         /// <summary>The enterprise SSO connection the user signed in through (<c>sso_connection_id</c>).</summary>
         [JsonPropertyName("sso_connection_id")] public string? SsoConnectionId { get; init; }
+        /// <summary>
+        /// The Atlas organization that owns the SSO connection (<c>sso_organization_id</c>), absent for an instance-wide connection.
+        /// Independent of <see cref="OrgId"/>: scope a per-organization "require SSO" rule on this, never on "signed in via SSO".
+        /// </summary>
+        [JsonPropertyName("sso_organization_id")] public string? SsoOrganizationId { get; init; }
+        /// <summary>The connection protocol (<c>sso_connection_type</c>): <c>saml</c> or <c>oidc</c>.</summary>
+        [JsonPropertyName("sso_connection_type")] public string? SsoConnectionType { get; init; }
         /// <summary>The IdP-side tenant: the Entra <c>tid</c>, the Google Workspace <c>hd</c>, or the SAML IdP entity id (<c>sso_tenant_id</c>).</summary>
         [JsonPropertyName("sso_tenant_id")] public string? SsoTenantId { get; init; }
         /// <summary>The IdP issuer of an enterprise SSO sign-in (<c>sso_issuer</c>).</summary>

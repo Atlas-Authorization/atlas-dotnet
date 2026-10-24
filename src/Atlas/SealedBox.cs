@@ -73,3 +73,17 @@ namespace Atlas
         }
     }
 }
+
+namespace Atlas
+{
+    /// <summary>
+    /// Says a response was sealed to the key named in <c>X-Secret-Recipient</c> (<see cref="AtlasClientOptions.SecretRecipient"/>):
+    /// each listed field arrives as <c>sealed_&lt;field&gt;</c> instead of in plaintext. Open one with <see cref="SealedBox.OpenSealedSecret"/>.
+    /// </summary>
+    public sealed class SecretsSealed
+    {
+        public string Algorithm { get; init; } = "";
+        public string Recipient { get; init; } = "";
+        public System.Collections.Generic.List<string> Fields { get; init; } = new System.Collections.Generic.List<string>();
+    }
+}

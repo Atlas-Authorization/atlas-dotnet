@@ -102,6 +102,14 @@ namespace Atlas.Resources
         public long? UpdatedAt { get; init; }
         /// <summary>Reveal-once mk_ secret (create/rotate-only).</summary>
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
     }
 
     public sealed class Machine

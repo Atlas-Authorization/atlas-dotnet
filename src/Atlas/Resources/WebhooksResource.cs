@@ -65,6 +65,14 @@ namespace Atlas.Resources
         public long? DisabledAt { get; init; }
         public long CreatedAt { get; init; }
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         /// <summary>Epoch ms since deliveries started failing, or null while healthy.</summary>
         public long? FailingSince { get; init; }
         public string? ExternalRef { get; init; }
@@ -195,6 +203,14 @@ namespace Atlas.Resources
         public long CreatedAt { get; init; }
         public bool? Created { get; init; }
         public string? Secret { get; init; }
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? EventNaming { get; init; }
         public List<string>? SignatureVersions { get; init; }
         public WebhookDestination? Destination { get; init; }
@@ -510,6 +526,14 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         /// <summary>The current whsec_ signing secret.</summary>
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         /// <summary>On a rotation: what happens to the old secret.</summary>
         public string? Warning { get; init; }
         /// <summary>On a rotation: the overlap applied, in seconds.</summary>

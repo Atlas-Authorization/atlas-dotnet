@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.17.0 (Atlas.Sdk) — 2026-10-24
+
+### Added
+
+- **Enterprise SSO claims.** `SessionClaims` gains `SsoOrganizationId` (`sso_organization_id`: the Atlas organization that owns the connection, absent for an instance-wide one, independent of `OrgId`) and `SsoConnectionType` (`sso_connection_type`: `saml` | `oidc`). Scope a per-organization "require SSO" rule on `SsoOrganizationId`, never on "signed in via SSO".
+- **Adopting a Sign in with Atlas app.** `Platform.AtlasIdApps.SetManagedByAsync(id, instanceIdOrNull)` (`PUT /v1/platform/atlas_id_apps/{id}/managed_by`, `AtlasIdAppManagedBy`). App objects gain `ManagedVia` (`instance_toggle` | `adopted`); `ManagedAtlasIdApp` also carries `ButtonRenderedOrigins`, `AllowedScopes` and `CreatedAt`.
+- **Instance-surface app setup check.** `AtlasIdGrants.PreflightAsync(appId)` (`GET /v1/atlas_id_apps/{id}/preflight`). `AtlasIdAppPreflight` (both surfaces) gains `ButtonRenderedOrigins`, `AuthorizeRequests7d`, `FallbackOrigins` and `HomepageIncludesScript`.
+- **Dry run.** `DryRunResult` gains `Warnings`, `WouldReturnStatus`, `Suppressed` and `ValidationSkipped` (`DryRunValidationSkipped`); `Mode` is `native`, `rollback` or `plan`.
+- **Sealed secrets.** `SealedSecret`, `SealedClientSecret`, `SealedWebhookSecret` and `SecretsSealed` (`SecretsSealed`) on every secret-bearing response (webhook endpoints and secrets, OAuth clients, Sign in with Atlas apps, SCIM tokens, machines, API keys, platform apps and keys, integrations). `AtlasClientOptions.SecretRecipient` / `WithSecretRecipient` already send `X-Secret-Recipient` on every call, so every newly covered route answers sealed.
+- API coverage list: two more operations.
+
 ## 1.16.0 (Atlas.Sdk) — 2026-10-24
 
 ### Added

@@ -273,6 +273,8 @@ namespace Atlas.Resources
         public string Type { get; init; } = "";
         public string? SecretPrefix { get; init; }
         public string? ManagedByInstanceId { get; init; }
+        /// <summary><c>instance_toggle</c> (an instance's Sign in with Atlas toggle app) or <c>adopted</c> (handed to an instance with <c>SetManagedByAsync</c>); null otherwise.</summary>
+        public string? ManagedVia { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
         /// <summary>The per-app webhook URL, or null.</summary>
@@ -321,6 +323,8 @@ namespace Atlas.Resources
         public string Type { get; init; } = "";
         public string? SecretPrefix { get; init; }
         public string? ManagedByInstanceId { get; init; }
+        /// <summary><c>instance_toggle</c> (an instance's Sign in with Atlas toggle app) or <c>adopted</c> (handed to an instance with <c>SetManagedByAsync</c>); null otherwise.</summary>
+        public string? ManagedVia { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
         /// <summary>The per-app webhook URL, or null.</summary>
@@ -330,6 +334,14 @@ namespace Atlas.Resources
         public bool? WebhookActive { get; init; }
         /// <summary>Confidential apps only; returned exactly once.</summary>
         public string? ClientSecret { get; init; }
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? Note { get; init; }
         /// <summary>The per-app webhook signing secret, returned exactly once (first set, or rotated).</summary>
         public string? WebhookSecret { get; init; }
@@ -413,6 +425,14 @@ namespace Atlas.Resources
         public long UpdatedAt { get; init; }
         /// <summary>Reveal-once per-instance secret key.</summary>
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? Note { get; init; }
         /// <summary>The auto-created test-mode sibling in the environment opposite the primary (development for a production app — the default and common case). Has distinct publishable_key and secret from the primary. Absent when create_development_sibling is false.</summary>
         public PlatformAppWithSecret? SiblingInstance { get; init; }
@@ -455,6 +475,14 @@ namespace Atlas.Resources
         public long UpdatedAt { get; init; }
         /// <summary>Reveal-once per-instance secret key.</summary>
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? Note { get; init; }
         /// <summary>Provisioning tags.</summary>
         public Dictionary<string, JsonElement>? Metadata { get; init; }
@@ -534,6 +562,14 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         public string AppId { get; init; } = "";
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public long OverlapSeconds { get; init; }
         public long? PreviousKeysExpireAt { get; init; }
         public string Note { get; init; } = "";
@@ -565,6 +601,14 @@ namespace Atlas.Resources
         public string InstanceId { get; init; } = "";
         /// <summary>The new secret key, revealed exactly once.</summary>
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         /// <summary>The overlap applied, in seconds.</summary>
         public long OverlapSeconds { get; init; }
         /// <summary>When the prior keys stop working (epoch ms); null on a hard cut.</summary>
@@ -720,6 +764,15 @@ namespace Atlas.Resources
         public Task<OriginMove> MoveOriginAsync(string id, OriginMoveBody body, CancellationToken ct = default)
             => Req<OriginMove>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/move_origin", body, cancellationToken: ct);
 
+        /// <summary>
+        /// <c>PUT /v1/platform/atlas_id_apps/{id}/managed_by</c> — Hand the app's grant management to an instance of the same
+        /// account (<c>managed_via: "adopted"</c>), or take it back with <c>null</c>. That instance's secret key, scoped to
+        /// <c>privacy:grants:revoke</c> or <c>atlas_id_apps:*</c>, then lists and revokes the app's grants, so a data-rights tool
+        /// never needs the platform key.
+        /// </summary>
+        public Task<AtlasIdAppManagedBy> SetManagedByAsync(string id, string? instanceId, CancellationToken ct = default)
+            => Req<AtlasIdAppManagedBy>(HttpVerb.Put, $"/v1/platform/atlas_id_apps/{Enc(id)}/managed_by", new SetAtlasIdAppManagedByBody { InstanceId = instanceId }, cancellationToken: ct);
+
         /// <summary><c>POST /v1/platform/atlas_id_apps/{id}/webhook/rotate_secret</c> — Rotate the app's webhook signing secret (returned once).</summary>
         public Task<AtlasIdAppWithSecret> RotateWebhookSecretAsync(string id, CancellationToken ct = default)
             => Req<AtlasIdAppWithSecret>(HttpVerb.Post, $"/v1/platform/atlas_id_apps/{Enc(id)}/webhook/rotate_secret", cancellationToken: ct);
@@ -741,6 +794,34 @@ namespace Atlas.Resources
         /// <summary>People who have approved the app.</summary>
         public int UserCount { get; init; }
         public List<PreflightFinding> Findings { get; init; } = new List<PreflightFinding>();
+        /// <summary>The page origins the Sign in with Atlas button script ran on in the last 7 days.</summary>
+        public List<AtlasIdOriginSeen>? ButtonRenderedOrigins { get; init; }
+        /// <summary>How the last 7 days' sign-ins started.</summary>
+        [JsonPropertyName("authorize_requests_7d")] public AtlasIdAuthorizeSources? AuthorizeRequests7d { get; init; }
+        /// <summary>Origins of sign-ins that came through the no-script fallback link.</summary>
+        public List<AtlasIdOriginSeen>? FallbackOrigins { get; init; }
+        /// <summary>Whether the app's homepage references the button script (null = could not check).</summary>
+        public bool? HomepageIncludesScript { get; init; }
+    }
+
+    /// <summary>Body of <c>SetManagedByAsync</c>; a null <c>InstanceId</c> is sent as <c>null</c> and takes the app back.</summary>
+    public sealed class SetAtlasIdAppManagedByBody
+    {
+        [JsonPropertyName("instance_id")] [JsonIgnore(Condition = JsonIgnoreCondition.Never)] public string? InstanceId { get; init; }
+    }
+
+    /// <summary><c>PUT /v1/platform/atlas_id_apps/{id}/managed_by</c>: the app after the change, and whether anything changed.</summary>
+    public sealed class AtlasIdAppManagedBy
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "atlas_id_app";
+        public string Id { get; init; } = "";
+        public string ClientId { get; init; } = "";
+        public string Name { get; init; } = "";
+        public string? ManagedByInstanceId { get; init; }
+        /// <summary><c>instance_toggle</c> or <c>adopted</c>; null once taken back.</summary>
+        public string? ManagedVia { get; init; }
+        public long? UpdatedAt { get; init; }
+        public bool Changed { get; init; }
     }
 
     /// <summary>A person who has approved a Sign in with Atlas app.</summary>
@@ -992,6 +1073,12 @@ namespace Atlas.Resources
         public string AppId { get; init; } = "";
         public string InstanceId { get; init; } = "";
         public string? Secret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? SealedSecret { get; init; }
         public string? Note { get; init; }
         public Dictionary<string, JsonElement>? Metadata { get; init; }
@@ -1034,6 +1121,14 @@ namespace Atlas.Resources
         public PlatformApp? Target { get; init; }
         /// <summary>When a new instance was created for the clone, its secret key, shown once.</summary>
         public string? Secret { get; init; }
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? Note { get; init; }
     }
 
@@ -1164,6 +1259,12 @@ namespace Atlas.Resources
         public long UpdatedAt { get; init; }
         /// <summary>Present once, on create (or sealed).</summary>
         public string? Secret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? SealedSecret { get; init; }
     }
 

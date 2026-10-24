@@ -79,6 +79,14 @@ namespace Atlas.Resources
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
         public string? ClientSecret { get; init; }
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string Note { get; init; } = "";
         /// <summary>On a rotation: how long the previous secret keeps working, in seconds (echoed).</summary>
         public int? OverlapSeconds { get; init; }
@@ -692,6 +700,14 @@ namespace Atlas.Resources
         public bool? FrontchannelLogoutSessionRequired { get; init; }
         /// <summary>The client secret — returned ONCE on create (absent when auth method is `none`).</summary>
         public string? ClientSecret { get; init; }
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         /// <summary>Created (epoch ms).</summary>
         public long? CreatedAt { get; init; }
         /// <summary>Updated (epoch ms).</summary>

@@ -301,6 +301,45 @@ namespace Atlas.Tests
             Assert.Null(created.Secret);
         }
 
+        [Fact]
+        public async Task R2_SetManagedBy_PreflightAndSealedFields()
+        {
+            var h = MockHttpMessageHandler.Json("{\"object\":\"atlas_id_app\",\"id\":\"app_1\",\"managed_via\":\"adopted\",\"changed\":true,\"ok\":true,\"button_rendered_origins\":[{\"origin\":\"https://a.example\",\"last_seen_at\":1,\"requests\":2}],\"authorize_requests_7d\":{\"button\":1,\"js\":0,\"fedcm\":0,\"fallback\":2,\"unmarked\":0},\"homepage_includes_script\":false,\"sealed_client_secret\":\"AAAA\",\"secrets_sealed\":{\"algorithm\":\"x25519-sealed-box\",\"recipient\":\"x25519:k\",\"fields\":[\"client_secret\"]}}");
+            using var client = Client(h);
+            var r = await client.Platform.AtlasIdApps.SetManagedByAsync("app_1", "ins_1");
+            Assert.Equal("PUT", h.Requests[0].Method);
+            Assert.Equal("/v1/platform/atlas_id_apps/app_1/managed_by", h.Requests[0].Url.AbsolutePath);
+            Assert.Equal("{\"instance_id\":\"ins_1\"}", h.Requests[0].Body);
+            Assert.True(r.Changed);
+            Assert.Equal("adopted", r.ManagedVia);
+            await client.Platform.AtlasIdApps.SetManagedByAsync("app_1", null);
+            Assert.Equal("{\"instance_id\":null}", h.Requests[1].Body);
+
+            var pf = await client.AtlasIdGrants.PreflightAsync("app_1");
+            Assert.Equal("/v1/atlas_id_apps/app_1/preflight", h.Requests[2].Url.AbsolutePath);
+            Assert.Equal("https://a.example", pf.ButtonRenderedOrigins![0].Origin);
+            Assert.Equal(2, pf.AuthorizeRequests7d!.Fallback);
+            Assert.False(pf.HomepageIncludesScript);
+
+            var app = await client.Platform.AtlasIdApps.RotateSecretAsync("app_1");
+            Assert.Equal("AAAA", app.SealedClientSecret);
+            Assert.Equal("client_secret", app.SecretsSealed!.Fields[0]);
+        }
+
+        [Fact]
+        public void R2_DryRunResultAndSsoClaimsDecode()
+        {
+            var d = JsonSerializer.Deserialize<DryRunResult>("{\"object\":\"dry_run\",\"dry_run\":true,\"mode\":\"rollback\",\"validated\":true,\"changes\":[],\"warnings\":[{\"code\":\"origin_still_referenced\"}],\"would_return_status\":201,\"suppressed\":[\"email\"],\"validation_skipped\":{\"reason\":\"external_call\",\"detail\":\"d\"},\"note\":\"\"}", AtlasJson.Options)!;
+            Assert.Equal("rollback", d.Mode);
+            Assert.Equal(201, d.WouldReturnStatus);
+            Assert.Equal("email", d.Suppressed![0]);
+            Assert.Equal("external_call", d.ValidationSkipped!.Reason);
+            Assert.Single(d.Warnings!);
+            var c = JsonSerializer.Deserialize<SessionClaims>("{\"sub\":\"u\",\"sso_connection_id\":\"sso_1\",\"sso_organization_id\":\"org_1\",\"sso_connection_type\":\"saml\"}", AtlasJson.Options)!;
+            Assert.Equal("org_1", c.SsoOrganizationId);
+            Assert.Equal("saml", c.SsoConnectionType);
+        }
+
         // ---- errors ----------------------------------------------------------------------------
 
         [Fact]

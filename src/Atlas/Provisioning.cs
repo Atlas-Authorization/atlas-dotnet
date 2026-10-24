@@ -47,14 +47,33 @@ namespace Atlas
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "dry_run";
         public bool DryRun { get; init; }
-        /// <summary><c>native</c> (the endpoint validated in full) or <c>plan</c> (the body diffed over the current object, unvalidated).</summary>
+        /// <summary>
+        /// <c>native</c> (the endpoint's own dry run, validated in full), <c>rollback</c> (the real write ran in a transaction that
+        /// was rolled back, every side effect held back, validated in full) or <c>plan</c> (validation could not run to the end;
+        /// see <see cref="ValidationSkipped"/>).
+        /// </summary>
         public string Mode { get; init; } = "";
         public bool Validated { get; init; }
         public string Method { get; init; } = "";
         public string Path { get; init; } = "";
         public List<DryRunChange> Changes { get; init; } = new List<DryRunChange>();
         public JsonElement? WouldReturn { get; init; }
+        /// <summary>The same non-fatal warnings the real write returns (each has a <c>code</c>, e.g. <c>origin_still_referenced</c>).</summary>
+        public List<JsonElement>? Warnings { get; init; }
+        /// <summary>The status the real write would answer with (<c>rollback</c> mode).</summary>
+        public int? WouldReturnStatus { get; init; }
+        /// <summary>Side effects held back: <c>email</c>, <c>sms</c>, <c>voice</c>, <c>push</c>, <c>outbound_network</c>, <c>redis</c>, <c>cache</c>, <c>file</c>.</summary>
+        public List<string>? Suppressed { get; init; }
+        /// <summary><c>plan</c> mode: why validation did not run to the end.</summary>
+        public DryRunValidationSkipped? ValidationSkipped { get; init; }
         public string Note { get; init; } = "";
+    }
+
+    /// <summary>Why a plan-mode dry run did not validate to the end: <c>Reason</c> is external_call, database or unsupported_response.</summary>
+    public sealed class DryRunValidationSkipped
+    {
+        public string Reason { get; init; } = "";
+        public string Detail { get; init; } = "";
     }
 
     /// <summary>W3C trace context: mint and read <c>traceparent</c> headers.</summary>

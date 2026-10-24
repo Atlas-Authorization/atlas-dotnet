@@ -68,6 +68,12 @@ namespace Atlas.Resources
     public sealed class SecretKeyWithSecret : SecretKey
     {
         public string? Secret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? SealedSecret { get; init; }
         public string? Note { get; init; }
         /// <summary>On a rotation: the id of the key this one replaces.</summary>
@@ -274,6 +280,12 @@ namespace Atlas.Resources
         public long CreatedAt { get; init; }
         /// <summary>Set once, on create and rotate.</summary>
         public string? ClientSecret { get; init; }
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         public string? SealedClientSecret { get; init; }
         public bool? Revoked { get; init; }
     }
@@ -537,6 +549,12 @@ namespace Atlas.Resources
         public string ClientId { get; init; } = "";
         public string Name { get; init; } = "";
         public string? ManagedByInstanceId { get; init; }
+        /// <summary><c>instance_toggle</c> or <c>adopted</c>.</summary>
+        public string? ManagedVia { get; init; }
+        public List<string>? AllowedScopes { get; init; }
+        public long? CreatedAt { get; init; }
+        /// <summary>The page origins the Sign in with Atlas button script ran on in the last 7 days.</summary>
+        public List<AtlasIdOriginSeen>? ButtonRenderedOrigins { get; init; }
     }
 
     /// <summary>A verified email is a user of an app.</summary>
@@ -568,6 +586,10 @@ namespace Atlas.Resources
         /// <summary><c>GET /v1/atlas_id_apps</c> — the Sign in with Atlas apps this instance manages.</summary>
         public Task<ListPage<ManagedAtlasIdApp>> ListAppsAsync(CancellationToken ct = default)
             => Req<ListPage<ManagedAtlasIdApp>>(HttpVerb.Get, "/v1/atlas_id_apps", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/atlas_id_apps/{id}/preflight</c> — the setup check of an app this instance manages (<c>diagnostics:read</c> is enough).</summary>
+        public Task<AtlasIdAppPreflight> PreflightAsync(string appId, CancellationToken ct = default)
+            => Req<AtlasIdAppPreflight>(HttpVerb.Get, $"/v1/atlas_id_apps/{Enc(appId)}/preflight", cancellationToken: ct);
 
         /// <summary><c>GET /v1/atlas_id_apps/{id}/users?email=</c> — whether a verified email is a user of the app (an empty list when not).</summary>
         public Task<ListPage<AtlasIdGrantLookup>> LookupAsync(string appId, string email, CancellationToken ct = default)

@@ -319,6 +319,14 @@ namespace Atlas.Resources
     {
         /// <summary><c>aps_...</c>, returned once. Store it in your proxy's environment; Atlas keeps only a hash.</summary>
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
         /// <summary>true when an existing secret was replaced.</summary>
         public bool Rotated { get; init; }
     }

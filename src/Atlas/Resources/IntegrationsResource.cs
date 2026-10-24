@@ -204,6 +204,14 @@ namespace Atlas.Resources
         public string EndpointId { get; init; } = "";
         public string Url { get; init; } = "";
         public string Secret { get; init; } = "";
+        /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
+        public string? SealedSecret { get; init; }
+        /// <summary>With a secret recipient: the client secret sealed to it.</summary>
+        public string? SealedClientSecret { get; init; }
+        /// <summary>With a secret recipient: the webhook secret sealed to it.</summary>
+        public string? SealedWebhookSecret { get; init; }
+        /// <summary>Names the fields that arrived sealed.</summary>
+        public SecretsSealed? SecretsSealed { get; init; }
     }
 
     /// <summary>An identity-integration token; its claims follow <c>/schemas/suite-token-v1.json</c>.</summary>

@@ -493,6 +493,7 @@ POST /v1/messaging_providers/email/managed/verify
 POST /v1/oauth_clients/{id}/backchannel_logout/test
 POST /v1/platform/atlas_id_apps/{id}/backchannel_logout/test
 POST /v1/platform/atlas_id_apps/{id}/move_origin
+PUT /v1/platform/atlas_id_apps/{id}/managed_by
 POST /v1/platform/atlas_id_apps/{id}/webhook/rotate_secret
 POST /v1/platform/atlas_id_publisher/verify
 PUT /v1/instance/integrations/chatly
@@ -649,6 +650,7 @@ POST /v1/partner_links/outbound/{partner}/test
 DELETE /v1/partner_links/outbound/{partner}
 POST /v1/partner_links/outbound/{partner}/request
 GET /v1/atlas_id_apps
+GET /v1/atlas_id_apps/{id}/preflight
 GET /v1/atlas_id_apps/{id}/users
 DELETE /v1/atlas_id_apps/{id}/grants/{grantId}
 GET /v1/privacy
