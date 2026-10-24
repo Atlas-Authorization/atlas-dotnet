@@ -89,6 +89,9 @@ namespace Atlas
         private readonly bool? _strict;
         private readonly Action<UnknownFieldsWarning>? _onUnknownFields;
         private readonly string? _missingKeyMessage;
+        private readonly bool _dryRun;
+        private readonly string? _traceparent;
+        private readonly string? _secretRecipient;
 
         public AtlasTransport(string secretKey, string baseUrl, HttpClient http)
             : this(secretKey, baseUrl, http, null, null, null) { }
@@ -101,7 +104,24 @@ namespace Atlas
         /// <param name="missingKeyMessage">The error raised when <paramref name="secretKey"/> is empty.</param>
         public AtlasTransport(string secretKey, string baseUrl, HttpClient http, bool? strict,
             Action<UnknownFieldsWarning>? onUnknownFields, string? missingKeyMessage)
+            : this(secretKey, baseUrl, http, strict, onUnknownFields, missingKeyMessage, false, null, null) { }
+
+        /// <param name="secretKey">The bearer key (<c>sk_</c> or <c>psk_</c>, either format).</param>
+        /// <param name="baseUrl">The API origin.</param>
+        /// <param name="http">The shared <see cref="HttpClient"/>.</param>
+        /// <param name="strict"><c>true</c>/<c>false</c> sends <c>Atlas-Strict</c> on every write; <c>null</c> sends nothing.</param>
+        /// <param name="onUnknownFields">Called when a response carries <c>Atlas-Unknown-Fields</c>.</param>
+        /// <param name="missingKeyMessage">The error raised when <paramref name="secretKey"/> is empty.</param>
+        /// <param name="dryRun">When true every write (anything but GET) is sent with <c>?dry_run=true</c> and no <c>Idempotency-Key</c>.</param>
+        /// <param name="traceparent">A W3C <c>traceparent</c> sent on every call.</param>
+        /// <param name="secretRecipient">An <c>x25519:&lt;base64 public key&gt;</c> recipient: shown-once secrets come back sealed to it.</param>
+        public AtlasTransport(string secretKey, string baseUrl, HttpClient http, bool? strict,
+            Action<UnknownFieldsWarning>? onUnknownFields, string? missingKeyMessage,
+            bool dryRun, string? traceparent, string? secretRecipient)
         {
+            _dryRun = dryRun;
+            _traceparent = string.IsNullOrEmpty(traceparent) ? null : traceparent;
+            _secretRecipient = string.IsNullOrEmpty(secretRecipient) ? null : secretRecipient;
             _secretKey = secretKey;
             _baseUrl = baseUrl.TrimEnd('/');
             _http = http;
@@ -115,7 +135,14 @@ namespace Atlas
 
         /// <summary>A copy of this transport that sends <c>Atlas-Strict: &lt;strict&gt;</c> on writes (<c>null</c> = never).</summary>
         public AtlasTransport WithStrict(bool? strict) =>
-            new AtlasTransport(_secretKey, _baseUrl, _http, strict, _onUnknownFields, _missingKeyMessage);
+            new AtlasTransport(_secretKey, _baseUrl, _http, strict, _onUnknownFields, _missingKeyMessage, _dryRun, _traceparent, _secretRecipient);
+
+        /// <summary>A copy of this transport that sends every write as a dry run.</summary>
+        public AtlasTransport WithDryRun(bool dryRun) =>
+            new AtlasTransport(_secretKey, _baseUrl, _http, _strict, _onUnknownFields, _missingKeyMessage, dryRun, _traceparent, _secretRecipient);
+
+        /// <summary>Whether this transport sends every write as a dry run.</summary>
+        public bool DryRun => _dryRun;
 
         public async Task<T?> SendAsync<T>(RequestOptions options, CancellationToken cancellationToken = default)
         {
@@ -124,16 +151,28 @@ namespace Atlas
                 throw new InvalidOperationException(_missingKeyMessage ?? "No API key is configured for this call.");
             }
 
+            var isWrite = options.Method != HttpVerb.Get;
+            var dryRun = _dryRun && isWrite;
+            var query = options.Query;
+            if (dryRun)
+            {
+                var withDry = new List<KeyValuePair<string, object?>>();
+                if (query != null) withDry.AddRange(query);
+                withDry.Add(new KeyValuePair<string, object?>("dry_run", true));
+                query = withDry;
+            }
             var url = _baseUrl + (options.Path.StartsWith("/") ? options.Path : "/" + options.Path)
-                      + QuerySerializer.Serialize(options.Query);
+                      + QuerySerializer.Serialize(query);
 
             using var request = new HttpRequestMessage(ToHttpMethod(options.Method), url);
             request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + _secretKey);
             request.Headers.TryAddWithoutValidation("Accept", "application/json");
-            if (!string.IsNullOrEmpty(options.IdempotencyKey))
+            if (!string.IsNullOrEmpty(options.IdempotencyKey) && !dryRun)
             {
                 request.Headers.TryAddWithoutValidation("Idempotency-Key", options.IdempotencyKey);
             }
+            if (_traceparent != null) request.Headers.TryAddWithoutValidation("traceparent", _traceparent);
+            if (_secretRecipient != null) request.Headers.TryAddWithoutValidation("X-Secret-Recipient", _secretRecipient);
             if (options.Headers != null)
             {
                 foreach (var h in options.Headers)

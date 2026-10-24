@@ -24,6 +24,18 @@ namespace Atlas
 
         [JsonPropertyName("meta")]
         public Dictionary<string, object?>? Meta { get; init; }
+
+        /// <summary>The code's page in the error reference (<c>https://atlasauth.net/errors/&lt;code&gt;</c>).</summary>
+        [JsonPropertyName("docs_url")]
+        public string? DocsUrl { get; init; }
+
+        /// <summary>On <c>ROUTE_NOT_FOUND</c> only: the closest documented paths.</summary>
+        [JsonPropertyName("did_you_mean")]
+        public List<string>? DidYouMean { get; init; }
+
+        /// <summary>On <c>ROUTE_NOT_FOUND</c> only: the methods the path does support.</summary>
+        [JsonPropertyName("allowed_methods")]
+        public List<string>? AllowedMethods { get; init; }
     }
 
     /// <summary>Internal wrapper used to parse the <c>{ errors: [...] }</c> envelope.</summary>
@@ -61,6 +73,52 @@ namespace Atlas
 
         /// <summary>True when any error in the envelope carries the given stable code.</summary>
         public bool HasCode(string code) => Errors.Any(e => e.Code == code);
+
+        /// <summary>
+        /// True when the key lacked a scope the call needs: <c>INSUFFICIENT_SCOPE</c>, or the former spelling
+        /// <c>SCOPE_MISSING</c> (still tolerated).
+        /// </summary>
+        public bool IsInsufficientScope => HasCode(ErrorCodes.InsufficientScope) || HasCode(ErrorCodes.ScopeMissing);
+
+        /// <summary>The scope an <c>INSUFFICIENT_SCOPE</c> / <c>SCOPE_MISSING</c> error says the call needed (<c>meta.required_scope</c>), or null.</summary>
+        public string? RequiredScope
+        {
+            get
+            {
+                foreach (var e in Errors)
+                {
+                    if (e.Code != ErrorCodes.InsufficientScope && e.Code != ErrorCodes.ScopeMissing) continue;
+                    if (e.Meta != null && e.Meta.TryGetValue("required_scope", out var v))
+                    {
+                        if (v is string s) return s;
+                        if (v is System.Text.Json.JsonElement el && el.ValueKind == System.Text.Json.JsonValueKind.String) return el.GetString();
+                    }
+                }
+                return null;
+            }
+        }
+
+        /// <summary>True for <c>STEP_UP_REQUIRED</c>: a root action (create an app or instance, mint a key) needs a multi-factor sign-in within the last five minutes.</summary>
+        public bool IsStepUpRequired => HasCode(ErrorCodes.StepUpRequired);
+
+        /// <summary>True for <c>ROUTE_NOT_FOUND</c>: no endpoint matches the method and path (see <see cref="DidYouMean"/>).</summary>
+        public bool IsRouteNotFound => HasCode(ErrorCodes.RouteNotFound);
+
+        /// <summary>The closest documented paths of a <c>ROUTE_NOT_FOUND</c> error (empty otherwise).</summary>
+        public IReadOnlyList<string> DidYouMean
+        {
+            get
+            {
+                foreach (var e in Errors)
+                {
+                    if (e.Code == ErrorCodes.RouteNotFound) return (IReadOnlyList<string>?)e.DidYouMean ?? System.Array.Empty<string>();
+                }
+                return System.Array.Empty<string>();
+            }
+        }
+
+        /// <summary>True for <c>ORIGIN_NOT_ALLOWED</c>: the key is pinned to browser origins and the request came from another.</summary>
+        public bool IsOriginNotAllowed => HasCode(ErrorCodes.OriginNotAllowed);
 
         /// <summary>Build the right subclass for a status + parsed envelope.</summary>
         public static AtlasException FromStatus(int status, IReadOnlyList<AtlasErrorItem> errors)

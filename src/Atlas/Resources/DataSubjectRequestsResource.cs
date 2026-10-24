@@ -22,6 +22,20 @@ namespace Atlas.Resources
         public long? CompletedAt { get; init; }
         /// <summary>The export package — present on <c>get</c> and on a fulfilled export.</summary>
         public object? Result { get; init; }
+        /// <summary>The canonical request type: access, deletion, closure, restriction or rectification.</summary>
+        public string? CanonicalType { get; init; }
+        /// <summary>Where the request came from.</summary>
+        public string? Source { get; init; }
+        public string? Detail { get; init; }
+        /// <summary>The case id in the data-rights orchestrator, when one was opened.</summary>
+        public string? CaseId { get; init; }
+        public JsonElement? ExternalCase { get; init; }
+        /// <summary>The W3C trace id of the operation that caused the request.</summary>
+        public string? TraceId { get; init; }
+        public List<PrivacyStep>? Steps { get; init; }
+        public List<PrivacyRetention>? Retention { get; init; }
+        /// <summary>When the deletion takes effect (epoch ms), after the grace window.</summary>
+        public long? DeletionEffectiveAt { get; init; }
     }
 
     public sealed class ListDataSubjectRequestsParams : CursorParams

@@ -52,6 +52,27 @@ namespace Atlas
         /// </summary>
         public System.Action<UnknownFieldsWarning>? OnUnknownFields { get; set; }
 
+        /// <summary>
+        /// Send every write as a dry run (<c>?dry_run=true</c>, no <c>Idempotency-Key</c>): Atlas validates it and answers
+        /// with the changes it would make without changing anything. Override per call with <see cref="AtlasClient.WithDryRun"/>.
+        /// Typed results of a dry-run call are mostly empty; use <see cref="AtlasClient.DryRunAsync"/> for the plan.
+        /// </summary>
+        public bool DryRun { get; set; }
+
+        /// <summary>
+        /// A W3C <c>traceparent</c> sent on every call, so Atlas stores the trace id on the webhook deliveries,
+        /// back-channel deliveries, referral calls and executor requests it triggers. Mint one with
+        /// <see cref="AtlasTrace.NewTraceparent"/>; override per call with <see cref="AtlasClient.WithTraceparent"/>.
+        /// </summary>
+        public string? Traceparent { get; set; }
+
+        /// <summary>
+        /// Seal every shown-once secret in a response to this recipient (<c>x25519:&lt;base64 public key&gt;</c>, see
+        /// <see cref="SealedBox.GenerateKeyPair"/>): responses then carry <c>sealed_secret</c> fields instead of plaintext.
+        /// Open them with <see cref="SealedBox.OpenSealedSecret"/>.
+        /// </summary>
+        public string? SecretRecipient { get; set; }
+
         internal AtlasClientOptions Copy() => (AtlasClientOptions)MemberwiseClone();
     }
 }

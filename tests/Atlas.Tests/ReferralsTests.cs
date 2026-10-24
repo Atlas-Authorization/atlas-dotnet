@@ -219,12 +219,12 @@ namespace Atlas.Tests
             [Fact]
         public async Task V2_SettingsFields_PingTest_AndCallPaging()
         {
-            var handler = MockHttpMessageHandler.Json("{\"object\":\"referral_settings\",\"enabled\":true,\"provider\":\"referally\",\"signing_secret_set\":true,\"api_key_set\":false,"
+            var handler = MockHttpMessageHandler.Json("{\"object\":\"referral_settings\",\"enabled\":true,\"provider\":\"referalli\",\"signing_secret_set\":true,\"api_key_set\":false,"
                 + "\"url_params\":[\"ref\"],\"tracking_token\":\"tt_public_1\",\"code_lookup_url\":null,\"signup_code_field\":true,\"forward_lifecycle\":true,"
                 + "\"mirror_to_public_metadata\":false,\"include_referral_claims\":true,"
                 + "\"connection\":{\"last_test\":null,\"last_ping\":{\"ok\":true,\"org_name\":\"Acme\",\"clock_skew_ms\":90000,\"clock_skew_warning\":true},"
                 + "\"alert\":{\"code\":\"signature_rejected\",\"message\":\"401\",\"at\":9,\"call_id\":\"rfc_9\"},\"failed_calls_7d\":1,\"retrying_calls\":0,\"last_success_at\":null},"
-                + "\"providers\":[{\"id\":\"referally\",\"capabilities\":{\"signup\":true,\"erase\":true,\"export\":true,\"partner\":true,\"auto_enroll\":true,\"signal\":true,\"alias\":true,\"user\":true,\"ping\":true},"
+                + "\"providers\":[{\"id\":\"referalli\",\"capabilities\":{\"signup\":true,\"erase\":true,\"export\":true,\"partner\":true,\"auto_enroll\":true,\"signal\":true,\"alias\":true,\"user\":true,\"ping\":true},"
                 + "\"needs\":[\"endpoint_url\",\"connection_id\",\"signing_secret\"]}]}");
             using var client = Client(handler);
             var view = await client.Referrals.GetAsync();
@@ -236,7 +236,7 @@ namespace Atlas.Tests
 
             await client.Referrals.UpdateAsync(new UpdateReferralSettingsBody
             {
-                Provider = "referally",
+                Provider = "referalli",
                 TrackingToken = "tt_public_1",
                 ForwardLifecycle = false,
                 MirrorToPublicMetadata = true,

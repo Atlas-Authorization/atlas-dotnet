@@ -30,6 +30,19 @@ namespace Atlas.Verification
         /// <summary>The union of the user's app roles' permissions (<c>app_permissions</c>).</summary>
         [JsonPropertyName("app_permissions")] public List<string>? AppPermissions { get; init; }
 
+        /// <summary>
+        /// Every organization membership (<c>orgs</c>): present in OpenID Provider ID tokens and userinfo when the <c>organizations</c> scope was granted.
+        /// </summary>
+        [JsonPropertyName("orgs")] public List<OrgMembershipClaim>? Orgs { get; init; }
+        /// <summary>The enterprise SSO connection the user signed in through (<c>sso_connection_id</c>).</summary>
+        [JsonPropertyName("sso_connection_id")] public string? SsoConnectionId { get; init; }
+        /// <summary>The IdP-side tenant: the Entra <c>tid</c>, the Google Workspace <c>hd</c>, or the SAML IdP entity id (<c>sso_tenant_id</c>).</summary>
+        [JsonPropertyName("sso_tenant_id")] public string? SsoTenantId { get; init; }
+        /// <summary>The IdP issuer of an enterprise SSO sign-in (<c>sso_issuer</c>).</summary>
+        [JsonPropertyName("sso_issuer")] public string? SsoIssuer { get; init; }
+        /// <summary>The enterprise SSO connection's domain (<c>sso_domain</c>).</summary>
+        [JsonPropertyName("sso_domain")] public string? SsoDomain { get; init; }
+
         /// <summary>Whether the user holds the app role (no active organization needed).</summary>
         public bool HasAppRole(string role) => AppRoles != null && AppRoles.Contains(role);
 
@@ -56,6 +69,14 @@ namespace Atlas.Verification
 
         /// <summary>Every claim without a named member above (incl. <c>token_use</c>, <c>aud</c>).</summary>
         [JsonExtensionData] public Dictionary<string, JsonElement> Extra { get; init; } = new Dictionary<string, JsonElement>();
+    }
+
+    /// <summary>One entry of the <c>orgs</c> claim.</summary>
+    public sealed class OrgMembershipClaim
+    {
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("slug")] public string Slug { get; init; } = "";
+        [JsonPropertyName("role")] public string Role { get; init; } = "";
     }
 
     /// <summary>

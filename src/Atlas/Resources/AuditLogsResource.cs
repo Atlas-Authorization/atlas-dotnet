@@ -16,6 +16,17 @@ namespace Atlas.Resources
         public string? TargetId { get; init; }
         public Dictionary<string, object?>? Metadata { get; init; }
         public long CreatedAt { get; init; }
+        /// <summary>Who acted; <c>KeyName</c> names the secret or platform key when a key did.</summary>
+        public AuditLogActor? Actor { get; init; }
+    }
+
+    /// <summary>Who performed an audited action.</summary>
+    public sealed class AuditLogActor
+    {
+        public string Type { get; init; } = "";
+        public string? Id { get; init; }
+        public string? KeyName { get; init; }
+        public string? KeyPrefix { get; init; }
     }
 
     public sealed class ListAuditLogsParams : CursorParams

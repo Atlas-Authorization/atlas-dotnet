@@ -39,6 +39,10 @@ namespace Atlas.Resources
         public Task<JsonElement> ListUsersAsync(string idOrKey, int? limit = null, int? offset = null, CancellationToken ct = default)
             => Req<JsonElement>(HttpVerb.Get, $"/v1/app_roles/{Enc(idOrKey)}/users", query: Q(("limit", limit), ("offset", offset)), cancellationToken: ct);
 
+        /// <summary>One cursor page of the users holding a role (<c>limit</c> + <c>starting_after</c>; the page carries <c>next_cursor</c>).</summary>
+        public Task<JsonElement> ListUsersPageAsync(string idOrKey, int? limit = null, string? startingAfter = null, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, $"/v1/app_roles/{Enc(idOrKey)}/users", query: Q(("limit", limit), ("starting_after", startingAfter)), cancellationToken: ct);
+
         /// <summary>A user's app roles and effective permissions.</summary>
         public Task<JsonElement> GetForUserAsync(string userId, CancellationToken ct = default)
             => Req<JsonElement>(HttpVerb.Get, $"/v1/users/{Enc(userId)}/app_roles", cancellationToken: ct);

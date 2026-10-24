@@ -92,6 +92,10 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+        /// <summary>Provisioning tags (strings, numbers or booleans). On a PATCH they replace the tags.</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
+        /// <summary>A stable key of your own: a repeat create with it returns the existing object (200, no secret) instead of creating another one.</summary>
+        public string? ExternalRef { get; set; }
     }
 
     public sealed class UpdateAtlasIdAppBody
@@ -125,6 +129,8 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+        /// <summary>Provisioning tags (strings, numbers or booleans). On a PATCH they replace the tags.</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
     }
 
     public sealed class CreatePlatformAppBody
@@ -151,6 +157,10 @@ namespace Atlas.Resources
             AllowedOrigins = null;
             return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
         }
+        /// <summary>Provisioning tags (strings, numbers or booleans). On a PATCH they replace the tags.</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
+        /// <summary>A stable key of your own: a repeat create with it returns the existing object (200, no secret) instead of creating another one.</summary>
+        public string? ExternalRef { get; set; }
     }
 
     public sealed class UpdatePlatformAppBody
@@ -175,6 +185,8 @@ namespace Atlas.Resources
             AllowedOrigins = null;
             return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
         }
+        /// <summary>Provisioning tags (strings, numbers or booleans). On a PATCH they replace the tags.</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
     }
 
     public sealed class CreatePlatformInstanceBody
@@ -198,6 +210,10 @@ namespace Atlas.Resources
             AllowedOrigins = null;
             return Set("allowed_origins", AllowedOriginEntry.ToWire(entries));
         }
+        /// <summary>Provisioning tags (strings, numbers or booleans). On a PATCH they replace the tags.</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
+        /// <summary>A stable key of your own: a repeat create with it returns the existing object (200, no secret) instead of creating another one.</summary>
+        public string? ExternalRef { get; set; }
     }
 
     public sealed class CreateAccountlessAppBody
@@ -270,6 +286,20 @@ namespace Atlas.Resources
         public long? PreviousSecretExpiresAt { get; init; }
         /// <summary>When the current client secret was issued (epoch ms); null for a public app.</summary>
         public long? SecretIssuedAt { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back (200, no secret).</summary>
+        public bool? IdempotentReplay { get; init; }
+        /// <summary>The page origins the Sign in with Atlas button script ran on in the last 7 days (Get only).</summary>
+        public List<AtlasIdOriginSeen>? ButtonRenderedOrigins { get; init; }
+        /// <summary>How the last 7 days' sign-ins started.</summary>
+        [JsonPropertyName("authorize_requests_7d")] public AtlasIdAuthorizeSources? AuthorizeRequests7d { get; init; }
+        /// <summary>Origins of sign-ins that came through the no-script fallback link (<c>?atlasid_fallback=1</c>).</summary>
+        public List<AtlasIdOriginSeen>? FallbackOrigins { get; init; }
+        /// <summary>Whether the app's homepage references the button script (null = could not check).</summary>
+        public bool? HomepageIncludesScript { get; init; }
     }
 
     public sealed class AtlasIdAppWithSecret
@@ -311,6 +341,20 @@ namespace Atlas.Resources
         public long? SecretIssuedAt { get; init; }
         /// <summary>On a rotation: the overlap applied, in seconds.</summary>
         public int? OverlapSeconds { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back (200, no secret).</summary>
+        public bool? IdempotentReplay { get; init; }
+        /// <summary>The page origins the Sign in with Atlas button script ran on in the last 7 days (Get only).</summary>
+        public List<AtlasIdOriginSeen>? ButtonRenderedOrigins { get; init; }
+        /// <summary>How the last 7 days' sign-ins started.</summary>
+        [JsonPropertyName("authorize_requests_7d")] public AtlasIdAuthorizeSources? AuthorizeRequests7d { get; init; }
+        /// <summary>Origins of sign-ins that came through the no-script fallback link (<c>?atlasid_fallback=1</c>).</summary>
+        public List<AtlasIdOriginSeen>? FallbackOrigins { get; init; }
+        /// <summary>Whether the app's homepage references the button script (null = could not check).</summary>
+        public bool? HomepageIncludesScript { get; init; }
     }
 
     /// <summary>The body of the Sign in with Atlas app rotate calls (client secret and webhook secret).</summary>
@@ -318,6 +362,24 @@ namespace Atlas.Resources
     {
         /// <summary>How long the previous secret keeps working, in seconds; at most 604800 (7 days). Null uses the default: 86400 (24 hours) for the client secret, 0 (it stops at once) for the webhook secret. 0 stops it now.</summary>
         public int? OverlapSeconds { get; set; }
+    }
+
+    /// <summary>A page origin the button (or the fallback link) was seen on.</summary>
+    public sealed class AtlasIdOriginSeen
+    {
+        public string Origin { get; init; } = "";
+        public long LastSeenAt { get; init; }
+        public int Requests { get; init; }
+    }
+
+    /// <summary>Counts how sign-ins started: the rendered button, the script API, One Tap, the no-script fallback, or unmarked.</summary>
+    public sealed class AtlasIdAuthorizeSources
+    {
+        public int Button { get; init; }
+        public int Js { get; init; }
+        [JsonPropertyName("fedcm")] public int FedCm { get; init; }
+        public int Fallback { get; init; }
+        public int Unmarked { get; init; }
     }
 
     public sealed class PlatformAppProvisioned
@@ -354,6 +416,12 @@ namespace Atlas.Resources
         public string? Note { get; init; }
         /// <summary>The auto-created test-mode sibling in the environment opposite the primary (development for a production app — the default and common case). Has distinct publishable_key and secret from the primary. Absent when create_development_sibling is false.</summary>
         public PlatformAppWithSecret? SiblingInstance { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back (200, no secret).</summary>
+        public bool? IdempotentReplay { get; init; }
     }
 
     public sealed class PlatformAppWithSecret
@@ -388,6 +456,12 @@ namespace Atlas.Resources
         /// <summary>Reveal-once per-instance secret key.</summary>
         public string Secret { get; init; } = "";
         public string? Note { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back (200, no secret).</summary>
+        public bool? IdempotentReplay { get; init; }
     }
 
     /// <summary>An app (instance) a platform owns. Never carries a secret except on create/rotate/claim.</summary>
@@ -420,6 +494,12 @@ namespace Atlas.Resources
         public long CreatedAt { get; init; }
         /// <summary>Last updated (epoch ms).</summary>
         public long UpdatedAt { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back (200, no secret).</summary>
+        public bool? IdempotentReplay { get; init; }
     }
 
     public sealed class PlatformAppDisabled
@@ -435,12 +515,18 @@ namespace Atlas.Resources
         public string Id { get; init; } = "";
         public bool Deleted { get; init; }
         public string? Reason { get; init; }
+        public string? Type { get; init; }
+        public string? InstanceId { get; init; }
     }
 
     public sealed class PlatformAppBulkDeleteResult
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         public List<PlatformAppBulkDeleteItem> Results { get; init; } = new List<PlatformAppBulkDeleteItem>();
+        /// <summary><c>disable</c> (ids) or <c>hard_delete</c> (a sandbox metadata selection).</summary>
+        public string? Mode { get; init; }
+        public bool? DryRun { get; init; }
+        public List<DryRunChange>? Changes { get; init; }
     }
 
     public sealed class PlatformAppSecretRotation
@@ -460,6 +546,13 @@ namespace Atlas.Resources
         public string Prefix { get; init; } = "";
         public long CreatedAt { get; init; }
         public long? ExpiresAt { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back (200, no secret).</summary>
+        public bool? IdempotentReplay { get; init; }
+        public string? Name { get; init; }
     }
 
     public sealed class PlatformInstanceSecret
@@ -573,6 +666,10 @@ namespace Atlas.Resources
         /// <summary><c>GET /v1/platform/atlas_id_apps</c> — List the Sign in with Atlas apps registered to this platform's account, with the issuer and discovery URL.</summary>
         public Task<DataList<AtlasIdApp>> ListAsync(CancellationToken ct = default)
             => Req<DataList<AtlasIdApp>>(HttpVerb.Get, "/v1/platform/atlas_id_apps", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/platform/atlas_id_apps?metadata[key]=value</c> — the apps whose provisioning metadata matches every pair.</summary>
+        public Task<DataList<AtlasIdApp>> ListAsync(IDictionary<string, object?> metadata, CancellationToken ct = default)
+            => Req<DataList<AtlasIdApp>>(HttpVerb.Get, "/v1/platform/atlas_id_apps", query: AtlasProvisioning.MetadataQuery(metadata), cancellationToken: ct);
 
         /// <summary><c>POST /v1/platform/atlas_id_apps</c> — Register a Sign in with Atlas app (an OpenID Connect client on https://atlasauth.net) for this platform's account.</summary>
         public Task<AtlasIdAppWithSecret> CreateAsync(CreateAtlasIdAppBody body, string? idempotencyKey = null, CancellationToken ct = default)
@@ -691,6 +788,8 @@ namespace Atlas.Resources
         public long? UpdatedAt { get; init; }
         /// <summary>Set by verify: whether the TXT record matched.</summary>
         public bool? RecordFound { get; init; }
+        /// <summary>False when the singleton has never been set (the GET answers 200, no longer 404).</summary>
+        public bool? Configured { get; init; }
     }
 
     public sealed class AtlasIdPublisherBody
@@ -773,6 +872,26 @@ namespace Atlas.Resources
         public Task<CursorPage<PlatformSecretKey>> ListSecretKeysAsync(string id, CancellationToken ct = default)
             => Req<CursorPage<PlatformSecretKey>>(HttpVerb.Get, $"/v1/platform/apps/{Enc(id)}/secret_keys", cancellationToken: ct);
 
+        /// <summary><c>GET /v1/platform/apps/{id}/secret_keys?metadata[key]=value</c> — an app's secret keys whose provisioning metadata matches every pair.</summary>
+        public Task<CursorPage<PlatformSecretKey>> ListSecretKeysAsync(string id, IDictionary<string, object?> metadata, CancellationToken ct = default)
+            => Req<CursorPage<PlatformSecretKey>>(HttpVerb.Get, $"/v1/platform/apps/{Enc(id)}/secret_keys", query: AtlasProvisioning.MetadataQuery(metadata), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/apps/{id}/secret_keys</c> — mint an additional named, taggable secret key for an app (shown once; an <c>ExternalRef</c> makes it idempotent).</summary>
+        public Task<CreatedPlatformSecretKey> CreateSecretKeyAsync(string id, CreatePlatformSecretKeyBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<CreatedPlatformSecretKey>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/secret_keys", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/apps/{id}/clone_config</c> — copy an app's configuration into its development (or another) instance, secrets excluded.</summary>
+        public Task<CloneConfigResult> CloneConfigAsync(string id, CloneConfigBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<CloneConfigResult>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/clone_config", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/platform/apps/bulk_delete</c> — hard-delete every sandbox-tagged app and resource of this platform. <paramref name="metadata"/> must carry
+        /// <c>sandbox: true</c> (null = <c>{"sandbox": true}</c>); <paramref name="dryRun"/> lists what would go.
+        /// </summary>
+        public Task<PlatformAppBulkDeleteResult> SandboxTeardownAsync(IDictionary<string, object?>? metadata = null, bool dryRun = false, CancellationToken ct = default)
+            => Req<PlatformAppBulkDeleteResult>(HttpVerb.Post, "/v1/platform/apps/bulk_delete",
+                Body(("metadata", metadata ?? new Dictionary<string, object?> { ["sandbox"] = true }), ("dry_run", dryRun ? true : (bool?)null)), cancellationToken: ct);
+
         /// <summary><c>POST /v1/platform/apps/{id}/instances</c> — Provision an additional instance (e.g.</summary>
         public Task<PlatformAppWithSecret> CreateInstanceAsync(string id, CreatePlatformInstanceBody body, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<PlatformAppWithSecret>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/instances", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
@@ -818,7 +937,19 @@ namespace Atlas.Resources
             AtlasIdApps = new PlatformAtlasIdAppsResource(transport);
             Apps = new PlatformAppsResource(transport);
             AtlasIdPublisher = new PlatformAtlasIdPublisherResource(transport);
+            Keys = new PlatformKeysResource(transport);
+            Audit = new PlatformAuditResource(transport);
         }
+
+        /// <summary><c>/v1/platform/keys</c> — every credential on the account, and minting / revoking them.</summary>
+        public PlatformKeysResource Keys { get; }
+
+        /// <summary>The account audit log (<c>/v1/platform/audit_logs</c>) and its streams.</summary>
+        public PlatformAuditResource Audit { get; }
+
+        /// <summary><c>GET /v1/platform/whoami</c> — introspect the platform key or token this client uses.</summary>
+        public Task<Whoami> WhoamiAsync(CancellationToken ct = default)
+            => Req<Whoami>(HttpVerb.Get, "/v1/platform/whoami", cancellationToken: ct);
 
         /// <summary>The account's Sign in with Atlas publisher (<c>/v1/platform/atlas_id_publisher</c>).</summary>
         public PlatformAtlasIdPublisherResource AtlasIdPublisher { get; }
@@ -835,5 +966,268 @@ namespace Atlas.Resources
 
         /// <summary>Apps (instances) owned by the platform (<c>/v1/platform/apps</c>).</summary>
         public PlatformAppsResource Apps { get; }
+    }
+
+    // ---- provisioning additions ----------------------------------------------------
+
+    /// <summary>The body of <c>POST /v1/platform/apps/{id}/secret_keys</c>.</summary>
+    public sealed class CreatePlatformSecretKeyBody
+    {
+        public string? Name { get; set; }
+        /// <summary>Any instance of the same app (default the app's own).</summary>
+        public string? InstanceId { get; set; }
+        public Dictionary<string, object?>? Metadata { get; set; }
+        public string? ExternalRef { get; set; }
+    }
+
+    /// <summary>A minted secret key. <c>Secret</c> is present only on a fresh create (never on an idempotent replay).</summary>
+    public sealed class CreatedPlatformSecretKey
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string? Name { get; init; }
+        public string Prefix { get; init; } = "";
+        public long CreatedAt { get; init; }
+        public long? ExpiresAt { get; init; }
+        public string AppId { get; init; } = "";
+        public string InstanceId { get; init; } = "";
+        public string? Secret { get; init; }
+        public string? SealedSecret { get; init; }
+        public string? Note { get; init; }
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        public string? ExternalRef { get; init; }
+        public bool? IdempotentReplay { get; init; }
+    }
+
+    /// <summary>The body of <c>POST /v1/platform/apps/{id}/clone_config</c>.</summary>
+    public sealed class CloneConfigBody
+    {
+        /// <summary><c>development</c> (default) or <c>production</c>.</summary>
+        public string? ToEnvironment { get; set; }
+        public string? TargetInstanceId { get; set; }
+        /// <summary><c>auth_config</c>, <c>allowed_origins</c>, <c>roles</c>, <c>redirect_urls</c> (default auth_config, roles, redirect_urls).</summary>
+        public List<string>? Sections { get; set; }
+        public bool? IncludeOrigins { get; set; }
+        public bool? DryRun { get; set; }
+    }
+
+    /// <summary>A path that was not copied, and why (<c>secret</c> or <c>instance_specific</c>).</summary>
+    public sealed class CloneConfigExcluded
+    {
+        public string Path { get; init; } = "";
+        public string Reason { get; init; } = "";
+    }
+
+    /// <summary>The answer to a config clone.</summary>
+    public sealed class CloneConfigResult
+    {
+        /// <summary><c>clone_config_result</c>, or <c>dry_run</c>.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string SourceInstanceId { get; init; } = "";
+        public string? TargetInstanceId { get; init; }
+        public string? ToEnvironment { get; init; }
+        public bool CreatedTarget { get; init; }
+        public List<string>? Sections { get; init; }
+        public List<CloneConfigExcluded>? Excluded { get; init; }
+        public List<string>? NeverCopied { get; init; }
+        public List<DryRunChange>? Changes { get; init; }
+        public PlatformApp? Target { get; init; }
+        /// <summary>When a new instance was created for the clone, its secret key, shown once.</summary>
+        public string? Secret { get; init; }
+        public string? Note { get; init; }
+    }
+
+    // ---- platform credentials & account audit --------------------------------------
+
+    /// <summary>The body of <c>POST /v1/platform/keys</c>. Scopes are a subset of the caller's; per-app grant scopes <c>atlas_id_apps:&lt;app id&gt;:grants:read|write</c> are allowed.</summary>
+    public sealed class CreatePlatformKeyBody
+    {
+        public List<string> Scopes { get; set; } = new List<string>();
+        public string? Name { get; set; }
+        public List<string>? ApplicationIds { get; set; }
+        /// <summary>Unix ms or ISO 8601, at most one year away.</summary>
+        public object? ExpiresAt { get; set; }
+        public List<string>? IpAllowlist { get; set; }
+        /// <summary>Browser origins a request carrying an <c>Origin</c> header must come from.</summary>
+        public List<string>? AllowedOrigins { get; set; }
+        public string? Owner { get; set; }
+        /// <summary><c>atlas</c> (default) or <c>legacy</c>.</summary>
+        public string? KeyFormat { get; set; }
+    }
+
+    /// <summary>The body of <c>PATCH /v1/platform/keys/{id}</c>. Use <see cref="Set"/> to send an explicit <c>null</c> (name, owner, expires_at).</summary>
+    public sealed class UpdatePlatformKeyBody
+    {
+        public string? Name { get; set; }
+        public string? Owner { get; set; }
+        public object? ExpiresAt { get; set; }
+        public List<string>? AllowedOrigins { get; set; }
+
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        public UpdatePlatformKeyBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
+    }
+
+    /// <summary>A platform key; <c>Secret</c> / <c>SealedSecret</c> are present once.</summary>
+    public sealed class PlatformApiKey : StandardKey
+    {
+        public string? Secret { get; init; }
+        public string? SealedSecret { get; init; }
+        public List<string>? ApplicationIds { get; init; }
+        public List<string>? AllowedOrigins { get; init; }
+        public string? Note { get; init; }
+    }
+
+    /// <summary>Acknowledges a revocation.</summary>
+    public sealed class PlatformKeyRevoked
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string Kind { get; init; } = "";
+        public bool Revoked { get; init; }
+    }
+
+    /// <summary><c>/v1/platform/keys</c>.</summary>
+    public sealed class PlatformKeysResource : ResourceBase
+    {
+        public PlatformKeysResource(AtlasTransport t) : base(t) { }
+
+        /// <summary>
+        /// <c>GET /v1/platform/keys</c> — every credential on the account, revoked ones included. <paramref name="kind"/> is <c>secret_key</c>, <c>platform_key</c>,
+        /// <c>account_key</c>, <c>webhook_secret</c>, <c>partner_link</c> or <c>access_token</c>; <paramref name="status"/> is <c>active</c>, <c>expiring</c>, <c>expired</c> or <c>revoked</c>.
+        /// </summary>
+        public Task<ListPage<StandardKey>> ListAsync(string? kind = null, string? status = null, string? instanceId = null, CancellationToken ct = default)
+            => Req<ListPage<StandardKey>>(HttpVerb.Get, "/v1/platform/keys", query: Q(("kind", kind), ("status", status), ("instance_id", instanceId)), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/keys</c> — mint a platform key; the secret is in this response only.</summary>
+        public Task<PlatformApiKey> CreateAsync(CreatePlatformKeyBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<PlatformApiKey>(HttpVerb.Post, "/v1/platform/keys", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/platform/keys/{id}</c> — change a key's name, owner or expiry.</summary>
+        public Task<PlatformApiKey> UpdateAsync(string id, UpdatePlatformKeyBody body, CancellationToken ct = default)
+            => Req<PlatformApiKey>(HttpVerb.Patch, $"/v1/platform/keys/{Enc(id)}", body, cancellationToken: ct);
+
+        /// <summary><c>POST /v1/platform/keys/{id}/revoke</c> — revoke a key at once.</summary>
+        public Task<PlatformKeyRevoked> RevokeAsync(string id, CancellationToken ct = default)
+            => Req<PlatformKeyRevoked>(HttpVerb.Post, $"/v1/platform/keys/{Enc(id)}/revoke", cancellationToken: ct);
+    }
+
+    public sealed class AccountAuditActor
+    {
+        public string Type { get; init; } = "";
+        public string? Id { get; init; }
+    }
+
+    public sealed class AccountAuditTarget
+    {
+        public string? Type { get; init; }
+        public string? Id { get; init; }
+    }
+
+    /// <summary>One entry of the account audit log.</summary>
+    public sealed class AccountAuditRecord
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string AccountId { get; init; } = "";
+        public AccountAuditActor? Actor { get; init; }
+        public string Action { get; init; } = "";
+        public AccountAuditTarget? Target { get; init; }
+        public string? InstanceId { get; init; }
+        public string? Ip { get; init; }
+        public string? UserAgent { get; init; }
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        public long CreatedAt { get; init; }
+    }
+
+    /// <summary>Forwards the account audit log to a URL.</summary>
+    public sealed class AccountAuditStream
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string Url { get; init; } = "";
+        /// <summary><c>atlas</c> or <c>cloudevents</c>.</summary>
+        public string Format { get; init; } = "";
+        public bool Active { get; init; }
+        public bool HasSecret { get; init; }
+        public string? Cursor { get; init; }
+        public int ConsecutiveFailures { get; init; }
+        public long? FailingSince { get; init; }
+        public long? NextAttemptAt { get; init; }
+        public long? LastDeliveredAt { get; init; }
+        public string? LastError { get; init; }
+        public long CreatedAt { get; init; }
+        public long UpdatedAt { get; init; }
+        /// <summary>Present once, on create (or sealed).</summary>
+        public string? Secret { get; init; }
+        public string? SealedSecret { get; init; }
+    }
+
+    /// <summary>The body of <c>POST /v1/platform/audit_streams</c>.</summary>
+    public sealed class CreateAccountAuditStreamBody
+    {
+        public string Url { get; set; } = "";
+        /// <summary><c>atlas</c> (default) or <c>cloudevents</c>.</summary>
+        public string? Format { get; set; }
+    }
+
+    /// <summary>The body of <c>PATCH /v1/platform/audit_streams/{id}</c>.</summary>
+    public sealed class UpdateAccountAuditStreamBody
+    {
+        public string? Url { get; set; }
+        public string? Format { get; set; }
+        public bool? Active { get; set; }
+    }
+
+    /// <summary>The answer to a test send.</summary>
+    public sealed class AccountAuditStreamTest
+    {
+        public string Id { get; init; } = "";
+        public bool Ok { get; init; }
+        public int? Status { get; init; }
+        public string? Error { get; init; }
+    }
+
+    /// <summary>The account audit log and its streams.</summary>
+    public sealed class PlatformAuditResource : ResourceBase
+    {
+        public PlatformAuditResource(AtlasTransport t) : base(t)
+        {
+            Streams = new PlatformAuditStreamsResource(t);
+        }
+
+        /// <summary><c>/v1/platform/audit_streams</c>.</summary>
+        public PlatformAuditStreamsResource Streams { get; }
+
+        /// <summary><c>GET /v1/platform/audit_logs</c> — one cursor page of the account audit log.</summary>
+        public Task<CursorPage<AccountAuditRecord>> ListAsync(int? limit = null, string? startingAfter = null, string? action = null, CancellationToken ct = default)
+            => Req<CursorPage<AccountAuditRecord>>(HttpVerb.Get, "/v1/platform/audit_logs", query: Q(("limit", limit), ("starting_after", startingAfter), ("action", action)), cancellationToken: ct);
+    }
+
+    /// <summary><c>/v1/platform/audit_streams</c>.</summary>
+    public sealed class PlatformAuditStreamsResource : ResourceBase
+    {
+        public PlatformAuditStreamsResource(AtlasTransport t) : base(t) { }
+
+        public Task<ListPage<AccountAuditStream>> ListAsync(CancellationToken ct = default)
+            => Req<ListPage<AccountAuditStream>>(HttpVerb.Get, "/v1/platform/audit_streams", cancellationToken: ct);
+
+        /// <summary>Add a stream; its signing secret is in this response only.</summary>
+        public Task<AccountAuditStream> CreateAsync(CreateAccountAuditStreamBody body, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<AccountAuditStream>(HttpVerb.Post, "/v1/platform/audit_streams", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        public Task<AccountAuditStream> UpdateAsync(string id, UpdateAccountAuditStreamBody body, CancellationToken ct = default)
+            => Req<AccountAuditStream>(HttpVerb.Patch, $"/v1/platform/audit_streams/{Enc(id)}", body, cancellationToken: ct);
+
+        public Task<DeletedObject> DeleteAsync(string id, CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, $"/v1/platform/audit_streams/{Enc(id)}", cancellationToken: ct);
+
+        /// <summary>Send one synthetic event.</summary>
+        public Task<AccountAuditStreamTest> TestAsync(string id, CancellationToken ct = default)
+            => Req<AccountAuditStreamTest>(HttpVerb.Post, $"/v1/platform/audit_streams/{Enc(id)}/test", cancellationToken: ct);
     }
 }

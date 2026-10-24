@@ -111,6 +111,13 @@ namespace Atlas.Resources
         public Task<SessionTouch> TouchAsync(string id, CancellationToken ct = default)
             => Req<SessionTouch>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/touch", cancellationToken: ct);
 
+        /// <summary>
+        /// <c>POST /v1/sessions/{id}/integration_tokens/{integration}</c> — mint an identity-integration token for this session, the
+        /// server-side form of <c>getToken({ for })</c>: a preset such as <c>chatly</c>, or a custom integration id.
+        /// </summary>
+        public Task<IntegrationToken> GetIntegrationTokenAsync(string id, string integration, CancellationToken ct = default)
+            => Req<IntegrationToken>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/integration_tokens/{Enc(integration)}", cancellationToken: ct);
+
         /// <summary><c>POST /v1/sessions/{id}/tokens/{template}</c> — Mint a named JWT-template token for a session (Clerk SessionApi.getToken).</summary>
         public Task<SessionTemplateToken> CreateTokenAsync(string id, string template, CancellationToken ct = default)
             => Req<SessionTemplateToken>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/tokens/{Enc(template)}", cancellationToken: ct);

@@ -8,6 +8,8 @@ namespace Atlas.Resources
         public bool? IncludeArchived { get; set; }
         public bool? Archived { get; set; }
         public string? Tag { get; set; }
+        /// <summary>Keep only apps whose provisioning metadata matches every pair (<c>metadata[key]=value</c>).</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
 
         /// <summary>Flatten to query key/value pairs, dropping unset fields.</summary>
         public IEnumerable<KeyValuePair<string, object?>> ToQuery()
@@ -15,6 +17,7 @@ namespace Atlas.Resources
             yield return new KeyValuePair<string, object?>("include_archived", IncludeArchived);
             yield return new KeyValuePair<string, object?>("archived", Archived);
             yield return new KeyValuePair<string, object?>("tag", Tag);
+            foreach (var kv in AtlasProvisioning.MetadataQuery(Metadata)) yield return kv;
         }
     }
 
@@ -24,6 +27,12 @@ namespace Atlas.Resources
         public string? Type { get; set; }
         public string? From { get; set; }
         public string? To { get; set; }
+        /// <summary>Bounds the feed by time (ISO 8601); wins over <see cref="From"/>.</summary>
+        public string? Since { get; set; }
+        /// <summary>Bounds the feed by time (ISO 8601); wins over <see cref="To"/>.</summary>
+        public string? Until { get; set; }
+        /// <summary><c>asc</c> or <c>desc</c>.</summary>
+        public string? Order { get; set; }
         public long? Limit { get; set; }
         public string? StartingAfter { get; set; }
 
@@ -33,6 +42,9 @@ namespace Atlas.Resources
             yield return new KeyValuePair<string, object?>("type", Type);
             yield return new KeyValuePair<string, object?>("from", From);
             yield return new KeyValuePair<string, object?>("to", To);
+            yield return new KeyValuePair<string, object?>("since", Since);
+            yield return new KeyValuePair<string, object?>("until", Until);
+            yield return new KeyValuePair<string, object?>("order", Order);
             yield return new KeyValuePair<string, object?>("limit", Limit);
             yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
         }
@@ -61,6 +73,8 @@ namespace Atlas.Resources
     {
         public string? Action { get; set; }
         public string? Since { get; set; }
+        /// <summary>false leaves out writes that changed nothing; null keeps the server default.</summary>
+        public bool? IncludeNoOp { get; set; }
         public long? Limit { get; set; }
         public string? StartingAfter { get; set; }
 
@@ -69,6 +83,7 @@ namespace Atlas.Resources
         {
             yield return new KeyValuePair<string, object?>("action", Action);
             yield return new KeyValuePair<string, object?>("since", Since);
+            yield return new KeyValuePair<string, object?>("include_no_op", IncludeNoOp);
             yield return new KeyValuePair<string, object?>("limit", Limit);
             yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
         }

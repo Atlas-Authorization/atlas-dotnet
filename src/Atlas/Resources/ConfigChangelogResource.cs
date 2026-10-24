@@ -33,7 +33,12 @@ namespace Atlas.Resources
         /// <summary>The object that changed.</summary>
         public ConfigChangelogTarget? Target { get; init; }
         public List<ConfigChangelogEntryChanges>? Changes { get; init; }
+        /// <summary>Deprecated: read <c>Changes[].Section</c>.</summary>
         public List<string>? Fields { get; init; }
+        /// <summary>True when the write changed nothing.</summary>
+        public bool? NoOp { get; init; }
+        /// <summary>What the source recorded: <c>diff</c> (before/after values), <c>fields</c> (names only) or <c>none</c>.</summary>
+        public string? Recorded { get; init; }
     }
 
     public sealed class ConfigChangelogTarget
@@ -47,6 +52,8 @@ namespace Atlas.Resources
         public string? Section { get; init; }
         public JsonElement? Before { get; init; }
         public JsonElement? After { get; init; }
+        /// <summary>False on an older entry that recorded only field names (then <c>Before</c> / <c>After</c> are null).</summary>
+        public bool? ValuesRecorded { get; init; }
     }
 
     /// <summary>Config change history (<c>/v1/config_changelog</c>).</summary>

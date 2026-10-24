@@ -67,6 +67,18 @@ namespace Atlas.Resources
         public JsonElement? Data { get; init; }
     }
 
+    /// <summary>The page of <c>GET /v1/events</c> with how long events are kept.</summary>
+    public sealed class EventPage
+    {
+        [JsonPropertyName("object")] public string? ObjectType { get; init; }
+        public List<Event> Data { get; init; } = new List<Event>();
+        public bool HasMore { get; init; }
+        public string? NextCursor { get; init; }
+        public List<string>? AvailableTypes { get; init; }
+        /// <summary>How long events are kept.</summary>
+        public JsonElement? Retention { get; init; }
+    }
+
     /// <summary>Usage analytics (<c>/v1/usage</c>) and the product activity feed (<c>/v1/events</c>).</summary>
     public sealed class AnalyticsResource : ResourceBase
     {
@@ -81,5 +93,9 @@ namespace Atlas.Resources
         /// <summary><c>GET /v1/events</c> — Read the product activity feed (events), filterable by type and time and cursor-paginated, with the list of event types this instance has actually emitted.</summary>
         public Task<CursorPage<Event>> EventsAsync(ListEventsParams? @params = null, CancellationToken ct = default)
             => Req<CursorPage<Event>>(HttpVerb.Get, "/v1/events", query: (@params ?? new ListEventsParams()).ToQuery(), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/events</c> with the whole page: <c>available_types</c> and the <c>retention</c> window.</summary>
+        public Task<EventPage> EventsPageAsync(ListEventsParams? @params = null, CancellationToken ct = default)
+            => Req<EventPage>(HttpVerb.Get, "/v1/events", query: (@params ?? new ListEventsParams()).ToQuery(), cancellationToken: ct);
     }
 }

@@ -13,7 +13,7 @@
 
     <!-- NuGet package metadata -->
     <PackageId>Atlas.Sdk</PackageId>
-    <Version>1.15.0</Version>
+    <Version>1.16.0</Version>
     <Authors>Atlas</Authors>
     <Company>Atlas</Company>
     <Product>Atlas Backend SDK</Product>
@@ -37,6 +37,8 @@
     <!-- JWT / JWKS verification -->
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.2.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.2.0" />
+    <!-- Sealed secret delivery (libsodium crypto_box_seal); nothing hand-rolled. -->
+    <PackageReference Include="Sodium.Core" Version="1.3.5" />
   </ItemGroup>
 
   <!-- System.Text.Json is in-box on net8.0; needs a package on netstandard2.1. -->

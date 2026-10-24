@@ -49,6 +49,8 @@ namespace Atlas.Resources
         public long? NextRetryAt { get; init; }
         public long? DeliveredAt { get; init; }
         public long CreatedAt { get; init; }
+        /// <summary>The W3C trace id of the operation that caused the logout.</summary>
+        public string? TraceId { get; init; }
     }
 
     /// <summary>
@@ -81,5 +83,9 @@ namespace Atlas.Resources
         /// <summary>The delivery log, newest first (limit 1-100).</summary>
         public Task<ListPage<LogoutNotifyDelivery>> ListDeliveriesAsync(string id, int? limit = null, CancellationToken ct = default)
             => Req<ListPage<LogoutNotifyDelivery>>(HttpVerb.Get, $"/v1/logout_notify_endpoints/{Enc(id)}/deliveries", query: Q(("limit", limit)), cancellationToken: ct);
+
+        /// <summary>One cursor page of the delivery log; pass the previous page's <c>NextCursor</c> as <paramref name="startingAfter"/>. Each row carries <c>TraceId</c>; <paramref name="trace"/> finds one operation.</summary>
+        public Task<CursorPage<LogoutNotifyDelivery>> ListDeliveriesPageAsync(string id, int? limit = null, string? startingAfter = null, string? trace = null, CancellationToken ct = default)
+            => Req<CursorPage<LogoutNotifyDelivery>>(HttpVerb.Get, $"/v1/logout_notify_endpoints/{Enc(id)}/deliveries", query: Q(("limit", limit), ("starting_after", startingAfter), ("trace", trace)), cancellationToken: ct);
     }
 }

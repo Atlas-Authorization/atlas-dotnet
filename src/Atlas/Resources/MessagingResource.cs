@@ -21,6 +21,8 @@ namespace Atlas.Resources
         /// <summary>Which secret keys are set for this transport, never their values.</summary>
         public Dictionary<string, bool> SecretsSet { get; init; } = new Dictionary<string, bool>();
         public long UpdatedAt { get; init; }
+        /// <summary>False when the singleton has never been set (the GET answers 200, no longer 404).</summary>
+        public bool? Configured { get; init; }
     }
 
     public sealed class MessagingProviders
@@ -111,6 +113,8 @@ namespace Atlas.Resources
         /// <summary>Create only, with Dns: the zone and the records Atlas wrote.</summary>
         public System.Text.Json.JsonElement? DnsResult { get; init; }
         public string? NextStep { get; init; }
+        /// <summary>False when the singleton has never been set (the GET answers 200, no longer 404).</summary>
+        public bool? Configured { get; init; }
     }
 
     /// <summary>The body of <c>POST /v1/messaging_providers/email/managed</c>.</summary>
@@ -172,6 +176,8 @@ namespace Atlas.Resources
         public string? Note { get; init; }
         public string? NextStep { get; init; }
         public long UpdatedAt { get; init; }
+        /// <summary>False when the singleton has never been set (the GET answers 200, no longer 404).</summary>
+        public bool? Configured { get; init; }
     }
 
     /// <summary>The body of <c>POST /v1/messaging_providers/email/development</c>: <c>ProviderId</c>, or <c>Transport</c> + <c>Config</c> exactly as <c>SetEmailAsync</c> takes them.</summary>
@@ -232,6 +238,13 @@ namespace Atlas.Resources
         /// <summary>The instance's configured email and SMS providers, secrets omitted.</summary>
         public Task<MessagingProviders> GetAsync(CancellationToken ct = default)
             => Req<MessagingProviders>(HttpVerb.Get, "/v1/messaging_providers", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>GET /v1/messaging_providers/{channel}</c> — one channel's provider (<c>email</c> or <c>sms</c>). When none is set it answers 200 with
+        /// <c>Configured = false</c> (never a 404).
+        /// </summary>
+        public Task<MessagingProvider> ChannelAsync(string channel, CancellationToken ct = default)
+            => Req<MessagingProvider>(HttpVerb.Get, $"/v1/messaging_providers/{Enc(channel)}", cancellationToken: ct);
 
         /// <summary>
         /// Configure (or update) the email provider with typed, per-transport settings.

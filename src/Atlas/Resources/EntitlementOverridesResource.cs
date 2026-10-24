@@ -28,6 +28,8 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+        /// <summary>Marks the grant as an owner-account grant (reported as <c>internal</c>, never revenue).</summary>
+        public bool? Internal { get; set; }
     }
 
     /// <summary>A sales-led entitlement override (P1-6): a non-Stripe grant pinning a plan / features / limits onto a user or org. A non-expired override wins over the Stripe-derived entitlement.</summary>
@@ -46,6 +48,8 @@ namespace Atlas.Resources
         public string? CreatedBy { get; init; }
         /// <summary>Created (epoch ms).</summary>
         public long CreatedAt { get; init; }
+        /// <summary>Marks a grant for an account of the owner's own products: it reads back as plan source <c>internal</c> and never counts as revenue.</summary>
+        public bool? Internal { get; init; }
     }
 
     /// <summary>Sales-led entitlement overrides (<c>/v1/entitlement_overrides</c>).</summary>

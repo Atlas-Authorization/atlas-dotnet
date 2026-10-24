@@ -362,6 +362,10 @@ namespace Atlas.Resources
         /// <summary><c>GET /v1/api_keys/revoked</c> — Revocation feed: the keys revoked since a cursor (since=&lt;iso|cursor&gt;), so a resource can deny-list revoked key ids while their short-lived delegated tokens are still live.</summary>
         public Task<ListPage<RevokedApiKey>> ListRevokedAsync(string? since = null, int? limit = null, CancellationToken ct = default)
             => Req<ListPage<RevokedApiKey>>(HttpVerb.Get, "/v1/api_keys/revoked", query: Q(("since", since), ("limit", limit)), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/api_keys/revoked</c> as a cursor page: pass the previous page's <c>NextCursor</c> as <paramref name="startingAfter"/>.</summary>
+        public Task<CursorPage<RevokedApiKey>> ListRevokedPageAsync(string? since = null, int? limit = null, string? startingAfter = null, CancellationToken ct = default)
+            => Req<CursorPage<RevokedApiKey>>(HttpVerb.Get, "/v1/api_keys/revoked", query: Q(("since", since), ("limit", limit), ("starting_after", startingAfter)), cancellationToken: ct);
     }
 
     public sealed class MintApiKeyTokenBody

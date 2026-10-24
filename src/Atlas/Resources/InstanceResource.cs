@@ -112,6 +112,43 @@ namespace Atlas.Resources
         public Task<Preflight> PreflightAsync(CancellationToken ct = default)
             => Req<Preflight>(HttpVerb.Get, "/v1/instance/preflight", cancellationToken: ct);
 
+        /// <summary>
+        /// <c>GET /v1/instance/preflight</c> with <c>min_severity</c> (<c>error</c>, <c>warning</c> or <c>info</c>; <c>Ok</c> still covers every finding)
+        /// and <c>include_suppressed</c> (also lists the findings that do not apply to how the instance integrates).
+        /// </summary>
+        public Task<Preflight> PreflightAsync(string? minSeverity, bool? includeSuppressed = null, CancellationToken ct = default)
+            => Req<Preflight>(HttpVerb.Get, "/v1/instance/preflight", query: Q(("min_severity", minSeverity), ("include_suppressed", includeSuppressed)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>GET /v1/instance/unknown_fields_report</c> — the unknown body fields your writes sent over the last <paramref name="days"/> (1-90; null = 30): fix every row
+        /// with an <c>IgnoredCount</c>, then turn <c>auth_config.strictRequestBodies</c> on.
+        /// </summary>
+        public Task<UnknownFieldsReport> UnknownFieldsReportAsync(int? days = null, CancellationToken ct = default)
+            => Req<UnknownFieldsReport>(HttpVerb.Get, "/v1/instance/unknown_fields_report", query: Q(("days", days)), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/openapi/diff</c> — the operations added, deprecated and removed since a date (YYYY-MM-DD). <paramref name="surface"/> limits it (for example <c>bapi</c>).</summary>
+        public Task<OpenApiDiff> OpenApiDiffAsync(string since, string? surface = null, CancellationToken ct = default)
+            => Req<OpenApiDiff>(HttpVerb.Get, "/v1/openapi/diff", query: Q(("since", since), ("surface", surface)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>GET /v1/integration-health</c> — one report of everything that connects the instance to the outside world (setup checks, webhooks with the failing
+        /// hop, back-channel logout, referrals, email, consent manager, SDK versions). <paramref name="only"/> limits the sources; <paramref name="probe"/> = false skips live reachability probes.
+        /// </summary>
+        public Task<IntegrationHealthReport> IntegrationHealthAsync(IEnumerable<string>? only = null, bool? probe = null, CancellationToken ct = default)
+            => Req<IntegrationHealthReport>(HttpVerb.Get, "/v1/integration-health",
+                query: Q(("only", only == null ? null : string.Join(",", only)), ("probe", probe)), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/integration-health/providers</c> — the check sources this deployment reports.</summary>
+        public Task<ListPage<IntegrationHealthProvider>> IntegrationHealthProvidersAsync(CancellationToken ct = default)
+            => Req<ListPage<IntegrationHealthProvider>>(HttpVerb.Get, "/v1/integration-health/providers", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>GET /v1/embed</c> — the embed manifest for an instance (public; no key needed): CSP sources per surface with its hosts filled in, and the merged
+        /// policy in <c>Tenant.Policy</c>. <paramref name="origin"/> is the page origin to check; <paramref name="shape"/> is <c>redirect</c>, <c>panel</c> or <c>button</c>.
+        /// </summary>
+        public Task<EmbedManifest> EmbedAsync(string instance, string? origin = null, string? shape = null, CancellationToken ct = default)
+            => Req<EmbedManifest>(HttpVerb.Get, "/v1/embed", query: Q(("instance", instance), ("origin", origin), ("shape", shape)), cancellationToken: ct);
+
         /// <summary><c>POST /v1/instance/move_origin</c> — Move every URL that points at one origin to another (a domain move), across the instance, its OAuth clients, webhooks, redirect URLs and Sign in with Atlas apps. DryRun writes nothing.</summary>
         public Task<OriginMove> MoveOriginAsync(OriginMoveBody body, CancellationToken ct = default)
             => Req<OriginMove>(HttpVerb.Post, "/v1/instance/move_origin", body, cancellationToken: ct);
@@ -143,6 +180,34 @@ namespace Atlas.Resources
         /// <summary><c>DELETE /v1/instance/integrations/forumulate</c> — Remove the Forumulate connection.</summary>
         public Task<ForumulateIntegration> DeleteForumulateIntegrationAsync(CancellationToken ct = default)
             => Req<ForumulateIntegration>(HttpVerb.Delete, "/v1/instance/integrations/forumulate", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/integrations</c> — every identity integration (the presets, connected or not, and every custom one) with its health.</summary>
+        public Task<ListPage<Integration>> ListIntegrationsAsync(CancellationToken ct = default)
+            => Req<ListPage<Integration>>(HttpVerb.Get, "/v1/instance/integrations", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/integrations/{id}</c></summary>
+        public Task<Integration> GetIntegrationAsync(string id, CancellationToken ct = default)
+            => Req<Integration>(HttpVerb.Get, $"/v1/instance/integrations/{Enc(id)}", cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/instance/integrations/{id}</c> — connect or replace an integration. Use <c>atlas.WithDryRun()</c> to validate and save nothing.</summary>
+        public Task<Integration> SetIntegrationAsync(string id, SetIntegrationBody body, CancellationToken ct = default)
+            => Req<Integration>(HttpVerb.Put, $"/v1/instance/integrations/{Enc(id)}", body, cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/integrations/{id}</c> — disconnect an integration.</summary>
+        public Task<Integration> DeleteIntegrationAsync(string id, CancellationToken ct = default)
+            => Req<Integration>(HttpVerb.Delete, $"/v1/instance/integrations/{Enc(id)}", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/integrations/{id}/deliveries</c> — event and back-channel logout deliveries, newest first. <paramref name="trace"/> finds one operation by its trace id; <paramref name="kind"/> is <c>event</c> or <c>backchannel_logout</c>.</summary>
+        public Task<ListPage<IntegrationDelivery>> IntegrationDeliveriesAsync(string id, int? limit = null, string? trace = null, string? kind = null, CancellationToken ct = default)
+            => Req<ListPage<IntegrationDelivery>>(HttpVerb.Get, $"/v1/instance/integrations/{Enc(id)}/deliveries", query: Q(("limit", limit), ("trace", trace), ("kind", kind)), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/instance/integrations/{id}/events_secret</c> — reveal the event receiver's signing secret (audited).</summary>
+        public Task<IntegrationEventsSecret> RevealIntegrationEventsSecretAsync(string id, CancellationToken ct = default)
+            => Req<IntegrationEventsSecret>(HttpVerb.Post, $"/v1/instance/integrations/{Enc(id)}/events_secret", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/instance/integrations/{id}/atlas_id_tokens</c> — mint an integration token for a Sign in with Atlas user from their Atlas ID access token.</summary>
+        public Task<IntegrationToken> IntegrationAtlasIdTokenAsync(string id, string accessToken, CancellationToken ct = default)
+            => Req<IntegrationToken>(HttpVerb.Post, $"/v1/instance/integrations/{Enc(id)}/atlas_id_tokens", Body(("access_token", accessToken)), cancellationToken: ct);
 
         /// <summary><c>GET /v1/instance/cookie_consent</c> — Read the cookie-consent CMP injected into the hosted sign-in, sign-up and account pages (enabled:false when none).</summary>
         public Task<CookieConsent> GetCookieConsentAsync(CancellationToken ct = default)
@@ -462,6 +527,11 @@ namespace Atlas.Resources
         public string Fix { get; init; } = "";
         /// <summary>Ids of what the finding is about (provider, id/client_id, domain_id/host, …).</summary>
         public Dictionary<string, string>? Subject { get; init; }
+        /// <summary><c>security_posture</c> on the findings about settings weaker than the defaults new instances get.</summary>
+        public string? Group { get; init; }
+        /// <summary>Set only with <c>includeSuppressed</c>: the finding does not apply to how the instance integrates (<see cref="SuppressedReason"/> says why).</summary>
+        public bool? Suppressed { get; init; }
+        public string? SuppressedReason { get; init; }
     }
 
     public sealed class Preflight
@@ -475,6 +545,12 @@ namespace Atlas.Resources
         public List<PreflightFinding> Findings { get; init; } = new List<PreflightFinding>();
         /// <summary>Atlas browser SDK versions seen in the last 7 days, with their advisories.</summary>
         public List<SdkVersionSeen>? SdkVersionsSeen { get; init; }
+        /// <summary>The <c>min_severity</c> the findings were filtered by (<c>info</c> = everything).</summary>
+        public string? MinSeverity { get; init; }
+        /// <summary>The findings that do not apply to how the instance integrates (not counted in <see cref="Ok"/>).</summary>
+        public List<PreflightSuppressedFinding>? Suppressed { get; init; }
+        /// <summary>How each allowed https origin signs in.</summary>
+        public List<PreflightOriginIntegration>? Integrations { get; init; }
     }
 
     public sealed class SdkVersionSeen
@@ -504,6 +580,10 @@ namespace Atlas.Resources
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         public bool Enabled { get; init; }
+        /// <summary>Who set it: <c>manual</c> or <c>integration</c>.</summary>
+        public string? Source { get; init; }
+        /// <summary>The integration that set it, when <see cref="Source"/> is <c>integration</c>.</summary>
+        public string? SourceIntegration { get; init; }
         /// <summary>The CMP script URL (https).</summary>
         public string? ScriptUrl { get; init; }
         public string? ScriptId { get; init; }

@@ -1,5 +1,7 @@
 using System;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using Atlas.Resources;
 
 namespace Atlas
@@ -24,6 +26,8 @@ namespace Atlas
         private readonly bool _ownsHttp;
 
         private readonly AtlasClientOptions _options;
+        private readonly AtlasTransport _transport;
+        private readonly AtlasTransport _platformTransport;
 
         public AtlasClient(AtlasClientOptions options)
             : this(options, null) { }
@@ -39,10 +43,14 @@ namespace Atlas
             _http = shared ?? options.HttpClient ?? new HttpClient();
             var transport = new AtlasTransport(options.SecretKey ?? "", options.ApiUrl, _http, options.Strict,
                 options.OnUnknownFields,
-                "This call needs an instance secret key: set AtlasClientOptions.SecretKey (sk_...).");
+                "This call needs an instance secret key: set AtlasClientOptions.SecretKey (sk_...).",
+                options.DryRun, options.Traceparent, options.SecretRecipient);
             var platformTransport = new AtlasTransport(options.PlatformKey ?? "", options.ApiUrl, _http, options.Strict,
                 options.OnUnknownFields,
-                "Platform calls need a platform key: set AtlasClientOptions.PlatformKey (psk_...).");
+                "Platform calls need a platform key: set AtlasClientOptions.PlatformKey (psk_...).",
+                options.DryRun, options.Traceparent, options.SecretRecipient);
+            _transport = transport;
+            _platformTransport = platformTransport;
 
             Users = new UsersResource(transport);
             Sessions = new SessionsResource(transport);
@@ -124,6 +132,20 @@ namespace Atlas
             Testing = new TestingResource(transport);
             OpenFga = new OpenFgaResource(transport);
             Captcha = new CaptchaResource(transport);
+            SecretKeys = new SecretKeysResource(transport);
+            Keys = new KeysResource(transport);
+            PartnerLinks = new PartnerLinksResource(transport);
+            AtlasIdGrants = new AtlasIdGrantsResource(transport);
+            Privacy = new PrivacyResource(transport);
+            Integrations = new IntegrationsResource(transport);
+            Entitlements = new EntitlementsResource(transport);
+            Notices = new NoticesResource(transport);
+            SecurityAdvisories = new SecurityAdvisoriesResource(transport);
+            SubProcessors = new SubProcessorsResource(transport);
+            AuditExports = new AuditExportsResource(transport);
+            Status = new StatusResource(transport);
+            Delivery = new DeliveryResource(transport);
+            Whoami = new WhoamiResource(transport);
         }
 
         /// <summary>
@@ -141,9 +163,80 @@ namespace Atlas
             return new AtlasClient(o, _http);
         }
 
+        /// <summary>
+        /// A client that sends every write as a dry run (<c>?dry_run=true</c>): Atlas validates and answers with the
+        /// changes it would make, nothing changes. Shares this client's <see cref="HttpClient"/>.
+        /// <code>
+        /// var plan = await atlas.DryRunAsync(HttpVerb.Patch, "/v1/platform/apps/ins_1", new { name = "New" }, platform: true);
+        /// </code>
+        /// </summary>
+        public AtlasClient WithDryRun(bool dryRun = true)
+        {
+            var o = _options.Copy();
+            o.DryRun = dryRun;
+            return new AtlasClient(o, _http);
+        }
+
+        /// <summary>A client that sends a W3C <c>traceparent</c> on every call (see <see cref="AtlasTrace.NewTraceparent"/>).</summary>
+        public AtlasClient WithTraceparent(string? traceparent)
+        {
+            var o = _options.Copy();
+            o.Traceparent = traceparent;
+            return new AtlasClient(o, _http);
+        }
+
+        /// <summary>A client whose shown-once secrets come back sealed to <paramref name="recipient"/> (<c>x25519:…</c>).</summary>
+        public AtlasClient WithSecretRecipient(string? recipient)
+        {
+            var o = _options.Copy();
+            o.SecretRecipient = recipient;
+            return new AtlasClient(o, _http);
+        }
+
+        /// <summary>
+        /// Send one write as a dry run and return the plan (<c>POST</c>, <c>PUT</c>, <c>PATCH</c> or <c>DELETE</c>).
+        /// <paramref name="platform"/> sends it with the platform key.
+        /// </summary>
+        public async Task<DryRunResult> DryRunAsync(HttpVerb method, string path, object? body = null, bool platform = false, CancellationToken ct = default)
+        {
+            if (method == HttpVerb.Get) throw new ArgumentException("A dry run is for writes (POST, PUT, PATCH, DELETE).", nameof(method));
+            var t = (platform ? _platformTransport : _transport).WithDryRun(true);
+            var result = await t.SendAsync<DryRunResult>(new RequestOptions { Method = method, Path = path, Body = body }, ct).ConfigureAwait(false);
+            return result ?? new DryRunResult();
+        }
+
         /// <summary>Convenience overload: just a secret key, default API URL.</summary>
         public AtlasClient(string secretKey)
             : this(new AtlasClientOptions { SecretKey = secretKey }) { }
+
+        /// <summary><c>/v1/secret_keys</c>: scoped, expiring, rotatable instance secret keys.</summary>
+        public SecretKeysResource SecretKeys { get; }
+        /// <summary><c>/v1/keys</c>: every credential on the instance in one standard shape.</summary>
+        public KeysResource Keys { get; }
+        /// <summary><c>/v1/partner_links</c>: credentials granted to (and held for) an integrated partner service.</summary>
+        public PartnerLinksResource PartnerLinks { get; }
+        /// <summary><c>/v1/atlas_id_apps</c>: the Sign in with Atlas apps this instance manages, and their per-user grants.</summary>
+        public AtlasIdGrantsResource AtlasIdGrants { get; }
+        /// <summary>The data-rights executor protocol (<c>/v1/privacy</c>) and the instance's orchestrator connection.</summary>
+        public PrivacyResource Privacy { get; }
+        /// <summary>The integration-facing surface (<c>/v1/integrations/*</c>).</summary>
+        public IntegrationsResource Integrations { get; }
+        /// <summary><c>/v1/entitlements</c>: the standard entitlements document.</summary>
+        public EntitlementsResource Entitlements { get; }
+        /// <summary><c>/v1/instance/notices</c>: behaviour changes that affect this instance.</summary>
+        public NoticesResource Notices { get; }
+        /// <summary><c>/v1/security_advisories</c>.</summary>
+        public SecurityAdvisoriesResource SecurityAdvisories { get; }
+        /// <summary><c>/v1/instance/sub_processors</c>.</summary>
+        public SubProcessorsResource SubProcessors { get; }
+        /// <summary><c>/v1/audit_exports</c>: continuous audit-log forwarding.</summary>
+        public AuditExportsResource AuditExports { get; }
+        /// <summary>The service status, the instance's incident subscription and its status dependencies.</summary>
+        public StatusResource Status { get; }
+        /// <summary>Outbound delivery health (<c>/v1/delivery_health</c>) and the fixed egress addresses (<c>/v1/meta/egress_ips</c>).</summary>
+        public DeliveryResource Delivery { get; }
+        /// <summary><c>GET /v1/whoami</c>: what the key in use is and what it may do.</summary>
+        public WhoamiResource Whoami { get; }
 
         public UsersResource Users { get; }
         public SessionsResource Sessions { get; }

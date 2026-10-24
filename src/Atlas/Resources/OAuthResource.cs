@@ -45,6 +45,12 @@ namespace Atlas.Resources
         public string? AccessTokenFormat { get; init; }
         /// <summary>This client's token lifetime overrides (seconds); a null field is inherited.</summary>
         public OAuthTokenLifetimes? TokenLifetimes { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back.</summary>
+        public bool? IdempotentReplay { get; init; }
     }
 
     /// <summary>Create/rotate reveal the secret exactly once, alongside the client.</summary>
@@ -76,6 +82,12 @@ namespace Atlas.Resources
         public string Note { get; init; } = "";
         /// <summary>On a rotation: how long the previous secret keeps working, in seconds (echoed).</summary>
         public int? OverlapSeconds { get; init; }
+        /// <summary>Provisioning tags.</summary>
+        public Dictionary<string, JsonElement>? Metadata { get; init; }
+        /// <summary>The idempotent-create key you sent, if any.</summary>
+        public string? ExternalRef { get; init; }
+        /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back.</summary>
+        public bool? IdempotentReplay { get; init; }
     }
 
     /// <summary>The body of <c>POST /v1/oauth_clients/{id}/rotate_secret</c>.</summary>
@@ -105,6 +117,8 @@ namespace Atlas.Resources
         public string? TokenEndpointAuthMethod { get; set; }
         public string? LogoUrl { get; set; }
         public bool? FirstParty { get; set; }
+        /// <summary>New clients default to true (confidential ones included); send false to opt out.</summary>
+        public bool? RequirePkce { get; set; }
         /// <summary>
         /// Skip the logout confirmation page for RP-initiated logout (<c>/oauth2/logout</c>) with this client's
         /// <c>client_id</c> and an exactly registered <c>post_logout_redirect_uri</c>: the session ends and the user is
@@ -132,10 +146,16 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+        /// <summary>Provisioning tags (strings, numbers or booleans).</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
+        /// <summary>A stable key of your own: a repeat create with it returns the existing client (no secret).</summary>
+        public string? ExternalRef { get; set; }
     }
 
     public sealed class UpdateOAuthClientBody
     {
+        /// <summary>Replaces the provisioning tags.</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
         public string? Name { get; set; }
         public List<string>? RedirectUris { get; set; }
         public List<string>? AllowedScopes { get; set; }
@@ -260,6 +280,10 @@ namespace Atlas.Resources
 
         public Task<ListPage<OAuthClient>> ListAsync(CancellationToken ct = default)
             => Req<ListPage<OAuthClient>>(HttpVerb.Get, "/v1/oauth_clients", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/oauth_clients?metadata[key]=value</c> — the clients whose provisioning metadata matches every pair.</summary>
+        public Task<ListPage<OAuthClient>> ListAsync(IDictionary<string, object?> metadata, CancellationToken ct = default)
+            => Req<ListPage<OAuthClient>>(HttpVerb.Get, "/v1/oauth_clients", query: AtlasProvisioning.MetadataQuery(metadata), cancellationToken: ct);
 
         public Task<OAuthClient> GetAsync(string id, CancellationToken ct = default)
             => Req<OAuthClient>(HttpVerb.Get, $"/v1/oauth_clients/{Enc(id)}", cancellationToken: ct);

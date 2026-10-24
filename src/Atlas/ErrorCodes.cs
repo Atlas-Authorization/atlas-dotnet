@@ -24,8 +24,27 @@ namespace Atlas
         /// <summary>The key is valid but for a different surface (e.g. a platform key on an instance route).</summary>
         public const string WrongKeySurface = "WRONG_KEY_SURFACE";
         public const string Forbidden = "FORBIDDEN";
-        /// <summary>The key lacks the scope this route needs.</summary>
+        /// <summary>
+        /// The key lacks the scope this route needs (403); <c>meta.required_scope</c> names it. Replaces
+        /// <see cref="ScopeMissing"/>; use <see cref="AtlasException.IsInsufficientScope"/>, which accepts both.
+        /// </summary>
+        public const string InsufficientScope = "INSUFFICIENT_SCOPE";
+        /// <summary>The former spelling of <see cref="InsufficientScope"/> (the new envelope carries it as <c>meta.legacy_code</c>); still tolerated.</summary>
         public const string ScopeMissing = "SCOPE_MISSING";
+        /// <summary>A root action (create an app or instance, mint a key) needs a multi-factor sign-in within the last five minutes (403).</summary>
+        public const string StepUpRequired = "STEP_UP_REQUIRED";
+        /// <summary>No endpoint matches the method and path (a typo or a guessed route); see <see cref="AtlasErrorItem.DidYouMean"/>.</summary>
+        public const string RouteNotFound = "ROUTE_NOT_FOUND";
+        /// <summary>The call is for a live instance only.</summary>
+        public const string NotALiveInstance = "NOT_A_LIVE_INSTANCE";
+        /// <summary>The call is for a test-mode instance only.</summary>
+        public const string TestModeOnly = "TEST_MODE_ONLY";
+        /// <summary>Test-mode tooling is not available on this deployment.</summary>
+        public const string TestingUnavailable = "TESTING_UNAVAILABLE";
+        /// <summary>The partner-link credential an integration needs is not available on this instance.</summary>
+        public const string PartnerLinkUnavailable = "PARTNER_LINK_UNAVAILABLE";
+        /// <summary>The key is pinned to browser origins (<c>allowed_origins</c>) and the request's <c>Origin</c> is not one of them.</summary>
+        public const string OriginNotAllowed = "ORIGIN_NOT_ALLOWED";
         /// <summary>Email sending is not set up for this instance.</summary>
         public const string EmailDeliveryNotConfigured = "EMAIL_DELIVERY_NOT_CONFIGURED";
         /// <summary>The operation needs an email provider to be configured first.</summary>

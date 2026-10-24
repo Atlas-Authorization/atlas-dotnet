@@ -232,7 +232,11 @@ namespace Atlas.Resources
         public long? CreatedAfter { get; set; }
         /// <summary>Epoch ms.</summary>
         public long? CreatedBefore { get; set; }
-        /// <summary><c>created_at</c>, <c>-created_at</c>, <c>last_sign_in_at</c> or <c>-last_sign_in_at</c>.</summary>
+        /// <summary>Epoch ms bound on <c>updated_at</c>: the way to sync changed users incrementally.</summary>
+        public long? UpdatedAfter { get; set; }
+        /// <summary>Epoch ms bound on <c>updated_at</c>.</summary>
+        public long? UpdatedBefore { get; set; }
+        /// <summary><c>created_at</c>, <c>-created_at</c>, <c>last_sign_in_at</c>, <c>-last_sign_in_at</c>, <c>updated_at</c> or <c>-updated_at</c>.</summary>
         public string? OrderBy { get; set; }
         /// <summary>Adds <c>total_count</c> to the page.</summary>
         public bool? IncludeTotalCount { get; set; }
@@ -251,6 +255,8 @@ namespace Atlas.Resources
             yield return new KeyValuePair<string, object?>("organization_id", OrganizationId);
             yield return new KeyValuePair<string, object?>("created_after", CreatedAfter);
             yield return new KeyValuePair<string, object?>("created_before", CreatedBefore);
+            yield return new KeyValuePair<string, object?>("updated_after", UpdatedAfter);
+            yield return new KeyValuePair<string, object?>("updated_before", UpdatedBefore);
             yield return new KeyValuePair<string, object?>("order_by", OrderBy);
             yield return new KeyValuePair<string, object?>("include_total_count", IncludeTotalCount);
         }

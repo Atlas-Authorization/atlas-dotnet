@@ -58,6 +58,74 @@ using var atlas = new AtlasClient(new AtlasClientOptions
 The secret key is sent only as `Authorization: Bearer <key>`; it is never logged and
 never placed in a URL.
 
+### Integrator platform (1.16)
+
+Credentials, privacy, integrations, status and webhooks v2. Key prefix checks must accept both formats,
+`atlas_<live|test>_<kind>_…` and the legacy `sk_` / `pk_` / `psk_` / `whsec_`:
+
+```csharp
+AtlasKeys.IsSecretKey("atlas_live_sk_abc"); // true, and so is "sk_live_abc"
+
+// Scoped, expiring, rotatable secret keys; the secret is in the create response only.
+var key = await atlas.SecretKeys.CreateAsync(new CreateSecretKeyBody
+{
+    Name = "ci", Scopes = new List<string> { "read_only" },
+    AllowedOrigins = new List<string> { "https://*.example.com" }, ExternalRef = "ci-key",
+}, idempotencyKey: "ci-key-1");
+
+// Ask Atlas to seal shown-once secrets to your key instead (libsodium sealed box).
+var pair = SealedBox.GenerateKeyPair();
+using var sealedAtlas = new AtlasClient(new AtlasClientOptions { SecretKey = "...", SecretRecipient = pair.Recipient });
+var created = await sealedAtlas.SecretKeys.CreateAsync(new CreateSecretKeyBody { Scopes = new List<string> { "read_only" } });
+var secret = SealedBox.OpenSealedSecret(created.SealedSecret!, pair);
+
+// What can this key do? (also atlas.Platform.WhoamiAsync() for a platform key)
+var who = await atlas.Whoami.GetAsync();
+
+// Validate a write without changing anything, and tag it with a W3C trace id.
+var plan = await atlas.DryRunAsync(HttpVerb.Patch, "/v1/instance", new { name = "New" });
+var traced = atlas.WithTraceparent(AtlasTrace.NewTraceparent());
+```
+
+`INSUFFICIENT_SCOPE` (the former `SCOPE_MISSING` is still recognised) carries the scope the call needed;
+`STEP_UP_REQUIRED` means a root action needs a multi-factor sign-in within five minutes:
+
+```csharp
+catch (AtlasException ex) when (ex.IsInsufficientScope) { Console.WriteLine(ex.RequiredScope); }
+catch (AtlasException ex) when (ex.IsRouteNotFound) { Console.WriteLine(string.Join(", ", ex.DidYouMean)); }
+```
+
+A CLI can sign an operator in without a long-lived key (device flow, then a one-hour token for one instance):
+
+```csharp
+var start = await OperatorClient.StartLoginAsync();
+Console.WriteLine($"Open {start.VerificationUriComplete} (code {start.UserCode})");
+var operatorToken = await OperatorClient.PollLoginAsync(start);
+var scoped = await OperatorClient.ExchangeTokenAsync(operatorToken.AccessToken, "ins_123", new[] { "users:read" });
+using var cli = OperatorClient.NewClientFromAccessToken(scoped.AccessToken);
+```
+
+Webhook endpoints can be upserted by URL on every deploy, tested inline, replayed after an outage, and verified with
+URL-bound v2 signatures:
+
+```csharp
+var endpoint = await atlas.Webhooks.Endpoints.UpsertByUrlAsync(new UpsertWebhookEndpointBody
+{
+    Url = "https://app.example.com/hooks/atlas", SignatureVersions = new List<string> { "v1", "v2" },
+});
+var test = await atlas.Webhooks.Endpoints.TestNowAsync(endpoint.Id, "10s"); // status, latency, snippet
+await atlas.Webhooks.Endpoints.ReplayAsync(endpoint.Id, new ReplayWebhookBody { Since = "failing_since" });
+
+var result = new WebhookVerifier(secret).VerifyUrl(rawBody, headers, "https://app.example.com/hooks/atlas", requireV2: true);
+WebhookEvents.Canonical("organizationMembership.created"); // "organization_membership.created"
+```
+
+Data-rights receivers verify Atlas's signed calls with `PrivacyCall.Verify(rawBody, headers, signingSecret, out var reason)`;
+executors use `atlas.Privacy` (lookup, requests, cancel) and the instance connection is `atlas.Privacy.Orchestrator`.
+Identity integrations are `atlas.Instance.*Integration*` (and `atlas.Sessions.GetIntegrationTokenAsync` mints a token
+for a session); `atlas.Status`, `Notices`, `SecurityAdvisories`, `SubProcessors`, `AuditExports` and `Entitlements`
+cover service status, behaviour changes, advisories, processors, audit forwarding and entitlements.
+
 ### Errors
 
 Every non-2xx response throws an `AtlasException` subclass carrying the HTTP `Status`
@@ -323,7 +391,7 @@ null when never reported), `ReferralCode` and `ReferralLink`. `Referral.Status` 
 await atlas.Referrals.UpdateAsync(new UpdateReferralSettingsBody
 {
     Enabled = true,
-    Provider = "webhook", // the Atlas referral protocol; or "referally" or another built-in adapter
+    Provider = "webhook", // the Atlas referral protocol; or "referalli" or another built-in adapter
     EndpointUrl = "https://referrals.example.com/atlas",
     SigningSecret = Environment.GetEnvironmentVariable("REFERRAL_SIGNING_SECRET"),
     Security = new UpdateReferralSecurityBody { OnHighRisk = "hold" },

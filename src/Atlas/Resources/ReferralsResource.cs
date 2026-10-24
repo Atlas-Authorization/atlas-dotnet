@@ -28,7 +28,7 @@ namespace Atlas.Resources
     /// <summary>A referral provider Atlas supports.</summary>
     public sealed class ReferralProvider
     {
-        /// <summary><c>webhook</c> (the Atlas referral protocol), <c>referally</c> or another vendor adapter id.</summary>
+        /// <summary><c>webhook</c> (the Atlas referral protocol), <c>referalli</c> or another vendor adapter id.</summary>
         public string Id { get; init; } = "";
         public string Name { get; init; } = "";
         public ReferralProviderCapabilities Capabilities { get; init; } = new ReferralProviderCapabilities();
@@ -36,6 +36,43 @@ namespace Atlas.Resources
         public List<string> Needs { get; init; } = new List<string>();
         public string? DefaultContextCookie { get; init; }
         public string? DocsUrl { get; init; }
+        /// <summary>Every cookie the vendor has written, in the order Atlas tries them.</summary>
+        public List<string>? DefaultContextCookies { get; init; }
+        /// <summary>Retired spellings of <see cref="Id"/> that are still accepted on write (for example <c>referally</c> for <c>referalli</c>).</summary>
+        public List<string>? Aliases { get; init; }
+    }
+
+    /// <summary>Referral provider ids. The built-in adapter was renamed from <c>referally</c> to <c>referalli</c>; the API accepts both on write.</summary>
+    public static class ReferralProviders
+    {
+        public const string Webhook = "webhook";
+        public const string Referalli = "referalli";
+        public const string ReferalliLegacy = "referally";
+    }
+
+    /// <summary>A one-click (OAuth) install a deployment offers for a referral platform.</summary>
+    public sealed class ReferralOneClick
+    {
+        public string Id { get; init; } = "";
+        public string Name { get; init; } = "";
+        public bool Available { get; init; }
+        /// <summary>What the connection is saved as: <c>referalli</c> or <c>webhook</c> (the generic protocol).</summary>
+        public string? Provider { get; init; }
+        public string? Scope { get; init; }
+        public string? RedirectUri { get; init; }
+    }
+
+    /// <summary>The answer to <c>POST /v1/instance/referrals/{preset}/install</c>.</summary>
+    public sealed class ReferralInstall
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Preset { get; init; } = "";
+        public string? Provider { get; init; }
+        /// <summary>Where to send the merchant to pick an organization and program.</summary>
+        public string AuthorizeUrl { get; init; } = "";
+        public string? RedirectUri { get; init; }
+        /// <summary>Epoch ms; the link lasts 15 minutes.</summary>
+        public long ExpiresAt { get; init; }
     }
 
     /// <summary>Fraud and bot protection for referred sign-ups (<c>security</c> on the referral settings).</summary>
@@ -93,6 +130,8 @@ namespace Atlas.Resources
         public long? ClockSkewMs { get; init; }
         /// <summary>True when the skew is over 60 seconds.</summary>
         public bool ClockSkewWarning { get; init; }
+        /// <summary>What the platform said it can do.</summary>
+        public ReferralProviderCapabilities? AdvertisedCapabilities { get; init; }
     }
 
     /// <summary>Delivery is blocked on something only a person can fix. Show it as a banner.</summary>
@@ -149,7 +188,7 @@ namespace Atlas.Resources
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_settings";
         public bool Enabled { get; init; }
-        /// <summary><c>webhook</c> (the Atlas referral protocol), <c>referally</c> or another built-in vendor adapter id.</summary>
+        /// <summary><c>webhook</c> (the Atlas referral protocol), <c>referalli</c> or another built-in vendor adapter id.</summary>
         public string Provider { get; init; } = "";
         public string? EndpointUrl { get; init; }
         public string? ProgramId { get; init; }
@@ -159,6 +198,16 @@ namespace Atlas.Resources
         /// <summary>Query parameters that carry a referral code, in priority order.</summary>
         public List<string> UrlParams { get; init; } = new List<string>();
         public string? ContextCookie { get; init; }
+        /// <summary>Every tracking cookie, in the order they are tried.</summary>
+        public List<string>? ContextCookies { get; init; }
+        /// <summary>Retired spellings of <see cref="Provider"/> still accepted on write.</summary>
+        public List<string>? ProviderAliases { get; init; }
+        /// <summary>What the chosen provider can do now: its built-in capabilities plus what its last ping advertised.</summary>
+        public ReferralProviderCapabilities? Capabilities { get; init; }
+        /// <summary>The one-click connect to Referalli (the <c>referalli</c> preset).</summary>
+        public ReferralOneClick? OneClick { get; init; }
+        /// <summary>Every platform this deployment offers a one-click install for.</summary>
+        public List<ReferralOneClick>? OneClickPresets { get; init; }
         public string? ConsentCategory { get; init; }
         public string? ConsentFallbackCategory { get; init; }
         public bool AutoEnrollUsers { get; init; }
@@ -166,14 +215,14 @@ namespace Atlas.Resources
         public string? LinkTemplate { get; init; }
         public int TimeoutMs { get; init; }
         public ReferralSecuritySettings Security { get; init; } = new ReferralSecuritySettings();
-        /// <summary>Public tracking token (the <c>referally</c> provider derives the code lookup from it). Not a secret.</summary>
+        /// <summary>Public tracking token (the <c>referalli</c> provider derives the code lookup from it). Not a secret.</summary>
         public string? TrackingToken { get; init; }
         /// <summary>Public, CORS-enabled URL template with <c>{code}</c> for "X invited you" on hosted sign-up.</summary>
         public string? CodeLookupUrl { get; init; }
         /// <summary>Show an optional "Referral code" field on hosted sign-up.</summary>
         public bool SignupCodeField { get; init; }
         /// <summary>
-        /// The referral programs whose script or cookie the browser reads, in order (<c>referally</c>, <c>rewardful</c>,
+        /// The referral programs whose script or cookie the browser reads, in order (<c>referalli</c>, <c>rewardful</c>,
         /// <c>tolt</c>, <c>promotekit</c>, <c>firstpromoter</c>, <c>partnerstack</c>, <c>dub</c>); the provider's default unless set.
         /// </summary>
         public List<string>? BrowserSources { get; init; }
@@ -182,7 +231,7 @@ namespace Atlas.Resources
         /// <summary>
         /// Which consent manager decides on the tracking cookie's ids: <c>auto</c> (any common one), one manager
         /// (<c>cookiemunch</c>, <c>onetrust</c>, <c>cookiebot</c>, <c>didomi</c>, <c>usercentrics</c>, <c>osano</c>, <c>cookieyes</c>,
-        /// <c>complianz</c>, <c>klaro</c>, <c>tcf</c>, <c>consent_mode</c>), or <c>app</c> (only the app's own decision).
+        /// <c>complianz</c>, <c>klaro</c>, <c>tcf</c>, <c>consent_mode</c>, <c>fdconsent</c>, <c>gpc</c>), or <c>app</c> (only the app's own decision).
         /// </summary>
         public string? ConsentProvider { get; init; }
         /// <summary>Forward email, name and suspension changes to the platform (default true).</summary>
@@ -226,6 +275,8 @@ namespace Atlas.Resources
         public string? InboundEndpointId { get; set; }
         public List<string>? UrlParams { get; set; }
         public string? ContextCookie { get; set; }
+        /// <summary>A list of up to 5 cookie names tried in order; it wins over <see cref="ContextCookie"/>.</summary>
+        public List<string>? ContextCookies { get; set; }
         public string? ConsentCategory { get; set; }
         public string? ConsentFallbackCategory { get; set; }
         public bool? AutoEnrollUsers { get; set; }
@@ -399,6 +450,8 @@ namespace Atlas.Resources
         public string? UserId { get; set; }
         /// <summary>Only calls whose last failure had this code, e.g. <c>signature_rejected</c>.</summary>
         public string? ErrorCode { get; set; }
+        /// <summary>Only the calls of one operation (W3C trace id).</summary>
+        public string? Trace { get; set; }
         /// <summary>The id of the last call of the previous page.</summary>
         public string? StartingAfter { get; set; }
     }
@@ -464,6 +517,8 @@ namespace Atlas.Resources
         public string? RequestId { get; init; }
         /// <summary>The backfill job that queued the call.</summary>
         public string? BatchId { get; init; }
+        /// <summary>The W3C trace id of the operation that caused the call.</summary>
+        public string? TraceId { get; init; }
     }
 
     /// <summary>
@@ -513,7 +568,14 @@ namespace Atlas.Resources
         public Task<ListPage<ReferralCall>> ListCallsAsync(ListReferralCallsQuery query, CancellationToken ct = default)
             => Req<ListPage<ReferralCall>>(HttpVerb.Get, "/v1/instance/referrals/calls",
                 query: Q(("limit", query.Limit), ("status", query.Status), ("kind", query.Kind), ("user_id", query.UserId),
-                    ("error_code", query.ErrorCode), ("starting_after", query.StartingAfter)), cancellationToken: ct);
+                    ("error_code", query.ErrorCode), ("trace", query.Trace), ("starting_after", query.StartingAfter)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/instance/referrals/{preset}/install</c> — start a one-click connection to a referral platform (<c>referalli</c>, or any id in
+        /// <c>OneClickPresets</c>). 422 <c>REFERRALS_NOT_CONFIGURED</c> when the deployment does not offer it; connect with a key or signing secret then.
+        /// </summary>
+        public Task<ReferralInstall> InstallAsync(string preset, string? returnTo = null, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<ReferralInstall>(HttpVerb.Post, $"/v1/instance/referrals/{Enc(preset)}/install", Body(("return_to", returnTo)), idempotencyKey: idempotencyKey, cancellationToken: ct);
 
         /// <summary>
         /// <c>POST /v1/instance/referrals/calls/retry_failed</c> — re-queue every failed call (not tests) to send now.

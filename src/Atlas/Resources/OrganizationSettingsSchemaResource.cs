@@ -15,6 +15,8 @@ namespace Atlas.Resources
         public long? Version { get; init; }
         /// <summary>Last registered (epoch ms).</summary>
         public long? UpdatedAt { get; init; }
+        /// <summary>False when the singleton has never been set (the GET answers 200, no longer 404).</summary>
+        public bool? Configured { get; init; }
     }
 
     /// <summary>The instance-wide JSON Schema for organization settings (<c>/v1/organization_settings_schema</c>).</summary>

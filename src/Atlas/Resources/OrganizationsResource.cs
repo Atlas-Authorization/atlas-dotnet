@@ -253,6 +253,8 @@ namespace Atlas.Resources
     {
         public List<OrganizationMembership> Data { get; init; } = new List<OrganizationMembership>();
         public bool HasMore { get; init; }
+        /// <summary>Pass as <c>starting_after</c> to continue.</summary>
+        public string? NextCursor { get; init; }
     }
 
     /// <summary>Nested memberships namespace.</summary>
@@ -262,6 +264,10 @@ namespace Atlas.Resources
 
         public Task<MembershipListPage> ListAsync(string orgId, CancellationToken ct = default)
             => Req<MembershipListPage>(HttpVerb.Get, $"/v1/organizations/{Enc(orgId)}/memberships", cancellationToken: ct);
+
+        /// <summary>One cursor page of an organization's memberships (<c>limit</c> + <c>starting_after</c>; the page carries <c>next_cursor</c>).</summary>
+        public Task<MembershipListPage> ListPageAsync(string orgId, int? limit, string? startingAfter = null, CancellationToken ct = default)
+            => Req<MembershipListPage>(HttpVerb.Get, $"/v1/organizations/{Enc(orgId)}/memberships", query: Q(("limit", limit), ("starting_after", startingAfter)), cancellationToken: ct);
 
         public Task<AddMembershipResult> AddAsync(string orgId, string userId, string? role = null, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<AddMembershipResult>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/memberships",

@@ -352,6 +352,62 @@ namespace Atlas.Resources
         public bool Legacy { get; init; }
         /// <summary>When legacy is true: the design derived from the older branding settings (a good starting point for an editor). Null otherwise.</summary>
         public AtlasDesign? LegacyDesign { get; init; }
+        /// <summary>The imported brand document layer (null when none). Instance designs only.</summary>
+        public BrandImport? Brand { get; init; }
+        /// <summary>The layers, lowest first (preset &lt; brand &lt; design &lt; audience). Instance designs only.</summary>
+        public List<DesignLayer>? Precedence { get; init; }
+        /// <summary>Which layer each field set by the brand or the design comes from (<c>brand</c> or <c>design</c>).</summary>
+        public Dictionary<string, string>? Sources { get; init; }
+        /// <summary>After a brand import, the tokens that were not applied.</summary>
+        public List<BrandIgnoredToken>? Ignored { get; init; }
+    }
+
+    /// <summary>One layer of the design precedence.</summary>
+    public sealed class DesignLayer
+    {
+        /// <summary><c>preset</c>, <c>brand</c>, <c>design</c> or <c>audience</c>.</summary>
+        public string Layer { get; init; } = "";
+        public string? Source { get; init; }
+    }
+
+    /// <summary>A brand token that was not applied, and why.</summary>
+    public sealed class BrandIgnoredToken
+    {
+        /// <summary>The token path in the brand document, e.g. <c>color.sparkle</c>.</summary>
+        public string Token { get; init; } = "";
+        public string Reason { get; init; } = "";
+    }
+
+    /// <summary>Which design field a brand token set.</summary>
+    public sealed class BrandMapping
+    {
+        public string Token { get; init; } = "";
+        public string To { get; init; } = "";
+        public JsonElement? Value { get; init; }
+    }
+
+    /// <summary>The identity data a brand document carried.</summary>
+    public sealed class BrandMeta
+    {
+        public string? Name { get; init; }
+        [JsonPropertyName("legalName")] public string? LegalName { get; init; }
+        [JsonPropertyName("supportEmail")] public string? SupportEmail { get; init; }
+        public string? Favicon { get; init; }
+    }
+
+    /// <summary>An imported brand document (W3C design tokens), as its own layer under the instance design.</summary>
+    public sealed class BrandImport
+    {
+        /// <summary><c>url</c> or <c>inline</c>.</summary>
+        public string Source { get; init; } = "";
+        public string? Url { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long ImportedAt { get; init; }
+        [JsonPropertyName("document_sha256")] public string? DocumentSha256 { get; init; }
+        public AtlasDesign? Design { get; init; }
+        public List<BrandMapping>? Mapping { get; init; }
+        public List<BrandIgnoredToken>? Ignored { get; init; }
+        public BrandMeta? Meta { get; init; }
     }
 
     /// <summary>The fully-resolved design every surface renders (defaults ← preset ← overrides): the same shape as AtlasDesign with every field present.</summary>
@@ -480,6 +536,21 @@ namespace Atlas.Resources
         /// <summary>Shorthand: wraps <paramref name="design"/> in a <see cref="DesignBody"/>.</summary>
         public Task<DesignSettings> ReplaceAsync(AtlasDesign design, CancellationToken ct = default)
             => ReplaceAsync(new DesignBody { Design = design }, ct);
+
+        /// <summary>
+        /// <c>PUT /v1/instance/design</c> with <c>brand_url</c> — import a brand document (W3C design tokens) from an https URL as its own layer
+        /// under the instance design. The result lists <c>Brand.Mapping</c> and <c>Ignored</c>.
+        /// </summary>
+        public Task<DesignSettings> ImportBrandUrlAsync(string brandUrl, CancellationToken ct = default)
+            => Req<DesignSettings>(HttpVerb.Put, "/v1/instance/design", Body(("brand_url", brandUrl)), cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/instance/design</c> with <c>brand</c> — import an inline brand document.</summary>
+        public Task<DesignSettings> ImportBrandAsync(IDictionary<string, object?> brand, CancellationToken ct = default)
+            => Req<DesignSettings>(HttpVerb.Put, "/v1/instance/design", Body(("brand", brand)), cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/instance/design</c> with <c>brand: null</c> — remove the imported brand layer.</summary>
+        public Task<DesignSettings> RemoveBrandAsync(CancellationToken ct = default)
+            => Req<DesignSettings>(HttpVerb.Put, "/v1/instance/design", new Dictionary<string, object?> { ["brand"] = null }, cancellationToken: ct);
 
         /// <summary><c>PATCH /v1/instance/design</c> — Change part of the instance design ({ design: AtlasDesignPatch }): nested settings merge, null removes a setting.</summary>
         public Task<DesignSettings> UpdateAsync(DesignBody body, CancellationToken ct = default)
