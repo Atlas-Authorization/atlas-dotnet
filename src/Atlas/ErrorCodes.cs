@@ -85,6 +85,12 @@ namespace Atlas
         public const string LimitExceeded = "LIMIT_EXCEEDED";
         /// <summary>422: managed WAF provision/deprovision on an instance with no WAF configuration saved (<c>meta.action</c>).</summary>
         public const string ManagedWafNotConfigured = "MANAGED_WAF_NOT_CONFIGURED";
+        /// <summary>403: a Sign in with Atlas test or review account used something other than the app(s) it was made for (another app, the dashboard, account settings), or an expired one tried to sign in.</summary>
+        public const string TestAccountRestricted = "TEST_ACCOUNT_RESTRICTED";
+        /// <summary>409: the account-wide cap on test and review accounts is reached.</summary>
+        public const string ProvisionedAccountLimitReached = "PROVISIONED_ACCOUNT_LIMIT_REACHED";
+        /// <summary>422: a setting or address needs a domain the account has not verified.</summary>
+        public const string DomainNotVerified = "DOMAIN_NOT_VERIFIED";
         /// <summary>The session was revoked.</summary>
         public const string SessionRevoked = "SESSION_REVOKED";
         /// <summary>The session timed out from inactivity.</summary>

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.19.0 (Atlas.Sdk) — 2026-10-25
+
+### Added
+
+- **Test and review accounts for Sign in with Atlas apps.** `client.Platform.AtlasIdApps.ProvisionedAccounts`: `ListAsync`, `CreateAsync`, `GetAsync`, `RemoveAsync` and `RotatePasswordAsync` for `/v1/platform/atlas_id_apps/{id}/provisioned_accounts`, with typed `AtlasIdProvisionedAccount`, `AtlasIdProvisionedAccountList`, `CreateAtlasIdProvisionedAccountBody` and `RotateAtlasIdProvisionedPasswordBody`. Needs the `platform:atlas_id_apps:provision` scope (or `atlas_id_apps:<app id>:provision` for one app). The password is returned once, on create and on rotation; with `AtlasClientOptions.SecretRecipient` it arrives sealed as `SealedPassword`. Neither the password nor the sealed value is printed by `ToString()` on the models.
+- **Verified domains.** `client.Platform.Domains`: `ListAsync`, `ClaimAsync`, `CheckAsync` (alias `VerifyAsync`) and `RemoveAsync` for `/v1/platform/domains`, with `AccountDomain` and `AccountDomainList`.
+- **App fields.** `TestMode` and `ProvisionedVerifiedDomainsOnly` on `AtlasIdApp`, `AtlasIdAppWithSecret` and `UpdateAtlasIdAppBody`.
+- Error codes `ErrorCodes.TestAccountRestricted` (403), `ErrorCodes.ProvisionedAccountLimitReached` (409) and `ErrorCodes.DomainNotVerified` (422).
+- API coverage list: the nine new operations.
+
 ## 1.18.0 (Atlas.Sdk) — 2026-10-25
 
 ### Added

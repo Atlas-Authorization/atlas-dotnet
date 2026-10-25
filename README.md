@@ -354,6 +354,21 @@ With a platform key, `Platform.AtlasIdApps.FindUsersAsync(id, email)` answers a 
 `RevokeGrantAsync(id, grantId)` revokes one person's approval, and `Platform.AtlasIdPublisher` claims and verifies
 the publisher name shown on consent screens.
 
+Test and review accounts (app-store reviewers, CI, demos) are real Atlas accounts confined to one app. Claim and
+verify a domain with `Platform.Domains`, then manage accounts with `Platform.AtlasIdApps.ProvisionedAccounts`
+(needs the `platform:atlas_id_apps:provision` scope, or `atlas_id_apps:<app id>:provision` for one app):
+
+```csharp
+await atlas.Platform.AtlasIdApps.UpdateAsync(appId, new UpdateAtlasIdAppBody { TestMode = true, ProvisionedVerifiedDomainsOnly = true });
+var acct = await atlas.Platform.AtlasIdApps.ProvisionedAccounts.CreateAsync(appId,
+    new CreateAtlasIdProvisionedAccountBody { Email = "reviewer@example.com", Label = "app-store reviewer" });
+// acct.Password is shown once (or acct.SealedPassword when AtlasClientOptions.SecretRecipient is set).
+await atlas.Platform.AtlasIdApps.ProvisionedAccounts.RotatePasswordAsync(appId, acct.Id);
+await atlas.Platform.AtlasIdApps.ProvisionedAccounts.RemoveAsync(appId, acct.Id);
+```
+
+Related error codes: `TEST_ACCOUNT_RESTRICTED`, `PROVISIONED_ACCOUNT_LIMIT_REACHED`, `DOMAIN_NOT_VERIFIED`.
+
 ### Policy acceptance
 
 Terms of service, a privacy policy or any policy your users accept at sign-up (and again at sign-in when a new

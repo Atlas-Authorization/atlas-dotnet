@@ -119,6 +119,10 @@ namespace Atlas.Resources
         public AtlasIdAppBrandingInput? Branding { get; set; }
         /// <summary>Per-app webhook (public https): user.updated, user.deleted and grant.revoked for this app's users. The first set returns WebhookSecret once; <c>Set("webhook_url", null)</c> removes it.</summary>
         public string? WebhookUrl { get; set; }
+        /// <summary>Test sign-in mode: <c>+atlas_test</c> addresses on a verified domain sign in to this app with the fixed code 424242. Needs a verified domain (422 <c>DOMAIN_NOT_VERIFIED</c> otherwise). A risk you opt into: turn it off when you are not testing.</summary>
+        public bool? TestMode { get; set; }
+        /// <summary>Test and review accounts must use an address on a domain you verified.</summary>
+        public bool? ProvisionedVerifiedDomainsOnly { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -288,6 +292,10 @@ namespace Atlas.Resources
         public long? PreviousSecretExpiresAt { get; init; }
         /// <summary>When the current client secret was issued (epoch ms); null for a public app.</summary>
         public long? SecretIssuedAt { get; init; }
+        /// <summary>Test sign-in mode: <c>+atlas_test</c> addresses on a verified domain sign in to this app with the fixed code 424242.</summary>
+        public bool? TestMode { get; init; }
+        /// <summary>Test and review accounts must use an address on a domain you verified.</summary>
+        public bool? ProvisionedVerifiedDomainsOnly { get; init; }
         /// <summary>Provisioning tags.</summary>
         public Dictionary<string, JsonElement>? Metadata { get; init; }
         /// <summary>The idempotent-create key you sent, if any.</summary>
@@ -351,6 +359,10 @@ namespace Atlas.Resources
         public long? PreviousSecretExpiresAt { get; init; }
         /// <summary>When the current client secret was issued (epoch ms); null for a public app.</summary>
         public long? SecretIssuedAt { get; init; }
+        /// <summary>Test sign-in mode: <c>+atlas_test</c> addresses on a verified domain sign in to this app with the fixed code 424242.</summary>
+        public bool? TestMode { get; init; }
+        /// <summary>Test and review accounts must use an address on a domain you verified.</summary>
+        public bool? ProvisionedVerifiedDomainsOnly { get; init; }
         /// <summary>On a rotation: the overlap applied, in seconds.</summary>
         public int? OverlapSeconds { get; init; }
         /// <summary>Provisioning tags.</summary>
@@ -697,7 +709,13 @@ namespace Atlas.Resources
     /// <summary>Sign in with Atlas apps (<c>/v1/platform/atlas_id_apps</c>).</summary>
     public sealed class PlatformAtlasIdAppsResource : ResourceBase
     {
-        public PlatformAtlasIdAppsResource(AtlasTransport transport) : base(transport) { }
+        public PlatformAtlasIdAppsResource(AtlasTransport transport) : base(transport)
+        {
+            ProvisionedAccounts = new PlatformProvisionedAccountsResource(transport);
+        }
+
+        /// <summary>Test and review accounts for an app (<c>/v1/platform/atlas_id_apps/{id}/provisioned_accounts</c>). Needs the <c>platform:atlas_id_apps:provision</c> or per-app <c>atlas_id_apps:&lt;id&gt;:provision</c> scope.</summary>
+        public PlatformProvisionedAccountsResource ProvisionedAccounts { get; }
 
         /// <summary><c>POST /v1/platform/atlas_id_apps/design/preview</c> — Preview a Sign in with Atlas app design without saving it: the compiled bundle plus the rendered Sign in with Atlas page (the Atlas trust strip, the destination line and "Secured by Atlas" are always there).</summary>
         public Task<DesignPreview> PreviewDesignAsync(DesignBody body, string? idempotencyKey = null, CancellationToken ct = default)
@@ -1016,6 +1034,7 @@ namespace Atlas.Resources
         {
             DesignAssets = new PlatformDesignAssetsResource(transport);
             AtlasIdApps = new PlatformAtlasIdAppsResource(transport);
+            Domains = new PlatformDomainsResource(transport);
             Apps = new PlatformAppsResource(transport);
             AtlasIdPublisher = new PlatformAtlasIdPublisherResource(transport);
             Keys = new PlatformKeysResource(transport);
@@ -1047,6 +1066,9 @@ namespace Atlas.Resources
 
         /// <summary>Apps (instances) owned by the platform (<c>/v1/platform/apps</c>).</summary>
         public PlatformAppsResource Apps { get; }
+
+        /// <summary>Domains the account verified by DNS (<c>/v1/platform/domains</c>); they gate test sign-in mode and the test-account domain restriction.</summary>
+        public PlatformDomainsResource Domains { get; }
     }
 
     // ---- provisioning additions ----------------------------------------------------

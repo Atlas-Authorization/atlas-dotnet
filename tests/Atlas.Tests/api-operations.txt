@@ -734,3 +734,12 @@ DELETE /v1/platform/audit_streams/{id}
 POST /v1/platform/audit_streams/{id}/test
 POST /v1/platform/apps/{id}/secret_keys
 POST /v1/platform/apps/{id}/clone_config
+GET /v1/platform/atlas_id_apps/{id}/provisioned_accounts
+POST /v1/platform/atlas_id_apps/{id}/provisioned_accounts
+GET /v1/platform/atlas_id_apps/{id}/provisioned_accounts/{acct}
+DELETE /v1/platform/atlas_id_apps/{id}/provisioned_accounts/{acct}
+POST /v1/platform/atlas_id_apps/{id}/provisioned_accounts/{acct}/password
+GET /v1/platform/domains
+POST /v1/platform/domains
+POST /v1/platform/domains/{id}/verify
+DELETE /v1/platform/domains/{id}
