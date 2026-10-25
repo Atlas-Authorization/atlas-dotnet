@@ -135,6 +135,7 @@ namespace Atlas
             SecretKeys = new SecretKeysResource(transport);
             Keys = new KeysResource(transport);
             PartnerLinks = new PartnerLinksResource(transport);
+            PartnerPlatforms = new PartnerPlatformsResource(transport);
             AtlasIdGrants = new AtlasIdGrantsResource(transport);
             Privacy = new PrivacyResource(transport);
             Integrations = new IntegrationsResource(transport);
@@ -215,6 +216,8 @@ namespace Atlas
         public KeysResource Keys { get; }
         /// <summary><c>/v1/partner_links</c>: credentials granted to (and held for) an integrated partner service.</summary>
         public PartnerLinksResource PartnerLinks { get; }
+        /// <summary><c>/v1/partner_platforms</c>: this instance as a partner platform of another product (signed partner deliveries, registration, the stored partner token).</summary>
+        public PartnerPlatformsResource PartnerPlatforms { get; }
         /// <summary><c>/v1/atlas_id_apps</c>: the Sign in with Atlas apps this instance manages, and their per-user grants.</summary>
         public AtlasIdGrantsResource AtlasIdGrants { get; }
         /// <summary>The data-rights executor protocol (<c>/v1/privacy</c>) and the instance's orchestrator connection.</summary>

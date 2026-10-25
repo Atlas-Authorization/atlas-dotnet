@@ -240,6 +240,8 @@ namespace Atlas.Resources
         public string? OrderBy { get; set; }
         /// <summary>Adds <c>total_count</c> to the page.</summary>
         public bool? IncludeTotalCount { get; set; }
+        /// <summary>Also list soft-deleted users still in their scrub window (each with <c>deleted_at</c> set). Default false.</summary>
+        public bool? IncludeDeleted { get; set; }
 
         public override IEnumerable<KeyValuePair<string, object?>> ToQuery()
         {
@@ -259,6 +261,7 @@ namespace Atlas.Resources
             yield return new KeyValuePair<string, object?>("updated_before", UpdatedBefore);
             yield return new KeyValuePair<string, object?>("order_by", OrderBy);
             yield return new KeyValuePair<string, object?>("include_total_count", IncludeTotalCount);
+            yield return new KeyValuePair<string, object?>("include_deleted", IncludeDeleted);
         }
     }
 
@@ -941,6 +944,8 @@ namespace Atlas.Resources
         public string EmailAddress { get; init; } = "";
         public string UserId { get; init; } = "";
         public bool Verified { get; init; }
+        /// <summary>True only for a soft-deleted user matched with <c>IncludeDeleted</c>.</summary>
+        public bool? Deleted { get; init; }
     }
 
     public sealed class ResolvedIdentity

@@ -752,11 +752,11 @@ namespace Atlas.Resources
         public Task<AtlasIdAppPreflight> PreflightAsync(string id, CancellationToken ct = default)
             => Req<AtlasIdAppPreflight>(HttpVerb.Get, $"/v1/platform/atlas_id_apps/{Enc(id)}/preflight", cancellationToken: ct);
 
-        /// <summary><c>GET /v1/platform/atlas_id_apps/{id}/users</c> — Privacy requests: is this person (verified email, exact match) one of the app's users? Anyone else gets an empty list.</summary>
+        /// <summary><c>GET /v1/platform/atlas_id_apps/{id}/users</c> (an instance secret key is accepted too, see <c>AtlasIdGrants</c>) — Privacy requests: is this person (verified email, exact match) one of the app's users? Anyone else gets an empty list.</summary>
         public Task<ListPage<AtlasIdAppUser>> FindUsersAsync(string id, string email, CancellationToken ct = default)
             => Req<ListPage<AtlasIdAppUser>>(HttpVerb.Get, $"/v1/platform/atlas_id_apps/{Enc(id)}/users", query: Q(("email", email)), cancellationToken: ct);
 
-        /// <summary><c>DELETE /v1/platform/atlas_id_apps/{id}/grants/{grantId}</c> — Revoke one user's grant; the next sign-in shows the consent screen again.</summary>
+        /// <summary><c>DELETE /v1/platform/atlas_id_apps/{id}/grants/{grantId}</c> (an instance secret key is accepted too, see <c>AtlasIdGrants</c>) — Revoke one user's grant; the next sign-in shows the consent screen again.</summary>
         public Task<AtlasIdGrantRevocation> RevokeGrantAsync(string id, string grantId, CancellationToken ct = default)
             => Req<AtlasIdGrantRevocation>(HttpVerb.Delete, $"/v1/platform/atlas_id_apps/{Enc(id)}/grants/{Enc(grantId)}", cancellationToken: ct);
 

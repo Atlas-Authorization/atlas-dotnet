@@ -47,6 +47,10 @@ namespace Atlas
         public string TokenExchangeEndpoint { get; init; } = "";
         public string TokenExchangeAudience { get; init; } = "";
         public int RootActionMaxMfaAgeSeconds { get; init; }
+        /// <summary>Other products that accept Atlas operators (pass one as the audience of a login).</summary>
+        public List<string>? Audiences { get; init; }
+        /// <summary>The claims an operator access token carries.</summary>
+        public List<string>? AccessTokenClaims { get; init; }
     }
 
     /// <summary>The RFC 8628 device authorization response.</summary>

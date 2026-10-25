@@ -83,6 +83,8 @@ namespace Atlas
         public const string IdentifierNotFound = "IDENTIFIER_NOT_FOUND";
         /// <summary>A usage debit would exceed one of the API key's spend caps (the <c>Code</c> of a refused debit).</summary>
         public const string LimitExceeded = "LIMIT_EXCEEDED";
+        /// <summary>422: managed WAF provision/deprovision on an instance with no WAF configuration saved (<c>meta.action</c>).</summary>
+        public const string ManagedWafNotConfigured = "MANAGED_WAF_NOT_CONFIGURED";
         /// <summary>The session was revoked.</summary>
         public const string SessionRevoked = "SESSION_REVOKED";
         /// <summary>The session timed out from inactivity.</summary>

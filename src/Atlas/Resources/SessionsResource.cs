@@ -118,6 +118,19 @@ namespace Atlas.Resources
         public Task<IntegrationToken> GetIntegrationTokenAsync(string id, string integration, CancellationToken ct = default)
             => Req<IntegrationToken>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/integration_tokens/{Enc(integration)}", cancellationToken: ct);
 
+        /// <summary>
+        /// <see cref="GetIntegrationTokenAsync(string, string, CancellationToken)"/> for a per-call audience. <paramref name="audience"/> is the
+        /// full audience; <paramref name="audienceParams"/> carries the integration's own parameter (a site id, a channel, an organization id; the one
+        /// named in its <c>per_call_audience.param</c>). The token's <c>aud</c> is that audience when the integration permits it; a value it does not permit is refused (403).
+        /// </summary>
+        public Task<IntegrationToken> GetIntegrationTokenAsync(string id, string integration, string? audience, IDictionary<string, string>? audienceParams, CancellationToken ct = default)
+        {
+            var pairs = new List<KeyValuePair<string, object?>>();
+            if (audienceParams != null) foreach (var kv in audienceParams) pairs.Add(new KeyValuePair<string, object?>(kv.Key, kv.Value));
+            if (!string.IsNullOrEmpty(audience)) pairs.Add(new KeyValuePair<string, object?>("audience", audience));
+            return Req<IntegrationToken>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/integration_tokens/{Enc(integration)}", query: pairs, cancellationToken: ct);
+        }
+
         /// <summary><c>POST /v1/sessions/{id}/tokens/{template}</c> — Mint a named JWT-template token for a session (Clerk SessionApi.getToken).</summary>
         public Task<SessionTemplateToken> CreateTokenAsync(string id, string template, CancellationToken ct = default)
             => Req<SessionTemplateToken>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/tokens/{Enc(template)}", cancellationToken: ct);

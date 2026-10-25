@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.18.0 (Atlas.Sdk) — 2026-10-25
+
+### Added
+
+- **Partner platforms.** `client.PartnerPlatforms` (`PartnerPlatformsResource`): `ListAsync`, `GetAsync`, `SetAsync`, `RemoveAsync`, `RegistrationAsync`, `StoreTokenAsync` and `DeliveriesAsync` for `/v1/partner_platforms`, with typed `PartnerPlatform`, `PartnerPlatformList`, `PartnerPlatformRegistration`, `PartnerDelivery`, `SetPartnerPlatformBody` and `StorePartnerPlatformTokenBody`. The partner token is write-only: stored encrypted, never in a response model, and the body type does not print it.
+- **Per-call audience.** `SetIntegrationBody.PerCallAudience` (`Param`, `Template`, `Allowed`, `AnyMatching`; `Set("per_call_audience", null)` turns it off) and `Sessions.GetIntegrationTokenAsync(id, integration, audience, audienceParams)` to mint a token for one audience (a site id, a channel, an organization id).
+- **Privacy orchestrator.** `SetPrivacyOrchestratorBody` gains `SiteId`, `PartnerLinkId` and `CancelDeletionOnSignIn`. An outbound partner link's `source` can be `registration`.
+- `ListUsersParams.IncludeDeleted` (`GET /v1/users`), and `UserEmailMatch.Deleted`.
+- `OperatorConfiguration` gains `Audiences` and `AccessTokenClaims`.
+- Error code `ErrorCodes.ManagedWafNotConfigured` (422, `meta.action`).
+- The Sign in with Atlas grant routes under `/v1/platform/atlas_id_apps/{id}` also accept an instance secret key (documented on `Platform.AtlasIdApps` and `AtlasIdGrants`).
+- API coverage list: the partner platform operations.
+
 ## 1.17.0 (Atlas.Sdk) — 2026-10-24
 
 ### Added

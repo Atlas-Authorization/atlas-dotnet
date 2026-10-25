@@ -137,8 +137,20 @@ namespace Atlas.Resources
 
     /// <summary>
     /// The body of <c>PUT /v1/instance/integrations/{id}</c>. Use <see cref="Set"/> to send an explicit <c>null</c> for a nullable
-    /// field: events_url, backchannel_logout_url, verify_error_report_url, cmp, audience_format, principal_claim, ext_claim, external_ref.
+    /// field: events_url, backchannel_logout_url, verify_error_report_url, cmp, audience_format, principal_claim, ext_claim, external_ref, per_call_audience.
     /// </summary>
+    /// <summary>
+    /// A per-call audience for an integration token: <c>Param</c> is the query parameter that carries the value,
+    /// <c>Template</c> the audience with the value filled in, <c>Allowed</c> the values permitted, <c>AnyMatching</c> permits any value.
+    /// </summary>
+    public sealed class PerCallAudience
+    {
+        public string? Param { get; set; }
+        public string? Template { get; set; }
+        public List<string>? Allowed { get; set; }
+        public bool? AnyMatching { get; set; }
+    }
+
     public sealed class SetIntegrationBody
     {
         public bool? Enabled { get; set; }
@@ -157,6 +169,8 @@ namespace Atlas.Resources
         public string? VerifyErrorReportUrl { get; set; }
         public IntegrationCmpBody? Cmp { get; set; }
         public bool? AtlasIdUsers { get; set; }
+        /// <summary>Let a token be minted for a per-call audience. <c>Set("per_call_audience", null)</c> turns it off.</summary>
+        public PerCallAudience? PerCallAudience { get; set; }
         public string? ExternalRef { get; set; }
         /// <summary>Chatly channel (preset field).</summary>
         public string? Channel { get; set; }

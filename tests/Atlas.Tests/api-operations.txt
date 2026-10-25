@@ -634,6 +634,13 @@ POST /v1/secret_keys/{id}/rotate
 POST /v1/secret_keys/{id}/revoke
 GET /v1/keys
 GET /v1/whoami
+GET /v1/partner_platforms
+GET /v1/partner_platforms/{id}
+PUT /v1/partner_platforms/{id}
+DELETE /v1/partner_platforms/{id}
+GET /v1/partner_platforms/{id}/registration
+POST /v1/partner_platforms/{id}/token
+GET /v1/partner_platforms/{id}/deliveries
 POST /v1/partner_links
 GET /v1/partner_links
 GET /v1/partner_links/{id}

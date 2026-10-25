@@ -183,6 +183,12 @@ namespace Atlas.Resources
         public string? ApiKey { get; set; }
         /// <summary>Call through the partner link the orchestrator granted Atlas (partner id = provider).</summary>
         public bool? UsePartnerLink { get; set; }
+        /// <summary>Call through this partner link (implies <c>UsePartnerLink</c>); <c>Set("partner_link_id", null)</c> clears it.</summary>
+        public string? PartnerLinkId { get; set; }
+        /// <summary>The orchestrator-side site a case is for; <c>Set("site_id", null)</c> clears it.</summary>
+        public string? SiteId { get; set; }
+        /// <summary>Cancel a self-scheduled deletion when the person signs back in during the grace period.</summary>
+        public bool? CancelDeletionOnSignIn { get; set; }
         public bool? OpenClosureCases { get; set; }
         /// <summary>Mints (true) a secret and signs every case call; true again rotates it; false stops signing.</summary>
         public bool? SignRequests { get; set; }
