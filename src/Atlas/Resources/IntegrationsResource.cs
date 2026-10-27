@@ -382,7 +382,7 @@ namespace Atlas.Resources
     /// <c>/v1/integrations/*</c>: the routes an integrated service calls with the instance secret key (or the partner link the
     /// instance owner granted it).
     /// </summary>
-    public sealed class IntegrationsResource : ResourceBase
+    public sealed partial class IntegrationsResource : ResourceBase
     {
         public IntegrationsResource(AtlasTransport t) : base(t) { }
 

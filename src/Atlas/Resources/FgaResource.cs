@@ -195,7 +195,7 @@ namespace Atlas.Resources
     /// Call <see cref="Store"/> to bind a default store and drop the repeated
     /// <c>storeId</c> argument.
     /// </summary>
-    public sealed class FgaResource : ResourceBase
+    public sealed partial class FgaResource : ResourceBase
     {
         public FgaResource(AtlasTransport transport) : base(transport)
         {

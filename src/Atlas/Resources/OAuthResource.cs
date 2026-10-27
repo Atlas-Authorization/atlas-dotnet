@@ -277,7 +277,7 @@ namespace Atlas.Resources
         public string? BodyExcerpt { get; init; }
     }
 
-    public sealed class OAuthClientsResource : ResourceBase
+    public sealed partial class OAuthClientsResource : ResourceBase
     {
         public OAuthClientsResource(AtlasTransport transport) : base(transport)
         {

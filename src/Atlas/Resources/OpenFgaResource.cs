@@ -269,7 +269,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>The OpenFGA-compatible authorization API (<c>/v1/openfga</c>).</summary>
-    public sealed class OpenFgaResource : ResourceBase
+    public sealed partial class OpenFgaResource : ResourceBase
     {
         public OpenFgaResource(AtlasTransport transport) : base(transport)
         {

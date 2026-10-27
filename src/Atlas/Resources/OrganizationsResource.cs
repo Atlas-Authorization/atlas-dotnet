@@ -333,7 +333,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>The organizations namespace (<c>/v1/organizations</c>) and its sub-namespaces.</summary>
-    public sealed class OrganizationsResource : ResourceBase
+    public sealed partial class OrganizationsResource : ResourceBase
     {
         public OrganizationsResource(AtlasTransport transport) : base(transport)
         {

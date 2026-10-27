@@ -80,7 +80,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>Usage analytics (<c>/v1/usage</c>) and the product activity feed (<c>/v1/events</c>).</summary>
-    public sealed class AnalyticsResource : ResourceBase
+    public sealed partial class AnalyticsResource : ResourceBase
     {
         public AnalyticsResource(AtlasTransport transport) : base(transport)
         {

@@ -66,7 +66,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>The attack-protection namespace (<c>/v1/attack_protection</c>).</summary>
-    public sealed class AttackProtectionResource : ResourceBase
+    public sealed partial class AttackProtectionResource : ResourceBase
     {
         public AttackProtectionResource(AtlasTransport transport) : base(transport) { }
 

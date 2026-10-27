@@ -98,7 +98,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>The instance-config namespace (<c>/v1/instance</c>).</summary>
-    public sealed class InstanceResource : ResourceBase
+    public sealed partial class InstanceResource : ResourceBase
     {
         public InstanceResource(AtlasTransport transport) : base(transport) { }
 
