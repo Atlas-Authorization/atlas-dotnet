@@ -20,7 +20,7 @@ namespace Atlas
     /// var user = await atlas.Users.GetAsync("user_123");
     /// </code>
     /// </summary>
-    public sealed class AtlasClient : IDisposable
+    public sealed partial class AtlasClient : IDisposable
     {
         private readonly HttpClient _http;
         private readonly bool _ownsHttp;

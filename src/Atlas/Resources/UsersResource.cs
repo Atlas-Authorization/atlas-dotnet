@@ -406,7 +406,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>The user-management namespace (<c>/v1/users</c>).</summary>
-    public sealed class UsersResource : ResourceBase
+    public sealed partial class UsersResource : ResourceBase
     {
         public UsersResource(AtlasTransport transport) : base(transport) { }
 

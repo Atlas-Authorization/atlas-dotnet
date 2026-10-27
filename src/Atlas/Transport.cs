@@ -202,6 +202,18 @@ namespace Atlas
             using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken)
                 .ConfigureAwait(false);
 
+            // A raw byte[] request (a gzip archive download) must not round-trip through a string.
+            if (options.Raw && typeof(T) == typeof(byte[]) && response.IsSuccessStatusCode)
+            {
+                var bytes =
+#if NET8_0_OR_GREATER
+                    await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+#else
+                    await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+#endif
+                return (T)(object)bytes;
+            }
+
             var text =
 #if NET8_0_OR_GREATER
                 await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);

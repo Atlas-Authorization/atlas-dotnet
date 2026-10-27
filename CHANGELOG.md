@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Backend API parity.** 452 operations that the SDK did not yet cover, added as resources on `AtlasClient` (and as new methods on `Users`, `Organizations`, `OAuthClients`, `Fga`, `OpenFga`, `AttackProtection`, `RiskBasedMfa`, `Actions`, `Integrations`, `Analytics`, `Instance` and `OrgLdapConnections`). New resources: `AppCatalog`, `LdapServerClients`, `Journeys`, `Groups` (with `Rules`), `Migrations` (with `Imports`), `ManagedGrants`, `LeastPrivilege`, `DeliveryHealth`, `Flags`, `MfaFactors` (with `Yubikeys` and `SmartCardMappings`), `Marketing`, `AuditEventSchemas`, `DirectoryPullSources`, `RelayAgents`, `OAuthClientProfiles`, `PasskeyApi`, `Vc`, `Listen`, `AgentRegistration`, `Agents`, `AgentAccessRequests`, `Workflows`, `PageTemplates`, `ServiceConnectors`, `DesktopMfa`, `IdentityVerification`, `Iga` (entitlements, requests, grants, delegations, SoD, lifecycle, campaigns), `ScimProvisioningPresets`, `Vault`, `Connections`, `Ssf`, `NetworkZones`, `AccessPolicies`, `Abac` (templates, links, schema), `Resources` (types, assignments), `OrgRoleGrants`, `Devices`, `AuthzDecisions`, `PolicyBundles`, `ProxyApps` and `McpGateways` (with `Budgets`). Request bodies are typed (`...Body` classes); responses come back as `JsonElement`. `PolicyBundles.ArchiveAsync` returns the raw `byte[]`; `Listen.StreamSessionAsync` returns the event stream text.
+- `AtlasTransport` returns a raw `byte[]` for a request marked `Raw` when `T` is `byte[]`.
+- API coverage list: the 452 new operations.
+- **Risk-event timeline.** `client.RiskBasedMfa`: `ListEventsAsync` (`GET /v1/risk_events`), `EventMetricsAsync` (`GET /v1/risk_events/metrics`) and `EventFeedbackAsync` (`POST /v1/risk_events/{id}/feedback`, verdict `legit` or `fraud`), with typed `RiskEvent`, `RiskEventList` and `RiskEventMetrics`.
+- **Fraud lookup.** `client.RiskBasedMfa.FraudLookupAsync` (`POST /v1/fraud/lookup`) with typed `FraudLookupBody` and `FraudLookup`.
+- `RiskBasedMfa` and `UpdateRiskBasedMfaBody` gain `Mode`, `LevelActions`, `Reputation`, `Fraud`, `Baseline` and `MidSession`.
+- API coverage list: the four new operations.
+
 ## 1.19.0 (Atlas.Sdk) — 2026-10-25
 
 ### Added

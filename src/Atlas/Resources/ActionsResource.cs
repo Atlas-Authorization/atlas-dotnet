@@ -92,7 +92,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>The actions namespace (<c>/v1/actions</c>) — tenant code at auth-pipeline triggers.</summary>
-    public sealed class ActionsResource : ResourceBase
+    public sealed partial class ActionsResource : ResourceBase
     {
         public ActionsResource(AtlasTransport transport) : base(transport) { }
 

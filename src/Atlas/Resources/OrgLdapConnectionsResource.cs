@@ -89,7 +89,7 @@ namespace Atlas.Resources
     }
 
     /// <summary>Organization-owned LDAP / Active Directory connections (<c>/v1/org_ldap_connections</c>).</summary>
-    public sealed class OrgLdapConnectionsResource : ResourceBase
+    public sealed partial class OrgLdapConnectionsResource : ResourceBase
     {
         public OrgLdapConnectionsResource(AtlasTransport transport) : base(transport)
         {
