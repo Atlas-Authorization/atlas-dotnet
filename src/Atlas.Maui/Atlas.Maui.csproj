@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <RootNamespace>Atlas.Maui</RootNamespace>
+    <AssemblyName>Atlas.Maui</AssemblyName>
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-ios'))">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-maccatalyst'))">15.0</SupportedOSPlatformVersion>
+
+    <PackageId>Atlas.Maui</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Atlas</Authors>
+    <Company>Atlas</Company>
+    <Description>.NET MAUI integration for Atlas: hosted sign-in in the system browser (WebAuthenticator), session storage in SecureStorage, and one-line registration. Builds on Atlas.Native.</Description>
+    <PackageTags>atlas;auth;maui;android;ios;authentication</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Atlas.Native/Atlas.Native.csproj" />
+  </ItemGroup>
+
+</Project>

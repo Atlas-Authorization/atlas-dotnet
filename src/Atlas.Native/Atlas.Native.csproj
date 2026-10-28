@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <RootNamespace>Atlas.Native</RootNamespace>
+    <AssemblyName>Atlas.Native</AssemblyName>
+
+    <PackageId>Atlas.Native</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Atlas</Authors>
+    <Company>Atlas</Company>
+    <Description>Sign in and keep an Atlas session in a native .NET app (MAUI, WPF, console): hosted OAuth with PKCE, the cookie-free session exchange, rotation of the refresh token, and a message handler for your API calls. Atlas.Maui supplies the MAUI browser and secure storage.</Description>
+    <PackageTags>atlas;auth;oauth;pkce;native;maui</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Atlas.Frameworks.Tests" />
+  </ItemGroup>
+
+</Project>
