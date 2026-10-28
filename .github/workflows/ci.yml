@@ -15,3 +15,17 @@ jobs:
         with:
           dotnet-version: "8.0.x"
       - run: dotnet test
+  maui:
+    # Atlas.Maui needs the MAUI workload, so it is built on its own and not part of the solution.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: dotnet workload install maui-android
+      - run: dotnet build src/Atlas.Maui/Atlas.Maui.csproj -f net10.0-android -c Release

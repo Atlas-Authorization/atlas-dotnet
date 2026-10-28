@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <RootNamespace>Atlas.Blazor.WebAssembly</RootNamespace>
+    <AssemblyName>Atlas.Blazor.WebAssembly</AssemblyName>
+
+    <PackageId>Atlas.Blazor.WebAssembly</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Atlas</Authors>
+    <Company>Atlas</Company>
+    <Description>Blazor WebAssembly integration for Atlas: an authentication state provider over the Atlas session cookie and a message handler that attaches the session token to your API calls. Your API verifies the token (Atlas.AspNetCore).</Description>
+    <PackageTags>atlas;auth;blazor;webassembly;wasm;authentication</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- A Razor class library that ships a static JS file; no server-side Atlas code is referenced. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <InternalsVisibleTo Include="Atlas.Frameworks.Tests" />
+  </ItemGroup>
+
+</Project>

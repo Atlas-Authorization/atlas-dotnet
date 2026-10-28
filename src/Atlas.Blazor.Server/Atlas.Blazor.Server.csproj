@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <RootNamespace>Atlas.Blazor.Server</RootNamespace>
+    <AssemblyName>Atlas.Blazor.Server</AssemblyName>
+
+    <PackageId>Atlas.Blazor.Server</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Atlas</Authors>
+    <Company>Atlas</Company>
+    <Description>Blazor Server (interactive server) integration for Atlas: an authentication state provider that revalidates the Atlas session behind a long-lived circuit. Builds on Atlas.AspNetCore.</Description>
+    <PackageTags>atlas;auth;blazor;blazor-server;authentication</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Atlas/Atlas.csproj" />
+    <ProjectReference Include="../Atlas.AspNetCore/Atlas.AspNetCore.csproj" />
+    <InternalsVisibleTo Include="Atlas.Frameworks.Tests" />
+  </ItemGroup>
+
+</Project>
