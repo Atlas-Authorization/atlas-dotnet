@@ -165,6 +165,8 @@ namespace Atlas.Resources
         /// <summary>Up to 20 addresses; empty leaves the default (the account's owners).</summary>
         public List<string>? AlertContacts { get; set; }
         public string? Description { get; set; }
+        /// <summary><c>false</c> creates the endpoint switched off (default true).</summary>
+        public bool? Active { get; set; }
         /// <summary>An event destination instead of an HTTPS url.</summary>
         public WebhookDestination? Destination { get; set; }
         /// <summary>Your own credentials for the destination (stored encrypted, write-only).</summary>

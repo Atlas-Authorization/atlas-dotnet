@@ -183,11 +183,24 @@ namespace Atlas.Resources
         public ReferralInboundEvent? LastEvent { get; init; }
     }
 
+    /// <summary>One entry of <see cref="ReferralSettings.Warnings"/>.</summary>
+    public sealed class ReferralSettingsWarning
+    {
+        /// <summary><c>renamed</c> or <c>defaulted</c>.</summary>
+        public string Code { get; init; } = "";
+        public string? Field { get; init; }
+        public JsonElement? From { get; init; }
+        public JsonElement? To { get; init; }
+        public string Message { get; init; } = "";
+    }
+
     /// <summary><c>GET /v1/instance/referrals</c>. Secrets are never returned, only <c>SigningSecretSet</c> / <c>ApiKeySet</c> / <c>Inbound.SecretSet</c>.</summary>
     public sealed class ReferralSettings
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "referral_settings";
         public bool Enabled { get; init; }
+        /// <summary>Update only: what was stored differently from what was sent (<c>renamed</c>: a retired provider name; <c>defaulted</c>: tracking cookies filled in).</summary>
+        public List<ReferralSettingsWarning>? Warnings { get; init; }
         /// <summary><c>webhook</c> (the Atlas referral protocol), <c>referalli</c> or another built-in vendor adapter id.</summary>
         public string Provider { get; init; } = "";
         public string? EndpointUrl { get; init; }

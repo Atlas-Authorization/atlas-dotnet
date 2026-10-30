@@ -151,7 +151,7 @@ namespace Atlas.Verification
         // The signatures of one version in an atlas-signature header: one "v1,<base64>" entry, or several separated by
         // spaces (while an endpoint secret rotates, Atlas signs with the old and the new secret). Entries of
         // another version are skipped.
-        private static List<string> Signatures(string header, string version)
+        internal static List<string> Signatures(string header, string version)
         {
             var list = new List<string>();
             foreach (var entry in header.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
@@ -163,7 +163,7 @@ namespace Atlas.Verification
             return list;
         }
 
-        private static string? Header(IEnumerable<KeyValuePair<string, string>> headers, string name)
+        internal static string? Header(IEnumerable<KeyValuePair<string, string>> headers, string name)
         {
             if (headers == null) return null;
             foreach (var pair in headers)

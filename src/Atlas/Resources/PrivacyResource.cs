@@ -204,16 +204,105 @@ namespace Atlas.Resources
         }
     }
 
+    /// <summary>
+    /// The body of <c>POST /v1/instance/privacy_integrations/connect</c>: one call that wires a consent manager / orchestrator
+    /// both ways (banner, orchestrator connection, completion webhook and an executor key).
+    /// </summary>
+    public sealed class PrivacyIntegrationConnectBody
+    {
+        /// <summary>An orchestrator preset (<c>cookiemunch</c>) or <c>custom</c>.</summary>
+        public string Preset { get; set; } = "";
+        /// <summary>The orchestrator-side site id. Required by the cookiemunch preset.</summary>
+        public string? SiteId { get; set; }
+        /// <summary>The key the orchestrator issued to Atlas for opening cases (optional on a re-run). Write-only.</summary>
+        public string? ApiKey { get; set; }
+        public string? PartnerLinkId { get; set; }
+        /// <summary>The webhook URL the orchestrator shows for this instance's executor connection (optional on a re-run).</summary>
+        public string? CompletionWebhookUrl { get; set; }
+        /// <summary>Overrides for <c>PUT /v1/instance/cookie_consent</c> (merged over the preset), or <c>false</c> to leave it alone.</summary>
+        public object? CookieConsent { get; set; }
+        /// <summary>Further orchestrator fields (name, case_url, cancel_url, sign_requests, ...), by wire name.</summary>
+        public Dictionary<string, object?>? Orchestrator { get; set; }
+        /// <summary>The executor key: privacy:* scopes only (default privacy:execute + privacy:grants:revoke).</summary>
+        public PrivacyIntegrationKeyInput? Key { get; set; }
+
+        public override string ToString() => $"PrivacyIntegrationConnectBody {{ Preset = {Preset}, SiteId = {SiteId} }}";
+    }
+
+    /// <summary>The executor key options of a privacy integration connect.</summary>
+    public sealed class PrivacyIntegrationKeyInput
+    {
+        public string? Name { get; set; }
+        public List<string>? Scopes { get; set; }
+        /// <summary>Epoch ms or an ISO 8601 string.</summary>
+        public object? ExpiresAt { get; set; }
+        public List<string>? AllowedIps { get; set; }
+        public List<string>? AllowedOrigins { get; set; }
+    }
+
+    /// <summary>The consent manager, orchestrator, completion webhook and executor key, in one view.</summary>
+    public sealed class PrivacyIntegration
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "privacy_integration";
+        public string? Preset { get; init; }
+        /// <summary>Banner on, orchestrator and its completion webhook set, executor key live.</summary>
+        public bool Connected { get; init; }
+        public JsonElement? CookieConsent { get; init; }
+        public PrivacyOrchestrator? PrivacyOrchestrator { get; init; }
+        public JsonElement? DsrWebhook { get; init; }
+        /// <summary>The executor key: <c>secret</c> only on the connect that minted it; <c>idempotent_replay</c> on a re-run.</summary>
+        public PrivacyIntegrationExecutorKey? ExecutorKey { get; init; }
+        /// <summary>Connect only: the consent-manager site check.</summary>
+        public List<PrivacyIntegrationWarning>? Warnings { get; init; }
+    }
+
+    public sealed class PrivacyIntegrationExecutorKey
+    {
+        public string Id { get; init; } = "";
+        public List<string> Scopes { get; init; } = new List<string>();
+        /// <summary>Shown once, on the connect that minted the key.</summary>
+        public string? Secret { get; init; }
+        public bool? IdempotentReplay { get; init; }
+        /// <summary>The rest of the key's fields.</summary>
+        [JsonExtensionData] public Dictionary<string, JsonElement>? Extra { get; init; }
+
+        public override string ToString() => $"PrivacyIntegrationExecutorKey {{ Id = {Id} }}";
+    }
+
+    public sealed class PrivacyIntegrationWarning
+    {
+        public string Code { get; init; } = "";
+        public string Message { get; init; } = "";
+    }
+
+    /// <summary><c>/v1/instance/privacy_integrations</c>.</summary>
+    public sealed class PrivacyIntegrationResource : ResourceBase
+    {
+        public PrivacyIntegrationResource(AtlasTransport t) : base(t) { }
+
+        /// <summary><c>GET /v1/instance/privacy_integrations</c></summary>
+        public Task<PrivacyIntegration> GetAsync(CancellationToken ct = default)
+            => Req<PrivacyIntegration>(HttpVerb.Get, "/v1/instance/privacy_integrations", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/instance/privacy_integrations/connect</c> — wire all of it in one idempotent call; the executor key's secret comes back once.</summary>
+        public Task<PrivacyIntegration> ConnectAsync(PrivacyIntegrationConnectBody body, CancellationToken ct = default)
+            => Req<PrivacyIntegration>(HttpVerb.Post, "/v1/instance/privacy_integrations/connect", body, cancellationToken: ct);
+    }
+
     /// <summary>The data-rights executor protocol (<c>/v1/privacy</c>). <see cref="Orchestrator"/> hangs off it.</summary>
     public sealed class PrivacyResource : ResourceBase
     {
         public PrivacyResource(AtlasTransport t) : base(t)
         {
             Orchestrator = new PrivacyOrchestratorResource(t);
+            Integration = new PrivacyIntegrationResource(t);
         }
 
         /// <summary>The instance's orchestrator connection (<c>/v1/instance/privacy_orchestrator</c>).</summary>
         public PrivacyOrchestratorResource Orchestrator { get; }
+
+        /// <summary>The consent manager + orchestrator + executor key in one view (<c>/v1/instance/privacy_integrations</c>).</summary>
+        public PrivacyIntegrationResource Integration { get; }
 
         /// <summary><c>GET /v1/privacy</c> — what this executor speaks (public).</summary>
         public Task<JsonElement> DiscoverAsync(CancellationToken ct = default)

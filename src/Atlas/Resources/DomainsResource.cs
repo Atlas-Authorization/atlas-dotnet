@@ -32,6 +32,14 @@ namespace Atlas.Resources
     {
         public string Provider { get; init; } = "";
         public bool TokenSet { get; init; }
+        /// <summary>Managed email: <c>pending</c>, <c>verifying</c>, <c>verified</c> or <c>failed</c> (Atlas writes the records and verifies in the background); null on older setups.</summary>
+        public string? Status { get; init; }
+        public string? LastError { get; init; }
+        public int? Attempts { get; init; }
+        /// <summary>Epoch ms of the next background check.</summary>
+        public long? NextCheckAt { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long? StartedAt { get; init; }
     }
 
     /// <summary>Let Atlas write the domain's DNS record. The token is write-only.</summary>
