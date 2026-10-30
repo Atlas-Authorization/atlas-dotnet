@@ -95,6 +95,91 @@ namespace Atlas.Resources
         public List<string> AllowedOrigins { get; init; } = new List<string>();
         public Dictionary<string, string>? AllowedOriginIntegrations { get; init; }
         public Metadata AuthConfig { get; init; } = new Metadata();
+        /// <summary>What the write did not do as sent (<c>origin_still_referenced</c>, and on a lenient write <c>unknown_field</c>).</summary>
+        public List<InstanceUpdateWarning>? Warnings { get; init; }
+    }
+
+    /// <summary>One entry of <see cref="InstanceUpdateResult.Warnings"/>: something the write did not do as sent.</summary>
+    public sealed class InstanceUpdateWarning
+    {
+        /// <summary><c>origin_still_referenced</c> or <c>unknown_field</c>.</summary>
+        public string Code { get; init; } = "";
+        public string Message { get; init; } = "";
+        /// <summary>unknown_field: the full path, e.g. <c>auth_config.strategies.atlasId</c>.</summary>
+        public string? Field { get; init; }
+        public string? Hint { get; init; }
+        public string? DidYouMean { get; init; }
+        /// <summary>origin_still_referenced: the removed origin.</summary>
+        public string? Origin { get; init; }
+    }
+
+    /// <summary>"Sign in with Atlas" on the instance (<c>GET/PATCH /v1/instance/sign_in_with_atlas</c>).</summary>
+    public sealed class SignInWithAtlasSettings
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "sign_in_with_atlas";
+        /// <summary>Whether the embedded and hosted sign-in show "Continue with Atlas".</summary>
+        public bool Enabled { get; init; }
+        /// <summary>The SSO connection the button starts; null when off.</summary>
+        public string? ConnectionId { get; init; }
+        /// <summary><c>instance_toggle</c> (Atlas created the connection) or <c>linked</c> (an existing connection of yours).</summary>
+        public string? ManagedVia { get; init; }
+        public string? ConnectionStatus { get; init; }
+        /// <summary>Whether this deployment can offer Sign in with Atlas at all.</summary>
+        public bool Available { get; init; }
+        /// <summary>The Atlas issuer the connection must point at.</summary>
+        public string? Issuer { get; init; }
+        /// <summary>Active OIDC connections to that issuer that could be linked.</summary>
+        public List<SignInWithAtlasCandidate> Candidates { get; init; } = new List<SignInWithAtlasCandidate>();
+    }
+
+    public sealed class SignInWithAtlasCandidate
+    {
+        public string Id { get; init; } = "";
+        public string? ClientId { get; init; }
+        public bool ManagedByThisInstance { get; init; }
+    }
+
+    /// <summary>The body of <c>PATCH /v1/instance/sign_in_with_atlas</c>.</summary>
+    public sealed class UpdateSignInWithAtlasBody
+    {
+        public bool Enabled { get; set; }
+        /// <summary>Link this existing connection (an active OIDC connection to the Atlas issuer). Omit to pick or create one.</summary>
+        public string? ConnectionId { get; set; }
+    }
+
+    /// <summary>Where the hosted pages send the browser (<c>GET/PATCH /v1/instance/hosted_pages</c>); null serves the hosted page.</summary>
+    public sealed class HostedPagesSettings
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "hosted_pages";
+        public string? SignInUrl { get; init; }
+        public string? SignUpUrl { get; init; }
+        public string? UserUrl { get; init; }
+        /// <summary>The hosted pages these settings apply to.</summary>
+        public HostedPagesUrls? Hosted { get; init; }
+    }
+
+    public sealed class HostedPagesUrls
+    {
+        public string SignIn { get; init; } = "";
+        public string SignUp { get; init; } = "";
+        public string User { get; init; } = "";
+    }
+
+    /// <summary>The body of <c>PATCH /v1/instance/hosted_pages</c>: each URL https on one of the instance's allowed origins. Use <see cref="Set"/> to clear one with <c>null</c>.</summary>
+    public sealed class UpdateHostedPagesBody
+    {
+        public string? SignInUrl { get; set; }
+        public string? SignUpUrl { get; set; }
+        public string? UserUrl { get; set; }
+
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Set any field by its wire name, including an explicit <c>null</c>.</summary>
+        public UpdateHostedPagesBody Set(string key, object? value)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
+            return this;
+        }
     }
 
     /// <summary>The instance-config namespace (<c>/v1/instance</c>).</summary>
@@ -236,6 +321,25 @@ namespace Atlas.Resources
         /// </summary>
         public Task<InstanceUpdateResult> SetCaptchaConfigAsync(Dictionary<string, object?> captcha, CancellationToken ct = default)
             => Req<InstanceUpdateResult>(HttpVerb.Patch, "/v1/instance", new Dictionary<string, object?> { ["auth_config"] = new Dictionary<string, object?> { ["captcha"] = captcha } }, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/sign_in_with_atlas</c> — whether "Continue with Atlas" is on, and the connection it starts.</summary>
+        public Task<SignInWithAtlasSettings> GetSignInWithAtlasAsync(CancellationToken ct = default)
+            => Req<SignInWithAtlasSettings>(HttpVerb.Get, "/v1/instance/sign_in_with_atlas", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>PATCH /v1/instance/sign_in_with_atlas</c> — turn "Sign in with Atlas" on or off. <c>Enabled = true</c> links an existing
+        /// connection to the Atlas issuer (or the one named by <c>ConnectionId</c>), else creates one.
+        /// </summary>
+        public Task<SignInWithAtlasSettings> UpdateSignInWithAtlasAsync(UpdateSignInWithAtlasBody body, CancellationToken ct = default)
+            => Req<SignInWithAtlasSettings>(HttpVerb.Patch, "/v1/instance/sign_in_with_atlas", body, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/hosted_pages</c> — where the hosted sign-in, sign-up and account pages send the browser.</summary>
+        public Task<HostedPagesSettings> GetHostedPagesAsync(CancellationToken ct = default)
+            => Req<HostedPagesSettings>(HttpVerb.Get, "/v1/instance/hosted_pages", cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/instance/hosted_pages</c> — send the hosted pages to your app's own pages (302); <c>Set(key, null)</c> clears one.</summary>
+        public Task<HostedPagesSettings> UpdateHostedPagesAsync(UpdateHostedPagesBody body, CancellationToken ct = default)
+            => Req<HostedPagesSettings>(HttpVerb.Patch, "/v1/instance/hosted_pages", body, cancellationToken: ct);
     }
 
     // ---------------- Instance security ----------------
@@ -624,6 +728,20 @@ namespace Atlas.Resources
         public string WrittenWhen { get; init; } = "";
         /// <summary>atlas_frontend_api or atlas_sdk.</summary>
         public string SetBy { get; init; } = "";
+        /// <summary>The purpose per locale (locale to text).</summary>
+        public Dictionary<string, string>? Purposes { get; init; }
+        /// <summary>For a lifetime the instance configures: the setting and its bounds.</summary>
+        public DeclaredCookieLifetimeRange? LifetimeRange { get; init; }
+    }
+
+    /// <summary>The configurable lifetime of a declared cookie, in seconds.</summary>
+    public sealed class DeclaredCookieLifetimeRange
+    {
+        /// <summary>The setting that controls it.</summary>
+        public string Setting { get; init; } = "";
+        public long? MinSeconds { get; init; }
+        public long? MaxSeconds { get; init; }
+        public long? DefaultSeconds { get; init; }
     }
 
     /// <summary>The body of an origin move: <c>from</c> and <c>to</c> are <c>scheme://host[:port]</c> origins.</summary>

@@ -71,6 +71,7 @@ namespace Atlas
             ActorTokens = new ActorTokensResource(transport);
             Invitations = new InvitationsResource(transport);
             Webhooks = new WebhooksResource(transport);
+            AppEvents = new AppEventsResource(transport);
             SignInTokens = new SignInTokensResource(transport);
             AuditLogs = new AuditLogsResource(transport);
             JwtTemplates = new JwtTemplatesResource(transport);
@@ -262,6 +263,8 @@ namespace Atlas
         public ActorTokensResource ActorTokens { get; }
         public InvitationsResource Invitations { get; }
         public WebhooksResource Webhooks { get; }
+        /// <summary>Application webhooks: your own events, sent to your customers' (organizations') endpoints.</summary>
+        public AppEventsResource AppEvents { get; }
         public SignInTokensResource SignInTokens { get; }
         public AuditLogsResource AuditLogs { get; }
         public JwtTemplatesResource JwtTemplates { get; }

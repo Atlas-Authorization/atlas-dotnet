@@ -56,6 +56,33 @@ namespace Atlas.Resources
         public SessionActor? Actor { get; set; }
         /// <summary>Custom per-session data to attach (a JSON object, at most 2 KB).</summary>
         public Dictionary<string, object?>? CustomData { get; set; }
+        /// <summary><c>session</c> (the default) or <c>browser_ticket</c>; use <see cref="SessionsResource.CreateBrowserTicketAsync"/> for the latter.</summary>
+        public string? Mode { get; set; }
+        /// <summary>Browser ticket only: where the ready <c>url</c> lands (one of the instance's allowed origins).</summary>
+        public string? RedirectUrl { get; set; }
+        /// <summary>Browser ticket only: 1 to 300 (default 60).</summary>
+        public int? ExpiresInSeconds { get; set; }
+    }
+
+    /// <summary>
+    /// A one-time ticket that signs a BROWSER in as the user (<c>POST /v1/sessions</c> with <c>mode: browser_ticket</c>,
+    /// or <c>object: testing_sign_in_url</c> from <see cref="TestingResource.CreateSignInUrlAsync"/>). Open <see cref="Url"/>
+    /// in the browser, or exchange <see cref="Ticket"/> through the sign-in ticket strategy. No session exists until then.
+    /// </summary>
+    public sealed class BrowserTicket
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "browser_ticket";
+        public string Id { get; init; } = "";
+        public string UserId { get; init; } = "";
+        /// <summary>The one-time ticket. Single use; on development instances only, a repeat exchange from the same client within 10 seconds returns the first answer.</summary>
+        public string Ticket { get; init; } = "";
+        /// <summary>The ready sign-in URL; null without a redirect URL.</summary>
+        public string? Url { get; init; }
+        public string? RedirectUrl { get; init; }
+        /// <summary>Seconds.</summary>
+        public int ExpiresIn { get; init; }
+        /// <summary>ISO 8601.</summary>
+        public string ExpiresAt { get; init; } = "";
     }
 
     /// <summary>
@@ -90,6 +117,14 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/sessions</c> — mint a session for a user without the sign-in flow.</summary>
         public Task<MintedSession> CreateAsync(CreateSessionBody body, CancellationToken ct = default)
             => Req<MintedSession>(HttpVerb.Post, "/v1/sessions", body, cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/sessions</c> with <c>mode: browser_ticket</c> — a one-time ticket that signs a browser in as the user
+        /// (support handoffs, E2E). <paramref name="redirectUrl"/> (an allowed origin) makes the answer carry a ready <c>url</c>;
+        /// <paramref name="expiresInSeconds"/> is 1 to 300 (default 60). Replaces the deprecated sign-in tokens.
+        /// </summary>
+        public Task<BrowserTicket> CreateBrowserTicketAsync(string userId, string? redirectUrl = null, int? expiresInSeconds = null, CancellationToken ct = default)
+            => Req<BrowserTicket>(HttpVerb.Post, "/v1/sessions", new CreateSessionBody { UserId = userId, Mode = "browser_ticket", RedirectUrl = redirectUrl, ExpiresInSeconds = expiresInSeconds }, cancellationToken: ct);
 
         /// <summary><c>GET /v1/sessions?user_id=</c> — requires a user id.</summary>
         public Task<ListPage<Session>> ListAsync(string userId, CancellationToken ct = default)

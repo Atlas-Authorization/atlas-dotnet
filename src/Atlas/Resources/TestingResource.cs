@@ -52,5 +52,13 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/testing_tokens</c> — Mint a short-lived signed testing token (development instances only) that @atlasauth/testing presents to the sign-in gate to skip the human-only CAPTCHA.</summary>
         public Task<TestingToken> CreateTestingTokenAsync(CancellationToken ct = default)
             => Req<TestingToken>(HttpVerb.Post, "/v1/testing_tokens", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/testing/sign_in_url</c> — a ready one-time URL that signs a browser in as <paramref name="userId"/> and lands
+        /// on <paramref name="redirectUrl"/> (an allowed origin or localhost). Development instances only (403 <c>TESTING_UNAVAILABLE</c>
+        /// otherwise; use <see cref="SessionsResource.CreateBrowserTicketAsync"/> there). The answer's object is <c>testing_sign_in_url</c>.
+        /// </summary>
+        public Task<BrowserTicket> CreateSignInUrlAsync(string userId, string redirectUrl, int? expiresInSeconds = null, CancellationToken ct = default)
+            => Req<BrowserTicket>(HttpVerb.Post, "/v1/testing/sign_in_url", Body(("user_id", userId), ("redirect_url", redirectUrl), ("expires_in_seconds", expiresInSeconds)), cancellationToken: ct);
     }
 }

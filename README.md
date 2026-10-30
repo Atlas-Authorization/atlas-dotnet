@@ -332,6 +332,38 @@ var rotated = await atlas.Webhooks.Endpoints.RotateSecretAsync(endpointId, new R
 // rotated.PreviousSecretExpiresAt says when the old secret stops signing.
 ```
 
+### Application webhooks
+
+Send your app's own events to endpoints your customers (organizations) register. Atlas signs each delivery
+(Standard Webhooks), retries, tracks health and keeps the delivery log with redeliver and replay.
+
+```csharp
+await atlas.AppEvents.Types.CreateAsync(new CreateAppEventTypeBody { Type = "call.completed", Description = "A call finished." });
+await atlas.AppEvents.Endpoints.CreateAsync(orgId, new AppWebhookEndpointBody { Url = "https://hooks.example.com/atlas", EnabledEvents = new List<string> { "call.completed" } });
+await atlas.AppEvents.PublishAsync(new PublishAppEventBody { OrganizationId = orgId, Type = "call.completed", Data = new Dictionary<string, object?> { ["call_id"] = callId } }, idempotencyKey: callId);
+
+// The receiving side (any Standard Webhooks library works too):
+var result = new StandardWebhookVerifier("whsec_...").Verify(rawBody, headers);
+```
+
+### Browser tickets and test sign-in URLs
+
+```csharp
+// A one-time ticket that signs a browser in as the user (support handoffs, E2E). Replaces SignInTokens.
+var ticket = await atlas.Sessions.CreateBrowserTicketAsync("user_123", "https://app.example.com/", 120);
+// ticket.Url signs the browser in when opened.
+
+// Development instances only: a ready sign-in URL for tests.
+var url = (await atlas.Testing.CreateSignInUrlAsync("user_123", "http://localhost:3000/")).Url;
+```
+
+A ticket is single-use. On development instances only, a repeat exchange of the same ticket from the same client
+within 10 seconds returns the first answer.
+
+`atlas.Instance.GetSignInWithAtlasAsync` / `UpdateSignInWithAtlasAsync`, `GetHostedPagesAsync` / `UpdateHostedPagesAsync`
+and `atlas.Privacy.Integration.GetAsync` / `ConnectAsync` cover "Sign in with Atlas", hosted-page redirects and the
+one-call privacy integration.
+
 ### Trusted reverse proxy
 
 If a reverse proxy serves the Frontend API from your own origin, give it a proxy secret. It sends the secret in

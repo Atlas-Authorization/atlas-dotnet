@@ -1,6 +1,22 @@
 # Changelog
 
-## Unreleased
+## 1.20.0 (Atlas.Sdk) — 2026-10-30
+
+### Added
+
+- **Application webhooks.** `AppEvents` (`PublishAsync`, `ListAsync`, `GetAsync`), `AppEvents.Types` (the event catalog: `ListAsync`, `CreateAsync`, `GetAsync`, `UpdateAsync`, `DeleteAsync`, by `aet_` id or type name) and `AppEvents.Endpoints` (one organization's endpoints: `ListAsync`, `CreateAsync`, `GetAsync`, `UpdateAsync`, `DeleteAsync`, `RotateSecretAsync`, `RevealSecretAsync`, `TestAsync`, `DeliveriesAsync`, `RedeliverAsync`, `ReplayAsync`, and the picker `EventTypesAsync`), with typed `AppEvent`, `PublishedAppEvent`, `AppEventType` and bodies.
+- **Standard Webhooks verifier.** `StandardWebhookVerifier` for application webhooks (`webhook-id`, `webhook-timestamp`, `webhook-signature`, `whsec_` base64 key).
+- **Browser tickets.** `Sessions.CreateBrowserTicketAsync` returns a typed `BrowserTicket`; `CreateSessionBody` gains `Mode`, `RedirectUrl`, `ExpiresInSeconds`.
+- **Sign-in URL for tests.** `Testing.CreateSignInUrlAsync` (`POST /v1/testing/sign_in_url`, development instances only).
+- **Sign in with Atlas and hosted pages.** `Instance.GetSignInWithAtlasAsync` / `UpdateSignInWithAtlasAsync`, `GetHostedPagesAsync` / `UpdateHostedPagesAsync`; `InstanceUpdateResult.Warnings`.
+- **Privacy integration.** `Privacy.Integration.GetAsync` / `ConnectAsync`.
+- `ApiKeyLimitPeriods.Second` and `Minute`; `ApiKeyVerification.EffectiveScopes`; declared cookie `Purposes` and `LifetimeRange`; `User.ExternalAccounts` (`UserExternalAccount`); `ImageUrl` on `CreateUserBody`, `UpdateUserBody` and `ImportUserRow`; `CreateWebhookEndpointBody.Active`; `ReferralSettings.Warnings`; managed email `Dns.Status`, `LastError`, `Attempts`, `NextCheckAt`, `StartedAt`, `FeedbackWebhookId` and `FeedbackWebhookError` (the create with DNS automation now answers 202; `DnsResult` is no longer sent).
+
+### Deprecated
+
+- `SignInTokens.CreateAsync` and `RevokeAsync` are `[Obsolete]` (sunset 2027-04-01): use `Sessions.CreateBrowserTicketAsync`.
+
+## Unreleased (folded into 1.20.0)
 
 ### Added
 

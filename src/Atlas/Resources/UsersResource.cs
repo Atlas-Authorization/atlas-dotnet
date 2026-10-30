@@ -35,6 +35,24 @@ namespace Atlas.Resources
         public string? ReferralLink { get; init; }
         /// <summary>When a timed ban lifts (epoch ms); null for a permanent ban or no ban.</summary>
         public long? BanExpiresAt { get; init; }
+        /// <summary>Every linked provider identity (tokens and raw profiles are never included).</summary>
+        public List<UserExternalAccount>? ExternalAccounts { get; init; }
+    }
+
+    /// <summary>A provider identity linked to a user (<see cref="User.ExternalAccounts"/>).</summary>
+    public sealed class UserExternalAccount
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "external_account";
+        public string Id { get; init; } = "";
+        public string Provider { get; init; } = "";
+        public string ProviderUserId { get; init; } = "";
+        public string? ProviderEmail { get; init; }
+        public bool EmailVerified { get; init; }
+        public string? FirstName { get; init; }
+        public string? LastName { get; init; }
+        public string? ImageUrl { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long ConnectedAt { get; init; }
     }
 
     /// <summary>Where a user's inbound referral stands and, once attributed, who referred them.</summary>
@@ -272,6 +290,8 @@ namespace Atlas.Resources
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public bool? EmailVerified { get; set; }
+        /// <summary>An absolute https URL (at most 2048 characters). The server also accepts the alias <c>profile_image_url</c>.</summary>
+        public string? ImageUrl { get; set; }
         public Metadata? PublicMetadata { get; set; }
         public Metadata? PrivateMetadata { get; set; }
         public Metadata? UnsafeMetadata { get; set; }
@@ -287,6 +307,8 @@ namespace Atlas.Resources
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        /// <summary>An absolute https URL; clear it with <c>Set("image_url", null)</c>. Alias <c>profile_image_url</c>.</summary>
+        public string? ImageUrl { get; set; }
         public Metadata? PublicMetadata { get; set; }
         public Metadata? PrivateMetadata { get; set; }
         /// <summary>The user's own referral code, unique per instance (409 <c>REFERRAL_CODE_TAKEN</c>).</summary>

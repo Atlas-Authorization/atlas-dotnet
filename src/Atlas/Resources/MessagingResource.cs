@@ -92,8 +92,12 @@ namespace Atlas.Resources
         public string? Backend { get; init; }
         /// <summary>Your email provider (mode <c>managed_domain</c>) that holds the API key.</summary>
         public string? ProviderId { get; init; }
-        /// <summary>Brevo, on create: <c>registered</c> or <c>not_registered</c>.</summary>
+        /// <summary>The bounce / complaint webhook on your provider account: <c>registered</c> or <c>not_registered</c>.</summary>
         public string? FeedbackWebhook { get; init; }
+        /// <summary>The provider's id for that webhook.</summary>
+        public string? FeedbackWebhookId { get; init; }
+        /// <summary>Why registering it failed, when it did.</summary>
+        public string? FeedbackWebhookError { get; init; }
         public string? Region { get; init; }
         /// <summary>not_started, pending, verified, failed or temporary_failure.</summary>
         public string Status { get; init; } = "";
@@ -103,14 +107,14 @@ namespace Atlas.Resources
         public ManagedEmailLimits? Limits { get; init; }
         public ManagedEmailUsage? Usage { get; init; }
         public string? Reputation { get; init; }
-        /// <summary>DNS automation (the token is never returned), or null.</summary>
+        /// <summary>DNS automation (the token is never returned) with its background progress (<c>Status</c>, <c>LastError</c>, <c>Attempts</c>, <c>NextCheckAt</c>, <c>StartedAt</c>), or null.</summary>
         public CustomDomainDns? Dns { get; init; }
         public string? FailureReason { get; init; }
         public long? LastCheckedAt { get; init; }
         public long? VerifiedAt { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
-        /// <summary>Create only, with Dns: the zone and the records Atlas wrote.</summary>
+        /// <summary>No longer sent: with Dns the create answers 202 at once and <see cref="Dns"/> tracks the progress. Kept for older servers.</summary>
         public System.Text.Json.JsonElement? DnsResult { get; init; }
         public string? NextStep { get; init; }
         /// <summary>False when the singleton has never been set (the GET answers 200, no longer 404).</summary>

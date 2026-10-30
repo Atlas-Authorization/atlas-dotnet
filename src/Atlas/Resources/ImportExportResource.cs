@@ -70,6 +70,8 @@ namespace Atlas.Resources
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Username { get; set; }
+        /// <summary>An absolute https URL (alias <c>profile_image_url</c>); an invalid one rejects the row with <c>invalid_image_url</c>.</summary>
+        public string? ImageUrl { get; set; }
         public Metadata? PublicMetadata { get; set; }
         public Metadata? PrivateMetadata { get; set; }
         public List<ImportExternalAccount>? ExternalAccounts { get; set; }

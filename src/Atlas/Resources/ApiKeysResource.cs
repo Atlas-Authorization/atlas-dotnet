@@ -130,6 +130,10 @@ namespace Atlas.Resources
     {
         /// <summary>Caps a single debit.</summary>
         public const string Request = "request";
+        /// <summary>A one-second window (a rate limit).</summary>
+        public const string Second = "second";
+        /// <summary>A one-minute window (a rate limit).</summary>
+        public const string Minute = "minute";
         /// <summary>A UTC calendar day.</summary>
         public const string Day = "day";
         /// <summary>A UTC calendar month.</summary>
@@ -283,6 +287,8 @@ namespace Atlas.Resources
         public long? LastUsedAt { get; init; }
         public string? Name { get; init; }
         public List<string>? Scopes { get; init; }
+        /// <summary>The key's scopes plus every scope they imply (the instance's scope implications); <c>required_scopes</c> are checked against these.</summary>
+        public List<string>? EffectiveScopes { get; init; }
         public Dictionary<string, object?>? Constraints { get; init; }
         /// <summary>The key's spend caps; null when it has none.</summary>
         public List<ApiKeyLimit>? Limits { get; init; }
