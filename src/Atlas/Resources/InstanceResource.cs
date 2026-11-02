@@ -204,6 +204,22 @@ namespace Atlas.Resources
         public Task<Preflight> PreflightAsync(string? minSeverity, bool? includeSuppressed = null, CancellationToken ct = default)
             => Req<Preflight>(HttpVerb.Get, "/v1/instance/preflight", query: Q(("min_severity", minSeverity), ("include_suppressed", includeSuppressed)), cancellationToken: ct);
 
+        /// <summary><c>GET /v1/instance/preflight/acks</c> — every preflight acknowledgement, lapsed ones included (<c>Active</c> false).</summary>
+        public Task<ListPage<PreflightAck>> ListPreflightAcksAsync(CancellationToken ct = default)
+            => Req<ListPage<PreflightAck>>(HttpVerb.Get, "/v1/instance/preflight/acks", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>PUT /v1/instance/preflight/acks/{code}</c> — acknowledge a known, accepted warning or info finding: it is still
+        /// listed, with <see cref="PreflightFinding.Acknowledged"/>, and stops counting. <paramref name="expiresAt"/> (epoch ms or
+        /// ISO 8601, in the future; null = until removed) makes it lapse. A code that can be an error is refused (422).
+        /// </summary>
+        public Task<PreflightAck> AcknowledgePreflightAsync(string code, string reason, object? expiresAt = null, CancellationToken ct = default)
+            => Req<PreflightAck>(HttpVerb.Put, $"/v1/instance/preflight/acks/{Enc(code)}", Body(("reason", reason), ("expires_at", expiresAt)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/preflight/acks/{code}</c> — remove an acknowledgement: the findings count again. 404 when there is none.</summary>
+        public Task<DeletedPreflightAck> DeletePreflightAckAsync(string code, CancellationToken ct = default)
+            => Req<DeletedPreflightAck>(HttpVerb.Delete, $"/v1/instance/preflight/acks/{Enc(code)}", cancellationToken: ct);
+
         /// <summary>
         /// <c>GET /v1/instance/unknown_fields_report</c> — the unknown body fields your writes sent over the last <paramref name="days"/> (1-90; null = 30): fix every row
         /// with an <c>IgnoredCount</c>, then turn <c>auth_config.strictRequestBodies</c> on.
@@ -389,6 +405,10 @@ namespace Atlas.Resources
         public bool Deleted { get; init; }
         /// <summary>The captcha flows a forced delete switched off.</summary>
         [JsonPropertyName("flows_turned_off")] public List<string>? FlowsTurnedOff { get; init; }
+        /// <summary>True when a set with a site key switched <c>auth_config.captcha</c> to this provider.</summary>
+        public bool Switched { get; init; }
+        /// <summary>The resulting captcha config, present when <see cref="Switched"/>.</summary>
+        public Dictionary<string, JsonElement>? Captcha { get; init; }
     }
 
     public sealed class KerberosSecretResult
@@ -477,7 +497,16 @@ namespace Atlas.Resources
         /// refused with 422 <c>CAPTCHA_KEYS_REQUIRED</c> (<see cref="ErrorCodes.CaptchaKeysRequired"/>).
         /// </summary>
         public Task<CaptchaSecretResult> SetCaptchaSecretAsync(string secret, string? provider, CancellationToken ct = default)
-            => Req<CaptchaSecretResult>(HttpVerb.Put, "/v1/instance/captcha_secret", body: Body(("secret", secret), ("provider", provider)), cancellationToken: ct);
+            => SetCaptchaSecretAsync(secret, provider, null, ct);
+
+        /// <summary>
+        /// Store a captcha provider secret and, with <paramref name="siteKey"/> (the provider's public site key), switch
+        /// <c>auth_config.captcha</c> to <paramref name="provider"/> in the same atomic write (e.g. from the built-in
+        /// <c>atlas</c> captcha to Turnstile); <see cref="CaptchaSecretResult.Switched"/> is then true. A null site key
+        /// stores the secret only.
+        /// </summary>
+        public Task<CaptchaSecretResult> SetCaptchaSecretAsync(string secret, string? provider, string? siteKey, CancellationToken ct = default)
+            => Req<CaptchaSecretResult>(HttpVerb.Put, "/v1/instance/captcha_secret", body: Body(("secret", secret), ("provider", provider), ("site_key", siteKey)), cancellationToken: ct);
 
         /// <summary>Remove the configured provider's captcha secret.</summary>
         public Task<CaptchaSecretResult> DeleteCaptchaSecretAsync(CancellationToken ct = default)
@@ -649,6 +678,36 @@ namespace Atlas.Resources
         /// <summary>Set only with <c>includeSuppressed</c>: the finding does not apply to how the instance integrates (<see cref="SuppressedReason"/> says why).</summary>
         public bool? Suppressed { get; init; }
         public string? SuppressedReason { get; init; }
+        /// <summary>Set when the code is acknowledged as known and accepted (never on an error): do not count the finding.</summary>
+        public PreflightAckSummary? Acknowledged { get; init; }
+    }
+
+    /// <summary>The acknowledgement a preflight finding carries.</summary>
+    public class PreflightAckSummary
+    {
+        public string Reason { get; init; } = "";
+        /// <summary>The API key or dashboard user that acknowledged it.</summary>
+        public string? By { get; init; }
+        /// <summary>Epoch ms.</summary>
+        public long At { get; init; }
+        /// <summary>Epoch ms; null = until removed.</summary>
+        public long? ExpiresAt { get; init; }
+    }
+
+    /// <summary>A stored preflight acknowledgement (<c>/v1/instance/preflight/acks</c>).</summary>
+    public sealed class PreflightAck : PreflightAckSummary
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "preflight_ack";
+        public string Code { get; init; } = "";
+        /// <summary>False once <c>ExpiresAt</c> has passed: the finding counts again.</summary>
+        public bool Active { get; init; }
+    }
+
+    public sealed class DeletedPreflightAck
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "preflight_ack";
+        public string Code { get; init; } = "";
+        public bool Deleted { get; init; }
     }
 
     public sealed class Preflight

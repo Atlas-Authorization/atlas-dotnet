@@ -273,6 +273,25 @@ await atlas.Design.UpdateAsync(new AtlasDesign { Logo = new AtlasDesignLogo { As
   (first-party clients only): logout through `/oauth2/logout` with the client's
   `client_id` and an exactly registered `post_logout_redirect_uri` ends the session
   and redirects straight back, without the confirmation page.
+- `atlas.OAuthClients.LogoutAsync(clientId, sid)` signs a user out of your app and of
+  Atlas from your backend (`sid` is the id_token's `sid`): it revokes the client's grants
+  under that sid, ends the Atlas session and queues a back-channel logout to every other
+  app signed in through it, with no browser redirect to `/oauth2/logout` (needs
+  `oauth_clients:write` and `sessions:write`). `Session` is `revoked` or `already_ended`.
+- `RefreshTouchesSession = true` (first-party) keeps the Atlas session alive on every
+  refresh and makes the refresh fail (`invalid_grant`) once that session has ended.
+  `AddRedirectOrigins = true` on create / update also adds the redirect URIs' origins to
+  `allowed_origins`; the response's `AddedOrigins` lists them.
+- `atlas.OAuthClients.RevealSecretAsync(id)` fetches a generated secret once more (within 10
+  minutes of the create or rotate, a single time; the response's `ClientSecretReveal` says
+  where and until when). `ClientSecret` on create sets your own secret instead.
+  `RequireVerifiedEmail = true` issues no authorization code to a user whose primary email
+  is not verified.
+- `atlas.Instance.AcknowledgePreflightAsync("pkce_not_required", "legacy app", expiresAt)`
+  marks a known warning or info finding as accepted: preflight still lists it with
+  `Acknowledged`, and you stop counting it. `ListPreflightAcksAsync` / `DeletePreflightAckAsync`.
+- `atlas.Platform.Apps.ListAsync(new ListPlatformAppsParams { ExternalRef = "acme/prod" })`
+  finds one app (also `Name`, `NamePrefix`, `Limit`, `StartingAfter`).
 - `atlas.OAuthProviders.ListAsync(new[] { "google" }, configured: true)` filters the
   catalog; the upsert body takes `DisplayName`, `IconUrl`, `Mode`, and wallet settings
   (`UpsertOAuthProviderBody.Siwe(...)`, `Siws(...)`, `Siwf(...)`).

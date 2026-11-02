@@ -59,6 +59,16 @@ namespace Atlas.Resources
         public const string ScimGroupMemberAdded = "scim_group.member_added";
         public const string ScimGroupMemberRemoved = "scim_group.member_removed";
 
+        // Events added with session expiry and instance invitations.
+
+        /// <summary>A session idled out (<c>data.reason</c> <c>idle_expired</c>) or reached its absolute lifetime (<c>expired</c>); sent once per session.</summary>
+        public const string SessionExpired = "session.expired";
+        /// <summary>An instance invitation (<c>POST /v1/invitations</c>) was created; <c>data</c> is the invitation.</summary>
+        public const string InvitationCreated = "invitation.created";
+        /// <summary>Someone signed up with the invited address; <c>data.user_id</c> is the new user.</summary>
+        public const string InvitationAccepted = "invitation.accepted";
+        public const string InvitationRevoked = "invitation.revoked";
+
         /// <summary>Lets a key reveal webhook signing secrets.</summary>
         public const string ScopeWebhooksReveal = "webhooks:reveal";
 

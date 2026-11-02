@@ -219,7 +219,14 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "messaging_test";
         public string Channel { get; init; } = "";
         public string SentTo { get; init; } = "";
+        /// <summary>Always true: a provider refusal is a 502 error whose meta says what the provider answered.</summary>
         public bool Ok { get; init; }
+        public bool Accepted { get; init; }
+        /// <summary>The transport that accepted it (resend, smtp, twilio, ...).</summary>
+        public string Provider { get; init; } = "";
+        public string? ProviderMessageId { get; init; }
+        /// <summary>SMTP: the server reply line (carries the queue id).</summary>
+        public string? ProviderResponse { get; init; }
     }
 
     public sealed class DeletedMessagingProvider

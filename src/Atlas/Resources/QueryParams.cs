@@ -8,6 +8,16 @@ namespace Atlas.Resources
         public bool? IncludeArchived { get; set; }
         public bool? Archived { get; set; }
         public string? Tag { get; set; }
+        /// <summary>Only apps with exactly this name, ignoring case.</summary>
+        public string? Name { get; set; }
+        /// <summary>Only apps whose name starts with this text, ignoring case.</summary>
+        public string? NamePrefix { get; set; }
+        /// <summary>Only the app created with this <c>external_ref</c> (zero or one item).</summary>
+        public string? ExternalRef { get; set; }
+        /// <summary>Page size (up to 500); without it every matching app is returned.</summary>
+        public int? Limit { get; set; }
+        /// <summary>The previous page's <c>next_cursor</c>.</summary>
+        public string? StartingAfter { get; set; }
         /// <summary>Keep only apps whose provisioning metadata matches every pair (<c>metadata[key]=value</c>).</summary>
         public Dictionary<string, object?>? Metadata { get; set; }
 
@@ -17,6 +27,11 @@ namespace Atlas.Resources
             yield return new KeyValuePair<string, object?>("include_archived", IncludeArchived);
             yield return new KeyValuePair<string, object?>("archived", Archived);
             yield return new KeyValuePair<string, object?>("tag", Tag);
+            yield return new KeyValuePair<string, object?>("name", Name);
+            yield return new KeyValuePair<string, object?>("name_prefix", NamePrefix);
+            yield return new KeyValuePair<string, object?>("external_ref", ExternalRef);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
             foreach (var kv in AtlasProvisioning.MetadataQuery(Metadata)) yield return kv;
         }
     }

@@ -30,6 +30,18 @@ namespace Atlas.Resources
         /// without the confirmation page. First-party clients only. Defaults to false.
         /// </summary>
         public bool SkipLogoutConfirmation { get; init; }
+        /// <summary>
+        /// First-party only: each refresh keeps the Atlas session it came from alive, and once that session has ended
+        /// the refresh fails (<c>invalid_grant</c>).
+        /// </summary>
+        public bool RefreshTouchesSession { get; init; }
+        /// <summary>No authorization code is issued for a user whose primary email is not verified.</summary>
+        public bool RequireVerifiedEmail { get; init; }
+        /// <summary>
+        /// Create and update responses only: the origins the write added to the instance's <c>allowed_origins</c>
+        /// (<c>add_redirect_origins</c>, or automatically for a client a connected integration signs users in with).
+        /// </summary>
+        public List<string>? AddedOrigins { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
         /// <summary>Every OAuth flow for the client is refused while true.</summary>
@@ -76,9 +88,26 @@ namespace Atlas.Resources
         /// without the confirmation page. First-party clients only. Defaults to false.
         /// </summary>
         public bool SkipLogoutConfirmation { get; init; }
+        /// <summary>
+        /// First-party only: each refresh keeps the Atlas session it came from alive, and once that session has ended
+        /// the refresh fails (<c>invalid_grant</c>).
+        /// </summary>
+        public bool RefreshTouchesSession { get; init; }
+        /// <summary>No authorization code is issued for a user whose primary email is not verified.</summary>
+        public bool RequireVerifiedEmail { get; init; }
+        /// <summary>
+        /// Create and update responses only: the origins the write added to the instance's <c>allowed_origins</c>
+        /// (<c>add_redirect_origins</c>, or automatically for a client a connected integration signs users in with).
+        /// </summary>
+        public List<string>? AddedOrigins { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
         public string? ClientSecret { get; init; }
+        /// <summary>
+        /// Where and until when a generated secret can be fetched once more (<see cref="OAuthClientsResource.RevealSecretAsync"/>).
+        /// Absent for a caller-chosen secret.
+        /// </summary>
+        public OAuthClientSecretRevealLink? ClientSecretReveal { get; init; }
         /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
         public string? SealedSecret { get; init; }
         /// <summary>With a secret recipient: the client secret sealed to it.</summary>
@@ -96,6 +125,39 @@ namespace Atlas.Resources
         public string? ExternalRef { get; init; }
         /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back.</summary>
         public bool? IdempotentReplay { get; init; }
+    }
+
+    /// <summary><see cref="OAuthClientWithSecret.ClientSecretReveal"/>: the reveal path and its deadline (epoch ms).</summary>
+    public sealed class OAuthClientSecretRevealLink
+    {
+        public string Path { get; init; } = "";
+        public long ExpiresAt { get; init; }
+    }
+
+    /// <summary><see cref="OAuthClientsResource.RevealSecretAsync"/>: the secret the latest create or rotate generated.</summary>
+    public sealed class OAuthClientSecretReveal
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "oauth_client_secret";
+        public string Id { get; init; } = "";
+        public string ClientId { get; init; } = "";
+        public string ClientSecret { get; init; } = "";
+        public string? SecretPrefix { get; init; }
+        public long? ClientSecretExpiresAt { get; init; }
+        public string Note { get; init; } = "";
+    }
+
+    /// <summary>The result of <see cref="OAuthClientsResource.LogoutAsync"/>.</summary>
+    public sealed class OAuthClientLogout
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "oauth_client_logout";
+        public string ClientId { get; init; } = "";
+        public string Sid { get; init; } = "";
+        /// <summary><c>revoked</c>: this call ended the Atlas session. <c>already_ended</c>: it had already ended.</summary>
+        public string Session { get; init; } = "";
+        /// <summary>This client's refresh grants under the sid that were revoked (offline_access included).</summary>
+        public int GrantsRevoked { get; init; }
+        /// <summary>Back-channel logouts queued, to this client and every other app signed in through the session.</summary>
+        public int BackchannelLogouts { get; init; }
     }
 
     /// <summary>The body of <c>POST /v1/oauth_clients/{id}/rotate_secret</c>.</summary>
@@ -125,6 +187,8 @@ namespace Atlas.Resources
         public string? TokenEndpointAuthMethod { get; set; }
         public string? LogoUrl { get; set; }
         public bool? FirstParty { get; set; }
+        /// <summary>Your own secret (32-256 random printable characters); omit and Atlas generates one (then no reveal link).</summary>
+        public string? ClientSecret { get; set; }
         /// <summary>New clients default to true (confidential ones included); send false to opt out.</summary>
         public bool? RequirePkce { get; set; }
         /// <summary>
@@ -134,6 +198,18 @@ namespace Atlas.Resources
         /// 422 <c>VALIDATION_FAILED</c> (param <c>skip_logout_confirmation</c>).
         /// </summary>
         public bool? SkipLogoutConfirmation { get; set; }
+        /// <summary>
+        /// Each refresh keeps the Atlas session it came from alive, and once that session has ended the refresh fails
+        /// (<c>invalid_grant</c>). First-party clients only (422 <c>VALIDATION_FAILED</c> otherwise).
+        /// </summary>
+        public bool? RefreshTouchesSession { get; set; }
+        /// <summary>
+        /// Write-only: also add the redirect URIs' origins to the instance's <c>allowed_origins</c> (append only; the
+        /// response lists them in <c>AddedOrigins</c>).
+        /// </summary>
+        public bool? AddRedirectOrigins { get; set; }
+        /// <summary>Issue no authorization code for a user whose primary email is not verified. Default false.</summary>
+        public bool? RequireVerifiedEmail { get; set; }
         /// <summary>Lifetime of the issued secret (reported as <c>client_secret_expires_at</c>); null = never expires.</summary>
         public long? SecretExpiresInSeconds { get; set; }
         /// <summary><c>public</c> (default) or <c>pairwise</c>.</summary>
@@ -177,6 +253,18 @@ namespace Atlas.Resources
         /// 422 <c>VALIDATION_FAILED</c> (param <c>skip_logout_confirmation</c>).
         /// </summary>
         public bool? SkipLogoutConfirmation { get; set; }
+        /// <summary>
+        /// Each refresh keeps the Atlas session it came from alive, and once that session has ended the refresh fails
+        /// (<c>invalid_grant</c>). First-party clients only (422 <c>VALIDATION_FAILED</c> otherwise).
+        /// </summary>
+        public bool? RefreshTouchesSession { get; set; }
+        /// <summary>
+        /// Write-only: also add the redirect URIs' origins to the instance's <c>allowed_origins</c> (append only; the
+        /// response lists them in <c>AddedOrigins</c>).
+        /// </summary>
+        public bool? AddRedirectOrigins { get; set; }
+        /// <summary>Issue no authorization code for a user whose primary email is not verified. Default false.</summary>
+        public bool? RequireVerifiedEmail { get; set; }
         /// <summary>Lifetime of the issued secret (reported as <c>client_secret_expires_at</c>); null = never expires.</summary>
         public long? SecretExpiresInSeconds { get; set; }
         /// <summary><c>public</c> (default) or <c>pairwise</c>.</summary>
@@ -318,9 +406,26 @@ namespace Atlas.Resources
             => Req<CursorPage<BackchannelLogoutDelivery>>(HttpVerb.Get, $"/v1/oauth_clients/{Enc(id)}/backchannel_deliveries",
                 query: Q(("limit", limit), ("starting_after", startingAfter)), cancellationToken: ct);
 
+        /// <summary>
+        /// <c>POST /v1/oauth_clients/{id}/logout</c> — sign a user out of this app AND of Atlas in one call: revokes this
+        /// client's grants under <paramref name="sid"/> (the id_token's <c>sid</c>) and the Atlas session itself; every
+        /// other app gets a back-channel logout. <paramref name="id"/> is the client id or its public <c>client_id</c>.
+        /// Needs <c>oauth_clients:write</c> and <c>sessions:write</c>; no browser redirect to <c>/oauth2/logout</c> is
+        /// needed afterwards.
+        /// </summary>
+        public Task<OAuthClientLogout> LogoutAsync(string id, string sid, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<OAuthClientLogout>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/logout", Body(("sid", sid)), idempotencyKey: idempotencyKey, cancellationToken: ct);
+
         /// <summary><c>POST /v1/oauth_clients/{id}/backchannel_logout/test</c> — Send a test back-channel logout now and return what the receiver answered.</summary>
         public Task<BackchannelLogoutTest> TestBackchannelLogoutAsync(string id, CancellationToken ct = default)
             => Req<BackchannelLogoutTest>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/backchannel_logout/test", cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/oauth_clients/{id}/secret/reveal</c> — the secret the latest create or rotate generated, once more:
+        /// within 10 minutes, a single time, while it is still current. 410 afterwards (rotate instead).
+        /// </summary>
+        public Task<OAuthClientSecretReveal> RevealSecretAsync(string id, CancellationToken ct = default)
+            => Req<OAuthClientSecretReveal>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/secret/reveal", cancellationToken: ct);
 
         public Task<DeleteOAuthClientResult> DeleteAsync(string id, CancellationToken ct = default)
             => Req<DeleteOAuthClientResult>(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(id)}", cancellationToken: ct);

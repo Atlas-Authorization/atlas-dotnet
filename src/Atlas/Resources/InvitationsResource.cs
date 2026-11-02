@@ -22,6 +22,10 @@ namespace Atlas.Resources
     {
         public string EmailAddress { get; set; } = "";
         public Metadata? PublicMetadata { get; set; }
+        /// <summary>When it expires: epoch ms or an ISO 8601 date-time, at most 365 days ahead. Default 7 days.</summary>
+        public object? ExpiresAt { get; set; }
+        /// <summary>Alternative to <see cref="ExpiresAt"/>: 1 to 365 days from now. Send one or the other.</summary>
+        public int? ExpiresInDays { get; set; }
     }
 
     /// <summary>The instance-level invitations namespace (<c>/v1/invitations</c>).</summary>

@@ -25,6 +25,8 @@ namespace Atlas.Resources
         public bool SigningSecretSet { get; init; }
         /// <summary>500-5000, default 3000.</summary>
         public int TimeoutMs { get; init; }
+        /// <summary>Refuse the sign-up when the hook times out, errors or answers badly. Default false.</summary>
+        public bool FailClosed { get; init; }
         public BeforeUserCreateHookLastCall? LastCall { get; init; }
         public long? UpdatedAt { get; init; }
     }
@@ -42,6 +44,8 @@ namespace Atlas.Resources
         public string? SigningSecret { get; set; }
         /// <summary>500-5000.</summary>
         public int? TimeoutMs { get; set; }
+        /// <summary>Refuse the sign-up (403 <c>SIGN_UP_DENIED</c>) when the hook times out, errors or answers badly.</summary>
+        public bool? FailClosed { get; set; }
 
         /// <summary>Fields set with <see cref="Clear"/>, written as-is.</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -57,6 +61,9 @@ namespace Atlas.Resources
     /// <summary>What the hook answered to a test.</summary>
     public sealed class BeforeUserCreateHookAnswer
     {
+        /// <summary>True when the hook denied the sample sign-up (<see cref="Reason"/> says why).</summary>
+        public bool? Deny { get; init; }
+        public string? Reason { get; init; }
         public string? ExternalId { get; init; }
         public Dictionary<string, object?>? PublicMetadata { get; init; }
         public bool PrivateMetadataSet { get; init; }

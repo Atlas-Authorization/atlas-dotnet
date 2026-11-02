@@ -21,6 +21,8 @@ namespace Atlas.Resources
         public bool MfaEnabled { get; init; }
         public bool Banned { get; init; }
         public bool Locked { get; init; }
+        /// <summary>One account state: <c>active</c>, <c>suspended</c> or <c>banned</c> (the ID token's <c>account_status</c>; also on user webhooks).</summary>
+        public string? Status { get; init; }
         /// <summary>Epoch milliseconds, or null if never signed in.</summary>
         public long? LastSignInAt { get; init; }
         public long CreatedAt { get; init; }

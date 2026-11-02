@@ -317,6 +317,8 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         public string DeliveryId { get; init; } = "";
         public string EventId { get; init; } = "";
+        /// <summary>The exact URL the attempt was POSTed to.</summary>
+        public string Url { get; init; } = "";
         /// <summary>Always <c>webhook.test</c>.</summary>
         public string? EventType { get; init; }
         /// <summary><c>success</c> or <c>failed</c>.</summary>
@@ -565,6 +567,8 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         public string Id { get; init; } = "";
         public string EventId { get; init; } = "";
+        /// <summary>The URL the worker will POST to (only on a test).</summary>
+        public string? Url { get; init; }
         public string Status { get; init; } = "";
         public string Note { get; init; } = "";
     }

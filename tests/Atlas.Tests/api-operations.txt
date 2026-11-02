@@ -1236,3 +1236,10 @@ GET /v1/jwt_connections/{id}
 PATCH /v1/jwt_connections/{id}
 DELETE /v1/jwt_connections/{id}
 POST /v1/platform/apps/{id}/initial_secret/reveal
+# OAuth client logout (1.22.0)
+POST /v1/oauth_clients/{id}/logout
+# Preflight acknowledgements and the OAuth client secret reveal (1.22.0)
+GET /v1/instance/preflight/acks
+PUT /v1/instance/preflight/acks/{code}
+DELETE /v1/instance/preflight/acks/{code}
+POST /v1/oauth_clients/{id}/secret/reveal

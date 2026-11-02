@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.22.0 (Atlas.Sdk) — 2026-11-02
+
+### Added
+
+- **Back-channel sign-out from your backend.** `OAuthClients.LogoutAsync(id, sid, idempotencyKey)` (`POST /v1/oauth_clients/{id}/logout`) signs the user out of your app and of Atlas in one call; typed `OAuthClientLogout` (`Session`: `revoked` / `already_ended`, `GrantsRevoked`, `BackchannelLogouts`).
+- OAuth clients: `RefreshTouchesSession` (first-party; a refresh keeps the Atlas session alive and fails once it has ended) on `OAuthClient`, `OAuthClientWithSecret` and both bodies; write-only `AddRedirectOrigins` on create and update, with the response's `AddedOrigins`.
+- `InstanceSecurity.SetCaptchaSecretAsync(secret, provider, siteKey)`: with a site key, storing the secret and switching `auth_config.captcha` to that provider happen in one atomic write; `CaptchaSecretResult` gains `Switched` and `Captcha`.
+- **Preflight acknowledgements.** `Instance.ListPreflightAcksAsync()`, `AcknowledgePreflightAsync(code, reason, expiresAt)` and `DeletePreflightAckAsync(code)` (`/v1/instance/preflight/acks`); typed `PreflightAck`. `PreflightFinding.Acknowledged` marks a known, accepted warning or info finding: do not count it. Errors are never acknowledged (422).
+- **OAuth client secret, once more.** `OAuthClients.RevealSecretAsync(id)` (`POST /v1/oauth_clients/{id}/secret/reveal`: within 10 minutes, a single time); create and rotate responses carry `ClientSecretReveal` (`Path`, `ExpiresAt`). `CreateOAuthClientBody.ClientSecret` sets your own secret. `RequireVerifiedEmail` on `OAuthClient`, `OAuthClientWithSecret` and both bodies.
+- Webhook event names `WebhookEvents.SessionExpired` (`session.expired`, `data.reason` `idle_expired` / `expired`), `InvitationCreated`, `InvitationAccepted`, `InvitationRevoked`.
+- `User.Status` (`active` / `suspended` / `banned`, also on `user.*` webhook payloads).
+- `CreateInvitationBody.ExpiresAt` (epoch ms or ISO 8601) / `ExpiresInDays` (1-365).
+- `ListPlatformAppsParams`: `Name`, `NamePrefix`, `ExternalRef`, `Limit`, `StartingAfter`.
+- `WebhookTestResult.Url` and `WebhookDeliveryQueued.Url` (the exact URL tried); `MessagingTestResult` gains `Accepted`, `Provider`, `ProviderMessageId`, `ProviderResponse`.
+- `before_user_create` hook: `FailClosed` on the hook and its update body; a test answer may carry `Deny` / `Reason`.
+- Password import: `password_hash_algorithm` also takes `scrypt_node` / `scrypt_django` (Node `scrypt$N$r$p$salt$key` strings), and scrypt `password_hash_params` take `salt_encoding` (`hex`, `base64`, `base64url`, `utf8`).
+
 ## 1.21.0 (Atlas.Sdk) / 1.7.0 (Atlas.AspNetCore) — 2026-11-01
 
 ### Added
