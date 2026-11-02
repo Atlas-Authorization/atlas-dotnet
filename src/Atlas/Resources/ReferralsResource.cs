@@ -226,6 +226,8 @@ namespace Atlas.Resources
         public bool AutoEnrollUsers { get; init; }
         /// <summary>e.g. <c>https://app.example.com/join?ref={code}</c>; builds <c>referral_link</c>.</summary>
         public string? LinkTemplate { get; init; }
+        /// <summary>The partner portal linked from the hosted account page's "Refer a friend" panel; null = no link.</summary>
+        public string? PartnerPortalUrl { get; init; }
         public int TimeoutMs { get; init; }
         public ReferralSecuritySettings Security { get; init; } = new ReferralSecuritySettings();
         /// <summary>Public tracking token (the <c>referalli</c> provider derives the code lookup from it). Not a secret.</summary>
@@ -253,6 +255,8 @@ namespace Atlas.Resources
         public bool MirrorToPublicMetadata { get; init; }
         /// <summary>Add the user's own code as a <c>referral_code</c> claim to session and ID tokens (default false).</summary>
         public bool IncludeReferralClaims { get; init; }
+        /// <summary>Report the first sign-in of an Atlas ID account to a Sign in with Atlas app this instance manages as a sign-up (default false).</summary>
+        public bool ReportLinkedAtlasIdSignups { get; init; }
         /// <summary>What the chosen provider still needs before referrals can be enabled.</summary>
         public List<string>? Missing { get; init; }
         public ReferralConnectionStatus? Connection { get; init; }
@@ -295,6 +299,8 @@ namespace Atlas.Resources
         public bool? AutoEnrollUsers { get; set; }
         /// <summary>An https URL containing <c>{code}</c>.</summary>
         public string? LinkTemplate { get; set; }
+        /// <summary>An https URL (shown on the hosted account page); <c>Clear("partner_portal_url")</c> removes it.</summary>
+        public string? PartnerPortalUrl { get; set; }
         /// <summary>100-5000.</summary>
         public int? TimeoutMs { get; set; }
         public UpdateReferralSecurityBody? Security { get; set; }
@@ -310,6 +316,7 @@ namespace Atlas.Resources
         public bool? ForwardLifecycle { get; set; }
         public bool? MirrorToPublicMetadata { get; set; }
         public bool? IncludeReferralClaims { get; set; }
+        public bool? ReportLinkedAtlasIdSignups { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/> or <see cref="Clear"/>, written as-is.</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -325,7 +332,7 @@ namespace Atlas.Resources
         /// Clear a nullable field by its wire name (<c>endpoint_url</c>, <c>program_id</c>, <c>connection_id</c>,
         /// <c>signing_secret</c>, <c>api_key</c>, <c>inbound_secret</c>, <c>inbound_endpoint_id</c>,
         /// <c>context_cookie</c>, <c>consent_fallback_category</c>,
-        /// <c>link_template</c>, <c>tracking_token</c>, <c>code_lookup_url</c>, <c>browser_sources</c>): it is sent as <c>null</c>.
+        /// <c>link_template</c>, <c>partner_portal_url</c>, <c>tracking_token</c>, <c>code_lookup_url</c>, <c>browser_sources</c>): it is sent as <c>null</c>.
         /// </summary>
         public UpdateReferralSettingsBody Clear(string key) => Set(key, null);
     }

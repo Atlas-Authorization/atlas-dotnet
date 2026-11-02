@@ -1226,3 +1226,13 @@ POST /v1/organizations/{id}/app_webhook_endpoints/{endpointId}/test
 GET /v1/organizations/{id}/app_webhook_endpoints/{endpointId}/deliveries
 POST /v1/organizations/{id}/app_webhook_endpoints/{endpointId}/deliveries/{deliveryId}/redeliver
 POST /v1/organizations/{id}/app_webhook_endpoints/{endpointId}/replay
+# Organization provisioning, SSO setup, trusted-JWT connections (1.21.0)
+GET /v1/organizations/by_domain/{domain}
+GET /v1/organizations/{id}/policy
+POST /v1/organizations/{id}/domains/{domainId}/verification_email
+GET /v1/jwt_connections
+POST /v1/jwt_connections
+GET /v1/jwt_connections/{id}
+PATCH /v1/jwt_connections/{id}
+DELETE /v1/jwt_connections/{id}
+POST /v1/platform/apps/{id}/initial_secret/reveal

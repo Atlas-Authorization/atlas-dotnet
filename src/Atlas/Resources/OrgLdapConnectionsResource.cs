@@ -13,6 +13,8 @@ namespace Atlas.Resources
         [JsonPropertyName("firstName")] public string? FirstName { get; set; }
         [JsonPropertyName("lastName")] public string? LastName { get; set; }
         public string? Username { get; set; }
+        /// <summary>The multi-valued attribute holding the user's group DNs (default <c>memberOf</c>), read for group role mappings.</summary>
+        public string? Groups { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -23,6 +25,15 @@ namespace Atlas.Resources
             (AdditionalFields ??= new Dictionary<string, object?>())[key] = value;
             return this;
         }
+    }
+
+    /// <summary>A directory group DN → organization role key.</summary>
+    public sealed class OrgLdapGroupRoleMapping
+    {
+        /// <summary>e.g. <c>cn=admins,ou=groups,dc=example,dc=com</c>.</summary>
+        public string Group { get; set; } = "";
+        /// <summary>e.g. <c>org:admin</c>.</summary>
+        public string Role { get; set; } = "";
     }
 
     public sealed class OrgLdapConnectionBody
@@ -44,6 +55,8 @@ namespace Atlas.Resources
         /// <summary>Service-account password. Write-only; never returned.</summary>
         public string? BindPassword { get; set; }
         public string? DefaultRoleId { get; set; }
+        /// <summary>The first mapping whose group the person is in picks their role when they are seated (at most 50); <c>Set("group_role_mappings", null)</c> clears.</summary>
+        public List<OrgLdapGroupRoleMapping>? GroupRoleMappings { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -72,6 +85,7 @@ namespace Atlas.Resources
         /// <summary>Whether a bind password is set — never the password.</summary>
         public bool? HasBindPassword { get; init; }
         public string? DefaultRoleId { get; init; }
+        public List<OrgLdapGroupRoleMapping>? GroupRoleMappings { get; init; }
         /// <summary>Created (epoch ms).</summary>
         public long? CreatedAt { get; init; }
         /// <summary>Updated (epoch ms).</summary>

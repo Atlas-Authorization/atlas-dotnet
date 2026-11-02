@@ -15,9 +15,55 @@ namespace Atlas.Resources
         public string? ImageUrl { get; init; }
         public Metadata PublicMetadata { get; init; } = new Metadata();
         public int MaxAllowedMemberships { get; init; }
-        public string CreatedBy { get; init; } = "";
+        /// <summary>Null when your backend created the organization without a creator.</summary>
+        public string? CreatedBy { get; init; }
+        /// <summary>Your own id for this customer; unique per instance.</summary>
+        public string? ExternalId { get; init; }
+        /// <summary>Role key → your product's name for it (echoed as the <c>org_role_mapped</c> token claim).</summary>
+        public Dictionary<string, string>? RoleMappings { get; init; }
+        /// <summary>On create with <c>owner_email</c> only: the invitation sent to that address.</summary>
+        public OrganizationOwnerInvitation? OwnerInvitation { get; init; }
+        /// <summary>On <see cref="OrganizationsResource.GetAsync"/> only: the organization's SSO setup.</summary>
+        public OrganizationSso? Sso { get; init; }
+        /// <summary>On <see cref="OrganizationsResource.GetByDomainAsync"/> only: the matched domain.</summary>
+        public OrganizationDomainMatch? Domain { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
+    }
+
+    public sealed class OrganizationOwnerInvitation
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "organization_invitation";
+        public string Id { get; init; } = "";
+        public string Email { get; init; } = "";
+        public string Role { get; init; } = "";
+        public string Status { get; init; } = "";
+        public long? ExpiresAt { get; init; }
+    }
+
+    public sealed class OrganizationSso
+    {
+        public List<OrganizationSsoConnection> Connections { get; init; } = new List<OrganizationSsoConnection>();
+        /// <summary>The SCIM 2.0 base URL to give this organization's identity provider.</summary>
+        public string ScimBaseUrl { get; init; } = "";
+    }
+
+    public sealed class OrganizationSsoConnection
+    {
+        public string Id { get; init; } = "";
+        public string Type { get; init; } = "";
+        /// <summary><c>draft</c>, <c>active</c> or <c>disabled</c>.</summary>
+        public string Status { get; init; } = "";
+    }
+
+    public sealed class OrganizationDomainMatch
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "org_domain";
+        public string Id { get; init; } = "";
+        public string Domain { get; init; } = "";
+        /// <summary><c>pending</c>, <c>verified</c> or <c>failed</c>.</summary>
+        public string Status { get; init; } = "";
+        public long? VerifiedAt { get; init; }
     }
 
     public sealed class OrganizationMembership
@@ -50,6 +96,30 @@ namespace Atlas.Resources
         public string RecordValue { get; init; } = "";
     }
 
+    /// <summary>Every way to prove an organization domain.</summary>
+    public sealed class OrgDomainVerificationMethods
+    {
+        public OrgDomainVerification? DnsTxt { get; init; }
+        public OrgDomainWellKnown? WellKnown { get; init; }
+        public OrgDomainEmailVerification? Email { get; init; }
+    }
+
+    /// <summary>Serve <see cref="Body"/> at <see cref="Url"/>, then verify with method <c>well_known</c>.</summary>
+    public sealed class OrgDomainWellKnown
+    {
+        public string Url { get; init; } = "";
+        public string Body { get; init; } = "";
+        public string ContentType { get; init; } = "";
+    }
+
+    public sealed class OrgDomainEmailVerification
+    {
+        /// <summary>The administrative mailboxes a code can go to.</summary>
+        public List<string> Addresses { get; init; } = new List<string>();
+        public string? SentTo { get; init; }
+        public long? ExpiresAt { get; init; }
+    }
+
     public sealed class OrgDomain
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "org_domain";
@@ -60,6 +130,13 @@ namespace Atlas.Resources
         public bool AutoJoin { get; init; }
         public string? DefaultRoleId { get; init; }
         public OrgDomainVerification? Verification { get; init; }
+        public OrgDomainVerificationMethods? VerificationMethods { get; init; }
+        /// <summary>How the domain was proven: <c>dns_txt</c>, <c>well_known</c>, <c>email</c>, or null.</summary>
+        public string? VerificationMethod { get; init; }
+        /// <summary>On <see cref="OrganizationDomainsResource.SendVerificationEmailAsync"/> only: the address the code went to.</summary>
+        public string? SentTo { get; init; }
+        /// <summary>On a verify.</summary>
+        public bool? Verified { get; init; }
         public long? VerifiedAt { get; init; }
         public long? LastCheckedAt { get; init; }
         public long CreatedAt { get; init; }
@@ -141,18 +218,57 @@ namespace Atlas.Resources
     {
         public string Name { get; set; } = "";
         public string Slug { get; set; } = "";
-        public string CreatedBy { get; set; } = "";
+        /// <summary>Seated with the creator role; leave null for a backend-created organization with no members yet.</summary>
+        public string? CreatedBy { get; set; }
+        /// <summary>Your own id for this customer; unique per instance (409 when taken).</summary>
+        public string? ExternalId { get; set; }
+        public Metadata? PublicMetadata { get; set; }
+        public Metadata? PrivateMetadata { get; set; }
+        /// <summary>Invites this address with the creator role (<c>org:admin</c> by default); see <see cref="Organization.OwnerInvitation"/>.</summary>
+        public string? OwnerEmail { get; set; }
+        /// <summary>Role key → your product's name for it.</summary>
+        public Dictionary<string, string>? RoleMappings { get; set; }
         public int? MaxAllowedMemberships { get; set; }
+    }
+
+    /// <summary><c>GET /v1/organizations</c> filters.</summary>
+    public sealed class ListOrganizationsParams : CursorParams
+    {
+        /// <summary>Only the organization with this <c>external_id</c>.</summary>
+        public string? ExternalId { get; set; }
+        /// <summary><c>public_metadata</c> equality filters, sent as <c>metadata[key]=value</c> (all must match).</summary>
+        public Dictionary<string, object?>? Metadata { get; set; }
+
+        public override IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            foreach (var kv in base.ToQuery()) yield return kv;
+            yield return new KeyValuePair<string, object?>("external_id", ExternalId);
+            foreach (var kv in AtlasProvisioning.MetadataQuery(Metadata)) yield return kv;
+        }
     }
 
     public sealed class UpdateOrganizationBody
     {
+        /// <summary><c>Clear("external_id")</c> removes it.</summary>
+        public string? ExternalId { get; set; }
+        /// <summary><c>Clear("role_mappings")</c> removes them.</summary>
+        public Dictionary<string, string>? RoleMappings { get; set; }
         public string? Name { get; set; }
         public string? Slug { get; set; }
         public string? ImageUrl { get; set; }
         public int? MaxAllowedMemberships { get; set; }
         public Metadata? PublicMetadata { get; set; }
         public Metadata? PrivateMetadata { get; set; }
+
+        /// <summary>Fields cleared with <see cref="Clear"/>, written as-is.</summary>
+        [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
+
+        /// <summary>Clear a nullable field by its wire name (<c>external_id</c>, <c>role_mappings</c>): it is sent as <c>null</c>.</summary>
+        public UpdateOrganizationBody Clear(string key)
+        {
+            (AdditionalFields ??= new Dictionary<string, object?>())[key] = null;
+            return this;
+        }
     }
 
     public sealed class ReplaceOrganizationMetadataBody
@@ -316,6 +432,22 @@ namespace Atlas.Resources
         public Task<OrgDomain> VerifyAsync(string orgId, string domainId, CancellationToken ct = default)
             => Req<OrgDomain>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/domains/{Enc(domainId)}/verify", cancellationToken: ct);
 
+        /// <summary>
+        /// Check now by a chosen method: <c>dns_txt</c> (the TXT record), <c>well_known</c> (fetches the file) or <c>email</c>
+        /// (with the <paramref name="code"/> from <see cref="SendVerificationEmailAsync"/>).
+        /// </summary>
+        public Task<OrgDomain> VerifyAsync(string orgId, string domainId, string method, string? code = null, CancellationToken ct = default)
+            => Req<OrgDomain>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/domains/{Enc(domainId)}/verify",
+                body: Body(("method", method), ("code", code)), cancellationToken: ct);
+
+        /// <summary>
+        /// Email a 6-digit code to an administrative mailbox at the domain (<paramref name="address"/>: <c>admin</c> by default,
+        /// <c>administrator</c>, <c>hostmaster</c>, <c>postmaster</c> or <c>webmaster</c>), via your own email provider. 202.
+        /// </summary>
+        public Task<OrgDomain> SendVerificationEmailAsync(string orgId, string domainId, string? address = null, CancellationToken ct = default)
+            => Req<OrgDomain>(HttpVerb.Post, $"/v1/organizations/{Enc(orgId)}/domains/{Enc(domainId)}/verification_email",
+                body: Body(("address", address)), cancellationToken: ct);
+
         public Task<DeletedOrgDomain> DeleteAsync(string orgId, string domainId, CancellationToken ct = default)
             => Req<DeletedOrgDomain>(HttpVerb.Delete, $"/v1/organizations/{Enc(orgId)}/domains/{Enc(domainId)}", cancellationToken: ct);
     }
@@ -365,8 +497,21 @@ namespace Atlas.Resources
         public Task<CursorPage<Organization>> ListAsync(CursorParams? @params = null, CancellationToken ct = default)
             => Req<CursorPage<Organization>>(HttpVerb.Get, "/v1/organizations", query: (@params ?? new CursorParams()).ToQuery(), cancellationToken: ct);
 
+        /// <summary>The organization plus its SSO setup (<see cref="Organization.Sso"/>).</summary>
         public Task<Organization> GetAsync(string id, CancellationToken ct = default)
             => Req<Organization>(HttpVerb.Get, $"/v1/organizations/{Enc(id)}", cancellationToken: ct);
+
+        /// <summary>
+        /// The organization owning a domain (or an email address's domain), with the matched <see cref="Organization.Domain"/>.
+        /// Verified domains only unless <paramref name="includeUnverified"/>; 404 when none.
+        /// </summary>
+        public Task<Organization> GetByDomainAsync(string domain, bool includeUnverified = false, CancellationToken ct = default)
+            => Req<Organization>(HttpVerb.Get, $"/v1/organizations/by_domain/{Enc(domain)}",
+                query: Q(("include_unverified", includeUnverified ? true : (bool?)null)), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/organizations/:id/policy</c> — the same object <see cref="UpdatePolicyAsync"/> returns.</summary>
+        public Task<OrganizationPolicy> GetPolicyAsync(string id, CancellationToken ct = default)
+            => Req<OrganizationPolicy>(HttpVerb.Get, $"/v1/organizations/{Enc(id)}/policy", cancellationToken: ct);
 
         public Task<Organization> CreateAsync(CreateOrganizationBody body, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<Organization>(HttpVerb.Post, "/v1/organizations", body, idempotencyKey: idempotencyKey, cancellationToken: ct);

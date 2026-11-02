@@ -167,6 +167,8 @@ namespace Atlas.Resources
         public string? Description { get; set; }
         /// <summary><c>false</c> creates the endpoint switched off (default true).</summary>
         public bool? Active { get; set; }
+        /// <summary>Your own signing secret instead of a generated one: <c>whsec_</c> plus at least 32 characters (letters, digits, <c>+ / = _ -</c>), from a CSPRNG.</summary>
+        public string? Secret { get; set; }
         /// <summary>An event destination instead of an HTTPS url.</summary>
         public WebhookDestination? Destination { get; set; }
         /// <summary>Your own credentials for the destination (stored encrypted, write-only).</summary>
@@ -315,11 +317,16 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         public string DeliveryId { get; init; } = "";
         public string EventId { get; init; } = "";
+        /// <summary>Always <c>webhook.test</c>.</summary>
+        public string? EventType { get; init; }
+        /// <summary><c>success</c> or <c>failed</c>.</summary>
         public string Status { get; init; } = "";
         public int? HttpStatus { get; init; }
         public long? LatencyMs { get; init; }
         public string? ResponseSnippet { get; init; }
         public string? Error { get; init; }
+        /// <summary>Why the attempt failed: <c>non_2xx</c>, <c>redirect</c>, <c>timeout</c>, <c>tls</c>, <c>dns</c>, <c>connection_refused</c>, <c>network</c>, <c>url_blocked</c>; null on success.</summary>
+        public string? ErrorKind { get; init; }
         public string? SignatureHeaderSent { get; init; }
         public bool WillRetry { get; init; }
     }
@@ -549,6 +556,8 @@ namespace Atlas.Resources
     {
         /// <summary>How long the previous secret keeps signing deliveries (as a second <c>atlas-signature</c> entry), in seconds. Null or 0: it stops at once (the default); at most 604800 (7 days). Set it only once every receiver verifies with a verifier that accepts several signatures (1.6.0+).</summary>
         public int? OverlapSeconds { get; set; }
+        /// <summary>Rotate to a secret you chose (<c>whsec_</c> plus at least 32 characters, different from the current one; 422 otherwise).</summary>
+        public string? Secret { get; set; }
     }
 
     public sealed class WebhookDeliveryQueued

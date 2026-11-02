@@ -14,18 +14,42 @@ namespace Atlas.Resources
         public string Status { get; init; } = "";
         public string Action { get; init; } = "";
         public bool Live { get; init; }
-        public string CnameTarget { get; init; } = "";
+        /// <summary><c>cname</c>, or <c>path</c>: a path mount on your own host, proven by an https file (no DNS).</summary>
+        public string? Method { get; init; }
+        /// <summary>Null for a path mount (no CNAME).</summary>
+        public string? CnameTarget { get; init; }
         public long? LastCheckedAt { get; init; }
         public string? LastObservedTarget { get; init; }
         public string? FailureReason { get; init; }
         public long? CertificateExpiresAt { get; init; }
         public string? CookieDomain { get; init; }
-        /// <summary>Present on create; the DNS records to add. Absent on list rows.</summary>
+        /// <summary>Present on create; the DNS records to add (a verified path mount: nothing to add, or the reverse-proxy rule). Absent on list rows.</summary>
         public Dictionary<string, object?>? Instructions { get; init; }
         /// <summary>Present on <see cref="DomainsResource.VerifyAsync"/>.</summary>
         public bool? Verified { get; init; }
+        /// <summary>On <see cref="DomainsResource.VerifyAsync"/>: the instance's issuer once a verified host serves it.</summary>
+        public string? Issuer { get; init; }
+        public string? Note { get; init; }
+        /// <summary>Path mount: the prefix the Frontend API is served under.</summary>
+        public string? BasePath { get; init; }
+        /// <summary>Path mount, once verified: <c>atlas_ingress</c> (Atlas routes it) or <c>customer_proxy</c> (your reverse proxy does).</summary>
+        public string? Routing { get; init; }
+        /// <summary>Path mount: <c>https://&lt;host&gt;&lt;base_path&gt;</c>, the Frontend API and (once verified) the issuer.</summary>
+        public string? FrontendApiUrl { get; init; }
+        /// <summary>Path mount: publish <c>Content</c> at <c>Url</c> (status 200, no redirect), then verify.</summary>
+        public CustomDomainVerification? Verification { get; init; }
         /// <summary>DNS automation (the API token is never returned), or null.</summary>
         public CustomDomainDns? Dns { get; init; }
+    }
+
+    public sealed class CustomDomainVerification
+    {
+        /// <summary><c>https_file</c>.</summary>
+        public string Method { get; init; } = "";
+        public string Url { get; init; } = "";
+        public string Token { get; init; } = "";
+        public string Content { get; init; } = "";
+        public string Instructions { get; init; } = "";
     }
 
     public sealed class CustomDomainDns
@@ -71,7 +95,13 @@ namespace Atlas.Resources
 
     public sealed class CreateDomainBody
     {
-        public string Host { get; set; } = "";
+        public string? Host { get; set; }
+        /// <summary>Alias of <see cref="Host"/>.</summary>
+        public string? Hostname { get; set; }
+        /// <summary><c>cname</c> (the default) or <c>path</c>: the Frontend API under <see cref="BasePath"/> on a host you already run.</summary>
+        public string? Method { get; set; }
+        /// <summary>Path mount: default <c>/__atlas</c>.</summary>
+        public string? BasePath { get; set; }
         public string? Role { get; set; }
         /// <summary>Optional: have Atlas write the DNS record.</summary>
         public CustomDomainDnsInput? Dns { get; set; }

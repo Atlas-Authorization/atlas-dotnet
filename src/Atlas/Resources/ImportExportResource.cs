@@ -65,6 +65,11 @@ namespace Atlas.Resources
         public string? Email { get; set; }
         public string? Password { get; set; }
         public string? PasswordHash { get; set; }
+        /// <summary>Names a hash that does not describe itself (<c>scrypt</c>, <c>pbkdf2</c>, <c>md5</c>, <c>sha256</c>, their <c>_salted</c> forms, …).</summary>
+        public string? PasswordHashAlgorithm { get; set; }
+        /// <summary>The algorithm's parameters (scrypt <c>n</c> / <c>r</c> / <c>p</c> / <c>key_length</c>, pbkdf2 <c>digest</c> / <c>iterations</c>, <c>salt_encoding</c>, …).</summary>
+        public Dictionary<string, object?>? PasswordHashParams { get; set; }
+        public string? PasswordSalt { get; set; }
         public bool? EmailVerified { get; set; }
         public bool? Verified { get; set; }
         public string? FirstName { get; set; }

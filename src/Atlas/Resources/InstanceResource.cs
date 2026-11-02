@@ -577,6 +577,11 @@ namespace Atlas.Resources
         public CookieConsentSettingsLinkInput? SettingsLink { get; set; }
         /// <summary><c>page</c> (default: the script tag carries the page language) or <c>browser</c>.</summary>
         public string? Culture { get; set; }
+        /// <summary>
+        /// Up to 10 bare hostnames the hosted pages are served on that your CMP site is knowingly not registered for (e.g. the default
+        /// Frontend API host). Sent alone it sets only the aliases; an empty list clears them; omitted, they stay as they are.
+        /// </summary>
+        public List<string>? HostAliases { get; set; }
 
         /// <summary>Fields set with <see cref="Set"/>, written as-is (an explicit null clears a stored value on a partial update).</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -706,6 +711,8 @@ namespace Atlas.Resources
         public CookieConsentSettingsLink? SettingsLink { get; init; }
         /// <summary><c>page</c> or <c>browser</c>.</summary>
         public string? Culture { get; init; }
+        /// <summary>The declared host aliases.</summary>
+        public List<string>? HostAliases { get; init; }
         /// <summary>Every cookie and browser-storage key Atlas writes for this instance, for your cookie policy.</summary>
         public List<DeclaredCookie>? DeclaredCookies { get; init; }
     }

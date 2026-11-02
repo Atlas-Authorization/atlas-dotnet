@@ -75,6 +75,17 @@ namespace Atlas.Resources
         [JsonPropertyName("required")] public bool? Required { get; set; }
     }
 
+    /// <summary>The hosted account page (<c>/hosted/user</c>).</summary>
+    public sealed class BrandingAccountPortal
+    {
+        /// <summary>
+        /// Panel (<c>profile</c>, <c>email_addresses</c>, <c>password</c>, <c>passkeys</c>, <c>mfa</c>, <c>sessions</c>,
+        /// <c>linked_accounts</c>, <c>connected_apps</c>, <c>shared_resources</c>, <c>ciba</c>, <c>referrals</c>,
+        /// <c>delete_account</c>) to <c>false</c> to hide it. Absent = shown.
+        /// </summary>
+        [JsonPropertyName("panels")] public Dictionary<string, bool?>? Panels { get; set; }
+    }
+
     public sealed class BrandingSignUpField
     {
         [JsonPropertyName("key")] public string? Key { get; set; }
@@ -134,6 +145,7 @@ namespace Atlas.Resources
         [JsonPropertyName("customCss")] public string? CustomCss { get; set; }
         [JsonPropertyName("customHtmlHeader")] public string? CustomHtmlHeader { get; set; }
         [JsonPropertyName("customHtmlFooter")] public string? CustomHtmlFooter { get; set; }
+        [JsonPropertyName("accountPortal")] public BrandingAccountPortal? AccountPortal { get; set; }
     }
 
     /// <summary>What the renderers actually use — everything already escaped or dropped.</summary>

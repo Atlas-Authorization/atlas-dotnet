@@ -115,6 +115,12 @@ namespace Atlas.Resources
         public UserReferral? Referral { get; init; }
         public string? ReferralCode { get; init; }
         public string? ReferralLink { get; init; }
+        /// <summary><c>sign_in_with_atlas</c> for a Sign in with Atlas sign-up (then <c>UserId</c> is the <c>sub</c> the app sees); absent otherwise.</summary>
+        public string? Source { get; init; }
+        /// <summary>Sign in with Atlas sign-up: the <c>sub</c> the app sees.</summary>
+        public string? AtlasIdSub { get; init; }
+        /// <summary>Sign in with Atlas sign-up: the app the person signed in to.</summary>
+        public string? AtlasIdAppId { get; init; }
         /// <summary>Epoch ms.</summary>
         public long SignedUpAt { get; init; }
         public long UpdatedAt { get; init; }
@@ -287,6 +293,15 @@ namespace Atlas.Resources
     {
         public string EmailAddress { get; set; } = "";
         public string? Password { get; set; }
+        /// <summary>An existing hash instead of <see cref="Password"/> (alias <c>password_digest</c>). A self-describing hash is stored as given; any other needs <see cref="PasswordHashAlgorithm"/>.</summary>
+        public string? PasswordHash { get; set; }
+        /// <summary>Names a hash that does not describe itself: <c>scrypt</c>, <c>pbkdf2</c>, <c>md5</c>, <c>sha1</c>, <c>sha256</c>, <c>sha512</c>, <c>hmac_sha256</c>, …</summary>
+        public string? PasswordHashAlgorithm { get; set; }
+        /// <summary>The algorithm's parameters, e.g. scrypt <c>{ n, r, p, key_length, salt_encoding }</c>.</summary>
+        public Dictionary<string, object?>? PasswordHashParams { get; set; }
+        public string? PasswordSalt { get; set; }
+        /// <summary>The hasher name other providers use; read only when the hash does not describe itself.</summary>
+        public string? PasswordHasher { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public bool? EmailVerified { get; set; }

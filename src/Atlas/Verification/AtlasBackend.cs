@@ -20,6 +20,14 @@ namespace Atlas.Verification
         public string Issuer { get; set; } = "";
 
         /// <summary>
+        /// Earlier issuers of THIS instance, also accepted for <c>iss</c>: its old sign-in host while the instance moves
+        /// to a new one (a custom domain or a path mount going active). The keys are the instance's own, so nothing else
+        /// changes. The discovery document lists them in <c>atlas_previous_issuers</c> with an <c>accepted_until</c>;
+        /// remove them after that.
+        /// </summary>
+        public IReadOnlyList<string>? PreviousIssuers { get; set; }
+
+        /// <summary>
         /// §7.3 optional azp allowlist. When set, a token minted for a different
         /// origin is refused — what stops a token issued to one of the customer's
         /// apps being replayed against another.
@@ -124,6 +132,7 @@ namespace Atlas.Verification
                     IssuerSigningKeys = signingKeys,
                     ValidateIssuer = true,
                     ValidIssuer = _options.Issuer,
+                    ValidIssuers = _options.PreviousIssuers,
                     // The aud confusion guard below handles audience; an id_token that
                     // carries `aud` must be REJECTED, not merely audience-matched.
                     ValidateAudience = false,

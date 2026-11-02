@@ -46,6 +46,19 @@ namespace Atlas.Resources
         /// <summary>A secret key was revoked; audience <c>security</c>.</summary>
         public const string SecretKeyRevoked = "secret_key.revoked";
 
+        // Events added with organization SSO setup and SCIM groups.
+
+        /// <summary>An SSO connection went active.</summary>
+        public const string SsoConnectionActivated = "sso_connection.activated";
+        /// <summary>A customer finished a hosted SSO setup ticket (<c>data</c> carries <c>return_url</c>).</summary>
+        public const string SsoOnboardingTicketCompleted = "sso_onboarding_ticket.completed";
+        public const string ScimGroupCreated = "scim_group.created";
+        public const string ScimGroupUpdated = "scim_group.updated";
+        public const string ScimGroupDeleted = "scim_group.deleted";
+        /// <summary>A user joined a SCIM group (<c>data</c>: <c>group_id</c>, <c>user_id</c>, <c>organization_id</c>).</summary>
+        public const string ScimGroupMemberAdded = "scim_group.member_added";
+        public const string ScimGroupMemberRemoved = "scim_group.member_removed";
+
         /// <summary>Lets a key reveal webhook signing secrets.</summary>
         public const string ScopeWebhooksReveal = "webhooks:reveal";
 

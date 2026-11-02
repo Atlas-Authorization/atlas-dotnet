@@ -454,6 +454,51 @@ namespace Atlas.Resources
         public string? ExternalRef { get; init; }
         /// <summary>True on a create that sent an <c>external_ref</c> and got the existing object back (200, no secret).</summary>
         public bool? IdempotentReplay { get; init; }
+        /// <summary>The one extra look at this response's secrets (primary and sibling), for a caller that lost it: <see cref="PlatformAppsResource.RevealInitialSecretAsync"/>.</summary>
+        public InitialSecretReveal? InitialSecretReveal { get; init; }
+        /// <summary>True on an Idempotency-Key replay: the secrets are null because they are never stored for replay.</summary>
+        public bool? SecretRedacted { get; init; }
+    }
+
+    /// <summary>Where and until when a new app's secrets can be fetched once more.</summary>
+    public sealed class InitialSecretReveal
+    {
+        /// <summary>POST here once to get both secrets again.</summary>
+        public string Path { get; init; } = "";
+        /// <summary>When that stops working (epoch ms), 10 minutes after the create.</summary>
+        public long ExpiresAt { get; init; }
+    }
+
+    /// <summary>The result of <c>POST /v1/platform/apps/{id}/initial_secret/reveal</c>.</summary>
+    public sealed class PlatformInitialSecret
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "initial_secret";
+        public string AppId { get; init; } = "";
+        public string? InstanceId { get; init; }
+        public string? KeyId { get; init; }
+        /// <summary>The secret key created with the app; null if it was rotated or revoked since (and on a dry run).</summary>
+        public string? Secret { get; init; }
+        /// <summary>The development sibling created with the app (absent when there is none).</summary>
+        public PlatformInitialSecretSibling? SiblingInstance { get; init; }
+        /// <summary>Dry run only: whether the reveal can still be used.</summary>
+        public bool? Available { get; init; }
+        /// <summary>Dry run only: when the window closes (epoch ms).</summary>
+        public long? ExpiresAt { get; init; }
+        public string? Note { get; init; }
+
+        /// <summary>Never prints the secrets.</summary>
+        public override string ToString() => $"PlatformInitialSecret {{ AppId = {AppId}, InstanceId = {InstanceId}, KeyId = {KeyId} }}";
+    }
+
+    public sealed class PlatformInitialSecretSibling
+    {
+        public string? InstanceId { get; init; }
+        public string? KeyId { get; init; }
+        public string? Secret { get; init; }
+        public string? Note { get; init; }
+
+        /// <summary>Never prints the secret.</summary>
+        public override string ToString() => $"PlatformInitialSecretSibling {{ InstanceId = {InstanceId}, KeyId = {KeyId} }}";
     }
 
     public sealed class PlatformAppWithSecret
@@ -966,6 +1011,13 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/platform/apps/{id}/rotate_secret</c> — Rotate an owned app's secret key WITH OVERLAP (S3): mint a new sk_ (revealed exactly once) while the prior keys stay valid for a grace window so servers roll over without downtime.</summary>
         public Task<PlatformAppSecretRotation> RotateSecretAsync(string id, double? overlapSeconds = null, CancellationToken ct = default)
             => Req<PlatformAppSecretRotation>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/rotate_secret", Body(("overlap_seconds", overlapSeconds)), cancellationToken: ct);
+
+        /// <summary>
+        /// <c>POST /v1/platform/apps/{id}/initial_secret/reveal</c> — show a newly created app's secret keys once more (once, within
+        /// 10 minutes of the create, for the platform that created it). <paramref name="dryRun"/> only says whether it is still available.
+        /// </summary>
+        public Task<PlatformInitialSecret> RevealInitialSecretAsync(string id, bool dryRun = false, CancellationToken ct = default)
+            => Req<PlatformInitialSecret>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/initial_secret/reveal", query: Q(("dry_run", dryRun ? true : (bool?)null)), cancellationToken: ct);
 
         /// <summary><c>GET /v1/platform/apps/{id}/secret_keys</c> — List an owned app's currently-valid secret keys (S3) — the primary key plus any prior key still inside its rotation overlap window.</summary>
         public Task<CursorPage<PlatformSecretKey>> ListSecretKeysAsync(string id, CancellationToken ct = default)

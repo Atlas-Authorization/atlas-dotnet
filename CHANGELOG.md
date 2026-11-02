@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.21.0 (Atlas.Sdk) / 1.7.0 (Atlas.AspNetCore) — 2026-11-01
+
+### Added
+
+- **Trusted-JWT connections.** `client.JwtConnections` (`ListAsync`, `GetAsync`, `CreateAsync`, `UpdateAsync`, `DeleteAsync`) for `/v1/jwt_connections`, with typed `JwtConnection` and `JwtConnectionBody`.
+- **Organization provisioning.** `CreateOrganizationBody.CreatedBy` is optional; new `ExternalId`, `PublicMetadata`, `PrivateMetadata`, `OwnerEmail` and `RoleMappings` (`UpdateOrganizationBody` gains `ExternalId`, `RoleMappings` and `Clear`). `Organization` gains `ExternalId`, `RoleMappings`, `OwnerInvitation`, `Sso` (on `GetAsync`) and `Domain`; `CreatedBy` is nullable. `ListOrganizationsParams` filters by `ExternalId` and `Metadata`. `Organizations.GetByDomainAsync` (a domain or an email address) and `GetPolicyAsync`.
+- **Organization domain verification.** `Organizations.Domains.VerifyAsync(orgId, domainId, method, code)` (`dns_txt`, `well_known`, `email`) and `SendVerificationEmailAsync`; `OrgDomain` gains `VerificationMethods`, `VerificationMethod`, `SentTo` and `Verified`.
+- **SSO setup.** `ScimTokenWithSecret.ScimBaseUrl` and `Warnings`; `SsoConnection` and its bodies gain `SamlAcsPath` and `GithubAccess`; organization LDAP connections gain `GroupRoleMappings` and the `Groups` attribute. SSO onboarding: `ReturnUrl` on profiles, tickets and their bodies, `IssuedSsoOnboardingTicket.EffectiveReturnUrl`, and `SsoOnboarding.ListAsync(name)`.
+- **Path-mount domains.** `CreateDomainBody` gains `Method`, `Hostname` and `BasePath` (`Host` is now optional); `CustomDomain` gains `Method`, `BasePath`, `Routing`, `FrontendApiUrl`, `Verification`, `Issuer` and `Note`, and `CnameTarget` is nullable.
+- **Webhooks.** `CreateWebhookEndpointBody.Secret` and `RotateWebhookSecretBody.Secret` (a secret you chose); `WebhookTestResult.EventType` and `ErrorKind`. Event constants `SsoConnectionActivated`, `SsoOnboardingTicketCompleted`, `ScimGroupCreated`, `ScimGroupUpdated`, `ScimGroupDeleted`, `ScimGroupMemberAdded` and `ScimGroupMemberRemoved`; `UserReferralAttributedEvent` gains `Source`, `AtlasIdSub` and `AtlasIdAppId`.
+- **Password hash imports.** `PasswordHash`, `PasswordHashAlgorithm`, `PasswordHashParams`, `PasswordSalt` and `PasswordHasher` on `CreateUserBody`; `PasswordHashAlgorithm`, `PasswordHashParams` and `PasswordSalt` on `ImportUserRow`.
+- **Platform apps.** `Platform.Apps.RevealInitialSecretAsync` (`POST /v1/platform/apps/{id}/initial_secret/reveal`, with a dry run) returning `PlatformInitialSecret`; create responses gain `InitialSecretReveal` and `SecretRedacted`.
+- **Instance settings.** Referral settings `PartnerPortalUrl` and `ReportLinkedAtlasIdSignups`; cookie consent `HostAliases`; branding `AccountPortal` (hosted account page panels).
+- **Issuer moves.** `AtlasBackendOptions.PreviousIssuers` (and `AtlasAuthenticationOptions.PreviousIssuers`): earlier issuers of the same instance, also accepted for `iss`.
+- API coverage list: the nine new operations.
+
 ## 1.20.0 (Atlas.Sdk) — 2026-10-30
 
 ### Added

@@ -62,6 +62,9 @@ namespace Atlas.AspNetCore
         /// </summary>
         public IReadOnlyList<LegacyIssuer>? LegacyIssuers { get; set; }
 
+        /// <summary>Earlier issuers of this instance, also accepted (see <see cref="AtlasBackendOptions.PreviousIssuers"/>).</summary>
+        public IReadOnlyList<string>? PreviousIssuers { get; set; }
+
         // The verifier is built once from these options and cached. IOptionsMonitor
         // hands out one options instance per scheme, so this lazily becomes a single
         // verifier per scheme — the handler is transient but the JWKS cache it leans
@@ -89,6 +92,7 @@ namespace Atlas.AspNetCore
                     HttpClient = HttpClient,
                     Now = Now,
                     LegacyIssuers = LegacyIssuers,
+                    PreviousIssuers = PreviousIssuers,
                 });
             }
         }

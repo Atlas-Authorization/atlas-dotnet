@@ -133,6 +133,7 @@ namespace Atlas
             Testing = new TestingResource(transport);
             OpenFga = new OpenFgaResource(transport);
             Captcha = new CaptchaResource(transport);
+            JwtConnections = new JwtConnectionsResource(transport);
             SecretKeys = new SecretKeysResource(transport);
             Keys = new KeysResource(transport);
             PartnerLinks = new PartnerLinksResource(transport);
@@ -336,6 +337,8 @@ namespace Atlas
         public TestingResource Testing { get; }
         public OpenFgaResource OpenFga { get; }
         public CaptchaResource Captcha { get; }
+        /// <summary>Trusted-JWT connections: sign people in with a JWT your own system signs.</summary>
+        public JwtConnectionsResource JwtConnections { get; }
 
         /// <summary>Dispose the underlying <see cref="HttpClient"/>, if this client created it.</summary>
         public void Dispose()

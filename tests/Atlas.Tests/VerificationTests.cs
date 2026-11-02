@@ -108,6 +108,24 @@ namespace Atlas.Tests
         }
 
         [Fact]
+        public async Task Verify_PreviousIssuer_IsAccepted_OnlyWhenListed()
+        {
+            var token = Sign(SessionClaimsBag(), issuer: "https://old.issuer.test");
+            Assert.False((await Backend().VerifyAsync(token)).Ok);
+
+            var backend = new AtlasBackend(new AtlasBackendOptions
+            {
+                JwksUrl = "https://jwks.test/keys",
+                Issuer = Issuer,
+                PreviousIssuers = new[] { "https://old.issuer.test" },
+                HttpClient = new HttpClient(MockHttpMessageHandler.Json(Jwks())),
+            });
+            Assert.True((await backend.VerifyAsync(token)).Ok);
+            Assert.True((await backend.VerifyAsync(Sign(SessionClaimsBag()))).Ok);
+            Assert.False((await backend.VerifyAsync(Sign(SessionClaimsBag(), issuer: "https://evil.test"))).Ok);
+        }
+
+        [Fact]
         public async Task Verify_ExpiredToken_IsInvalid()
         {
             var token = Sign(SessionClaimsBag(),

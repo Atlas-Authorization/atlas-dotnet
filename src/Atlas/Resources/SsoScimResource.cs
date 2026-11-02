@@ -50,6 +50,10 @@ namespace Atlas.Resources
         public string? SamlIdpSloSoapUrl { get; init; }
         /// <summary>Assertions not encrypted to the connection's key are refused.</summary>
         public bool SamlRequireEncryptedAssertions { get; init; }
+        /// <summary>A custom ACS path on your own Frontend API domain (SAML migration); null = the standard ACS.</summary>
+        public string? SamlAcsPath { get; init; }
+        /// <summary>GitHub as the identity provider: only members of these GitHub orgs / teams sign in; null otherwise.</summary>
+        public SsoGithubAccess? GithubAccess { get; init; }
         /// <summary>An SP encryption key pair is set up (the private key is never returned).</summary>
         public bool HasSamlEncryptionKey { get; init; }
         /// <summary>A key rotation is in progress (the previous key is still accepted).</summary>
@@ -66,6 +70,14 @@ namespace Atlas.Resources
     }
 
     /// <summary>SP SAML metadata: the EntityDescriptor XML carried as a string in a JSON envelope.</summary>
+    /// <summary>GitHub as the identity provider: who may sign in.</summary>
+    public sealed class SsoGithubAccess
+    {
+        public List<string>? AllowedOrganizations { get; set; }
+        /// <summary><c>org/team-slug</c>.</summary>
+        public List<string>? AllowedTeams { get; set; }
+    }
+
     public sealed class SamlMetadata
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "sso_saml_metadata";
@@ -109,6 +121,10 @@ namespace Atlas.Resources
         public string? SamlIdpSloSoapUrl { get; set; }
         /// <summary>Refuse assertions not encrypted to the connection's key (needs an encryption key first).</summary>
         public bool? SamlRequireEncryptedAssertions { get; set; }
+        /// <summary>A custom ACS path on your own Frontend API domain (SAML migration), e.g. <c>/saml/acs/acme</c>.</summary>
+        public string? SamlAcsPath { get; set; }
+        /// <summary>GitHub as the identity provider (<c>oidc</c> type; <c>oidc_issuer</c> may be left out).</summary>
+        public SsoGithubAccess? GithubAccess { get; set; }
         /// <summary>OIDC: declarative profile mapping (<c>fields</c>, <c>public_metadata</c>, <c>private_metadata</c>, <c>update_on_sign_in</c>).</summary>
         public Dictionary<string, object?>? ProfileMapping { get; set; }
         /// <summary>OIDC: client_secret_basic, client_secret_post, client_secret_jwt, private_key_jwt or none.</summary>
@@ -161,6 +177,10 @@ namespace Atlas.Resources
         public string? SamlIdpSloSoapUrl { get; set; }
         /// <summary>Refuse assertions not encrypted to the connection's key (needs an encryption key first).</summary>
         public bool? SamlRequireEncryptedAssertions { get; set; }
+        /// <summary>A custom ACS path on your own Frontend API domain (SAML migration), e.g. <c>/saml/acs/acme</c>.</summary>
+        public string? SamlAcsPath { get; set; }
+        /// <summary>GitHub as the identity provider (<c>oidc</c> type; <c>oidc_issuer</c> may be left out).</summary>
+        public SsoGithubAccess? GithubAccess { get; set; }
         /// <summary>OIDC: declarative profile mapping (<c>fields</c>, <c>public_metadata</c>, <c>private_metadata</c>, <c>update_on_sign_in</c>).</summary>
         public Dictionary<string, object?>? ProfileMapping { get; set; }
         /// <summary>OIDC: client_secret_basic, client_secret_post, client_secret_jwt, private_key_jwt or none.</summary>
@@ -280,7 +300,17 @@ namespace Atlas.Resources
         public string? SealedWebhookSecret { get; init; }
         /// <summary>Names the fields that arrived sealed.</summary>
         public SecretsSealed? SecretsSealed { get; init; }
+        /// <summary>The SCIM 2.0 base URL to give the identity provider with this token.</summary>
+        public string? ScimBaseUrl { get; init; }
+        /// <summary><c>no_sso_connection</c> = the organization has no SSO connection yet.</summary>
+        public List<ScimTokenWarning>? Warnings { get; init; }
         public string Note { get; init; } = "";
+    }
+
+    public sealed class ScimTokenWarning
+    {
+        public string Code { get; init; } = "";
+        public string Message { get; init; } = "";
     }
 
     public sealed class CreateScimTokenBody
@@ -323,6 +353,8 @@ namespace Atlas.Resources
         public string? OrganizationId { get; init; }
         public string? CompanyName { get; init; }
         public bool AllowScim { get; init; }
+        /// <summary>Where "Finish" on the hosted setup page sends the admin.</summary>
+        public string? ReturnUrl { get; init; }
         public long CreatedAt { get; init; }
         public long UpdatedAt { get; init; }
     }
@@ -335,6 +367,8 @@ namespace Atlas.Resources
         public string OrganizationId { get; init; } = "";
         public string? SsoConnectionId { get; init; }
         public string Status { get; init; } = "";
+        /// <summary>This ticket's return URL (null = the profile's applies).</summary>
+        public string? ReturnUrl { get; init; }
         public long ExpiresAt { get; init; }
         public long CreatedAt { get; init; }
         public long? CompletedAt { get; init; }
@@ -349,6 +383,8 @@ namespace Atlas.Resources
         public string OrganizationId { get; init; } = "";
         public string? SsoConnectionId { get; init; }
         public string Status { get; init; } = "";
+        /// <summary>This ticket's return URL (null = the profile's applies).</summary>
+        public string? ReturnUrl { get; init; }
         public long ExpiresAt { get; init; }
         public long CreatedAt { get; init; }
         public long? CompletedAt { get; init; }
@@ -357,6 +393,8 @@ namespace Atlas.Resources
         /// <summary>The hosted URL the end-customer's IT admin opens.</summary>
         public string Url { get; init; } = "";
         public int ExpiresIn { get; init; }
+        /// <summary>Where "Finish" will send the admin: the ticket's return URL, else the profile's.</summary>
+        public string? EffectiveReturnUrl { get; init; }
     }
 
     public sealed class CreateSsoOnboardingProfileBody
@@ -366,12 +404,17 @@ namespace Atlas.Resources
         public string? OrganizationId { get; set; }
         public string? CompanyName { get; set; }
         public bool? AllowScim { get; set; }
+        /// <summary>https, on one of your allowed origins.</summary>
+        public string? ReturnUrl { get; set; }
     }
 
     public sealed class CreateSsoOnboardingTicketBody
     {
         public string? OrganizationId { get; set; }
+        /// <summary>300-2592000 (clamped); default 259200 (3 days).</summary>
         public int? ExpiresInSeconds { get; set; }
+        /// <summary>Overrides the profile's return URL for this ticket.</summary>
+        public string? ReturnUrl { get; set; }
     }
 
     /// <summary>The self-service SSO onboarding namespace (<c>/v1/sso_onboarding_profiles</c>).</summary>
@@ -381,6 +424,10 @@ namespace Atlas.Resources
 
         public Task<ListPage<SsoOnboardingProfile>> ListAsync(CancellationToken ct = default)
             => Req<ListPage<SsoOnboardingProfile>>(HttpVerb.Get, "/v1/sso_onboarding_profiles", cancellationToken: ct);
+
+        /// <summary>Only the profiles with exactly this name ("find or create").</summary>
+        public Task<ListPage<SsoOnboardingProfile>> ListAsync(string? name, CancellationToken ct = default)
+            => Req<ListPage<SsoOnboardingProfile>>(HttpVerb.Get, "/v1/sso_onboarding_profiles", query: Q(("name", name)), cancellationToken: ct);
 
         public Task<SsoOnboardingProfile> GetAsync(string id, CancellationToken ct = default)
             => Req<SsoOnboardingProfile>(HttpVerb.Get, $"/v1/sso_onboarding_profiles/{Enc(id)}", cancellationToken: ct);
