@@ -83,7 +83,8 @@ namespace Atlas.Resources
             byte[] data,
             string contentType,
             IEnumerable<KeyValuePair<string, object?>>? query = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            IReadOnlyDictionary<string, string>? headers = null)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
             if (string.IsNullOrEmpty(contentType))
@@ -96,6 +97,7 @@ namespace Atlas.Resources
                     Query = query,
                     BinaryBody = data,
                     ContentType = contentType,
+                    Headers = headers,
                 },
                 cancellationToken).ConfigureAwait(false);
             return result!;

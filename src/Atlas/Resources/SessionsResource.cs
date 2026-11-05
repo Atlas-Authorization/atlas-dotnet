@@ -136,6 +136,10 @@ namespace Atlas.Resources
         public Task<RevokedSession> RevokeAsync(string id, CancellationToken ct = default)
             => Req<RevokedSession>(HttpVerb.Post, $"/v1/sessions/{Enc(id)}/revoke", cancellationToken: ct);
 
+        /// <summary><c>GET /v1/sessions/{id}/status</c> — cheap freshness check: id, status (active, expired, revoked or ended), user_id, expires_at, last_active_at.</summary>
+        public Task<JsonElement> StatusAsync(string id, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, $"/v1/sessions/{Enc(id)}/status", cancellationToken: ct);
+
         /// <summary>
         /// <c>POST /v1/sessions/{id}/touch</c> — keep a session alive from your backend: slides its
         /// inactivity window as if the user had just loaded a page, never past the absolute expiry.

@@ -438,6 +438,14 @@ namespace Atlas.Resources
         public Task<DeletedObject> DeleteAsync(string id, CancellationToken ct = default)
             => Req<DeletedObject>(HttpVerb.Delete, $"/v1/sso_onboarding_profiles/{Enc(id)}", cancellationToken: ct);
 
+        /// <summary><c>PATCH /v1/sso_onboarding_profiles/{id}</c> — only the fields sent change.</summary>
+        public Task<SsoOnboardingProfile> UpdateAsync(string id, Dictionary<string, object?> body, CancellationToken ct = default)
+            => Req<SsoOnboardingProfile>(HttpVerb.Patch, $"/v1/sso_onboarding_profiles/{Enc(id)}", body, cancellationToken: ct);
+
+        /// <summary><c>PUT /v1/sso_onboarding_profiles/by_name/{name}</c> — create or update the profile with this exact name: 201 when created, else 200. 409 <c>IDENTIFIER_EXISTS</c> when two profiles already share the name.</summary>
+        public Task<SsoOnboardingProfile> UpsertByNameAsync(string name, Dictionary<string, object?> body, CancellationToken ct = default)
+            => Req<SsoOnboardingProfile>(HttpVerb.Put, $"/v1/sso_onboarding_profiles/by_name/{Enc(name)}", body, cancellationToken: ct);
+
         /// <summary>Issue a one-time ticket for a profile. The token is returned once, here.</summary>
         public Task<IssuedSsoOnboardingTicket> CreateTicketAsync(string profileId, CreateSsoOnboardingTicketBody? body = null, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<IssuedSsoOnboardingTicket>(HttpVerb.Post, $"/v1/sso_onboarding_profiles/{Enc(profileId)}/tickets",

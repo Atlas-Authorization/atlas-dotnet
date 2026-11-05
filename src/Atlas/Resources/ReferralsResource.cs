@@ -621,6 +621,10 @@ namespace Atlas.Resources
         public Task<ReferralBackfillJob> BackfillAsync(ReferralBackfillBody body, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<ReferralBackfillJob>(HttpVerb.Post, "/v1/instance/referrals/backfill", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
 
+        /// <summary><c>POST /v1/instance/referrals/accounts/resync</c> — send every organization's owner to the referral platform once, up to 10,000 per call. When <c>truncated</c>, continue with <c>next_starting_after</c>.</summary>
+        public Task<JsonElement> ResyncAccountsAsync(string? startingAfter = null, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Post, "/v1/instance/referrals/accounts/resync", startingAfter == null ? new Dictionary<string, object?>() : new Dictionary<string, object?> { ["starting_after"] = startingAfter }, cancellationToken: ct);
+
         /// <summary><c>GET /v1/instance/referrals/backfill/:id</c> — a backfill job and where its calls stand.</summary>
         public Task<ReferralBackfillJob> GetBackfillAsync(string id, CancellationToken ct = default)
             => Req<ReferralBackfillJob>(HttpVerb.Get, $"/v1/instance/referrals/backfill/{Enc(id)}", cancellationToken: ct);

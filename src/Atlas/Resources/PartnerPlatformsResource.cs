@@ -149,6 +149,14 @@ namespace Atlas.Resources
     {
         public PartnerPlatformsResource(AtlasTransport t) : base(t) { }
 
+        /// <summary><c>POST /v1/partner_executor_keys/{partner}/{instanceId}</c> — for the partner: mint its data-rights key for one instance. <paramref name="rawBody"/> is sent byte for byte because <paramref name="signature"/> (in <paramref name="signatureHeader"/>) signs those bytes. Answers <c>secret</c> and <c>executorUrl</c>.</summary>
+        public Task<JsonElement> MintExecutorKeyAsync(string partner, string instanceId, string rawBody, string signatureHeader, string signature, CancellationToken ct = default)
+            => ReqBytes<JsonElement>(HttpVerb.Post, $"/v1/partner_executor_keys/{Enc(partner)}/{Enc(instanceId)}", System.Text.Encoding.UTF8.GetBytes(rawBody), "application/json", cancellationToken: ct, headers: new Dictionary<string, string> { [signatureHeader] = signature });
+
+        /// <summary><c>DELETE /v1/partner_executor_keys/{partner}/{instanceId}</c> — for the partner: the link is gone, revoke the keys minted for that site. Answers <c>revoked</c>.</summary>
+        public Task<JsonElement> RevokeExecutorKeyAsync(string partner, string instanceId, string rawBody, string signatureHeader, string signature, CancellationToken ct = default)
+            => ReqBytes<JsonElement>(HttpVerb.Delete, $"/v1/partner_executor_keys/{Enc(partner)}/{Enc(instanceId)}", System.Text.Encoding.UTF8.GetBytes(rawBody), "application/json", cancellationToken: ct, headers: new Dictionary<string, string> { [signatureHeader] = signature });
+
         /// <summary><c>GET /v1/partner_platforms</c></summary>
         public Task<PartnerPlatformList> ListAsync(CancellationToken ct = default)
             => Req<PartnerPlatformList>(HttpVerb.Get, "/v1/partner_platforms", cancellationToken: ct);

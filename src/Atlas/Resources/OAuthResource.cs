@@ -318,6 +318,11 @@ namespace Atlas.Resources
             => Req<ClientGrant>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(clientId)}/grants",
                 body: Body(("resource_server_id", resourceServerId), ("scopes", scopes == null ? null : new List<string>(scopes))), cancellationToken: ct);
 
+        /// <summary>As <c>CreateAsync</c>, with names from the resource server's <c>scope_presets</c>, unioned with <paramref name="scopes"/>.</summary>
+        public Task<ClientGrant> CreateAsync(string clientId, string resourceServerId, IEnumerable<string>? scopes, IEnumerable<string> scopePresets, CancellationToken ct = default)
+            => Req<ClientGrant>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(clientId)}/grants",
+                body: Body(("resource_server_id", resourceServerId), ("scopes", scopes == null ? null : new List<string>(scopes)), ("scope_presets", new List<string>(scopePresets))), cancellationToken: ct);
+
         public Task<DeletedClientGrant> DeleteAsync(string clientId, string grantId, CancellationToken ct = default)
             => Req<DeletedClientGrant>(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(clientId)}/grants/{Enc(grantId)}", cancellationToken: ct);
     }
@@ -463,6 +468,8 @@ namespace Atlas.Resources
         public long? RefreshTokenIdleTtlSeconds { get; init; }
         /// <summary>client_ids of the confidential clients allowed to introspect this API's tokens.</summary>
         public List<string>? IntrospectionClientIds { get; init; }
+        /// <summary>Named bundles over <see cref="Scopes"/>, accepted as <c>scope_presets</c> wherever scopes are requested.</summary>
+        public Dictionary<string, List<string>>? ScopePresets { get; init; }
     }
 
     public sealed class CreateResourceServerBody
@@ -483,6 +490,8 @@ namespace Atlas.Resources
         public long? RefreshTokenIdleTtlSeconds { get; set; }
         /// <summary>client_ids of confidential clients (e.g. this API's backend) that may introspect its tokens.</summary>
         public List<string>? IntrospectionClientIds { get; set; }
+        /// <summary>Named bundles over the scopes: name to scope values. On an update it replaces them all.</summary>
+        public Dictionary<string, List<string>>? ScopePresets { get; set; }
 
         /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }
@@ -513,6 +522,8 @@ namespace Atlas.Resources
         public long? RefreshTokenIdleTtlSeconds { get; set; }
         /// <summary>client_ids of confidential clients (e.g. this API's backend) that may introspect its tokens.</summary>
         public List<string>? IntrospectionClientIds { get; set; }
+        /// <summary>Named bundles over the scopes: name to scope values. On an update it replaces them all.</summary>
+        public Dictionary<string, List<string>>? ScopePresets { get; set; }
 
         /// <summary>Extra wire fields, including explicit <c>null</c>s that clear a stored value.</summary>
         [JsonExtensionData] public Dictionary<string, object?>? AdditionalFields { get; set; }

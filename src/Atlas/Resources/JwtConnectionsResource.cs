@@ -45,6 +45,10 @@ namespace Atlas.Resources
     {
         public JwtConnectionsResource(AtlasTransport transport) : base(transport) { }
 
+        /// <summary>Where to send the person's browser to sign in with a trusted JWT (<c>GET /v1/sso/jwt/{connectionId}</c>). <paramref name="loginUrl"/> is the connection's <c>login_url</c>. A URL, not an API call: the token works once, and the 302 carries a one-time ticket that has to reach the browser.</summary>
+        public static string SignInUrl(string loginUrl, string token, string redirectUrl)
+            => loginUrl + (loginUrl.Contains("?") ? "&" : "?") + "token=" + System.Uri.EscapeDataString(token) + "&redirect_url=" + System.Uri.EscapeDataString(redirectUrl);
+
         public Task<ListPage<JwtConnection>> ListAsync(CancellationToken ct = default)
             => Req<ListPage<JwtConnection>>(HttpVerb.Get, "/v1/jwt_connections", cancellationToken: ct);
 

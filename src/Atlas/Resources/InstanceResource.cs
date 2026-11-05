@@ -322,6 +322,22 @@ namespace Atlas.Resources
         public Task<CookieConsent> DeleteCookieConsentAsync(CancellationToken ct = default)
             => Req<CookieConsent>(HttpVerb.Delete, "/v1/instance/cookie_consent", cancellationToken: ct);
 
+        /// <summary><c>GET /v1/instance/storage_declaration</c> — every cookie and browser-storage key of the hosted pages, for a consent manager to import.</summary>
+        public Task<JsonElement> GetStorageDeclarationAsync(CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, "/v1/instance/storage_declaration", cancellationToken: ct);
+
+        /// <summary><see cref="GetStorageDeclarationAsync"/> as CSV text.</summary>
+        public Task<string> GetStorageDeclarationCsvAsync(CancellationToken ct = default)
+            => Req<string>(HttpVerb.Get, "/v1/instance/storage_declaration", query: Q(("format", "csv")), raw: true, cancellationToken: ct);
+
+        /// <summary><c>GET /v1/storage_declaration</c> — the same declaration read by publishable key. Nothing in it is secret.</summary>
+        public Task<JsonElement> GetPublicStorageDeclarationAsync(string publishableKey, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, "/v1/storage_declaration", query: Q(("publishable_key", publishableKey)), cancellationToken: ct);
+
+        /// <summary><see cref="GetPublicStorageDeclarationAsync"/> as CSV text.</summary>
+        public Task<string> GetPublicStorageDeclarationCsvAsync(string publishableKey, CancellationToken ct = default)
+            => Req<string>(HttpVerb.Get, "/v1/storage_declaration", query: Q(("publishable_key", publishableKey), ("format", "csv")), raw: true, cancellationToken: ct);
+
         /// <summary>
         /// Write <c>auth_config.accountLinkingTrust</c>: keys are an exact provider key, a <c>prefix*</c> or <c>*</c>;
         /// values <c>always</c> (vouch for the provider's email, for linking only), <c>verified</c> or <c>never</c>
@@ -554,6 +570,18 @@ namespace Atlas.Resources
         /// <summary>The published token-signing keys: <c>current</c> and, inside a rotation's grace window, <c>previous</c>.</summary>
         public Task<JsonElement> ListSigningKeysAsync(CancellationToken ct = default)
             => Req<JsonElement>(HttpVerb.Get, "/v1/instance/signing_keys", cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/instance/signing_keys/next</c> — cancel a staged rotation; 404 when none is staged.</summary>
+        public Task<JsonElement> CancelStagedSigningKeyAsync(CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Delete, "/v1/instance/signing_keys/next", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/instance/signing_key_policy</c> — <c>prepublish_days</c> (null = off).</summary>
+        public Task<JsonElement> GetSigningKeyPolicyAsync(CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Get, "/v1/instance/signing_key_policy", cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/instance/signing_key_policy</c> — stage every ordinary rotation this many days ahead (1..90); 0 is off.</summary>
+        public Task<JsonElement> SetSigningKeyPolicyAsync(int prepublishDays, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Patch, "/v1/instance/signing_key_policy", new Dictionary<string, object?> { ["prepublish_days"] = prepublishDays }, cancellationToken: ct);
 
         /// <summary>Rotate the instance signing key, optionally switching <paramref name="alg"/> (RS256 or ES256).</summary>
         public Task<JsonElement> RotateSigningKeyAsync(string? alg = null, long? gracePeriodSeconds = null, bool? emergency = null, CancellationToken ct = default)

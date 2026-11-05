@@ -490,6 +490,10 @@ namespace Atlas.Resources
         public Task<Organization> GetBySlugAsync(string slug, CancellationToken ct = default)
             => Req<Organization>(HttpVerb.Get, $"/v1/organizations/by_slug/{Enc(slug)}", cancellationToken: ct);
 
+        /// <summary><c>PUT /v1/organizations/by_external_id/{external_id}</c> — create or update the organization keyed by your own id: 201 when created, else 200 with only the fields sent changed. <c>name</c> is required when it creates.</summary>
+        public Task<Organization> UpsertByExternalIdAsync(string externalId, Dictionary<string, object?> body, CancellationToken ct = default)
+            => Req<Organization>(HttpVerb.Put, $"/v1/organizations/by_external_id/{Enc(externalId)}", body, cancellationToken: ct);
+
         /// <summary>Whether a slug is valid and free: <c>{ slug, valid, available }</c>.</summary>
         public Task<JsonElement> CheckSlugAsync(string slug, CancellationToken ct = default)
             => Req<JsonElement>(HttpVerb.Get, "/v1/organizations/check_slug", query: Q(("slug", slug)), cancellationToken: ct);

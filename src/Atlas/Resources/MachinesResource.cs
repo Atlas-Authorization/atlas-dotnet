@@ -147,6 +147,46 @@ namespace Atlas.Resources
         public bool Valid { get; init; }
         public string? MachineId { get; init; }
         public string? Name { get; init; }
+        /// <summary>Machine JWT only: the resource server it is bound to.</summary>
+        public string? Audience { get; init; }
+        /// <summary>Machine JWT only: the scopes it carries.</summary>
+        public List<string>? Scopes { get; init; }
+        /// <summary>Machine JWT only: its organization context.</summary>
+        public string? OrganizationId { get; init; }
+        public string? OrgRole { get; init; }
+        public List<string>? OrgPermissions { get; init; }
+        /// <summary>Machine JWT only: when it expires (epoch ms).</summary>
+        public long? ExpiresAt { get; init; }
+        /// <summary>The resource servers the machine holds grants on now.</summary>
+        public List<JsonElement>? Grants { get; init; }
+        /// <summary>The organizations it is a member of now.</summary>
+        public List<JsonElement>? OrganizationMemberships { get; init; }
+    }
+
+    /// <summary>A machine's authorization for a resource server: it may obtain tokens for that API, up to <see cref="Scopes"/>.</summary>
+    public sealed class MachineGrant
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string MachineId { get; init; } = "";
+        public string ResourceServerId { get; init; } = "";
+        public List<string> Scopes { get; init; } = new List<string>();
+        public long CreatedAt { get; init; }
+        public long UpdatedAt { get; init; }
+    }
+
+    /// <summary>A machine as an organization member with a role.</summary>
+    public sealed class MachineMembership
+    {
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        public string Id { get; init; } = "";
+        public string OrganizationId { get; init; } = "";
+        public string MachineId { get; init; } = "";
+        /// <summary>The organization role key.</summary>
+        public string Role { get; init; } = "";
+        public string RoleId { get; init; } = "";
+        public long CreatedAt { get; init; }
+        public long UpdatedAt { get; init; }
     }
 
     public sealed class MachineEnrolmentTokenWithSecret
@@ -252,8 +292,37 @@ namespace Atlas.Resources
         public Task<Machine> RotateKeyAsync(string id, string? publicKeyPem, CancellationToken ct = default)
             => Req<Machine>(HttpVerb.Post, $"/v1/machines/{Enc(id)}/rotate_key", Body(("public_key_pem", publicKeyPem)), cancellationToken: ct);
 
-        /// <summary><c>POST /v1/m2m_tokens/verify</c> — Verify a presented machine secret → { valid, machine_id?</summary>
+        /// <summary><c>POST /v1/m2m_tokens/verify</c> — Verify a presented machine secret or machine JWT.</summary>
         public Task<M2mTokenVerification> VerifyTokenAsync(string token, CancellationToken ct = default)
             => Req<M2mTokenVerification>(HttpVerb.Post, "/v1/m2m_tokens/verify", Body(("token", token)), cancellationToken: ct);
+
+        /// <summary><c>GET /v1/machines/{id}/grants</c> — The resource servers this machine may obtain tokens for.</summary>
+        public Task<ListPage<MachineGrant>> ListGrantsAsync(string id, CancellationToken ct = default)
+            => Req<ListPage<MachineGrant>>(HttpVerb.Get, $"/v1/machines/{Enc(id)}/grants", cancellationToken: ct);
+
+        /// <summary><c>POST /v1/machines/{id}/grants</c> — Authorize the machine for a resource server. <paramref name="scopePresets"/> names the server's presets, unioned with <paramref name="scopes"/>. A second grant on the same server is a 409.</summary>
+        public Task<MachineGrant> CreateGrantAsync(string id, string resourceServerId, IEnumerable<string>? scopes = null, IEnumerable<string>? scopePresets = null, CancellationToken ct = default)
+            => Req<MachineGrant>(HttpVerb.Post, $"/v1/machines/{Enc(id)}/grants",
+                Body(("resource_server_id", resourceServerId), ("scopes", scopes == null ? null : new List<string>(scopes)), ("scope_presets", scopePresets == null ? null : new List<string>(scopePresets))), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/machines/{id}/grants/{grantId}</c> — Revoke a grant. A token already issued lasts until it expires.</summary>
+        public Task<DeletedObject> DeleteGrantAsync(string id, string grantId, CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, $"/v1/machines/{Enc(id)}/grants/{Enc(grantId)}", cancellationToken: ct);
+
+        /// <summary><c>GET /v1/organizations/{id}/machine_memberships</c> — The machines that are members of an organization.</summary>
+        public Task<CursorPage<MachineMembership>> ListOrganizationMembersAsync(string organizationId, long? limit = null, string? startingAfter = null, CancellationToken ct = default)
+            => Req<CursorPage<MachineMembership>>(HttpVerb.Get, $"/v1/organizations/{Enc(organizationId)}/machine_memberships", query: Q(("limit", limit), ("starting_after", startingAfter)), cancellationToken: ct);
+
+        /// <summary><c>POST /v1/organizations/{id}/machine_memberships</c> — Make a machine a member. A null <paramref name="role"/> means <c>org:member</c>.</summary>
+        public Task<MachineMembership> AddToOrganizationAsync(string organizationId, string machineId, string? role = null, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<MachineMembership>(HttpVerb.Post, $"/v1/organizations/{Enc(organizationId)}/machine_memberships", Body(("machine_id", machineId), ("role", role)), idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>PATCH /v1/organizations/{id}/machine_memberships/{machineId}</c> — Change a machine's role. New tokens carry it.</summary>
+        public Task<MachineMembership> UpdateOrganizationRoleAsync(string organizationId, string machineId, string role, CancellationToken ct = default)
+            => Req<MachineMembership>(HttpVerb.Patch, $"/v1/organizations/{Enc(organizationId)}/machine_memberships/{Enc(machineId)}", Body(("role", role)), cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/organizations/{id}/machine_memberships/{machineId}</c> — Remove a machine from an organization.</summary>
+        public Task<DeletedObject> RemoveFromOrganizationAsync(string organizationId, string machineId, CancellationToken ct = default)
+            => Req<DeletedObject>(HttpVerb.Delete, $"/v1/organizations/{Enc(organizationId)}/machine_memberships/{Enc(machineId)}", cancellationToken: ct);
     }
 }

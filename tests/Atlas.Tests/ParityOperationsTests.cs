@@ -738,9 +738,70 @@ namespace Atlas.Tests
         }
 
         [Fact]
+        public async Task MachineAccess_Operations_HitTheirRoutes()
+        {
+            await Row("POST", "/v1/users/a%2Fb/account_claim", "{\"password_policy\":\"until_email_verified\"}", true, c => c.Users.ProtectAccountClaimAsync("a/b", idempotencyKey: "idem-1"));
+            await Row("GET", "/v1/machines/a%2Fb/grants", null, false, c => c.Machines.ListGrantsAsync("a/b"));
+            await Row("POST", "/v1/machines/a%2Fb/grants", "{\"resource_server_id\":\"s\",\"scope_presets\":[\"readonly\"]}", false, c => c.Machines.CreateGrantAsync("a/b", "s", scopePresets: new[] { "readonly" }));
+            await Row("DELETE", "/v1/machines/a%2Fb/grants/p2", null, false, c => c.Machines.DeleteGrantAsync("a/b", "p2"));
+            await Row("GET", "/v1/organizations/a%2Fb/machine_memberships?limit=1&starting_after=q1", null, false, c => c.Machines.ListOrganizationMembersAsync("a/b", 1, "q1"));
+            await Row("POST", "/v1/organizations/a%2Fb/machine_memberships", "{\"machine_id\":\"s\",\"role\":\"org:admin\"}", true, c => c.Machines.AddToOrganizationAsync("a/b", "s", "org:admin", idempotencyKey: "idem-1"));
+            await Row("PATCH", "/v1/organizations/a%2Fb/machine_memberships/p2", "{\"role\":\"org:admin\"}", false, c => c.Machines.UpdateOrganizationRoleAsync("a/b", "p2", "org:admin"));
+            await Row("DELETE", "/v1/organizations/a%2Fb/machine_memberships/p2", null, false, c => c.Machines.RemoveFromOrganizationAsync("a/b", "p2"));
+        }
+
+        [Fact]
         public async Task Instance_Operations_HitTheirRoutes()
         {
+            await Row("POST", "/v1/instance/integrations/a%2Fb/deliveries/redeliver", "{\"since\":\"failing_since\"}", true, c => c.Instance.Integrations.RedeliverEventsAsync("a/b", "failing_since", idempotencyKey: "idem-1"));
             await Row("POST", "/v1/instance/integrations/a%2Fb/events_secret/rotate?dry_run=true", "{\"overlap_seconds\":7}", true, c => c.Instance.Integrations.RotateEventsSecretAsync("a/b", body: new InstanceIntegrationsRotateEventsSecretBody { OverlapSeconds = 7 }, dryRun: true, idempotencyKey: "idem-1"));
+        }
+
+        [Fact]
+        public async Task CatchUp_Operations_HitTheirRoutes()
+        {
+            await Row("DELETE", "/v1/instance/hooks/before_user_create", null, false, c => c.UserHooks.ClearBeforeUserCreateAsync());
+            await Row("DELETE", "/v1/instance/signing_keys/next", null, false, c => c.InstanceSecurity.CancelStagedSigningKeyAsync());
+            await Row("GET", "/v1/instance/signing_key_policy", null, false, c => c.InstanceSecurity.GetSigningKeyPolicyAsync());
+            await Row("PATCH", "/v1/instance/signing_key_policy", "{\"prepublish_days\":7}", false, c => c.InstanceSecurity.SetSigningKeyPolicyAsync(7));
+            await Row("POST", "/v1/partner_executor_keys/a%2Fb/p2", "{\"x\":1}", false, c => c.PartnerPlatforms.MintExecutorKeyAsync("a/b", "p2", "{\"x\":1}", "x-signature", "t=1"));
+            await Row("DELETE", "/v1/partner_executor_keys/a%2Fb/p2", "{\"x\":1}", false, c => c.PartnerPlatforms.RevokeExecutorKeyAsync("a/b", "p2", "{\"x\":1}", "x-signature", "t=1"));
+            await Row("DELETE", "/v1/users/a%2Fb/password?sign_out_of_other_sessions=false", null, false, c => c.Users.RemovePasswordAsync("a/b", signOutOfOtherSessions: false));
+            await Row("GET", "/v1/instance/storage_declaration", null, false, c => c.Instance.GetStorageDeclarationAsync());
+            await Row("GET", "/v1/storage_declaration?publishable_key=pk_1", null, false, c => c.Instance.GetPublicStorageDeclarationAsync("pk_1"));
+            await Row("GET", "/v1/sessions/a%2Fb/status", null, false, c => c.Sessions.StatusAsync("a/b"));
+            await Row("PATCH", "/v1/sso_onboarding_profiles/a%2Fb", "{\"x\":1}", false, c => c.SsoOnboarding.UpdateAsync("a/b", new Dictionary<string, object?> { ["x"] = 1 }));
+            await Row("POST", "/v1/instance/referrals/accounts/resync", "{\"starting_after\":\"org_1\"}", false, c => c.Referrals.ResyncAccountsAsync("org_1"));
+            await Row("PUT", "/v1/organizations/by_external_id/a%2Fb", "{\"x\":1}", false, c => c.Organizations.UpsertByExternalIdAsync("a/b", new Dictionary<string, object?> { ["x"] = 1 }));
+            await Row("PUT", "/v1/sso_onboarding_profiles/by_name/a%2Fb", "{\"x\":1}", false, c => c.SsoOnboarding.UpsertByNameAsync("a/b", new Dictionary<string, object?> { ["x"] = 1 }));
+        }
+
+        [Fact]
+        public async Task PartnerExecutorKey_SendsTheSignedBytesAndTheSignature()
+        {
+            const string raw = "{ \"nonce\":\"n\",  \"iat\":1 }";
+            var h = MockHttpMessageHandler.Json("{}");
+            using var c = new AtlasClient(new AtlasClientOptions { SecretKey = "sk_test_123", ApiUrl = "https://api.test.example", HttpClient = new HttpClient(h) });
+            await c.PartnerPlatforms.MintExecutorKeyAsync("p", "i", raw, "x-signature", "t=1");
+            Assert.Equal(raw, h.Requests[0].Body);
+            Assert.Equal("t=1", h.Requests[0].Headers["x-signature"]);
+            Assert.StartsWith("application/json", h.Requests[0].ContentType);
+        }
+
+        [Fact]
+        public async Task StorageDeclarationCsv_AsksForCsv_AndReturnsTheText()
+        {
+            var h = MockHttpMessageHandler.Json("name,provider");
+            using var c = new AtlasClient(new AtlasClientOptions { SecretKey = "sk_test_123", ApiUrl = "https://api.test.example", HttpClient = new HttpClient(h) });
+            Assert.Equal("name,provider", await c.Instance.GetStorageDeclarationCsvAsync());
+            Assert.EndsWith("/v1/instance/storage_declaration?format=csv", h.Requests[0].Url.OriginalString);
+        }
+
+        [Fact]
+        public void JwtSignInUrl_EncodesBothValues()
+        {
+            Assert.Equal("https://a.test/j?token=t%20k&redirect_url=https%3A%2F%2Fb.test%2F%3Fx%3D1", JwtConnectionsResource.SignInUrl("https://a.test/j", "t k", "https://b.test/?x=1"));
+            Assert.Equal("https://a.test/j?z=1&token=t&redirect_url=u", JwtConnectionsResource.SignInUrl("https://a.test/j?z=1", "t", "u"));
         }
 
         [Fact]

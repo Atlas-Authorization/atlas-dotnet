@@ -104,6 +104,10 @@ namespace Atlas.Resources
         public Task<BeforeUserCreateHookTest> TestBeforeUserCreateAsync(CancellationToken ct = default)
             => Req<BeforeUserCreateHookTest>(HttpVerb.Post, Path + "/test", cancellationToken: ct);
 
+        /// <summary><c>DELETE /v1/instance/hooks/before_user_create</c> — turn the hook off and clear its url and signing secret. Idempotent.</summary>
+        public Task<BeforeUserCreateHook> ClearBeforeUserCreateAsync(CancellationToken ct = default)
+            => Req<BeforeUserCreateHook>(HttpVerb.Delete, Path, cancellationToken: ct);
+
         /// <summary>The hook's delivery log, newest first (kept 30 days). <paramref name="status"/>: ok, failed, timeout, error or invalid_response.</summary>
         public Task<JsonElement> ListBeforeUserCreateCallsAsync(int? limit = null, string? status = null, bool? test = null, string? startingAfter = null, CancellationToken ct = default)
             => Req<JsonElement>(HttpVerb.Get, "/v1/instance/hooks/before_user_create/calls",

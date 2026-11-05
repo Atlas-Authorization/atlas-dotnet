@@ -493,6 +493,9 @@ namespace Atlas.Resources
             => Req<User>(HttpVerb.Post, $"/v1/users/{Enc(id)}/lock",
                 body: Body(("duration_in_seconds", durationInSeconds)), cancellationToken: ct);
 
+        public Task<JsonElement> ProtectAccountClaimAsync(string id, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Post, $"/v1/users/{Enc(id)}/account_claim", Body(("password_policy", "until_email_verified")), idempotencyKey: idempotencyKey, cancellationToken: ct);
+
         public Task<User> UnlockAsync(string id, CancellationToken ct = default)
             => Req<User>(HttpVerb.Post, $"/v1/users/{Enc(id)}/unlock", cancellationToken: ct);
 
@@ -566,6 +569,10 @@ namespace Atlas.Resources
         /// <summary><c>POST /v1/users/{id}/password</c> — Set (reset) a user's password from the backend.</summary>
         public Task<User> SetPasswordAsync(string id, SetUserPasswordBody body, string? idempotencyKey = null, CancellationToken ct = default)
             => Req<User>(HttpVerb.Post, $"/v1/users/{Enc(id)}/password", body, idempotencyKey: idempotencyKey, cancellationToken: ct);
+
+        /// <summary><c>DELETE /v1/users/{id}/password</c> — remove the password, even when it is the only sign-in method. Idempotent. Signs the user out unless <paramref name="signOutOfOtherSessions"/> is false.</summary>
+        public Task<User> RemovePasswordAsync(string id, bool? signOutOfOtherSessions = null, CancellationToken ct = default)
+            => Req<User>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/password", query: Q(("sign_out_of_other_sessions", signOutOfOtherSessions)), cancellationToken: ct);
 
         /// <summary><c>POST /v1/users/{id}/directives</c> — Impose a cross-property directive on a user (e.g.</summary>
         public Task<Directive> SetDirectiveAsync(string id, SetUserDirectiveBody body, string? idempotencyKey = null, CancellationToken ct = default)

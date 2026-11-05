@@ -19,6 +19,11 @@ namespace Atlas.Resources
     {
         public InstanceIntegrationsResource(AtlasTransport t) : base(t) { }
 
+        /// <summary><c>POST /v1/instance/integrations/{product}/deliveries/redeliver</c> - Re-send the events the integration's receiver never got, and switch a disabled receiver back on. Delivered events are not sent again. <paramref name="since"/> is an ISO 8601 time, epoch milliseconds or <c>failing_since</c>; while <c>has_more</c> is true, call again with <c>since</c> set to <c>next_since</c>.</summary>
+        /// <remarks>Needs the <c>instance:write</c> scope.</remarks>
+        public Task<JsonElement> RedeliverEventsAsync(string product, string since, string? idempotencyKey = null, CancellationToken ct = default)
+            => Req<JsonElement>(HttpVerb.Post, $"/v1/instance/integrations/{Enc(product)}/deliveries/redeliver", Body(("since", since)), idempotencyKey: idempotencyKey, cancellationToken: ct);
+
         /// <summary><c>POST /v1/instance/integrations/{product}/events_secret/rotate</c> - Rotate the signing secret of the integration's event receiver. The new secret is revealed exactly once. By default (`overlap_seconds` 0) the old secret stops signing at once. With `overlap_seconds` (at most 604800 = 7 days) every delivery carries two signatures in `Atlas-Signature` (`v1,&lt;new&gt; v1,&lt;old&gt;`, the new one first), so the service verifies with either secret while it deploys the new one; after that only the new secret signs. `previous_secret_expires_at` says when the old secret stops signing (epoch ms), or null when it already has. Audited as integration.&lt;id&gt;.events_secret_rotated. 404 when the integration has no event receiver.</summary>
         /// <remarks>Needs the <c>instance:write</c> scope.</remarks>
         public Task<JsonElement> RotateEventsSecretAsync(string product, InstanceIntegrationsRotateEventsSecretBody body, bool? dryRun = null, string? idempotencyKey = null, CancellationToken ct = default)
