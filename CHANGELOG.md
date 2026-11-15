@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.23.0 (Atlas.Sdk) / 1.8.0 (Atlas.AspNetCore) - 2026-11-14
+
+### Added
+
+- **Every Backend and Platform API operation.** `client.Catalog.<Namespace>.<Operation>Async(...)` now covers the whole API: typed request, response and query records, `CancellationToken` on every call, an `idempotencyKey` argument wherever the API accepts one, and `...AllAsync` (`IAsyncEnumerable`) for every cursor-paginated list. Generated from the OpenAPI document by `scripts/gen_catalog.py` (an operation is generated unless the same verb and path is already hand-written); published names are pinned in `scripts/catalog_pins.json`, so a regeneration never renames a method or type you use.
+- **All five signing algorithms.** Session tokens, access tokens, ID tokens, logout tokens, transaction tokens and signed status lists verify with RS256, ES256, ES384, PS256 and EdDSA. The algorithm is pinned (`none` and HMAC never verify) and only keys of the matching type are tried, so a key cannot be coerced into another algorithm; EdDSA uses a managed Ed25519 verifier, so there is no new dependency.
+- **Clearing a field.** Every generated request record derives from `ClearableBody`: an unset property is omitted (the default), and `Clear<Property>()` sends an explicit `null` (for example `new UpdateThingBody { Name = "x" }.ClearDescription()`), at any nesting depth.
+- **Hosted-redirect OIDC relying party.** `Atlas.Rp.RelyingParty`: `StartAsync` (state, nonce and PKCE S256 in one sealed cookie), `CallbackAsync` (algorithm pinned, issuer, audience / authorized party, expiry, nonce and `at_hash` checks), `RequireRecentAuthAsync` (step-up), `TouchIfDueAsync`, `RevokeSessionAsync`, `EndAppSessionAsync`, `SignOutAsync` and `HandleBackchannelLogoutAsync`, with `ISidStore` / `MemorySidStore`. Framework neutral.
+- **ASP.NET Core wiring (Atlas.AspNetCore).** `AddAtlasRelyingParty`, `MapAtlasRelyingParty` (sign-in, callback, sign-out and back-channel logout endpoints over your cookie scheme) and `UseAtlasSession` (keeps the Atlas session alive and drops sessions Atlas ended).
+- **Verification primitives (`Atlas.Primitives`).** `KeyMirror` (local end-user API key verification with revocation feed and webhooks), `SidRevocationList` (feed or signed status list), `ResourceRoleMirror` (local resource-role checks), `MachineClient` (enrol, challenge, cached machine tokens, DPoP proofs), `WebBotAuth` / `WebBotAuthVerifier`, `WebhookDedupe` with `MemoryWebhookDedupeStore` and `DbWebhookDedupeStore`, and `TransactionTokenVerifier`.
+- **Step-up helpers.** `AuthenticatedWithin`, `UsedMultiFactor`, `MfaSatisfied` and `MfaOrgSatisfied` on `SessionClaims` and on ID-token claims; JWT template settings (`Settings`, `UpdateAsync(name, claims, settings)`); `ApiKey.AllowedIps`, `OrganizationId`, `RevokedReason`.
+- **Observability and resilience.** `AtlasTelemetry` emits an `Atlas.Sdk` `ActivitySource` and `Meter` (no OpenTelemetry package needed; subscribe with `AddSource` / `AddMeter`). `AtlasClientOptions.Resilience` opts in to retries that honour `Retry-After`, back off on 429 / 503 and network failures, and lengthen the backoff while the status endpoint reports a major outage. `client.DoctorAsync()` checks keys, API reachability, clock skew, JWKS and service status.
+
 ## 1.22.0 (Atlas.Sdk) — 2026-11-02
 
 ### Added

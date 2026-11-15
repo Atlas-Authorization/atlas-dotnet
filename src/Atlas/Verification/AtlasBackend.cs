@@ -122,14 +122,12 @@ namespace Atlas.Verification
             SessionClaims claims;
             try
             {
-                var signingKeys = new JsonWebKeySet(keys.Raw).GetSigningKeys();
                 var parameters = new TokenValidationParameters
                 {
                     // Pinned. Without this, a token whose header says `alg: none` — or
                     // any algorithm the key material can be coerced into — verifies.
                     ValidAlgorithms = SigningAlgs.All,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKeys = signingKeys,
                     ValidateIssuer = true,
                     ValidIssuer = _options.Issuer,
                     ValidIssuers = _options.PreviousIssuers,
@@ -148,8 +146,7 @@ namespace Atlas.Verification
                     },
                 };
 
-                var handler = new JsonWebTokenHandler();
-                var result = await handler.ValidateTokenAsync(token, parameters).ConfigureAwait(false);
+                var result = await Jws.ValidateAsync(token, keys.Raw, parameters).ConfigureAwait(false);
                 if (!result.IsValid)
                     return VerifyResult.Failure(VerifyFailureReason.Invalid);
 

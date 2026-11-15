@@ -31,6 +31,12 @@ namespace Atlas.Resources
         /// <summary>Uses left (each successful verify spends one); null = unlimited.</summary>
         public long? Remaining { get; init; }
         public List<string>? Scopes { get; init; }
+        /// <summary>CIDR allowlist for callers presenting this key; null = any caller.</summary>
+        public List<string>? AllowedIps { get; init; }
+        /// <summary>The organization a user key is bound to; null = unbound.</summary>
+        public string? OrganizationId { get; init; }
+        /// <summary>Why it was revoked, when Atlas said (<c>membership_ended</c>, <c>creator_departed</c>, <c>organization_deleted</c>, <c>user_banned</c>, <c>rotated</c>).</summary>
+        public string? RevokedReason { get; init; }
     }
 
     /// <summary>The mint response: the key plus its secret, revealed exactly once.</summary>
@@ -434,5 +440,6 @@ namespace Atlas.Resources
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         public string Id { get; init; } = "";
         public long? RevokedAt { get; init; }
+        public string? RevokedReason { get; init; }
     }
 }

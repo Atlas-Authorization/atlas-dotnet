@@ -730,6 +730,31 @@ app.UseAtlasBetterAuthBridge(atlas, o => o.SignInUrl = "/sign-in");
 
 The middleware forwards the visitor's IP (`HttpContext.Connection.RemoteIpAddress`: behind a proxy add `UseForwardedHeaders`) and user agent, so Atlas's guards and risk checks see the user rather than your server. To keep accepting the old app's JWTs for a while, add `LegacyIssuers = new[] { new LegacyIssuer { Issuer = "https://app.example.com/api/auth", Until = ..., JwksUrl = "https://app.example.com/api/auth/jwks" } }` to `AtlasBackendOptions` / `AddAtlasAuthentication` (with `SecretKey`, or a `ResolveSubject`).
 
+## Everything else, the relying party and the primitives
+
+```csharp
+// Any operation not on a hand-written namespace: client.Catalog.<Namespace>.<Operation>Async
+var page = await client.Catalog.AbuseSignals.ListAsync(new AbuseSignalsListQuery { Limit = 50 });
+await foreach (var s in client.Catalog.AbuseSignals.ListAllAsync()) { /* every page */ }
+
+// PATCH bodies: unset fields are omitted; Clear<Property>() sends null
+var body = new AdministrativeUnitsUpdateBody { Name = "x" }.ClearDescription();
+
+// Opt-in retries (Retry-After, 429 / 503 backoff) and a setup check
+var client = new AtlasClient(new AtlasClientOptions { SecretKey = key, Resilience = new ResilienceOptions() });
+Console.WriteLine(await client.DoctorAsync(new DoctorOptions { Issuer = "https://id.example.com" }));
+```
+
+Telemetry: `AddSource(AtlasTelemetry.Name)` / `AddMeter(AtlasTelemetry.Name)` on your OpenTelemetry builder. Hosted-redirect sign-in for ASP.NET Core:
+
+```csharp
+builder.Services.AddAuthentication("Cookies").AddCookie();
+builder.Services.AddAtlasRelyingParty(o => { o.Issuer = ...; o.ClientId = ...; o.ClientSecret = ...; o.RedirectUri = "https://app.example/auth/callback"; o.Secret = ...; });
+app.UseAuthentication(); app.UseAtlasSession(); app.MapAtlasRelyingParty(o => o.BackchannelLogoutPath = "/auth/backchannel");
+```
+
+The `Atlas.Primitives` namespace holds the local verifiers: `KeyMirror`, `SidRevocationList`, `ResourceRoleMirror`, `MachineClient`, `WebBotAuth`, `WebhookDedupe` and `TransactionTokenVerifier`. Web Bot Auth does not accept the structured-field (`sf`) component parameter yet; such signatures are refused.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).

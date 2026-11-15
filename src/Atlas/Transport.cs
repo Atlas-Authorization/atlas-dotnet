@@ -135,16 +135,27 @@ namespace Atlas
 
         /// <summary>A copy of this transport that sends <c>Atlas-Strict: &lt;strict&gt;</c> on writes (<c>null</c> = never).</summary>
         public AtlasTransport WithStrict(bool? strict) =>
-            new AtlasTransport(_secretKey, _baseUrl, _http, strict, _onUnknownFields, _missingKeyMessage, _dryRun, _traceparent, _secretRecipient);
+            new AtlasTransport(_secretKey, _baseUrl, _http, strict, _onUnknownFields, _missingKeyMessage, _dryRun, _traceparent, _secretRecipient) { Resilience = Resilience };
 
         /// <summary>A copy of this transport that sends every write as a dry run.</summary>
         public AtlasTransport WithDryRun(bool dryRun) =>
-            new AtlasTransport(_secretKey, _baseUrl, _http, _strict, _onUnknownFields, _missingKeyMessage, dryRun, _traceparent, _secretRecipient);
+            new AtlasTransport(_secretKey, _baseUrl, _http, _strict, _onUnknownFields, _missingKeyMessage, dryRun, _traceparent, _secretRecipient) { Resilience = Resilience };
 
         /// <summary>Whether this transport sends every write as a dry run.</summary>
         public bool DryRun => _dryRun;
 
-        public async Task<T?> SendAsync<T>(RequestOptions options, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Send one request. Emits an <c>Atlas.Sdk</c> activity and metrics (see <see cref="AtlasTelemetry"/>) and, when
+        /// <see cref="ResilienceOptions"/> are configured, retries 429 / 503 and network failures honouring
+        /// <c>Retry-After</c>.
+        /// </summary>
+        public Task<T?> SendAsync<T>(RequestOptions options, CancellationToken cancellationToken = default) =>
+            Resilient.RunAsync<T>(options, Resilience, _baseUrl, _http, (info, ct) => SendOnceAsync<T>(options, info, ct), cancellationToken);
+
+        /// <summary>Retry and back-off policy for this transport (null = no retries).</summary>
+        internal ResilienceOptions? Resilience { get; set; }
+
+        private async Task<T?> SendOnceAsync<T>(RequestOptions options, AttemptInfo info, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(_secretKey))
             {
@@ -201,6 +212,10 @@ namespace Atlas
 
             using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken)
                 .ConfigureAwait(false);
+
+            info.Status = (int)response.StatusCode;
+            info.RetryAfter = Resilient.ParseRetryAfter(response);
+            info.DateHeader = response.Headers.Date;
 
             // A raw byte[] request (a gzip archive download) must not round-trip through a string.
             if (options.Raw && typeof(T) == typeof(byte[]) && response.IsSuccessStatusCode)

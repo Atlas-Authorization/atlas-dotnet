@@ -14,6 +14,13 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generated catalog is up to date
+        run: |
+          python3 scripts/gen_catalog.py
+          git diff --exit-code -- src/Atlas/Generated src/Atlas/AtlasClient.Catalog.cs tests/Atlas.Tests/api-operations.txt
       - run: dotnet test
   maui:
     # Atlas.Maui needs the MAUI workload, so it is built on its own and not part of the solution.

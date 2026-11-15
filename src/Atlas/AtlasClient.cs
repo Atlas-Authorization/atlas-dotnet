@@ -49,6 +49,8 @@ namespace Atlas
                 options.OnUnknownFields,
                 "Platform calls need a platform key: set AtlasClientOptions.PlatformKey (psk_...).",
                 options.DryRun, options.Traceparent, options.SecretRecipient);
+            transport.Resilience = options.Resilience;
+            platformTransport.Resilience = options.Resilience;
             _transport = transport;
             _platformTransport = platformTransport;
 

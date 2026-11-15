@@ -13,7 +13,7 @@
 
     <!-- NuGet package metadata -->
     <PackageId>Atlas.Sdk</PackageId>
-    <Version>1.22.0</Version>
+    <Version>1.23.0</Version>
     <Authors>Atlas</Authors>
     <Company>Atlas</Company>
     <Product>Atlas Backend SDK</Product>
@@ -45,6 +45,8 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <!-- ActivitySource / Meter (in-box on net8.0): the OpenTelemetry-compatible telemetry needs no OpenTelemetry package. -->
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
   </ItemGroup>
 
 </Project>
