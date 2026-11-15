@@ -13,13 +13,13 @@ using Microsoft.IdentityModel.Tokens;
 namespace Atlas.Verification
 {
     /// <summary>
-    /// The JWS algorithms Atlas signs tokens with: an instance key is RS256 (the default) or ES256, and an
-    /// API may use either. Every verifier in this package is pinned to exactly this list — <c>none</c> and
+    /// The JWS algorithms Atlas signs tokens with: an instance key is RS256 (the default), ES256, ES384, PS256
+    /// or EdDSA, and an API may use any of them. Every verifier in this package is pinned to exactly this list — <c>none</c> and
     /// HMAC never verify.
     /// </summary>
     public static class SigningAlgs
     {
-        public static readonly string[] All = { "RS256", "ES256" };
+        public static readonly string[] All = { "RS256", "ES256", "ES384", "PS256", "EdDSA" };
     }
 
     /// <summary>Configures an <see cref="AccessTokenVerifier"/>.</summary>
@@ -93,7 +93,7 @@ namespace Atlas.Verification
 
     /// <summary>
     /// Verifies Atlas-issued OAuth access tokens for your own API (an OAuth 2.0 resource server), locally
-    /// against the instance JWKS — RS256 or ES256 only: the issuer, expiry, that it IS an access token, that
+    /// against the instance JWKS — RS256, ES256, ES384, PS256 or EdDSA only: the issuer, expiry, that it IS an access token, that
     /// its <c>aud</c> names your API (RFC 8707), and the scopes a route needs. A refusal carries the RFC 6750 /
     /// RFC 9728 <c>WWW-Authenticate</c> challenge. Sender-constrained tokens (RFC 9449 DPoP) are enforced: a token
     /// bound to a key (<c>cnf.jkt</c>) is accepted only with the <c>DPoP</c> scheme and a valid DPoP proof from that
@@ -186,7 +186,6 @@ namespace Atlas.Verification
                     {
                         ValidAlgorithms = SigningAlgs.All,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKeys = new JsonWebKeySet(keys.Raw).GetSigningKeys(),
                         ValidateIssuer = true,
                         ValidIssuer = _issuer,
                         ValidateAudience = false,
@@ -195,7 +194,7 @@ namespace Atlas.Verification
                         LifetimeValidator = (nbf, exp, _, __) =>
                             exp.HasValue && now - skew <= exp.Value && (!nbf.HasValue || now + skew >= nbf.Value),
                     };
-                    var result = await new JsonWebTokenHandler().ValidateTokenAsync(token, parameters).ConfigureAwait(false);
+                    var result = await Jws.ValidateAsync(token, keys.Raw, parameters).ConfigureAwait(false);
                     if (!result.IsValid) return Refuse(401, "invalid_token", invalid, required);
                     using var doc = JsonDocument.Parse(Encoding.UTF8.GetString(JwksCache.Base64UrlDecode(token.Split('.')[1])));
                     claims = doc.RootElement.Clone();

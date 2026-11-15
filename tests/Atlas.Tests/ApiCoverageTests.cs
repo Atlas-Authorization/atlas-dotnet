@@ -33,7 +33,8 @@ namespace Atlas.Tests
                 var line = raw.Trim();
                 if (line.Length == 0 || line.StartsWith("#")) continue;
                 var parts = line.Split(' ');
-                var regex = "^" + Regex.Replace(parts[1], @"\{[^}]+\}", "[^/]+") + "$";
+                // a trailing /* is a catch-all (any non-empty remainder of the path)
+                var regex = "^" + Regex.Replace(Regex.Replace(parts[1], @"/\*$", "/\u0000"), @"\{[^}]+\}", "[^/]+").Replace("\u0000", ".+") + "$";
                 ops.Add(new Op(parts[0], new Regex(regex), line));
             }
             return ops;

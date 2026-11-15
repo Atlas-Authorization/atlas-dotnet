@@ -175,7 +175,7 @@ namespace Atlas.Tests
             Assert.True(r.Session.Has(new ProtectCondition { AppRole = "support" }));
             Assert.True((await backend.VerifyAsync(Sign(new Dictionary<string, object> { ["sub"] = "u" }, ec: false))).Ok);
             Assert.False((await backend.VerifyAsync(Sign(new Dictionary<string, object> { ["sub"] = "u" }, kid: "rs-1"))).Ok);
-            Assert.Equal(new[] { "RS256", "ES256" }, SigningAlgs.All);
+            Assert.Equal(new[] { "RS256", "ES256", "ES384", "PS256", "EdDSA" }, SigningAlgs.All);
         }
 
         private Dictionary<string, object> Access(string scope = "read write") => new Dictionary<string, object>

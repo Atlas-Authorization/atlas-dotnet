@@ -73,6 +73,12 @@ namespace Atlas
         /// </summary>
         public string? SecretRecipient { get; set; }
 
+        /// <summary>
+        /// Opt-in status-aware retries: honour <c>Retry-After</c>, back off on 429 / 503, consult the status endpoint.
+        /// Null (the default) never retries.
+        /// </summary>
+        public ResilienceOptions? Resilience { get; set; }
+
         internal AtlasClientOptions Copy() => (AtlasClientOptions)MemberwiseClone();
     }
 }

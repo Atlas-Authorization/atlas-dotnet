@@ -172,7 +172,7 @@ namespace Atlas.Verification
             }
 
             if (!header.TryGetValue("alg", out var alg) || alg.ValueKind != JsonValueKind.String || System.Array.IndexOf(SigningAlgs.All, alg.GetString()) < 0)
-                throw new LogoutTokenException(LogoutTokenFailure.BadAlgorithm, "logout_token must be signed with RS256 or ES256");
+                throw new LogoutTokenException(LogoutTokenFailure.BadAlgorithm, "logout_token must be signed with RS256, ES256, ES384, PS256 or EdDSA");
             if (header.TryGetValue("typ", out var typ))
             {
                 var t = typ.ValueKind == JsonValueKind.String ? typ.GetString()!.ToLowerInvariant() : "";
@@ -239,7 +239,6 @@ namespace Atlas.Verification
                 {
                     ValidAlgorithms = SigningAlgs.All,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKeys = new JsonWebKeySet(keys.Raw).GetSigningKeys(),
                     // Claims are checked one by one above/below so each failure has a reason.
                     ValidateIssuer = false,
                     ValidateAudience = false,
@@ -249,7 +248,7 @@ namespace Atlas.Verification
                     ValidateTokenReplay = false,
                     TypeValidator = (type, _, __) => type ?? "",
                 };
-                var result = await new JsonWebTokenHandler().ValidateTokenAsync(token, parameters).ConfigureAwait(false);
+                var result = await Jws.ValidateAsync(token, keys.Raw, parameters).ConfigureAwait(false);
                 return result.IsValid;
             }
             catch

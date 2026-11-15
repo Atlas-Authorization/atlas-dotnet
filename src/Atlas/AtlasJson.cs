@@ -36,7 +36,8 @@ namespace Atlas
             return options;
         }
 
-        public static string Serialize(object value) => JsonSerializer.Serialize(value, Options);
+        public static string Serialize(object value)
+            => ClearableBody.AnyCleared(value) ? ClearableBody.ToNode(value)!.ToJsonString(Options) : JsonSerializer.Serialize(value, Options);
 
         public static T? Deserialize<T>(string json) => JsonSerializer.Deserialize<T>(json, Options);
     }
