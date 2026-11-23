@@ -32,6 +32,23 @@ namespace Atlas.Primitives
         /// <summary>The organization a user key is bound to; null = unbound.</summary>
         public string? OrganizationId { get; init; }
         public string? RevokedReason { get; init; }
+        /// <summary>False = refused like an unknown key; null = enabled.</summary>
+        public bool? Enabled { get; init; }
+        /// <summary><c>secret</c> or <c>key_pair</c>. A key-pair row has no secret hash (<see cref="Hash"/> is a placeholder nothing matches).</summary>
+        public string Credential { get; init; } = "secret";
+        /// <summary>Key pair: the SPKI PEM assertions are verified against.</summary>
+        public string? PublicKeyPem { get; init; }
+        /// <summary>Key pair: the <c>aud</c> an assertion must carry.</summary>
+        public string? Audience { get; init; }
+        /// <summary>Key pair: the longest assertion lifetime in seconds; null = 3600.</summary>
+        public long? MaxTokenLifetimeSeconds { get; init; }
+    }
+
+    /// <summary>Optional on an <see cref="IKeyMirrorStore"/>: share used assertion ids across processes. Without it the mirror keeps them in memory.</summary>
+    public interface IAssertionJtiStore
+    {
+        /// <summary>Record the jti as used until <paramref name="expiresAtMs"/>; false when it was already used (a replay).</summary>
+        Task<bool> ClaimAssertionJtiAsync(string keyId, string jti, long expiresAtMs);
     }
 
     /// <summary>The smallest store that works. <see cref="InMemoryKeyMirrorStore"/> is for tests and single-process apps; back it with a table in production.</summary>
@@ -140,7 +157,12 @@ namespace Atlas.Primitives
         public Func<long>? Now { get; set; }
     }
 
-    public enum KeyMirrorCode { None, InsufficientScope, IpNotAllowed, ClientIpRequired, MembershipUnresolved, Stale }
+    public enum KeyMirrorCode
+    {
+        None, InsufficientScope, IpNotAllowed, ClientIpRequired, MembershipUnresolved, Stale,
+        /// <summary>The key-pair assertion refusals below are the codes Atlas verify answers.</summary>
+        InvalidAssertion, AssertionExpired, AssertionNotYetValid, WrongAudience, AssertionLifetimeTooLong, AssertionReplayed, ScopeNotGranted,
+    }
 
     public sealed class MirrorVerification
     {
@@ -153,6 +175,10 @@ namespace Atlas.Primitives
         public bool Stale { get; init; }
         public long? LastSyncAt { get; init; }
         public IReadOnlyList<string>? OrganizationPermissions { get; init; }
+        /// <summary><c>key_pair</c> after <see cref="KeyMirror.VerifyAssertionAsync"/>; <see cref="Jti"/> and <see cref="Exp"/> (epoch seconds) are the assertion's.</summary>
+        public string? Credential { get; init; }
+        public string? Jti { get; init; }
+        public long? Exp { get; init; }
     }
 
     /// <summary>
@@ -166,6 +192,7 @@ namespace Atlas.Primitives
     {
         private readonly KeyMirrorOptions _o;
         private long? _memorySyncAt;
+        private readonly Dictionary<string, long> _usedJtis = new Dictionary<string, long>();
 
         public KeyMirror(KeyMirrorOptions options)
         {
@@ -186,21 +213,23 @@ namespace Atlas.Primitives
         {
             Id = k.Id, Hash = hash, Prefix = k.Prefix, SubjectType = k.SubjectType, SubjectId = k.SubjectId, Name = k.Name,
             Scopes = k.Scopes, AllowedIps = k.AllowedIps, ExpiresAt = k.ExpiresAt, RevokedAt = k.RevokedAt,
-            OrganizationId = k.OrganizationId, RevokedReason = k.RevokedReason,
+            OrganizationId = k.OrganizationId, RevokedReason = k.RevokedReason, Enabled = k.Enabled,
+            Credential = k.Credential ?? "secret", PublicKeyPem = k.PublicKey, Audience = k.Audience, MaxTokenLifetimeSeconds = k.MaxTokenLifetimeSeconds,
         };
 
         private static MirroredApiKey ToMirrored(ApiKeyWithSecret k, string hash) => new MirroredApiKey
         {
             Id = k.Id, Hash = hash, Prefix = k.Prefix, SubjectType = k.SubjectType, SubjectId = k.SubjectId, Name = k.Name,
-            ExpiresAt = k.ExpiresAt, RevokedAt = k.RevokedAt,
+            ExpiresAt = k.ExpiresAt, RevokedAt = k.RevokedAt, Scopes = k.Scopes, Enabled = k.Enabled,
+            Credential = k.Credential ?? "secret", PublicKeyPem = k.PublicKey, Audience = k.Audience, MaxTokenLifetimeSeconds = k.MaxTokenLifetimeSeconds,
         };
 
         /// <summary>Mint at Atlas, then mirror it. Resolves with the one-time secret.</summary>
         public async Task<ApiKeyWithSecret> MintAsync(CreateApiKeyBody body, string? idempotencyKey = null, CancellationToken ct = default)
         {
             var created = await _o.Api.CreateAsync(body, idempotencyKey, ct).ConfigureAwait(false);
-            var m = ToMirrored(created, HashSecret(created.Secret));
-            await _o.Store.PutAsync(m with { Scopes = body.Scopes ?? m.Scopes }).ConfigureAwait(false);
+            var m = ToMirrored(created, string.IsNullOrEmpty(created.Secret) && created.Credential == "key_pair" ? "key_pair:" + created.Id : HashSecret(created.Secret));
+            await _o.Store.PutAsync(m with { Scopes = body.Scopes ?? m.Scopes, Enabled = m.Enabled ?? body.Enabled }).ConfigureAwait(false);
             return created;
         }
 
@@ -225,6 +254,112 @@ namespace Atlas.Primitives
 
         public async Task<long?> LastSyncAtAsync() => _o.Store != null ? await _o.Store.GetLastSyncAtAsync().ConfigureAwait(false) ?? _memorySyncAt : _memorySyncAt;
 
+        /// <summary>A refusal when the mirror is too stale to answer, and whether the answer is served stale.</summary>
+        private async Task<(MirrorVerification? Refusal, bool ServedStale)> FreshnessAsync()
+        {
+            if (_o.MaxStaleness == null) return (null, false);
+            var last = await LastSyncAtAsync().ConfigureAwait(false);
+            var behind = last == null ? long.MaxValue : Now() - last.Value - (long)_o.MaxStaleness.Value.TotalMilliseconds;
+            if (behind <= 0) return (null, false);
+            if (last == null || behind > (long)_o.ServeStaleFor.TotalMilliseconds) return (new MirrorVerification { Code = KeyMirrorCode.Stale, LastSyncAt = last }, false);
+            _o.OnServeStale?.Invoke(TimeSpan.FromMilliseconds(behind));
+            return (null, true);
+        }
+
+        /// <summary>
+        /// Verify a key-pair assertion (<see cref="ApiKeyAssertion.Sign"/>) locally with the checks Atlas verify makes: the signature with the stored
+        /// public key (<c>alg</c> must fit its type), <c>iss</c> = <c>kid</c>, <c>aud</c>, <c>iat</c>, <c>exp</c> and the lifetime cap, <c>nbf</c>,
+        /// <c>scope</c> (a subset of the key's, narrows the result), revocation, expiry, the IP allowlist, then the single-use <c>jti</c>. A refusal
+        /// carries the server's code; a key the mirror does not hold answers invalid with <see cref="KeyMirrorCode.None"/>. The jti is claimed through
+        /// the store's optional <see cref="IAssertionJtiStore"/>, else in this process's memory, and only after every other check passed.
+        /// </summary>
+        public async Task<MirrorVerification> VerifyAssertionAsync(string token, IEnumerable<string>? requiredScopes = null, string? clientIp = null)
+        {
+            var (refusal, servedStale) = await FreshnessAsync().ConfigureAwait(false);
+            if (refusal != null) return refusal;
+            MirrorVerification Bad(KeyMirrorCode code) => new MirrorVerification { Code = code };
+            var parsed = ApiKeyAssertion.Parse(token);
+            if (parsed == null || !parsed.Header.TryGetProperty("kid", out var kidEl) || kidEl.ValueKind != JsonValueKind.String || string.IsNullOrEmpty(kidEl.GetString()))
+                return Bad(KeyMirrorCode.InvalidAssertion);
+            var kid = kidEl.GetString()!;
+            var key = await _o.Store.GetAsync(kid).ConfigureAwait(false);
+            if (key == null) return new MirrorVerification();
+            var claims = parsed.Claims;
+            string? Str(string n) => claims.TryGetProperty(n, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+            var alg = parsed.Header.TryGetProperty("alg", out var algEl) && algEl.ValueKind == JsonValueKind.String ? algEl.GetString()! : "";
+            if (key.Credential != "key_pair" || string.IsNullOrEmpty(key.PublicKeyPem)
+                || !ApiKeyAssertion.VerifySignature(alg, parsed.SigningInput, parsed.Signature, key.PublicKeyPem!) || Str("iss") != kid || key.Enabled == false)
+                return Bad(KeyMirrorCode.InvalidAssertion);
+            var nowMs = Now();
+            if (key.RevokedAt != null || (key.ExpiresAt != null && key.ExpiresAt.Value <= nowMs)) return new MirrorVerification();
+            var nowS = nowMs / 1000;
+            var audOk = claims.TryGetProperty("aud", out var aud)
+                && (aud.ValueKind == JsonValueKind.String ? aud.GetString() == key.Audience
+                    : aud.ValueKind == JsonValueKind.Array && aud.EnumerateArray().Any(x => x.ValueKind == JsonValueKind.String && x.GetString() == key.Audience));
+            if (!audOk) return Bad(KeyMirrorCode.WrongAudience);
+            bool Num(string n, out long v)
+            {
+                v = 0;
+                if (!claims.TryGetProperty(n, out var e) || e.ValueKind != JsonValueKind.Number || !e.TryGetDouble(out var d)) return false;
+                v = (long)Math.Floor(d);
+                return true;
+            }
+            var hasNbf = claims.TryGetProperty("nbf", out _);
+            var hasJti = claims.TryGetProperty("jti", out _);
+            var jti = Str("jti");
+            var scope = Str("scope");
+            long nbf = 0;
+            if (!Num("iat", out var iat) || !Num("exp", out var exp) || (hasNbf && !Num("nbf", out nbf))
+                || (hasJti && string.IsNullOrEmpty(jti)) || (claims.TryGetProperty("scope", out _) && scope == null))
+                return Bad(KeyMirrorCode.InvalidAssertion);
+            if (iat > nowS + 60 || (hasNbf && nbf > nowS + 60)) return Bad(KeyMirrorCode.AssertionNotYetValid);
+            if (exp <= nowS - 30) return Bad(KeyMirrorCode.AssertionExpired);
+            if (exp - iat > Math.Min(key.MaxTokenLifetimeSeconds ?? 3600, 86400)) return Bad(KeyMirrorCode.AssertionLifetimeTooLong);
+            if (key.AllowedIps is { Count: > 0 })
+            {
+                if (string.IsNullOrEmpty(clientIp)) return Bad(KeyMirrorCode.ClientIpRequired);
+                if (!IpInAllowlist(clientIp!, key.AllowedIps)) return Bad(KeyMirrorCode.IpNotAllowed);
+            }
+            var effective = Expand(key.Scopes ?? Array.Empty<string>());
+            IReadOnlyList<string>? orgPerms = null;
+            if (key.SubjectType == "user" && key.OrganizationId != null)
+            {
+                if (_o.Membership == null) return Bad(KeyMirrorCode.MembershipUnresolved);
+                orgPerms = await _o.Membership(key.SubjectId, key.OrganizationId).ConfigureAwait(false);
+                if (orgPerms == null) return new MirrorVerification();
+                effective = IntersectScopesWithPermissions(effective, orgPerms);
+            }
+            if (!string.IsNullOrWhiteSpace(scope))
+            {
+                var asked = scope!.Split(new[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var notGranted = asked.Where(x => !effective.Contains(x)).ToList();
+                if (notGranted.Count > 0) return new MirrorVerification { Code = KeyMirrorCode.ScopeNotGranted, MissingScopes = notGranted };
+                effective = effective.Where(x => asked.Contains(x)).ToList();
+            }
+            var missing = (requiredScopes ?? Array.Empty<string>()).Where(x => !effective.Contains(x)).ToList();
+            if (missing.Count > 0) return new MirrorVerification { Code = KeyMirrorCode.InsufficientScope, MissingScopes = missing };
+            // Last, so a refused assertion never burns its jti.
+            if (jti != null && !await ClaimJtiAsync(key.Id, jti, exp * 1000, nowMs).ConfigureAwait(false)) return Bad(KeyMirrorCode.AssertionReplayed);
+            return new MirrorVerification
+            {
+                Valid = true, Key = key, EffectiveScopes = effective, Stale = servedStale, OrganizationPermissions = orgPerms,
+                Credential = "key_pair", Jti = jti, Exp = exp,
+            };
+        }
+
+        private async Task<bool> ClaimJtiAsync(string keyId, string jti, long untilMs, long nowMs)
+        {
+            if (_o.Store is IAssertionJtiStore shared) return await shared.ClaimAssertionJtiAsync(keyId, jti, untilMs).ConfigureAwait(false);
+            lock (_usedJtis)
+            {
+                foreach (var stale in _usedJtis.Where(kv => kv.Value <= nowMs).Select(kv => kv.Key).ToList()) _usedJtis.Remove(stale);
+                var id = keyId + "\n" + jti;
+                if (_usedJtis.ContainsKey(id)) return false;
+                _usedJtis[id] = untilMs;
+                return true;
+            }
+        }
+
         /// <summary>
         /// Verify a presented secret against the mirror: no network call. Unknown, revoked and expired keys all answer invalid; a mirror that
         /// is not fresh (see <see cref="KeyMirrorOptions.MaxStaleness"/>) answers <see cref="KeyMirrorCode.Stale"/> instead.
@@ -232,18 +367,8 @@ namespace Atlas.Primitives
         public async Task<MirrorVerification> VerifyAsync(string secret, IEnumerable<string>? requiredScopes = null, string? clientIp = null, CancellationToken ct = default)
         {
             if (string.IsNullOrEmpty(secret)) return new MirrorVerification();
-            var servedStale = false;
-            if (_o.MaxStaleness != null)
-            {
-                var last = await LastSyncAtAsync().ConfigureAwait(false);
-                var behind = last == null ? long.MaxValue : Now() - last.Value - (long)_o.MaxStaleness.Value.TotalMilliseconds;
-                if (behind > 0)
-                {
-                    if (last == null || behind > (long)_o.ServeStaleFor.TotalMilliseconds) return new MirrorVerification { Code = KeyMirrorCode.Stale, LastSyncAt = last };
-                    servedStale = true;
-                    _o.OnServeStale?.Invoke(TimeSpan.FromMilliseconds(behind));
-                }
-            }
+            var (refusal, servedStale) = await FreshnessAsync().ConfigureAwait(false);
+            if (refusal != null) return refusal;
             var hash = HashSecret(secret);
             var key = await _o.Store.GetByHashAsync(hash).ConfigureAwait(false);
             if (key == null && _o.VerifyAtAtlas)
@@ -255,7 +380,7 @@ namespace Atlas.Primitives
                     if (full != null) { key = ToMirrored(full, hash); await _o.Store.PutAsync(key).ConfigureAwait(false); }
                 }
             }
-            if (key == null || key.RevokedAt != null) return new MirrorVerification();
+            if (key == null || key.RevokedAt != null || key.Enabled == false) return new MirrorVerification();
             if (key.ExpiresAt != null && key.ExpiresAt.Value <= Now()) return new MirrorVerification();
             // A key with allowed_ips needs the end caller's address; no address fails closed.
             if (key.AllowedIps is { Count: > 0 })
@@ -357,6 +482,7 @@ namespace Atlas.Primitives
                     AllowedIps = data.TryGetProperty("allowed_ips", out var ips) && ips.ValueKind == JsonValueKind.Array
                         ? ips.EnumerateArray().Select(x => x.GetString()!).ToList() : held.AllowedIps,
                     ExpiresAt = data.TryGetProperty("expires_at", out _) ? L("expires_at") : held.ExpiresAt,
+                    Enabled = data.TryGetProperty("enabled", out var en) && (en.ValueKind == JsonValueKind.True || en.ValueKind == JsonValueKind.False) ? en.GetBoolean() : held.Enabled,
                 }).ConfigureAwait(false);
                 return true;
             }

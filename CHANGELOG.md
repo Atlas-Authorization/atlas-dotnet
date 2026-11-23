@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24.0 (Atlas.Sdk) - 2026-11-22
+
+### Added
+
+- **Key-pair API keys.** `ApiKeyAssertion.Sign(privateKeyPem, keyId, audience, ttlSeconds, scope, jti)` signs the short-lived JWT a key-pair key presents (ES256 for P-256, EdDSA for Ed25519). `CreateApiKeyBody` takes `Credential`, `Audience` and `PublicKey`; `ApiKey` and `ApiKeyWithSecret` carry `Credential`, `Audience`, `KeyId` and, for a generated pair, `PrivateKey` once; `apiKeys.VerifyAssertionAsync(token)` and `MintApiKeyTokenBody.Assertion` present an assertion instead of a secret. `KeyMirror.VerifyAssertionAsync` verifies an assertion locally with the server's refusal codes (`KeyMirrorCode`); `MirroredApiKey` carries `Credential`, `PublicKeyPem`, `Audience`, `MaxTokenLifetimeSeconds` and `Enabled` (a disabled key is refused by `VerifyAsync` and `VerifyAssertionAsync`), and `ApplyWebhookAsync` copies `enabled`. A store may implement `IAssertionJtiStore` to share used ids between processes.
+
 ## 1.23.0 (Atlas.Sdk) / 1.8.0 (Atlas.AspNetCore) - 2026-11-14
 
 ### Added

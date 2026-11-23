@@ -506,6 +506,24 @@ await atlas.UserHooks.UpdateBeforeUserCreateAsync(new UpdateBeforeUserCreateHook
 var tested = await atlas.UserHooks.TestBeforeUserCreateAsync(); // Ok, Answer, Error
 ```
 
+### Key-pair API keys
+
+A key-pair key has no shared secret: Atlas returns a PKCS#8 private key once and keeps only the public key. Sign a short-lived assertion and present it where you would present a secret.
+
+```csharp
+var key = await client.ApiKeys.CreateAsync(new CreateApiKeyBody
+{
+    SubjectType = "user", SubjectId = "user_123", Credential = "key_pair", Audience = "https://api.example.com",
+});
+var assertion = ApiKeyAssertion.Sign(key.PrivateKey!, key.KeyId!, "https://api.example.com");
+await client.ApiKeys.VerifyAssertionAsync(assertion);
+await client.ApiKeys.MintTokenAsync(new MintApiKeyTokenBody { Assertion = assertion });
+```
+
+ES256 (P-256) and EdDSA (Ed25519) keys are supported.
+
+`mirror.VerifyAssertionAsync(assertion)` checks an assertion against the mirrored public key with no network call, with the same refusal codes Atlas answers.
+
 ### API key spend caps
 
 Give an end-user API key caps in your own units, then meter what your API consumed

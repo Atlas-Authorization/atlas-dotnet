@@ -37,6 +37,16 @@ namespace Atlas.Resources
         public string? OrganizationId { get; init; }
         /// <summary>Why it was revoked, when Atlas said (<c>membership_ended</c>, <c>creator_departed</c>, <c>organization_deleted</c>, <c>user_banned</c>, <c>rotated</c>).</summary>
         public string? RevokedReason { get; init; }
+        /// <summary><c>secret</c> or <c>key_pair</c>.</summary>
+        public string? Credential { get; init; }
+        /// <summary>Assertion audience of a key-pair key; null for a secret key.</summary>
+        public string? Audience { get; init; }
+        /// <summary>The JWT <c>kid</c> of a key-pair key (equal to <see cref="Id"/>).</summary>
+        public string? KeyId { get; init; }
+        public string? PublicKey { get; init; }
+        public string? PublicKeyJkt { get; init; }
+        /// <summary>Key pair: the longest assertion lifetime in seconds; null = 3600.</summary>
+        public long? MaxTokenLifetimeSeconds { get; init; }
     }
 
     /// <summary>The mint response: the key plus its secret, revealed exactly once.</summary>
@@ -54,6 +64,18 @@ namespace Atlas.Resources
         public long? RevokedAt { get; init; }
         public long CreatedAt { get; init; }
         public string Secret { get; init; } = "";
+        /// <summary><c>secret</c> or <c>key_pair</c>.</summary>
+        public string? Credential { get; init; }
+        public string? Audience { get; init; }
+        /// <summary>The JWT <c>kid</c> of a key-pair key (equal to <see cref="Id"/>).</summary>
+        public string? KeyId { get; init; }
+        public string? PublicKey { get; init; }
+        public string? PublicKeyJkt { get; init; }
+        public bool? Enabled { get; init; }
+        public long? MaxTokenLifetimeSeconds { get; init; }
+        public List<string>? Scopes { get; init; }
+        /// <summary>PKCS#8 PEM of an Atlas-generated key pair, revealed once (key-pair keys only).</summary>
+        public string? PrivateKey { get; init; }
         /// <summary>With a secret recipient: the secret sealed to it (then the plaintext field is absent).</summary>
         public string? SealedSecret { get; init; }
         /// <summary>With a secret recipient: the client secret sealed to it.</summary>
@@ -89,6 +111,12 @@ namespace Atlas.Resources
         /// <summary>A use budget each successful verify spends.</summary>
         public long? Remaining { get; set; }
         public List<string>? Scopes { get; set; }
+        /// <summary><c>secret</c> (default) or <c>key_pair</c>.</summary>
+        public string? Credential { get; set; }
+        /// <summary>Assertion audience of a key-pair key (default: the instance id).</summary>
+        public string? Audience { get; set; }
+        /// <summary>Your own SPKI PEM (P-256 or Ed25519) for a key-pair key; without it Atlas generates the pair.</summary>
+        public string? PublicKey { get; set; }
     }
 
     /// <summary>A per-key verify throttle: at most <see cref="Max"/> verifies per <see cref="WindowSeconds"/>.</summary>
@@ -308,6 +336,10 @@ namespace Atlas.Resources
         public long? RetryAfterMs { get; init; }
         /// <summary>Uses left after this verify; null = unlimited.</summary>
         public long? Remaining { get; init; }
+        /// <summary><c>key_pair</c> when an assertion was verified; <see cref="Jti"/> and <see cref="Exp"/> are the assertion's.</summary>
+        public string? Credential { get; init; }
+        public string? Jti { get; init; }
+        public long? Exp { get; init; }
     }
 
     public sealed class ListApiKeysParams
@@ -346,6 +378,11 @@ namespace Atlas.Resources
         public Task<ApiKeyVerification> VerifyAsync(string secret, IEnumerable<string> requiredScopes, CancellationToken ct = default)
             => Req<ApiKeyVerification>(HttpVerb.Post, "/v1/api_keys/verify",
                 body: Body(("secret", secret), ("required_scopes", new List<string>(requiredScopes))), cancellationToken: ct);
+
+        /// <summary>Check a key-pair assertion (<see cref="ApiKeyAssertion.Sign"/>) instead of a secret.</summary>
+        public Task<ApiKeyVerification> VerifyAssertionAsync(string token, IEnumerable<string>? requiredScopes = null, CancellationToken ct = default)
+            => Req<ApiKeyVerification>(HttpVerb.Post, "/v1/api_keys/verify",
+                body: requiredScopes == null ? Body(("token", token)) : Body(("token", token), ("required_scopes", new List<string>(requiredScopes))), cancellationToken: ct);
 
         public Task<ApiKey> GetAsync(string id, CancellationToken ct = default)
             => Req<ApiKey>(HttpVerb.Get, $"/v1/api_keys/{Enc(id)}", cancellationToken: ct);
@@ -391,6 +428,8 @@ namespace Atlas.Resources
     public sealed class MintApiKeyTokenBody
     {
         public string? Secret { get; set; }
+        /// <summary>A signed key-pair assertion, sent instead of <see cref="Secret"/>.</summary>
+        public string? Assertion { get; set; }
         public double? TtlSeconds { get; set; }
         public object? Audience { get; set; }
 
