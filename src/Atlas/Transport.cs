@@ -152,10 +152,38 @@ namespace Atlas
         public Task<T?> SendAsync<T>(RequestOptions options, CancellationToken cancellationToken = default) =>
             Resilient.RunAsync<T>(options, Resilience, _baseUrl, _http, (info, ct) => SendOnceAsync<T>(options, info, ct), cancellationToken);
 
+        // An idle pooled connection the server closed fails before any response: retry once on a fresh one,
+        // for requests that are safe to replay. Timeouts (TaskCanceledException) never qualify.
+        private async Task<T?> SendOnceAsync<T>(RequestOptions options, AttemptInfo info, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await SendCoreAsync<T>(options, info, cancellationToken).ConfigureAwait(false);
+            }
+            catch (HttpRequestException e) when (IsConnectionReset(e) && IsReplayable(options))
+            {
+                await Task.Delay(25 + new Random().Next(100), cancellationToken).ConfigureAwait(false);
+                return await SendCoreAsync<T>(options, info, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private static bool IsReplayable(RequestOptions o) =>
+            o.Method == HttpVerb.Get || o.Method == HttpVerb.Put || o.Method == HttpVerb.Delete || !string.IsNullOrEmpty(o.IdempotencyKey);
+
+        private static bool IsConnectionReset(HttpRequestException e)
+        {
+            for (Exception? x = e; x != null; x = x.InnerException)
+            {
+                if (x is System.Net.Sockets.SocketException se) return se.SocketErrorCode != System.Net.Sockets.SocketError.TimedOut;
+                if (x is System.IO.IOException) return true;
+            }
+            return e.Message.IndexOf("ended prematurely", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
         /// <summary>Retry and back-off policy for this transport (null = no retries).</summary>
         internal ResilienceOptions? Resilience { get; set; }
 
-        private async Task<T?> SendOnceAsync<T>(RequestOptions options, AttemptInfo info, CancellationToken cancellationToken)
+        private async Task<T?> SendCoreAsync<T>(RequestOptions options, AttemptInfo info, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(_secretKey))
             {

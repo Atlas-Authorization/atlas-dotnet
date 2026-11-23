@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24.1 (Atlas.Sdk) - 2026-11-23
+
+### Fixed
+
+- A request that fails with a connection reset before any response is retried once, after a short jittered delay, when it is a GET, PUT or DELETE or carries an idempotency key. Timeouts and other writes are never retried.
+
 ## 1.24.0 (Atlas.Sdk) - 2026-11-22
 
 ### Added

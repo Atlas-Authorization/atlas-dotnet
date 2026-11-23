@@ -146,6 +146,8 @@ catch (AtlasRateLimitException ex)
 }
 ```
 
+Every client retries once, after a short jittered delay, when a request fails with a connection reset before any response (an idle pooled connection the server closed). That covers GET, PUT, DELETE and any call with an idempotency key; timeouts and other writes are never replayed. Keep your `SocketsHttpHandler.PooledConnectionIdleTimeout` below 60 s.
+
 Subclasses: `AtlasBadRequestException` (400/422), `AtlasAuthenticationException` (401),
 `AtlasAuthorizationException` (403), `AtlasNotFoundException` (404),
 `AtlasConflictException` (409), `AtlasRateLimitException` (429),
