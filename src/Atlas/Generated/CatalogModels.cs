@@ -991,6 +991,135 @@ namespace Atlas.Generated
         [JsonPropertyName("deleted")] public string Deleted { get; init; } = "";
     }
 
+    /// <summary>A AnalyticsGetCaptchaResponseWindow object.</summary>
+    public sealed record AnalyticsGetCaptchaResponseWindow
+    {
+        [JsonPropertyName("from")] public long? From { get; init; }
+        [JsonPropertyName("to")] public long? To { get; init; }
+        [JsonPropertyName("granularity")] public string? Granularity { get; init; }
+        [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+    }
+
+    /// <summary>A AnalyticsGetCaptchaResponseDataItem object.</summary>
+    public sealed record AnalyticsGetCaptchaResponseDataItem
+    {
+        [JsonPropertyName("provider")] public string? Provider { get; init; }
+        [JsonPropertyName("flow")] public string? Flow { get; init; }
+        [JsonPropertyName("issued")] public long? Issued { get; init; }
+        [JsonPropertyName("passed")] public long? Passed { get; init; }
+        [JsonPropertyName("failed")] public long? Failed { get; init; }
+        [JsonPropertyName("blocked")] public long? Blocked { get; init; }
+        [JsonPropertyName("solve_rate")] public double? SolveRate { get; init; }
+    }
+
+    /// <summary>A AnalyticsGetCaptchaResponse object.</summary>
+    public sealed record AnalyticsGetCaptchaResponse
+    {
+        /// <summary>One of: analytics_captcha.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("window")] public AnalyticsGetCaptchaResponseWindow? Window { get; init; }
+        [JsonPropertyName("issued")] public long? Issued { get; init; }
+        [JsonPropertyName("passed")] public long? Passed { get; init; }
+        [JsonPropertyName("failed")] public long? Failed { get; init; }
+        [JsonPropertyName("blocked")] public long? Blocked { get; init; }
+        [JsonPropertyName("solve_rate")] public double? SolveRate { get; init; }
+        [JsonPropertyName("data")] public List<AnalyticsGetCaptchaResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of GetCaptcha. Unset values are not sent.</summary>
+    public sealed record AnalyticsGetCaptchaQuery
+    {
+        /// <summary>Window start: Unix epoch milliseconds or an ISO 8601 time.</summary>
+        public string? From { get; init; }
+        /// <summary>Window end (exclusive). Defaults to now.</summary>
+        public string? To { get; init; }
+        /// <summary>Window length in days ending at `to`, used when `from` is absent. Default 30, at most 180.</summary>
+        public long? Days { get; init; }
+        /// <summary>Bucket size for time series. One of: day, week, month.</summary>
+        public string? Granularity { get; init; }
+        /// <summary>Only members of this organization (a per-organization slice). Not available for failures or the journey funnel.or the journey funnel.</summary>
+        public string? OrganizationId { get; init; }
+        /// <summary>Response format. csv and parquet return the `data` rows as a file (parquet: one uncompressed row group, every column required). One of: json, csv, parquet.</summary>
+        public string? Format { get; init; }
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("from", From);
+            yield return new KeyValuePair<string, object?>("to", To);
+            yield return new KeyValuePair<string, object?>("days", Days);
+            yield return new KeyValuePair<string, object?>("granularity", Granularity);
+            yield return new KeyValuePair<string, object?>("organization_id", OrganizationId);
+            yield return new KeyValuePair<string, object?>("format", Format);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A AnalyticsListSmsResponseDataItem object.</summary>
+    public sealed record AnalyticsListSmsResponseDataItem
+    {
+        [JsonPropertyName("country")] public string? Country { get; init; }
+        [JsonPropertyName("messages")] public long? Messages { get; init; }
+        [JsonPropertyName("delivered")] public long? Delivered { get; init; }
+        [JsonPropertyName("failed")] public long? Failed { get; init; }
+        [JsonPropertyName("estimated_cost")] public double? EstimatedCost { get; init; }
+    }
+
+    /// <summary>A AnalyticsListSmsResponse object.</summary>
+    public sealed record AnalyticsListSmsResponse
+    {
+        /// <summary>One of: analytics_sms.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("window")] public AnalyticsGetCaptchaResponseWindow? Window { get; init; }
+        [JsonPropertyName("total")] public long? Total { get; init; }
+        [JsonPropertyName("data")] public List<AnalyticsListSmsResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListSms. Unset values are not sent.</summary>
+    public sealed record AnalyticsListSmsQuery
+    {
+        /// <summary>What one message costs you at your provider.</summary>
+        public double? RatePerMessage { get; init; }
+        /// <summary>Three-letter code echoed back with the estimate.</summary>
+        public string? Currency { get; init; }
+        /// <summary>Window start: Unix epoch milliseconds or an ISO 8601 time.</summary>
+        public string? From { get; init; }
+        /// <summary>Window end (exclusive). Defaults to now.</summary>
+        public string? To { get; init; }
+        /// <summary>Window length in days ending at `to`, used when `from` is absent. Default 30, at most 180.</summary>
+        public long? Days { get; init; }
+        /// <summary>Bucket size for time series. One of: day, week, month.</summary>
+        public string? Granularity { get; init; }
+        /// <summary>Only members of this organization (a per-organization slice). Not available for failures or the journey funnel.or the journey funnel.</summary>
+        public string? OrganizationId { get; init; }
+        /// <summary>Response format. csv and parquet return the `data` rows as a file (parquet: one uncompressed row group, every column required). One of: json, csv, parquet.</summary>
+        public string? Format { get; init; }
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("rate_per_message", RatePerMessage);
+            yield return new KeyValuePair<string, object?>("currency", Currency);
+            yield return new KeyValuePair<string, object?>("from", From);
+            yield return new KeyValuePair<string, object?>("to", To);
+            yield return new KeyValuePair<string, object?>("days", Days);
+            yield return new KeyValuePair<string, object?>("granularity", Granularity);
+            yield return new KeyValuePair<string, object?>("organization_id", OrganizationId);
+            yield return new KeyValuePair<string, object?>("format", Format);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>A ApiKeysGetPostureResponseThresholds object.</summary>
     public sealed record ApiKeysGetPostureResponseThresholds
     {
@@ -1129,8 +1258,10 @@ namespace Atlas.Generated
     /// <summary>A ApiKeysRotateResponse object.</summary>
     public sealed record ApiKeysRotateResponse
     {
-        /// <summary>The successor's secret. Shown once.</summary>
-        [JsonPropertyName("secret")] public string Secret { get; init; } = "";
+        /// <summary>The successor's secret. Shown once. Null for a key_pair key.</summary>
+        [JsonPropertyName("secret")] public string? Secret { get; init; }
+        /// <summary>key_pair only, when Atlas generated the pair: the PKCS#8 PEM private key. Shown once; never stored or replayed.</summary>
+        [JsonPropertyName("private_key")] public string? PrivateKey { get; init; }
         [JsonPropertyName("previous_key")] public ApiKeysRotateResponsePreviousKey? PreviousKey { get; init; }
         [JsonPropertyName("overlap_seconds")] public long OverlapSeconds { get; init; }
         [JsonPropertyName("note")] public string? Note { get; init; }
@@ -1147,6 +1278,12 @@ namespace Atlas.Generated
         [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
         /// <summary>Relative lifetime of the successor. Not with expires_at.</summary>
         [JsonPropertyName("expires_in_seconds")] public long? ExpiresInSeconds { get; init; }
+        /// <summary>Your own secret for the successor: 16-256 printable characters, no whitespace. Needs `prefix`, and must start with it.</summary>
+        [JsonPropertyName("secret")] public string? Secret { get; init; }
+        /// <summary>With `secret`: the public head of the secret, shown in listings. Without `secret`: the brand for a generated secret.</summary>
+        [JsonPropertyName("prefix")] public string? Prefix { get; init; }
+        /// <summary>key_pair keys only: your own SPKI PEM public key (P-256 or Ed25519) for the successor. Omit it and Atlas generates a pair and returns `private_key` once.</summary>
+        [JsonPropertyName("public_key")] public string? PublicKey { get; init; }
         /// <summary>Send <c>null</c> for <c>name</c>, which clears it.</summary>
         public ApiKeysRotateBody ClearName() => this with { Cleared = Plus("name") };
         /// <summary>Send <c>null</c> for <c>expires_at</c>, which clears it.</summary>
@@ -1260,11 +1397,15 @@ namespace Atlas.Generated
     /// <summary>A ApprovalRequestsListResponseDataItemApprovers object.</summary>
     public sealed record ApprovalRequestsListResponseDataItemApprovers
     {
-        /// <summary>One of: subject, users, role.</summary>
+        /// <summary>One of: subject, users, role, group.</summary>
         [JsonPropertyName("mode")] public string? Mode { get; init; }
         [JsonPropertyName("user_ids")] public List<string>? UserIds { get; init; }
         [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
         [JsonPropertyName("role")] public string? Role { get; init; }
+        /// <summary>Present when several roles of the organization were named.</summary>
+        [JsonPropertyName("roles")] public List<string>? Roles { get; init; }
+        /// <summary>Present in mode `group`.</summary>
+        [JsonPropertyName("group_id")] public string? GroupId { get; init; }
         /// <summary>How many distinct approvers must approve.</summary>
         [JsonPropertyName("required")] public long? Required { get; init; }
     }
@@ -1275,8 +1416,10 @@ namespace Atlas.Generated
         [JsonPropertyName("approver_user_id")] public string? ApproverUserId { get; init; }
         /// <summary>One of: approve, deny.</summary>
         [JsonPropertyName("decision")] public string? Decision { get; init; }
-        /// <summary>One of: device_key, passkey, number_match.</summary>
+        /// <summary>`step_up` means the approver decided with a fresh step-up for the request's step-up policy instead of a device signature. One of: device_key, passkey, step_up, number_match.</summary>
         [JsonPropertyName("method")] public string? Method { get; init; }
+        /// <summary>The free-text note the approver left with this decision.</summary>
+        [JsonPropertyName("note")] public string? Note { get; init; }
         [JsonPropertyName("key_id")] public string? KeyId { get; init; }
         /// <summary>The trusted device the decision came from; null when it came from a device that is not trusted.</summary>
         [JsonPropertyName("trusted_device_id")] public string? TrustedDeviceId { get; init; }
@@ -1308,6 +1451,10 @@ namespace Atlas.Generated
         [JsonPropertyName("require_signature")] public bool? RequireSignature { get; init; }
         /// <summary>The request only accepts an approval from a trusted device.</summary>
         [JsonPropertyName("require_trusted_device")] public bool? RequireTrustedDevice { get; init; }
+        /// <summary>The user the request is about cannot decide it.</summary>
+        [JsonPropertyName("exclude_requester")] public bool? ExcludeRequester { get; init; }
+        /// <summary>The step-up policy an approver may satisfy instead of a device signature.</summary>
+        [JsonPropertyName("step_up_policy")] public string? StepUpPolicy { get; init; }
         [JsonPropertyName("approvers")] public ApprovalRequestsListResponseDataItemApprovers? Approvers { get; init; }
         /// <summary>SHA-256 of the canonical request (base64url): what an approver signs.</summary>
         [JsonPropertyName("digest")] public string? Digest { get; init; }
@@ -1381,18 +1528,24 @@ namespace Atlas.Generated
         [JsonPropertyName("approvers")] public Dictionary<string, object?>? Approvers { get; init; }
         [JsonPropertyName("require_signature")] public bool? RequireSignature { get; init; }
         [JsonPropertyName("require_trusted_device")] public bool? RequireTrustedDevice { get; init; }
+        [JsonPropertyName("exclude_requester")] public bool? ExcludeRequester { get; init; }
+        [JsonPropertyName("step_up_policy")] public string? StepUpPolicy { get; init; }
         [JsonPropertyName("digest")] public string? Digest { get; init; }
         [JsonPropertyName("reference")] public string? Reference { get; init; }
         [JsonPropertyName("binding")] public string? Binding { get; init; }
     }
 
-    /// <summary>Who decides. Leave out for the v1 flow (the user answers on their own device with number matching). Name `user_ids` (1 to 20) or an `organization_id` with a `role`; `required` of them must approve (default 1, at most the number of user ids). Any one denial ends the request. A role with fewer holders than `required` is refused with 422 (`meta.reason` = `approvers_insufficient`). A request with approvers always needs signed approvals.</summary>
+    /// <summary>Who decides. Leave out for the v1 flow (the user answers on their own device with number matching). Name `user_ids` (1 to 20), a `group_id` (every member of the group may decide), or an `organization_id` with a `role` (or up to 10 `roles`; a holder of any of them may decide). A role or group is the way to name a big set: "any 2 of ops" is the role `ops` with `required: 2`. `required` of them must approve (default 1; at most the number of user ids, and at most 50 for a role or group). Membership is read when someone decides, so leaving the group or role ends the right to decide. Any one denial ends the request. A role or group with fewer members than `required` is refused with 422 (`meta.reason` = `approvers_insufficient`). A request with approvers always needs signed approvals.</summary>
     public sealed record ApprovalRequestsCreateBodyApprovers : ClearableBody
     {
         [JsonPropertyName("user_ids")] public List<string>? UserIds { get; init; }
         [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
         /// <summary>An organization role key; members holding it may decide.</summary>
         [JsonPropertyName("role")] public string? Role { get; init; }
+        /// <summary>Several role keys of `organization_id`; a holder of any may decide. Not together with `role`.</summary>
+        [JsonPropertyName("roles")] public List<string>? Roles { get; init; }
+        /// <summary>A group; its members may decide. Not together with `user_ids` or `organization_id`.</summary>
+        [JsonPropertyName("group_id")] public string? GroupId { get; init; }
         [JsonPropertyName("required")] public long? Required { get; init; }
     }
 
@@ -1407,10 +1560,14 @@ namespace Atlas.Generated
         [JsonPropertyName("context")] public Dictionary<string, string>? Context { get; init; }
         /// <summary>How long the request stays open: 10 to 604800 seconds. Default 120.</summary>
         [JsonPropertyName("ttl_seconds")] public long? TtlSeconds { get; init; }
-        /// <summary>Who decides. Leave out for the v1 flow (the user answers on their own device with number matching). Name `user_ids` (1 to 20) or an `organization_id` with a `role`; `required` of them must approve (default 1, at most the number of user ids). Any one denial ends the request. A role with fewer holders than `required` is refused with 422 (`meta.reason` = `approvers_insufficient`). A request with approvers always needs signed approvals.</summary>
+        /// <summary>Who decides. Leave out for the v1 flow (the user answers on their own device with number matching). Name `user_ids` (1 to 20), a `group_id` (every member of the group may decide), or an `organization_id` with a `role` (or up to 10 `roles`; a holder of any of them may decide). A role or group is the way to name a big set: "any 2 of ops" is the role `ops` with `required: 2`. `required` of them must approve (default 1; at most the number of user ids, and at most 50 for a role or group). Membership is read when someone decides, so leaving the group or role ends the right to decide. Any one denial ends the request. A role or group with fewer members than `required` is refused with 422 (`meta.reason` = `approvers_insufficient`). A request with approvers always needs signed approvals.</summary>
         [JsonPropertyName("approvers")] public ApprovalRequestsCreateBodyApprovers? Approvers { get; init; }
         /// <summary>Demand a signature over the canonical request even from the user themselves. Default false.</summary>
         [JsonPropertyName("require_signature")] public bool? RequireSignature { get; init; }
+        /// <summary>The user the request is about can never approve or reject it, even holding the approver role (403 with `meta.reason` = `requester_excluded`). Needs `approvers`; refused with 422 when too few other approvers remain to reach `required`. Default false.</summary>
+        [JsonPropertyName("exclude_requester")] public bool? ExcludeRequester { get; init; }
+        /// <summary>Name of a step-up policy. An approver may then approve from a signed-in session that has just met that policy (within its max age) instead of signing with a device key or passkey; the receipt records the method as `step_up`. Device-signature approvals keep working. Refused with 400 when the policy does not exist or is disabled.</summary>
+        [JsonPropertyName("step_up_policy")] public string? StepUpPolicy { get; init; }
         /// <summary>Only an approval from a device the approver trusted (a signing key, passkey or push device marked trusted) counts; a denial never needs one. Refused with 422 (`meta.reason` = `no_trusted_device`) when too few approvers have a trusted device. The instance setting approvals.requireTrustedDevice makes this the rule for every request. Default false.</summary>
         [JsonPropertyName("require_trusted_device")] public bool? RequireTrustedDevice { get; init; }
         /// <summary>An opaque value (for example a hash of the tool and its arguments) the receipt can only be consumed against.</summary>
@@ -3475,6 +3632,8 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("max_implied_per_permission")] public long? MaxImpliedPerPermission { get; init; }
         [JsonPropertyName("key_max_length")] public long? KeyMaxLength { get; init; }
+        [JsonPropertyName("max_parts")] public long? MaxParts { get; init; }
+        [JsonPropertyName("part_max_length")] public long? PartMaxLength { get; init; }
     }
 
     /// <summary>A ConfigListLimitsResponseLimitsScopes object.</summary>
@@ -3749,6 +3908,49 @@ namespace Atlas.Generated
         [JsonPropertyName("topics")] public Dictionary<string, List<string>>? Topics { get; init; }
     }
 
+    /// <summary>A ConnectionProvidersListPoliciesResponseDataItem object.</summary>
+    public sealed record ConnectionProvidersListPoliciesResponseDataItem
+    {
+        /// <summary>One of: connection_provider_policy.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("provider")] public string Provider { get; init; } = "";
+        [JsonPropertyName("unique_external_id")] public bool UniqueExternalId { get; init; }
+        [JsonPropertyName("has_webhook_secret")] public bool HasWebhookSecret { get; init; }
+        /// <summary>eBay: whether the developer id for Platform Notifications is stored.</summary>
+        [JsonPropertyName("has_dev_id")] public bool? HasDevId { get; init; }
+        /// <summary>Where to point the provider's uninstall or revocation notices; null for a provider without one.</summary>
+        [JsonPropertyName("events_url")] public string? EventsUrl { get; init; }
+        [JsonPropertyName("updated_at")] public long? UpdatedAt { get; init; }
+    }
+
+    /// <summary>A ConnectionProvidersListPoliciesResponse object.</summary>
+    public sealed record ConnectionProvidersListPoliciesResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<ConnectionProvidersListPoliciesResponseDataItem>? Data { get; init; }
+        /// <summary>Whether another page follows the cursor.</summary>
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+        /// <summary>The cursor to pass as `starting_after` for the next page on a keyset-paginated list; null on the last page (and absent on lists that are not cursor-paginated).</summary>
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of ListPolicies. Unset values are not sent.</summary>
+    public sealed record ConnectionProvidersListPoliciesQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>A ConnectionProvidersGetPolicyResponse object.</summary>
     public sealed record ConnectionProvidersGetPolicyResponse
     {
@@ -3804,6 +4006,56 @@ namespace Atlas.Generated
         public ConnectionReconnectSettingsSetBody ClearReturnUrl() => this with { Cleared = Plus("return_url") };
     }
 
+    /// <summary>A ConnectionTemplatesListResponseDataItem object.</summary>
+    public sealed record ConnectionTemplatesListResponseDataItem
+    {
+        /// <summary>One of: connection_template.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("provider")] public string Provider { get; init; } = "";
+        [JsonPropertyName("name")] public string Name { get; init; } = "";
+        /// <summary>The connection kind to create.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        /// <summary>connect: the owner authorizes in a browser (POST /v1/connections/{id}/connect). credentials: you enter the secrets (PUT /v1/connections/{id}/credentials). One of: connect, credentials.</summary>
+        [JsonPropertyName("flow")] public string Flow { get; init; } = "";
+        /// <summary>The write-only secret fields the credential entry takes.</summary>
+        [JsonPropertyName("secrets")] public List<string> Secrets { get; init; } = new();
+        /// <summary>Non-secret config to send with the connection.</summary>
+        [JsonPropertyName("config")] public Dictionary<string, object?> Config { get; init; } = new();
+        [JsonPropertyName("allowed_hosts")] public List<string> AllowedHosts { get; init; } = new();
+        /// <summary>host_params names the connection needs (for example the store host).</summary>
+        [JsonPropertyName("host_params")] public List<string> HostParams { get; init; } = new();
+        [JsonPropertyName("signature")] public string Signature { get; init; } = "";
+        [JsonPropertyName("note")] public string Note { get; init; } = "";
+    }
+
+    /// <summary>A ConnectionTemplatesListResponse object.</summary>
+    public sealed record ConnectionTemplatesListResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<ConnectionTemplatesListResponseDataItem>? Data { get; init; }
+        /// <summary>Whether another page follows the cursor.</summary>
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+        /// <summary>The cursor to pass as `starting_after` for the next page on a keyset-paginated list; null on the last page (and absent on lists that are not cursor-paginated).</summary>
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record ConnectionTemplatesListQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>A ConnectionsOauthCompleteResponse object.</summary>
     public sealed record ConnectionsOauthCompleteResponse
     {
@@ -3850,6 +4102,46 @@ namespace Atlas.Generated
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
         /// <summary>One of: client_secret_basic, client_secret_post, private_key_jwt.</summary>
         [JsonPropertyName("token_endpoint_auth_method")] public string? TokenEndpointAuthMethod { get; init; }
+    }
+
+    /// <summary>A ConnectionsRehomeResponseDataItem object.</summary>
+    public sealed record ConnectionsRehomeResponseDataItem
+    {
+        [JsonPropertyName("connection_id")] public string ConnectionId { get; init; } = "";
+        /// <summary>One of: moved, would_move, would_verify, failed, skipped.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        /// <summary>Why a connection did not move (refresh_failed, needs_reauth, not_connected, revoked).</summary>
+        [JsonPropertyName("reason")] public string? Reason { get; init; }
+    }
+
+    /// <summary>A ConnectionsRehomeResponse object.</summary>
+    public sealed record ConnectionsRehomeResponse
+    {
+        /// <summary>One of: connection_rehome.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("from_client")] public string FromClient { get; init; } = "";
+        [JsonPropertyName("to_client")] public string ToClient { get; init; } = "";
+        [JsonPropertyName("dry_run")] public bool DryRun { get; init; }
+        [JsonPropertyName("same_app")] public bool SameApp { get; init; }
+        [JsonPropertyName("moved")] public long Moved { get; init; }
+        [JsonPropertyName("would_move")] public long WouldMove { get; init; }
+        [JsonPropertyName("failed")] public long Failed { get; init; }
+        [JsonPropertyName("skipped")] public long Skipped { get; init; }
+        [JsonPropertyName("data")] public List<ConnectionsRehomeResponseDataItem> Data { get; init; } = new();
+    }
+
+    /// <summary>A ConnectionsRehomeBody object.</summary>
+    public sealed record ConnectionsRehomeBody : ClearableBody
+    {
+        /// <summary>The id of the OAuth client the connections hold now.</summary>
+        [JsonPropertyName("from_client")] public string? FromClient { get; init; }
+        /// <summary>The id of the OAuth client to move them to (enabled).</summary>
+        [JsonPropertyName("to_client")] public string? ToClient { get; init; }
+        /// <summary>Move only these connections (up to 1000 connections move per call).</summary>
+        [JsonPropertyName("connection_ids")] public List<string>? ConnectionIds { get; init; }
+        [JsonPropertyName("dry_run")] public bool? DryRun { get; init; }
+        /// <summary>false is accepted only when both clients are the same provider app.</summary>
+        [JsonPropertyName("verify")] public bool? Verify { get; init; }
     }
 
     /// <summary>A ConnectionsListRelayLimitsResponse object.</summary>
@@ -4256,7 +4548,7 @@ namespace Atlas.Generated
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         [JsonPropertyName("id")] public string Id { get; init; } = "";
         [JsonPropertyName("owner")] public ConnectionsTransferResponseOwner? Owner { get; init; }
-        /// <summary>oauth, github_app_installation, admin_consent and a three-legged oauth1 are authorized by a browser step; client_credentials and jwt_bearer mint tokens from a credential Atlas holds; api_key, bearer, basic, custom_header and hmac_secret are typed secrets the owner enters. One of: oauth, api_key, client_credentials, bearer, basic, custom_header, hmac_secret, jwt_bearer, oauth1, github_app_installation, admin_consent.</summary>
+        /// <summary>oauth, github_app_installation, admin_consent and a three-legged oauth1 are authorized by a browser step; client_credentials and jwt_bearer mint tokens from a credential Atlas holds; api_key, bearer, basic, custom_header and hmac_secret are typed secrets the owner enters. One of: oauth, api_key, client_credentials, bearer, basic, custom_header, hmac_secret, jwt_bearer, oauth1, github_app_installation, admin_consent, cookie_jar.</summary>
         [JsonPropertyName("kind")] public string Kind { get; init; } = "";
         [JsonPropertyName("provider")] public string Provider { get; init; } = "";
         /// <summary>Your label for this account, for example "Support inbox".</summary>
@@ -5252,6 +5544,91 @@ namespace Atlas.Generated
         }
     }
 
+    /// <summary>A CustomDomainModelVerificationLastObservation object.</summary>
+    public sealed record CustomDomainModelVerificationLastObservation
+    {
+        /// <summary>The HTTP status.</summary>
+        [JsonPropertyName("status")] public long Status { get; init; }
+        [JsonPropertyName("content_type")] public string? ContentType { get; init; }
+        /// <summary>Body bytes seen; headers are not counted.</summary>
+        [JsonPropertyName("bytes")] public long Bytes { get; init; }
+        /// <summary>True when reading stopped at the 64 KiB read limit, so bytes is a lower bound.</summary>
+        [JsonPropertyName("bytes_capped")] public bool BytesCapped { get; init; }
+        /// <summary>The first 200 bytes of the body (printable characters only).</summary>
+        [JsonPropertyName("body_prefix")] public string BodyPrefix { get; init; } = "";
+        /// <summary>The URL that answered, including the per-check atlas_nonce query parameter. Redirects are not followed.</summary>
+        [JsonPropertyName("final_url")] public string FinalUrl { get; init; } = "";
+        /// <summary>The Location of a 3xx answer.</summary>
+        [JsonPropertyName("redirect_to")] public string? RedirectTo { get; init; }
+        /// <summary>The Age response header, when present.</summary>
+        [JsonPropertyName("age")] public long? Age { get; init; }
+        /// <summary>The cf-cache-status or x-cache response header, when present.</summary>
+        [JsonPropertyName("cache_status")] public string? CacheStatus { get; init; }
+        [JsonPropertyName("is_html")] public bool? IsHtml { get; init; }
+        /// <summary>True when age is above 0 or a cache header says HIT: a cache answered, not your origin.</summary>
+        [JsonPropertyName("served_from_cache")] public bool? ServedFromCache { get; init; }
+        /// <summary>When the fetch ran (ms since epoch).</summary>
+        [JsonPropertyName("checked_at")] public long CheckedAt { get; init; }
+    }
+
+    /// <summary>method path: the https file that proves the host. Its whole body is the token; the token is bound to this instance, host and base path.</summary>
+    public sealed record CustomDomainModelVerification
+    {
+        /// <summary>One of: https_file.</summary>
+        [JsonPropertyName("method")] public string Method { get; init; } = "";
+        [JsonPropertyName("url")] public string Url { get; init; } = "";
+        [JsonPropertyName("token")] public string Token { get; init; } = "";
+        [JsonPropertyName("content")] public string Content { get; init; } = "";
+        [JsonPropertyName("instructions")] public string Instructions { get; init; } = "";
+        /// <summary>After a rotation: the replaced token's URL, which still verifies until previous_valid_until.</summary>
+        [JsonPropertyName("previous_url")] public string? PreviousUrl { get; init; }
+        /// <summary>After a rotation: when the replaced token stops working (ms since epoch).</summary>
+        [JsonPropertyName("previous_valid_until")] public long? PreviousValidUntil { get; init; }
+        /// <summary>What the most recent failed verification fetch got back, so you can see what answered (a cache, a catch-all page) without guessing. Null until a check fails, and again after one passes.</summary>
+        [JsonPropertyName("last_observation")] public CustomDomainModelVerificationLastObservation? LastObservation { get; init; }
+    }
+
+    /// <summary>A CustomDomainModelDns object.</summary>
+    public sealed record CustomDomainModelDns
+    {
+        /// <summary>One of: cloudflare.</summary>
+        [JsonPropertyName("provider")] public string Provider { get; init; } = "";
+        [JsonPropertyName("token_set")] public bool TokenSet { get; init; }
+    }
+
+    /// <summary>A CustomDomainModel object.</summary>
+    public sealed record CustomDomainModel
+    {
+        /// <summary>One of: custom_domain.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("role")] public string Role { get; init; } = "";
+        [JsonPropertyName("host")] public string Host { get; init; } = "";
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        [JsonPropertyName("action")] public string Action { get; init; } = "";
+        [JsonPropertyName("live")] public bool Live { get; init; }
+        [JsonPropertyName("cname_target")] public string? CnameTarget { get; init; }
+        [JsonPropertyName("last_checked_at")] public long? LastCheckedAt { get; init; }
+        [JsonPropertyName("last_observed_target")] public string? LastObservedTarget { get; init; }
+        [JsonPropertyName("failure_reason")] public string? FailureReason { get; init; }
+        [JsonPropertyName("certificate_expires_at")] public long? CertificateExpiresAt { get; init; }
+        [JsonPropertyName("cookie_domain")] public string? CookieDomain { get; init; }
+        /// <summary>cname: proven by a CNAME to Atlas. path: a path mount on your own host, proven by an https file. One of: cname, path.</summary>
+        [JsonPropertyName("method")] public string? Method { get; init; }
+        /// <summary>method path: the prefix the Frontend API is served under.</summary>
+        [JsonPropertyName("base_path")] public string? BasePath { get; init; }
+        /// <summary>method path, once verified: atlas_ingress (the host is on Atlas's ingress, which routes the prefix) or customer_proxy (add the reverse-proxy rule in instructions). One of: atlas_ingress, customer_proxy.</summary>
+        [JsonPropertyName("routing")] public string? Routing { get; init; }
+        /// <summary>method path: the Frontend API (and, once verified, the issuer) — https://&lt;host&gt;&lt;base_path&gt;.</summary>
+        [JsonPropertyName("frontend_api_url")] public string? FrontendApiUrl { get; init; }
+        /// <summary>method path: the https file that proves the host. Its whole body is the token; the token is bound to this instance, host and base path.</summary>
+        [JsonPropertyName("verification")] public CustomDomainModelVerification? Verification { get; init; }
+        /// <summary>method path, once verified: type atlas_ingress (nothing to add) or reverse_proxy (upstream, the headers to forward, and nginx / Caddy / Traefik snippets).</summary>
+        [JsonPropertyName("instructions")] public Dictionary<string, object?>? Instructions { get; init; }
+        /// <summary>DNS automation: the provider Atlas writes this host's record with. The API token is write-only and never returned.</summary>
+        [JsonPropertyName("dns")] public CustomDomainModelDns? Dns { get; init; }
+    }
+
     /// <summary>A DsrConsoleListRequestsResponse object.</summary>
     public sealed record DsrConsoleListRequestsResponse
     {
@@ -6130,6 +6507,75 @@ namespace Atlas.Generated
         public FraudSetEmailRiskSettingsBody ClearCredentials() => this with { Cleared = Plus("credentials") };
     }
 
+    /// <summary>A GrantsListResponseDataItem object.</summary>
+    public sealed record GrantsListResponseDataItem
+    {
+        /// <summary>One of: grant.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>`consent` is the user's recorded consent; `managed` is an OpenID Grant Management grant (`grant_id`). One of: consent, managed.</summary>
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        [JsonPropertyName("client_id")] public string? ClientId { get; init; }
+        [JsonPropertyName("client_name")] public string? ClientName { get; init; }
+        [JsonPropertyName("user_id")] public string UserId { get; init; } = "";
+        [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+        /// <summary>One of: active, revoked.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        [JsonPropertyName("scopes")] public List<string> Scopes { get; init; } = new();
+        /// <summary>Managed grants: the API the grant covers.</summary>
+        [JsonPropertyName("resource")] public string? Resource { get; init; }
+        [JsonPropertyName("authorization_details")] public List<Dictionary<string, object?>>? AuthorizationDetails { get; init; }
+        /// <summary>Managed grants: bumped by every merge, replace and narrowing.</summary>
+        [JsonPropertyName("revision")] public long? Revision { get; init; }
+        /// <summary>The JSON you set at consent accept or with PATCH. Never shown to the user.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?> Metadata { get; init; } = new();
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+        [JsonPropertyName("updated_at")] public long? UpdatedAt { get; init; }
+        /// <summary>The last time a token was issued or refreshed under the grant (Unix ms).</summary>
+        [JsonPropertyName("last_used_at")] public long? LastUsedAt { get; init; }
+        [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
+        /// <summary>Managed grants: client, user, admin or system.</summary>
+        [JsonPropertyName("revoked_by")] public string? RevokedBy { get; init; }
+    }
+
+    /// <summary>A GrantsListResponse object.</summary>
+    public sealed record GrantsListResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<GrantsListResponseDataItem> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool HasMore { get; init; }
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record GrantsListQuery
+    {
+        /// <summary>Only this user's grants.</summary>
+        public string? UserId { get; init; }
+        /// <summary>Only grants held by this OAuth client (its public client_id).</summary>
+        public string? ClientId { get; init; }
+        /// <summary>Only this kind of grant. Default all. One of: consent, managed, all.</summary>
+        public string? Type { get; init; }
+        /// <summary>Only grants in this state. Default active. One of: active, revoked, all.</summary>
+        public string? Status { get; init; }
+        /// <summary>Page size. Defaults to 50; values above 100 are capped at 100.</summary>
+        public long? Limit { get; init; }
+        /// <summary>The `next_cursor` of the previous page.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("user_id", UserId);
+            yield return new KeyValuePair<string, object?>("client_id", ClientId);
+            yield return new KeyValuePair<string, object?>("type", Type);
+            yield return new KeyValuePair<string, object?>("status", Status);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>A GrantsConsumeResponseLease object.</summary>
     public sealed record GrantsConsumeResponseLease
     {
@@ -6253,6 +6699,12 @@ namespace Atlas.Generated
         [JsonPropertyName("live")] public bool? Live { get; init; }
         [JsonPropertyName("counters")] public List<GrantsGetUsageResponseCountersItem>? Counters { get; init; }
         [JsonPropertyName("leases")] public List<GrantsGetUsageResponseLeasesItem>? Leases { get; init; }
+    }
+
+    /// <summary>A GrantsUpdateBody object.</summary>
+    public sealed record GrantsUpdateBody : ClearableBody
+    {
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
     }
 
     /// <summary>A IgaListActivationsResponseDataItem object.</summary>
@@ -7037,6 +7489,218 @@ namespace Atlas.Generated
         [JsonPropertyName("expected_sha256")] public string? ExpectedSha256 { get; init; }
     }
 
+    /// <summary>A InstanceUpdateCookieConsentResponseSettingsLink object.</summary>
+    public sealed record InstanceUpdateCookieConsentResponseSettingsLink
+    {
+        [JsonPropertyName("label")] public string Label { get; init; } = "";
+        /// <summary>The per-locale labels you set.</summary>
+        [JsonPropertyName("labels")] public Dictionary<string, string> Labels { get; init; } = new();
+        /// <summary>The text the link renders on a page in each supported locale.</summary>
+        [JsonPropertyName("rendered_labels")] public Dictionary<string, string> RenderedLabels { get; init; } = new();
+        /// <summary>One of: cookiemunch, cookiebot, onetrust, custom.</summary>
+        [JsonPropertyName("preset")] public string? Preset { get; init; }
+        /// <summary>The attributes you set.</summary>
+        [JsonPropertyName("attributes")] public Dictionary<string, string> Attributes { get; init; } = new();
+        /// <summary>The attributes the rendered link carries: yours plus the preset's trigger.</summary>
+        [JsonPropertyName("rendered_attributes")] public Dictionary<string, string> RenderedAttributes { get; init; } = new();
+    }
+
+    /// <summary>Present when the lifetime follows an instance setting (session.absoluteMs for __atlas_rt, __atlas_uat, __atlas_sessions and __atlas_fedcm): lifetime_seconds is this instance's value, which wins over the default the product-wide embed manifest shows; min/max bound what any instance can set.</summary>
+    public sealed record InstanceUpdateCookieConsentResponseDeclaredCookiesItemLifetimeRange
+    {
+        [JsonPropertyName("setting")] public string Setting { get; init; } = "";
+        [JsonPropertyName("min_seconds")] public long MinSeconds { get; init; }
+        [JsonPropertyName("max_seconds")] public long MaxSeconds { get; init; }
+        [JsonPropertyName("default_seconds")] public long DefaultSeconds { get; init; }
+    }
+
+    /// <summary>A InstanceUpdateCookieConsentResponseDeclaredCookiesItem object.</summary>
+    public sealed record InstanceUpdateCookieConsentResponseDeclaredCookiesItem
+    {
+        /// <summary>The exact name, or null when pattern describes a family of keys.</summary>
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        /// <summary>A * wildcard for keys with an id suffix, e.g. atlasid:*.</summary>
+        [JsonPropertyName("pattern")] public string? Pattern { get; init; }
+        /// <summary>One of: cookie, localStorage, sessionStorage, indexedDB.</summary>
+        [JsonPropertyName("store")] public string Store { get; init; } = "";
+        /// <summary>For a cookie: its Domain (a leading dot = your registrable domain and its subdomains, when cross-subdomain cookies are on) or the exact Frontend API host for a host-only cookie. For storage: "your app's origin".</summary>
+        [JsonPropertyName("domain")] public string Domain { get; init; } = "";
+        /// <summary>For a cookie: the Path it is set at. On a path mount, __session and __atlas_uat stay at / (your app reads them) and every other Atlas cookie moves under the base path (/__atlas, /__atlas/v1, ...). Null for browser storage.</summary>
+        [JsonPropertyName("path")] public string? Path { get; init; }
+        /// <summary>Seconds; null = browser session (cookie) or until cleared (storage).</summary>
+        [JsonPropertyName("lifetime_seconds")] public long? LifetimeSeconds { get; init; }
+        /// <summary>The lifetime in words, for a cookie policy table.</summary>
+        [JsonPropertyName("lifetime")] public string Lifetime { get; init; } = "";
+        /// <summary>Present when the lifetime follows an instance setting (session.absoluteMs for __atlas_rt, __atlas_uat, __atlas_sessions and __atlas_fedcm): lifetime_seconds is this instance's value, which wins over the default the product-wide embed manifest shows; min/max bound what any instance can set.</summary>
+        [JsonPropertyName("lifetime_range")] public InstanceUpdateCookieConsentResponseDeclaredCookiesItemLifetimeRange? LifetimeRange { get; init; }
+        [JsonPropertyName("http_only")] public bool HttpOnly { get; init; }
+        /// <summary>One of: necessary.</summary>
+        [JsonPropertyName("category")] public string Category { get; init; } = "";
+        /// <summary>English.</summary>
+        [JsonPropertyName("purpose")] public string Purpose { get; init; } = "";
+        /// <summary>The purpose in every language the hosted pages speak, keyed by locale (en, es, fr, de, pt-BR, ja, nl, ar, he, fa, hi, zh-Hans, zh-Hant, ko, it, pl, tr, ru, sv, id, vi, th).</summary>
+        [JsonPropertyName("purposes")] public Dictionary<string, string> Purposes { get; init; } = new();
+        [JsonPropertyName("written_when")] public string WrittenWhen { get; init; } = "";
+        /// <summary>One of: atlas_frontend_api, atlas_sdk.</summary>
+        [JsonPropertyName("set_by")] public string SetBy { get; init; } = "";
+    }
+
+    /// <summary>How the Frontend API is served: default (the shared Atlas host), custom_domain (a CNAME), or path_mount (base_path on your own host, routed by Atlas's ingress or by your reverse proxy; the cookies are the same either way).</summary>
+    public sealed record InstanceUpdateCookieConsentResponseFrontendMode
+    {
+        /// <summary>One of: default, custom_domain, path_mount.</summary>
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        /// <summary>The bare host the cookies live on.</summary>
+        [JsonPropertyName("host")] public string Host { get; init; } = "";
+        /// <summary>path_mount only: the prefix, e.g. /__atlas.</summary>
+        [JsonPropertyName("base_path")] public string? BasePath { get; init; }
+    }
+
+    /// <summary>Only where one exact Backend API call is the whole remedy: that call, ready to send. It is one of the remedies fix describes, so read fix first.</summary>
+    public sealed record PreflightFindingModelFixCall
+    {
+        /// <summary>One of: POST, PUT, PATCH.</summary>
+        [JsonPropertyName("method")] public string Method { get; init; } = "";
+        [JsonPropertyName("path")] public string Path { get; init; } = "";
+        [JsonPropertyName("body")] public Dictionary<string, object?>? Body { get; init; }
+    }
+
+    /// <summary>Present when the code is acknowledged (PUT /v1/instance/preflight/acks/{code}): a known, accepted warning or info finding that no longer counts. Never on an error.</summary>
+    public sealed record PreflightFindingModelAcknowledged
+    {
+        [JsonPropertyName("reason")] public string Reason { get; init; } = "";
+        /// <summary>The API key or dashboard user that acknowledged it.</summary>
+        [JsonPropertyName("by")] public string? By { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("at")] public long At { get; init; }
+        /// <summary>Epoch ms; null = until removed.</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+    }
+
+    /// <summary>A PreflightFindingModel object.</summary>
+    public sealed record PreflightFindingModel
+    {
+        /// <summary>One of: error, warning, info.</summary>
+        [JsonPropertyName("severity")] public string Severity { get; init; } = "";
+        /// <summary>Stable snake_case identifier. Every code is listed by GET /v1/instance/preflight/codes.</summary>
+        [JsonPropertyName("code")] public string Code { get; init; } = "";
+        /// <summary>What is wrong, in a plain sentence.</summary>
+        [JsonPropertyName("message")] public string Message { get; init; } = "";
+        /// <summary>What to do about it, in a plain sentence.</summary>
+        [JsonPropertyName("fix")] public string Fix { get; init; } = "";
+        /// <summary>Only where one exact Backend API call is the whole remedy: that call, ready to send. It is one of the remedies fix describes, so read fix first.</summary>
+        [JsonPropertyName("fix_call")] public PreflightFindingModelFixCall? FixCall { get; init; }
+        /// <summary>With fix_call: the complete body of that call, ready to send as it is.</summary>
+        [JsonPropertyName("autofix_body")] public Dictionary<string, object?>? AutofixBody { get; init; }
+        /// <summary>With fix_call: true only when the call cannot lock anyone out or change sign-in for existing users.</summary>
+        [JsonPropertyName("safe_to_autofix")] public bool? SafeToAutofix { get; init; }
+        /// <summary>Ids of what the finding is about (provider, id/client_id, origin, domain_id/host, site_id, …).</summary>
+        [JsonPropertyName("subject")] public Dictionary<string, string>? Subject { get; init; }
+        /// <summary>Set on the security posture findings (weaker than the defaults new instances get). One of: security_posture.</summary>
+        [JsonPropertyName("group")] public string? Group { get; init; }
+        /// <summary>Only with include_suppressed=true: the finding does not apply to how the instance integrates. One of: True.</summary>
+        [JsonPropertyName("suppressed")] public string? Suppressed { get; init; }
+        /// <summary>Only with include_suppressed=true: why it does not apply.</summary>
+        [JsonPropertyName("suppressed_reason")] public string? SuppressedReason { get; init; }
+        /// <summary>Present when the code is acknowledged (PUT /v1/instance/preflight/acks/{code}): a known, accepted warning or info finding that no longer counts. Never on an error.</summary>
+        [JsonPropertyName("acknowledged")] public PreflightFindingModelAcknowledged? Acknowledged { get; init; }
+    }
+
+    /// <summary>A InstanceUpdateCookieConsentResponse object.</summary>
+    public sealed record InstanceUpdateCookieConsentResponse
+    {
+        /// <summary>One of: cookie_consent.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>Whether the CMP (and the settings link) render on the hosted pages.</summary>
+        [JsonPropertyName("enabled")] public bool Enabled { get; init; }
+        /// <summary>The CMP script URL (https).</summary>
+        [JsonPropertyName("script_url")] public string? ScriptUrl { get; init; }
+        [JsonPropertyName("script_id")] public string? ScriptId { get; init; }
+        [JsonPropertyName("site_id")] public string? SiteId { get; init; }
+        /// <summary>The site reference ({ provider, host }) when the site was named by reference; site_id is what it resolved to.</summary>
+        [JsonPropertyName("site")] public Dictionary<string, object?>? Site { get; init; }
+        [JsonPropertyName("blocking_mode")] public string? BlockingMode { get; init; }
+        [JsonPropertyName("extra_origins")] public List<string>? ExtraOrigins { get; init; }
+        [JsonPropertyName("settings_link")] public InstanceUpdateCookieConsentResponseSettingsLink? SettingsLink { get; init; }
+        /// <summary>page (default): the CMP tag carries data-culture=&lt;page language&gt;, the same tag as &lt;html lang&gt;. browser: no attribute. One of: page, browser.</summary>
+        [JsonPropertyName("culture")] public string? Culture { get; init; }
+        /// <summary>Every cookie and browser-storage key Atlas writes for this instance, computed from its Frontend API host and cross-subdomain cookie setting. All strictly necessary. Present on the read.</summary>
+        [JsonPropertyName("declared_cookies")] public List<InstanceUpdateCookieConsentResponseDeclaredCookiesItem>? DeclaredCookies { get; init; }
+        /// <summary>How the Frontend API is served: default (the shared Atlas host), custom_domain (a CNAME), or path_mount (base_path on your own host, routed by Atlas's ingress or by your reverse proxy; the cookies are the same either way).</summary>
+        [JsonPropertyName("frontend_mode")] public InstanceUpdateCookieConsentResponseFrontendMode? FrontendMode { get; init; }
+        /// <summary>Where the effective setting comes from: manual (PUT, always wins), integration (an enabled integration with a cmp, else a consent manager's outbound partner link), or none. One of: manual, integration, none.</summary>
+        [JsonPropertyName("source")] public string? Source { get; init; }
+        /// <summary>With source integration: the integration id, or `partner_link:&lt;link id&gt;` when a partner link provides it.</summary>
+        [JsonPropertyName("source_integration")] public string? SourceIntegration { get; init; }
+        /// <summary>The declared host aliases (see the PUT body).</summary>
+        [JsonPropertyName("host_aliases")] public List<string>? HostAliases { get; init; }
+        /// <summary>Findings from checking a Cookie Munch site id against Cookie Munch: cmp_site_unknown, cmp_site_domain_mismatch, or cmp_site_check_unavailable when Cookie Munch could not be reached. Empty when the site checks out or there is nothing to check. Never blocks the save.</summary>
+        [JsonPropertyName("warnings")] public List<PreflightFindingModel> Warnings { get; init; } = new();
+    }
+
+    /// <summary>Name the CMP site by reference instead of site_id. Atlas looks up the verified site registered for the host (or a parent domain) through the linked partner platform on every save and stores both the reference and the resolved id; the check re-resolves when it fails. 400 when the provider is not linked or no site matches the host.</summary>
+    public sealed record InstanceUpdateCookieConsentBodySite : ClearableBody
+    {
+        /// <summary>The linked partner platform id, e.g. cookiemunch.</summary>
+        [JsonPropertyName("provider")] public string? Provider { get; init; }
+        /// <summary>The host the site is registered for.</summary>
+        [JsonPropertyName("host")] public string? Host { get; init; }
+    }
+
+    /// <summary>A "Cookie settings" link in the footer of the hosted sign-in, sign-up and account pages and Sign in with Atlas pages, for reopening the CMP preferences. Needs a preset or at least one attribute. null or omitted: no link. Unknown fields inside it are reported in Atlas-Unknown-Fields (e.g. settings_link.foo).</summary>
+    public sealed record InstanceUpdateCookieConsentBodySettingsLink : ClearableBody
+    {
+        /// <summary>The base link text (English), e.g. "Cookie settings".</summary>
+        [JsonPropertyName("label")] public string? Label { get; init; }
+        /// <summary>Per-language link text, keyed by page locale (any language the hosted pages speak: en, es, fr, de, pt-BR, ja, nl, ar, he, fa, hi, zh-Hans, zh-Hant, ko, it, pl, tr, ru, sv, id, vi, th; any other key is refused with a 400). Each value is 1-60 characters. The hosted page renders labels[&lt;page locale&gt;], else (on a non-English page) the preset's own translation of "Cookie settings", else label.</summary>
+        [JsonPropertyName("labels")] public Dictionary<string, string>? Labels { get; init; }
+        /// <summary>Fills in the CMP's reopen trigger: cookiemunch adds data-cc="show-settings"; cookiebot calls Cookiebot.renew(); onetrust calls OneTrust.ToggleInfoDisplay(); custom adds nothing (use attributes). One of: cookiemunch, cookiebot, onetrust, custom.</summary>
+        [JsonPropertyName("preset")] public string? Preset { get; init; }
+        /// <summary>Extra attributes for the link. Allowed names: data-*, aria-*, id, class, and href (an https URL or a #fragment). Event handlers (on*), style and every other name are refused with a 400; data-atlas-* is reserved for presets. Values are at most 200 characters and are HTML-escaped.</summary>
+        [JsonPropertyName("attributes")] public Dictionary<string, string>? Attributes { get; init; }
+        /// <summary>Send <c>null</c> for <c>preset</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBodySettingsLink ClearPreset() => this with { Cleared = Plus("preset") };
+    }
+
+    /// <summary>The whole setting (script_url required), or just { "enabled": false | true } to switch a stored setting off or on without deleting it, or just { "host_aliases": [...] } to declare hosts.</summary>
+    public sealed record InstanceUpdateCookieConsentBody : ClearableBody
+    {
+        /// <summary>false keeps the configuration but renders nothing (no CMP script, no CSP origins, no settings link). Default true. Sent alone, it toggles the stored setting.</summary>
+        [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
+        /// <summary>Your CMP script URL. Must be https; its origin is added to the page CSP.</summary>
+        [JsonPropertyName("script_url")] public string? ScriptUrl { get; init; }
+        /// <summary>The &lt;script id&gt; some CMPs need.</summary>
+        [JsonPropertyName("script_id")] public string? ScriptId { get; init; }
+        /// <summary>Your CMP site id (sent as data-cbid). Send this or site, not both.</summary>
+        [JsonPropertyName("site_id")] public string? SiteId { get; init; }
+        /// <summary>Name the CMP site by reference instead of site_id. Atlas looks up the verified site registered for the host (or a parent domain) through the linked partner platform on every save and stores both the reference and the resolved id; the check re-resolves when it fails. 400 when the provider is not linked or no site matches the host.</summary>
+        [JsonPropertyName("site")] public InstanceUpdateCookieConsentBodySite? Site { get; init; }
+        /// <summary>The CMP prior-blocking mode, e.g. "auto" (sent as data-blockingmode).</summary>
+        [JsonPropertyName("blocking_mode")] public string? BlockingMode { get; init; }
+        /// <summary>Other https URLs the CMP loads from or calls; each origin is added to the page CSP.</summary>
+        [JsonPropertyName("extra_origins")] public List<string>? ExtraOrigins { get; init; }
+        /// <summary>A "Cookie settings" link in the footer of the hosted sign-in, sign-up and account pages and Sign in with Atlas pages, for reopening the CMP preferences. Needs a preset or at least one attribute. null or omitted: no link. Unknown fields inside it are reported in Atlas-Unknown-Fields (e.g. settings_link.foo).</summary>
+        [JsonPropertyName("settings_link")] public InstanceUpdateCookieConsentBodySettingsLink? SettingsLink { get; init; }
+        /// <summary>page (default): the CMP tag on the hosted pages carries data-culture=&lt;the page language&gt; (?locale=, else Accept-Language), so the banner matches the page. browser: no data-culture; the CMP picks its own language. One of: page, browser.</summary>
+        [JsonPropertyName("culture")] public string? Culture { get; init; }
+        /// <summary>Hosts the hosted pages are served on that your consent manager's site is knowingly not registered for, typically the instance's default `&lt;slug&gt;-fapi.atlasauth.net` host when your product has no domain of its own to register. Bare hostnames. A Cookie Munch site check that finds the site registered for another domain reads as ok on these hosts (no cmp_site_domain_mismatch). Sent alone ({ "host_aliases": [...] }) it sets only the aliases and keeps the CMP setting, also when an integration supplies the CMP; [] or null clears them. Omitted on a full PUT, they stay as they are. DELETE clears them.</summary>
+        [JsonPropertyName("host_aliases")] public List<string>? HostAliases { get; init; }
+        /// <summary>Send <c>null</c> for <c>script_id</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBody ClearScriptId() => this with { Cleared = Plus("script_id") };
+        /// <summary>Send <c>null</c> for <c>site_id</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBody ClearSiteId() => this with { Cleared = Plus("site_id") };
+        /// <summary>Send <c>null</c> for <c>site</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBody ClearSite() => this with { Cleared = Plus("site") };
+        /// <summary>Send <c>null</c> for <c>blocking_mode</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBody ClearBlockingMode() => this with { Cleared = Plus("blocking_mode") };
+        /// <summary>Send <c>null</c> for <c>settings_link</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBody ClearSettingsLink() => this with { Cleared = Plus("settings_link") };
+        /// <summary>Send <c>null</c> for <c>culture</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBody ClearCulture() => this with { Cleared = Plus("culture") };
+        /// <summary>Send <c>null</c> for <c>host_aliases</c>, which clears it.</summary>
+        public InstanceUpdateCookieConsentBody ClearHostAliases() => this with { Cleared = Plus("host_aliases") };
+    }
+
     /// <summary>A InstanceSetDataKeyProviderBody object.</summary>
     public sealed record InstanceSetDataKeyProviderBody : ClearableBody
     {
@@ -7255,6 +7919,79 @@ namespace Atlas.Generated
         [JsonPropertyName("expires_at")] public long ExpiresAt { get; init; }
     }
 
+    /// <summary>The outcome of the last call. Null until the first sign-in reaches the hook.</summary>
+    public sealed record InstanceGetHooksBeforeFirstSessionResponseLastCall
+    {
+        [JsonPropertyName("at")] public long? At { get; init; }
+        /// <summary>One of: ok, timeout, error, invalid_response.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("error")] public string? Error { get; init; }
+    }
+
+    /// <summary>A InstanceGetHooksBeforeFirstSessionResponse object.</summary>
+    public sealed record InstanceGetHooksBeforeFirstSessionResponse
+    {
+        /// <summary>One of: before_first_session_hook.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("enabled")] public bool Enabled { get; init; }
+        /// <summary>Your endpoint. https only (http only for localhost on a development instance).</summary>
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        /// <summary>Whether a signing secret is stored (the value is never returned).</summary>
+        [JsonPropertyName("signing_secret_set")] public bool SigningSecretSet { get; init; }
+        /// <summary>How long a sign-in waits for the hook (500-5000, default 3000).</summary>
+        [JsonPropertyName("timeout_ms")] public long TimeoutMs { get; init; }
+        /// <summary>The outcome of the last call. Null until the first sign-in reaches the hook.</summary>
+        [JsonPropertyName("last_call")] public InstanceGetHooksBeforeFirstSessionResponseLastCall? LastCall { get; init; }
+        /// <summary>Calls that failed since the last good one. A failed call lets the sign-in continue without an external_id; each one is also in the audit log (before_first_session_hook.failed).</summary>
+        [JsonPropertyName("failed_calls")] public long? FailedCalls { get; init; }
+        [JsonPropertyName("updated_at")] public long? UpdatedAt { get; init; }
+    }
+
+    /// <summary>A InstanceUpdateHooksBeforeFirstSessionBody object.</summary>
+    public sealed record InstanceUpdateHooksBeforeFirstSessionBody : ClearableBody
+    {
+        /// <summary>Turning on requires url and signing_secret.</summary>
+        [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
+        /// <summary>https only (http only for localhost on a development instance); null clears.</summary>
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        /// <summary>Write-only, 16-512 characters; null clears.</summary>
+        [JsonPropertyName("signing_secret")] public string? SigningSecret { get; init; }
+        [JsonPropertyName("timeout_ms")] public long? TimeoutMs { get; init; }
+        /// <summary>Send <c>null</c> for <c>url</c>, which clears it.</summary>
+        public InstanceUpdateHooksBeforeFirstSessionBody ClearUrl() => this with { Cleared = Plus("url") };
+        /// <summary>Send <c>null</c> for <c>signing_secret</c>, which clears it.</summary>
+        public InstanceUpdateHooksBeforeFirstSessionBody ClearSigningSecret() => this with { Cleared = Plus("signing_secret") };
+    }
+
+    /// <summary>A InstanceHooksBeforeFirstSessionTestResponseAnswer object.</summary>
+    public sealed record InstanceHooksBeforeFirstSessionTestResponseAnswer
+    {
+        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
+    }
+
+    /// <summary>A InstanceHooksBeforeFirstSessionTestResponseError object.</summary>
+    public sealed record InstanceHooksBeforeFirstSessionTestResponseError
+    {
+        /// <summary>timeout, error, invalid_response or not_configured.</summary>
+        [JsonPropertyName("code")] public string? Code { get; init; }
+        [JsonPropertyName("message")] public string? Message { get; init; }
+    }
+
+    /// <summary>A InstanceHooksBeforeFirstSessionTestResponse object.</summary>
+    public sealed record InstanceHooksBeforeFirstSessionTestResponse
+    {
+        /// <summary>True when the receiver answered as a working one should (2xx for a webhook; a valid answer or a deny for a hook). Null while a webhook test is only queued (no ?wait).</summary>
+        [JsonPropertyName("ok")] public bool? Ok { get; init; }
+        /// <summary>success or failed once attempted; pending while a webhook test is queued. One of: success, failed, pending.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        /// <summary>The HTTP status the receiver answered with; null when no answer came (timeout, network error) or nothing was sent yet.</summary>
+        [JsonPropertyName("http_status")] public long? HttpStatus { get; init; }
+        /// <summary>How long the attempt took; null when nothing was sent yet.</summary>
+        [JsonPropertyName("latency_ms")] public long? LatencyMs { get; init; }
+        [JsonPropertyName("answer")] public InstanceHooksBeforeFirstSessionTestResponseAnswer? Answer { get; init; }
+        [JsonPropertyName("error")] public InstanceHooksBeforeFirstSessionTestResponseError? Error { get; init; }
+    }
+
     /// <summary>The outcome of the last REAL call (a sign-up); "Test hook" calls do not change it. Null until the first real sign-up reaches the hook. Every call, tests included, is in GET …/before_user_create/calls.</summary>
     public sealed record InstanceGetHooksBeforeUserCreateResponseLastCall
     {
@@ -7430,6 +8167,112 @@ namespace Atlas.Generated
         [JsonPropertyName("config_mode")] public string? ConfigMode { get; init; }
     }
 
+    /// <summary>A InstanceGetIntegrationsForwardingResponse object.</summary>
+    public sealed record InstanceGetIntegrationsForwardingResponse
+    {
+        /// <summary>One of: integration_forwarding.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>One of: lucida, hermetica, seolyticize, webhook.</summary>
+        [JsonPropertyName("forwarding")] public string? Forwarding { get; init; }
+        /// <summary>One of: user.created.</summary>
+        [JsonPropertyName("event")] public string? Event { get; init; }
+        /// <summary>The managed webhook endpoint.</summary>
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("active")] public bool? Active { get; init; }
+    }
+
+    /// <summary>A InstanceReplaceIntegrationsForwardingResponse object.</summary>
+    public sealed record InstanceReplaceIntegrationsForwardingResponse
+    {
+        /// <summary>One of: integration_forwarding.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>One of: lucida, hermetica, seolyticize, webhook.</summary>
+        [JsonPropertyName("forwarding")] public string? Forwarding { get; init; }
+        /// <summary>One of: user.created.</summary>
+        [JsonPropertyName("event")] public string? Event { get; init; }
+        [JsonPropertyName("created")] public bool? Created { get; init; }
+        /// <summary>The managed webhook endpoint.</summary>
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        /// <summary>webhook only, on create: the signing secret, shown once.</summary>
+        [JsonPropertyName("secret")] public string? Secret { get; init; }
+    }
+
+    /// <summary>A InstanceReplaceIntegrationsForwardingBody object.</summary>
+    public sealed record InstanceReplaceIntegrationsForwardingBody : ClearableBody
+    {
+        /// <summary>lucida, hermetica, seolyticize: the destination's server-side key (write-only).</summary>
+        [JsonPropertyName("server_key")] public string? ServerKey { get; init; }
+        /// <summary>seolyticize: the site key.</summary>
+        [JsonPropertyName("site_key")] public string? SiteKey { get; init; }
+        /// <summary>seolyticize: an https page of the site, used when a sign-up's visit is unknown to Seolyticize. Defaults to the first https allowed origin.</summary>
+        [JsonPropertyName("site_url")] public string? SiteUrl { get; init; }
+        /// <summary>lucida, hermetica: an https host other than the default.</summary>
+        [JsonPropertyName("host")] public string? Host { get; init; }
+        /// <summary>seolyticize: which event records the conversion. One of: user.created, user.attributed.</summary>
+        [JsonPropertyName("conversion_event")] public string? ConversionEvent { get; init; }
+        /// <summary>lucida, seolyticize: send email, name, ip and user agent. Default false.</summary>
+        [JsonPropertyName("include_pii")] public bool? IncludePii { get; init; }
+        /// <summary>webhook: the https receiver.</summary>
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        [JsonPropertyName("active")] public bool? Active { get; init; }
+    }
+
+    /// <summary>A InstanceGetIntegrationsHealthResponseDataItemLastFailure object.</summary>
+    public sealed record InstanceGetIntegrationsHealthResponseDataItemLastFailure
+    {
+        [JsonPropertyName("at")] public long? At { get; init; }
+        [JsonPropertyName("status")] public long? Status { get; init; }
+        [JsonPropertyName("error")] public string? Error { get; init; }
+    }
+
+    /// <summary>A InstanceGetIntegrationsHealthResponseDataItem object.</summary>
+    public sealed record InstanceGetIntegrationsHealthResponseDataItem
+    {
+        /// <summary>One of: webhook_endpoint, integration, privacy_orchestrator.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        /// <summary>The connected platform that owns it, if any.</summary>
+        [JsonPropertyName("managed_by")] public string? ManagedBy { get; init; }
+        /// <summary>The receiver type: https, a destination such as lucida, events_receiver, tokens_only or case_api.</summary>
+        [JsonPropertyName("destination")] public string? Destination { get; init; }
+        /// <summary>One of: healthy, failing, disabled, inactive, no_deliveries, unknown.</summary>
+        [JsonPropertyName("state")] public string State { get; init; } = "";
+        [JsonPropertyName("last_success_at")] public long? LastSuccessAt { get; init; }
+        [JsonPropertyName("last_failure")] public InstanceGetIntegrationsHealthResponseDataItemLastFailure? LastFailure { get; init; }
+        [JsonPropertyName("consecutive_failures")] public long? ConsecutiveFailures { get; init; }
+        /// <summary>integration only: the last token minted for it.</summary>
+        [JsonPropertyName("last_minted_at")] public long? LastMintedAt { get; init; }
+    }
+
+    /// <summary>A InstanceGetIntegrationsHealthResponse object.</summary>
+    public sealed record InstanceGetIntegrationsHealthResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<InstanceGetIntegrationsHealthResponseDataItem> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+        [JsonPropertyName("unhealthy_count")] public long UnhealthyCount { get; init; }
+        [JsonPropertyName("generated_at")] public long? GeneratedAt { get; init; }
+    }
+
+    /// <summary>Query parameters of GetIntegrationsHealth. Unset values are not sent.</summary>
+    public sealed record InstanceGetIntegrationsHealthQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>A InstanceListIntegrationsMintsResponseDataItem object.</summary>
     public sealed record InstanceListIntegrationsMintsResponseDataItem
     {
@@ -7531,6 +8374,19 @@ namespace Atlas.Generated
         {
             yield return new KeyValuePair<string, object?>("wait", Wait);
         }
+    }
+
+    /// <summary>A InstanceListIssuersResponse object.</summary>
+    public sealed record InstanceListIssuersResponse
+    {
+        /// <summary>The `iss` new tokens carry now.</summary>
+        [JsonPropertyName("active")] public string Active { get; init; } = "";
+        /// <summary>The `iss` after a pending domain claim goes active, else null.</summary>
+        [JsonPropertyName("planned")] public string? Planned { get; init; }
+        /// <summary>Earlier issuers still accepted.</summary>
+        [JsonPropertyName("previous")] public List<string> Previous { get; init; } = new();
+        /// <summary>The key set that verifies tokens of every issuer listed.</summary>
+        [JsonPropertyName("jwks_uri")] public string JwksUri { get; init; } = "";
     }
 
     /// <summary>A InstanceListOpKeysResponseDataItem object.</summary>
@@ -7739,6 +8595,10 @@ namespace Atlas.Generated
         [JsonPropertyName("description")] public Dictionary<string, string>? Description { get; init; }
         [JsonPropertyName("sensitive")] public bool? Sensitive { get; init; }
         [JsonPropertyName("requires_verified_client")] public bool? RequiresVerifiedClient { get; init; }
+        /// <summary>One of: any, verified, certified.</summary>
+        [JsonPropertyName("requires_client_level")] public string? RequiresClientLevel { get; init; }
+        [JsonPropertyName("owner_exempt")] public bool? OwnerExempt { get; init; }
+        [JsonPropertyName("wildcard")] public bool? Wildcard { get; init; }
     }
 
     /// <summary>A InstanceListScopesResponse object.</summary>
@@ -7770,18 +8630,38 @@ namespace Atlas.Generated
     {
         /// <summary>1-64 characters of letters, digits and : . _ -</summary>
         [JsonPropertyName("name")] public string? Name { get; init; }
-        /// <summary>Title per locale, e.g. { "en": "Read listings", "es": "Leer anuncios" }. Up to 200 characters each; longer is refused with 422, never cut.</summary>
+        /// <summary>Title per locale, e.g. { "en": "Read listings", "es": "Leer anuncios" }. Up to 500 characters each; longer is refused with 422 unless ?too_long=truncate.</summary>
         [JsonPropertyName("label")] public Dictionary<string, string>? Label { get; init; }
-        /// <summary>Explanation per locale. Up to 500 characters each; longer is refused with 422 (param scopes.&lt;n&gt;.description), never cut.</summary>
+        /// <summary>Explanation per locale. Up to 2000 characters each; longer is refused with 422 (param scopes.&lt;n&gt;.description) unless ?too_long=truncate.</summary>
         [JsonPropertyName("description")] public Dictionary<string, string>? Description { get; init; }
         [JsonPropertyName("sensitive")] public bool? Sensitive { get; init; }
         [JsonPropertyName("requires_verified_client")] public bool? RequiresVerifiedClient { get; init; }
+        /// <summary>The client level that may request the scope. One of: any, verified, certified.</summary>
+        [JsonPropertyName("requires_client_level")] public string? RequiresClientLevel { get; init; }
+        /// <summary>The developer who owns a client may request the scope with it on their own account whatever its level.</summary>
+        [JsonPropertyName("owner_exempt")] public bool? OwnerExempt { get; init; }
     }
 
     /// <summary>A InstanceSetScopesBody object.</summary>
     public sealed record InstanceSetScopesBody : ClearableBody
     {
         [JsonPropertyName("scopes")] public List<InstanceSetScopesBodyScopesItem>? Scopes { get; init; }
+    }
+
+    /// <summary>Query parameters of SetScopes. Unset values are not sent.</summary>
+    public sealed record InstanceSetScopesQuery
+    {
+        /// <summary>atomic (default) or partial.</summary>
+        public string? Mode { get; init; }
+        /// <summary>reject (default) or truncate.</summary>
+        public string? TooLong { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("mode", Mode);
+            yield return new KeyValuePair<string, object?>("too_long", TooLong);
+        }
     }
 
     /// <summary>A InstanceListSecretKeysResponseDataItemResource object.</summary>
@@ -7875,7 +8755,7 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
-        /// <summary>A named scope set instead of `scopes[]`. `app-runtime`: what an app server needs to run: read users, read and write sessions, organizations (memberships and policy) and SSO connections, read preflight. No webhook secret reveal or rotation, no instance settings writes, no key management. Send either preset or scopes. One of: app-runtime.</summary>
+        /// <summary>A named scope set instead of `scopes[]`. `app-runtime`: what an app server needs to run: read users, read and write sessions, organizations (memberships and policy) and SSO connections, read preflight. No webhook secret reveal or rotation, no instance settings writes, no key management. `web-app`: a web app's server: read and delete users, read and revoke sessions, privacy requests. `provisioning`: a deploy script's key (instance settings, domains, messaging, webhooks, OAuth, branding, keys). `integrations`: the key a connected platform's connect flow needs: instance settings, webhook endpoints, OAuth clients, keys, and the executor scopes `privacy:execute` and `privacy:grants:revoke` it mints its narrower key from. Send either preset or scopes. One of: app-runtime, web-app, provisioning, integrations.</summary>
         [JsonPropertyName("preset")] public string? Preset { get; init; }
         /// <summary>Unix ms or ISO 8601; at most one year away. Default one year from now.</summary>
         [JsonPropertyName("expires_at")] public object? ExpiresAt { get; init; }
@@ -7952,6 +8832,160 @@ namespace Atlas.Generated
         [JsonPropertyName("deleted")] public string Deleted { get; init; } = "";
         /// <summary>One of: False.</summary>
         [JsonPropertyName("enabled")] public string? Enabled { get; init; }
+    }
+
+    /// <summary>A InstanceListStagingCopiesResponseDataItem object.</summary>
+    public sealed record InstanceListStagingCopiesResponseDataItem
+    {
+        /// <summary>One of: instance_clone.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>One of: clone, preview.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        /// <summary>The new environment name (a preview is `preview-` and a slug of its ref).</summary>
+        [JsonPropertyName("name")] public string Name { get; init; } = "";
+        [JsonPropertyName("ref")] public string? Ref { get; init; }
+        /// <summary>`copying` while a large clone is filled by a background job; poll GET until `completed` or `failed`. One of: pending, copying, completed, failed, deleted.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        /// <summary>While copying: `sections.&lt;name&gt;` = { total, copied } rows.</summary>
+        [JsonPropertyName("progress")] public Dictionary<string, object?>? Progress { get; init; }
+        [JsonPropertyName("source_instance_id")] public string SourceInstanceId { get; init; } = "";
+        /// <summary>The new instance.</summary>
+        [JsonPropertyName("instance_id")] public string? InstanceId { get; init; }
+        /// <summary>One of: development.</summary>
+        [JsonPropertyName("environment")] public string Environment { get; init; } = "";
+        [JsonPropertyName("publishable_key")] public string? PublishableKey { get; init; }
+        [JsonPropertyName("frontend_api_host")] public string? FrontendApiHost { get; init; }
+        [JsonPropertyName("allowed_origins")] public List<string>? AllowedOrigins { get; init; }
+        [JsonPropertyName("include")] public List<string> Include { get; init; } = new();
+        [JsonPropertyName("mask_emails")] public bool MaskEmails { get; init; }
+        /// <summary>What was copied, per section.</summary>
+        [JsonPropertyName("counts")] public Dictionary<string, object?>? Counts { get; init; }
+        /// <summary>What could not be placed (at most 100).</summary>
+        [JsonPropertyName("errors")] public List<Dictionary<string, object?>>? Errors { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+        [JsonPropertyName("created_by")] public string? CreatedBy { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("completed_at")] public long? CompletedAt { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("deleted_at")] public long? DeletedAt { get; init; }
+    }
+
+    /// <summary>A InstanceListStagingCopiesResponse object.</summary>
+    public sealed record InstanceListStagingCopiesResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<InstanceListStagingCopiesResponseDataItem> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool HasMore { get; init; }
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of ListStagingCopies. Unset values are not sent.</summary>
+    public sealed record InstanceListStagingCopiesQuery
+    {
+        /// <summary>Page size, 1-100 (default 20).</summary>
+        public long? Limit { get; init; }
+        /// <summary>A copy id: return the ones after it.</summary>
+        public string? StartingAfter { get; init; }
+        /// <summary>Only clones or only previews. One of: clone, preview.</summary>
+        public string? Kind { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+            yield return new KeyValuePair<string, object?>("kind", Kind);
+        }
+    }
+
+    /// <summary>A InstanceCreateStagingCopyResponse object.</summary>
+    public sealed record InstanceCreateStagingCopyResponse
+    {
+        /// <summary>One of: instance_clone.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>One of: clone, preview.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        /// <summary>The new environment name (a preview is `preview-` and a slug of its ref).</summary>
+        [JsonPropertyName("name")] public string Name { get; init; } = "";
+        [JsonPropertyName("ref")] public string? Ref { get; init; }
+        /// <summary>`copying` while a large clone is filled by a background job; poll GET until `completed` or `failed`. One of: pending, copying, completed, failed, deleted.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        /// <summary>While copying: `sections.&lt;name&gt;` = { total, copied } rows.</summary>
+        [JsonPropertyName("progress")] public Dictionary<string, object?>? Progress { get; init; }
+        [JsonPropertyName("source_instance_id")] public string SourceInstanceId { get; init; } = "";
+        /// <summary>The new instance.</summary>
+        [JsonPropertyName("instance_id")] public string? InstanceId { get; init; }
+        /// <summary>One of: development.</summary>
+        [JsonPropertyName("environment")] public string Environment { get; init; } = "";
+        [JsonPropertyName("publishable_key")] public string? PublishableKey { get; init; }
+        [JsonPropertyName("frontend_api_host")] public string? FrontendApiHost { get; init; }
+        [JsonPropertyName("allowed_origins")] public List<string>? AllowedOrigins { get; init; }
+        [JsonPropertyName("include")] public List<string> Include { get; init; } = new();
+        [JsonPropertyName("mask_emails")] public bool MaskEmails { get; init; }
+        /// <summary>What was copied, per section.</summary>
+        [JsonPropertyName("counts")] public Dictionary<string, object?>? Counts { get; init; }
+        /// <summary>What could not be placed (at most 100).</summary>
+        [JsonPropertyName("errors")] public List<Dictionary<string, object?>>? Errors { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+        [JsonPropertyName("created_by")] public string? CreatedBy { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("completed_at")] public long? CompletedAt { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("deleted_at")] public long? DeletedAt { get; init; }
+        /// <summary>The new instance's first secret key, shown once (null on a repeat for the same ref).</summary>
+        [JsonPropertyName("secret")] public string? Secret { get; init; }
+        [JsonPropertyName("secret_key_scopes")] public List<string>? SecretKeyScopes { get; init; }
+        [JsonPropertyName("replayed")] public bool? Replayed { get; init; }
+        [JsonPropertyName("note")] public string? Note { get; init; }
+    }
+
+    /// <summary>A InstanceCreateStagingCopyBody object.</summary>
+    public sealed record InstanceCreateStagingCopyBody : ClearableBody
+    {
+        /// <summary>clone: a named environment that stays. preview: a short-lived one for a pull request, keyed on ref. One of: clone, preview.</summary>
+        [JsonPropertyName("mode")] public string? Mode { get; init; }
+        /// <summary>mode clone only: the environment name (lowercase letters, digits, hyphens; not development, production or starting with preview-).</summary>
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        /// <summary>A stable handle, e.g. a pull request number. Required for a preview. One live clone per ref: a repeat returns it (200) instead of creating another.</summary>
+        [JsonPropertyName("ref")] public string? Ref { get; init; }
+        /// <summary>What to copy. Default: config and roles. memberships needs users and organizations. A section over 2000 rows is refused: move it with a tenant export and import.</summary>
+        [JsonPropertyName("include")] public List<string>? Include { get; init; }
+        /// <summary>Default true: user email addresses are replaced with unreachable ones and phone numbers, usernames and linked identities are left out. false keeps them.</summary>
+        [JsonPropertyName("mask_emails")] public bool? MaskEmails { get; init; }
+        /// <summary>mode preview only: hours until the preview is deleted (default 72).</summary>
+        [JsonPropertyName("ttl_hours")] public long? TtlHours { get; init; }
+        /// <summary>The origins the new instance accepts (e.g. the preview URL). Not copied from the source.</summary>
+        [JsonPropertyName("allowed_origins")] public List<string>? AllowedOrigins { get; init; }
+        /// <summary>With an existing ref: re-apply the source's configuration to the clone and restart a preview's clock.</summary>
+        [JsonPropertyName("refresh")] public bool? Refresh { get; init; }
+        /// <summary>Platform API only. Scopes of the secret key minted for the new instance (default app-runtime). One of: app-runtime, full.</summary>
+        [JsonPropertyName("secret_key_preset")] public string? SecretKeyPreset { get; init; }
+    }
+
+    /// <summary>A InstanceStagingCopiesRefreshBodySyntheticUsers object.</summary>
+    public sealed record InstanceStagingCopiesRefreshBodySyntheticUsers : ClearableBody
+    {
+        [JsonPropertyName("count")] public long? Count { get; init; }
+        [JsonPropertyName("seed")] public string? Seed { get; init; }
+    }
+
+    /// <summary>A InstanceStagingCopiesRefreshBody object.</summary>
+    public sealed record InstanceStagingCopiesRefreshBody : ClearableBody
+    {
+        /// <summary>Default: config only.</summary>
+        [JsonPropertyName("include")] public List<string>? Include { get; init; }
+        [JsonPropertyName("synthetic_users")] public InstanceStagingCopiesRefreshBodySyntheticUsers? SyntheticUsers { get; init; }
+        /// <summary>A preview only: a new deadline from now.</summary>
+        [JsonPropertyName("ttl_hours")] public long? TtlHours { get; init; }
     }
 
     /// <summary>A UserTraitsSchema object.</summary>
@@ -8404,6 +9438,55 @@ namespace Atlas.Generated
         [JsonPropertyName("aws")] public MachineTrustPoliciesTestBodyAws? Aws { get; init; }
     }
 
+    /// <summary>A MachinesGetRevokedResponseDataItem object.</summary>
+    public sealed record MachinesGetRevokedResponseDataItem
+    {
+        /// <summary>One of: machine, machine_grant.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>`machine_grant` entries: the machine the grant belonged to.</summary>
+        [JsonPropertyName("machine_id")] public string? MachineId { get; init; }
+        /// <summary>`machine_grant` entries: the resource server identifier, the `aud` of the tokens it covered.</summary>
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
+        [JsonPropertyName("revoked_at")] public long RevokedAt { get; init; }
+        /// <summary>Secret-key callers only.</summary>
+        [JsonPropertyName("revoked_reason")] public string? RevokedReason { get; init; }
+        /// <summary>Secret-key callers only.</summary>
+        [JsonPropertyName("revoked_by")] public ConnectionsGetActivityResponseDataItemActor? RevokedBy { get; init; }
+        [JsonPropertyName("owner_user_id")] public string? OwnerUserId { get; init; }
+        [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+    }
+
+    /// <summary>A MachinesGetRevokedResponse object.</summary>
+    public sealed record MachinesGetRevokedResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<MachinesGetRevokedResponseDataItem>? Data { get; init; }
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+        /// <summary>Opaque keyset cursor; pass as since on the next poll.</summary>
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of GetRevoked. Unset values are not sent.</summary>
+    public sealed record MachinesGetRevokedQuery
+    {
+        /// <summary>Cursor: the `next_cursor` of the previous page (the same value `since` takes). Wins over since when both are sent.</summary>
+        public string? StartingAfter { get; init; }
+        /// <summary>Where to resume: the `next_cursor` of the previous poll, or on a first poll a floor as an ISO-8601 timestamp or epoch ms.</summary>
+        public string? Since { get; init; }
+        /// <summary>Page size, 1 to 100. Default 50.</summary>
+        public string? Limit { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+            yield return new KeyValuePair<string, object?>("since", Since);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+        }
+    }
+
     /// <summary>A MachinesUpdateGrantBody object.</summary>
     public sealed record MachinesUpdateGrantBody : ClearableBody
     {
@@ -8724,6 +9807,26 @@ namespace Atlas.Generated
         [JsonPropertyName("status")] public string? Status { get; init; }
     }
 
+    /// <summary>A MessageLinksCreateResponse object.</summary>
+    public sealed record MessageLinksCreateResponse
+    {
+        /// <summary>One of: message_link.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>One of: unsubscribe, preferences.</summary>
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        [JsonPropertyName("url")] public string Url { get; init; } = "";
+    }
+
+    /// <summary>A MessageLinksCreateBody object.</summary>
+    public sealed record MessageLinksCreateBody : ClearableBody
+    {
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        /// <summary>One of: unsubscribe, preferences.</summary>
+        [JsonPropertyName("type")] public string? Type { get; init; }
+        /// <summary>One of your optional notification categories. Required for `unsubscribe`, not allowed for `preferences`.</summary>
+        [JsonPropertyName("category")] public string? Category { get; init; }
+    }
+
     /// <summary>A MessageReceiversListResponseDataItem object.</summary>
     public sealed record MessageReceiversListResponseDataItem
     {
@@ -8822,6 +9925,12 @@ namespace Atlas.Generated
         [JsonPropertyName("template")] public string? Template { get; init; }
         /// <summary>Enough to recognise the recipient (`jo***@ex***.com`, `+1•••••0123`), not enough to use. The address itself is never stored in the ledger.</summary>
         [JsonPropertyName("recipient_masked")] public string RecipientMasked { get; init; } = "";
+        /// <summary>`auth` for Atlas's own sign-in mail, `transactional` for mail you sent with POST /v1/messages. One of: auth, transactional.</summary>
+        [JsonPropertyName("category")] public string? Category { get; init; }
+        /// <summary>The `category` you sent with POST /v1/messages (one of your notification categories), or null.</summary>
+        [JsonPropertyName("message_category")] public string? MessageCategory { get; init; }
+        /// <summary>The tags you sent with a transactional message.</summary>
+        [JsonPropertyName("tags")] public Dictionary<string, string>? Tags { get; init; }
         /// <summary>A keyed hash of the recipient, stable within the instance. Search with ?recipient=.</summary>
         [JsonPropertyName("recipient_hash")] public string RecipientHash { get; init; } = "";
         /// <summary>ISO country of a phone number.</summary>
@@ -8863,6 +9972,8 @@ namespace Atlas.Generated
         public string? Status { get; init; }
         /// <summary>Only this template.</summary>
         public string? Template { get; init; }
+        /// <summary>Only `auth` or `transactional` messages.</summary>
+        public string? Category { get; init; }
         /// <summary>Only this provider (`resend`, `ses`, `twilio`, ...).</summary>
         public string? Provider { get; init; }
         /// <summary>Only messages to this address or number (looked up by its keyed hash; the address is never stored).</summary>
@@ -8882,6 +9993,7 @@ namespace Atlas.Generated
             yield return new KeyValuePair<string, object?>("channel", Channel);
             yield return new KeyValuePair<string, object?>("status", Status);
             yield return new KeyValuePair<string, object?>("template", Template);
+            yield return new KeyValuePair<string, object?>("category", Category);
             yield return new KeyValuePair<string, object?>("provider", Provider);
             yield return new KeyValuePair<string, object?>("recipient", Recipient);
             yield return new KeyValuePair<string, object?>("since", Since);
@@ -8889,6 +10001,45 @@ namespace Atlas.Generated
             yield return new KeyValuePair<string, object?>("limit", Limit);
             yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
         }
+    }
+
+    /// <summary>A MessagesCreateBodyReplyToVariant2 object.</summary>
+    public sealed record MessagesCreateBodyReplyToVariant2 : ClearableBody
+    {
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        [JsonPropertyName("name")] public string? Name { get; init; }
+    }
+
+    /// <summary>A MessagesCreateBody object.</summary>
+    public sealed record MessagesCreateBody : ClearableBody
+    {
+        [JsonPropertyName("to")] public object? To { get; init; }
+        /// <summary>A template name or id. Not together with subject/html/text.</summary>
+        [JsonPropertyName("template")] public string? Template { get; init; }
+        /// <summary>Variables for the template's {{placeholders}}.</summary>
+        [JsonPropertyName("data")] public Dictionary<string, object?>? Data { get; init; }
+        /// <summary>Required without a template; one line.</summary>
+        [JsonPropertyName("subject")] public string? Subject { get; init; }
+        /// <summary>Up to 512 KB, sent as given.</summary>
+        [JsonPropertyName("html")] public string? Html { get; init; }
+        /// <summary>Up to 256 KB. Send html, text or both.</summary>
+        [JsonPropertyName("text")] public string? Text { get; init; }
+        /// <summary>Labels returned on the message. Keys are 1-40 letters, digits, _ . : or -.</summary>
+        [JsonPropertyName("tags")] public Dictionary<string, string>? Tags { get; init; }
+        /// <summary>Where replies go: an address, or { email, name }. Passed to your provider as Reply-To.</summary>
+        [JsonPropertyName("reply_to")] public object? ReplyTo { get; init; }
+        /// <summary>Send as this address instead of the configured sender. Its domain must be your verified sending domain, exactly (422 FROM_DOMAIN_NOT_VERIFIED otherwise).</summary>
+        [JsonPropertyName("from")] public object? From { get; init; }
+        /// <summary>Extra headers. Only List-Unsubscribe, List-Unsubscribe-Post (List-Unsubscribe=One-Click) and X-Entity-Ref-ID are accepted; values are one line. Any other header is a 400.</summary>
+        [JsonPropertyName("headers")] public Dictionary<string, string>? Headers { get; init; }
+        /// <summary>An https URL: sets List-Unsubscribe and List-Unsubscribe-Post (one-click, RFC 8058). Not together with unsubscribe or a List-Unsubscribe header.</summary>
+        [JsonPropertyName("unsubscribe_url")] public string? UnsubscribeUrl { get; init; }
+        /// <summary>Atlas generates a one-click unsubscribe link for each recipient, scoped to `category`, sets the headers and fills {{unsubscribe_url}} in the body. Needs `category`.</summary>
+        [JsonPropertyName("unsubscribe")] public bool? Unsubscribe { get; init; }
+        /// <summary>One of your notification categories (POST /v1/notification_categories). A recipient who opted out of it (an unsubscribe, the preference page, or the user's own preference) is not mailed: the message is recorded as suppressed. Built-in non-optional categories cannot be opted out of.</summary>
+        [JsonPropertyName("category")] public string? Category { get; init; }
+        /// <summary>With a template: the language copy to send (a tag such as fr or pt-BR). Default: the user's own locale when the address belongs to a user, then the template's base copy.</summary>
+        [JsonPropertyName("locale")] public string? Locale { get; init; }
     }
 
     /// <summary>A MessagesGetSummaryResponse object.</summary>
@@ -9438,12 +10589,64 @@ namespace Atlas.Generated
     {
         /// <summary>Days without legacy use before it counts as unused. Default 14.</summary>
         public long? QuietDays { get; init; }
+        /// <summary>true: do not let imported users who never signed in on Atlas block `safe_to_delete_old_auth`.</summary>
+        public bool? AcceptUnmigrated { get; init; }
 
         /// <summary>Flatten to query key/value pairs.</summary>
         public IEnumerable<KeyValuePair<string, object?>> ToQuery()
         {
             yield return new KeyValuePair<string, object?>("quiet_days", QuietDays);
+            yield return new KeyValuePair<string, object?>("accept_unmigrated", AcceptUnmigrated);
         }
+    }
+
+    /// <summary>A MigrationsSessionsResponseErrorsItem object.</summary>
+    public sealed record MigrationsSessionsResponseErrorsItem
+    {
+        [JsonPropertyName("index")] public long Index { get; init; }
+        /// <summary>One of: invalid_row, unknown_field, user_not_found, session_expired, already_exchanged.</summary>
+        [JsonPropertyName("code")] public string Code { get; init; } = "";
+        [JsonPropertyName("message")] public string Message { get; init; } = "";
+    }
+
+    /// <summary>A MigrationsSessionsResponse object.</summary>
+    public sealed record MigrationsSessionsResponse
+    {
+        /// <summary>One of: migration_session_import.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("source")] public string Source { get; init; } = "";
+        [JsonPropertyName("dry_run")] public bool DryRun { get; init; }
+        [JsonPropertyName("received")] public long Received { get; init; }
+        [JsonPropertyName("imported")] public long Imported { get; init; }
+        [JsonPropertyName("failed")] public long Failed { get; init; }
+        [JsonPropertyName("errors")] public List<MigrationsSessionsResponseErrorsItem> Errors { get; init; } = new();
+        /// <summary>The bridge mode for this source. Imported sessions exchange only in `session_table` mode.</summary>
+        [JsonPropertyName("bridge_mode")] public string? BridgeMode { get; init; }
+    }
+
+    /// <summary>A MigrationsSessionsBodySessionsItem object.</summary>
+    public sealed record MigrationsSessionsBodySessionsItem : ClearableBody
+    {
+        /// <summary>The legacy session token. Exactly one of token or token_hash.</summary>
+        [JsonPropertyName("token")] public string? Token { get; init; }
+        /// <summary>SHA-256 hex of the token (UTF-8). Exactly one of token or token_hash.</summary>
+        [JsonPropertyName("token_hash")] public string? TokenHash { get; init; }
+        /// <summary>The Atlas user. Exactly one of user_id or external_id.</summary>
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        /// <summary>Your id for the user. Exactly one of user_id or external_id.</summary>
+        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
+        /// <summary>When the legacy session ends (ISO 8601, or Unix ms). Must be in the future.</summary>
+        [JsonPropertyName("expires_at")] public string? ExpiresAt { get; init; }
+        /// <summary>The person had completed a second factor in this session.</summary>
+        [JsonPropertyName("mfa_verified")] public bool? MfaVerified { get; init; }
+    }
+
+    /// <summary>A MigrationsSessionsBody object.</summary>
+    public sealed record MigrationsSessionsBody : ClearableBody
+    {
+        [JsonPropertyName("sessions")] public List<MigrationsSessionsBodySessionsItem>? Sessions { get; init; }
+        /// <summary>Validate and count only.</summary>
+        [JsonPropertyName("dry_run")] public bool? DryRun { get; init; }
     }
 
     /// <summary>A MigrationsVerifyResponse object.</summary>
@@ -9464,6 +10667,104 @@ namespace Atlas.Generated
     {
         /// <summary>The old session token.</summary>
         [JsonPropertyName("token")] public string? Token { get; init; }
+    }
+
+    /// <summary>A NativeAppsListResponseDataItem object.</summary>
+    public sealed record NativeAppsListResponseDataItem
+    {
+        /// <summary>One of: native_app.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>napp_...: send it as `native_app_id` when starting a sign-in and as the `X-Atlas-App-Id` header.</summary>
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>One of: ios, android, development.</summary>
+        [JsonPropertyName("platform")] public string Platform { get; init; } = "";
+        /// <summary>development apps only.</summary>
+        [JsonPropertyName("allowed_users")] public List<string>? AllowedUsers { get; init; }
+        /// <summary>development apps only: epoch milliseconds.</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+        /// <summary>development apps only: expires_at has passed, so the app signs nobody in until it is extended.</summary>
+        [JsonPropertyName("expired")] public bool? Expired { get; init; }
+        [JsonPropertyName("bundle_id")] public string? BundleId { get; init; }
+        [JsonPropertyName("team_id")] public string? TeamId { get; init; }
+        [JsonPropertyName("package_name")] public string? PackageName { get; init; }
+        [JsonPropertyName("sha256_cert_fingerprints")] public List<string>? Sha256CertFingerprints { get; init; }
+        [JsonPropertyName("callback_urls")] public List<string> CallbackUrls { get; init; } = new();
+        /// <summary>Epoch milliseconds.</summary>
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+    }
+
+    /// <summary>A NativeAppsListResponse object.</summary>
+    public sealed record NativeAppsListResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<NativeAppsListResponseDataItem>? Data { get; init; }
+        /// <summary>Whether another page follows the cursor.</summary>
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+        /// <summary>The cursor to pass as `starting_after` for the next page on a keyset-paginated list; null on the last page (and absent on lists that are not cursor-paginated).</summary>
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record NativeAppsListQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A NativeAppsCreateBody object.</summary>
+    public sealed record NativeAppsCreateBody : ClearableBody
+    {
+        /// <summary>Required on create; cannot be changed. development: a test app with no store identity (Expo Go, a dev build), for the users in allowed_users until expires_at; its sessions are always device-bound. One of: ios, android, development.</summary>
+        [JsonPropertyName("platform")] public string? Platform { get; init; }
+        /// <summary>ios: the bundle identifier (with team_id).</summary>
+        [JsonPropertyName("bundle_id")] public string? BundleId { get; init; }
+        /// <summary>ios: the Apple team id (with bundle_id).</summary>
+        [JsonPropertyName("team_id")] public string? TeamId { get; init; }
+        /// <summary>android: the application id (with sha256_cert_fingerprints).</summary>
+        [JsonPropertyName("package_name")] public string? PackageName { get; init; }
+        /// <summary>android: signing-certificate SHA-256 fingerprints, 64 hex characters, colons optional; stored in uppercase colon form.</summary>
+        [JsonPropertyName("sha256_cert_fingerprints")] public List<string>? Sha256CertFingerprints { get; init; }
+        /// <summary>URLs a sign-in may return to: https (Universal Links / App Links) or an app-specific private-use scheme such as exampleapp://oauth-callback (RFC 8252 section 7.1; http, javascript, data, file and similar schemes are refused). No fragment. exp:// and exp+&lt;slug&gt;:// (Expo Go, dev clients) are accepted on development instances, and on any instance for a development app (400 DEV_SCHEME_ON_PRODUCTION otherwise).</summary>
+        [JsonPropertyName("callback_urls")] public List<string>? CallbackUrls { get; init; }
+        /// <summary>development: the user ids (user_...) or email addresses that may sign in through this app. PATCH replaces the list.</summary>
+        [JsonPropertyName("allowed_users")] public List<string>? AllowedUsers { get; init; }
+        /// <summary>development: epoch milliseconds when the app stops working, in the future and at most 90 days ahead. PATCH extends it (403 NATIVE_APP_EXPIRED at sign-in after it passes).</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+    }
+
+    /// <summary>A NativeAppsGetPublishableKeyResponse object.</summary>
+    public sealed record NativeAppsGetPublishableKeyResponse
+    {
+        /// <summary>One of: native_app_key_restriction.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>Empty = the publishable key works from any app (the default).</summary>
+        [JsonPropertyName("app_ids")] public List<string> AppIds { get; init; } = new();
+    }
+
+    /// <summary>A NativeAppsSetPublishableKeyBody object.</summary>
+    public sealed record NativeAppsSetPublishableKeyBody : ClearableBody
+    {
+        [JsonPropertyName("app_ids")] public List<string>? AppIds { get; init; }
+    }
+
+    /// <summary>A NativeAppsDeleteResponse object.</summary>
+    public sealed record NativeAppsDeleteResponse
+    {
+        /// <summary>One of: native_app.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        /// <summary>One of: True.</summary>
+        [JsonPropertyName("deleted")] public string? Deleted { get; init; }
     }
 
     /// <summary>A OauthApplicationTypesListResponseDataItem object.</summary>
@@ -9500,6 +10801,76 @@ namespace Atlas.Generated
             yield return new KeyValuePair<string, object?>("limit", Limit);
             yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
         }
+    }
+
+    /// <summary>A OauthClientsListConsentsResponseDataItem object.</summary>
+    public sealed record OauthClientsListConsentsResponseDataItem
+    {
+        /// <summary>One of: oauth_client_consent.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
+        /// <summary>The consent grant id, usable with GET/PATCH/DELETE /v1/grants/{id}. Backend API only.</summary>
+        [JsonPropertyName("grant_id")] public string? GrantId { get; init; }
+        /// <summary>The metadata set on the grant. Backend API only.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
+        /// <summary>One of: active, revoked.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        /// <summary>When the user first authorized the client (Unix ms).</summary>
+        [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
+        /// <summary>The last time a token was issued or refreshed for the user and client (Unix ms).</summary>
+        [JsonPropertyName("last_used_at")] public long? LastUsedAt { get; init; }
+        /// <summary>When the consent was revoked, for status revoked.</summary>
+        [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
+    }
+
+    /// <summary>A OauthClientsListConsentsResponse object.</summary>
+    public sealed record OauthClientsListConsentsResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("client_id")] public string? ClientId { get; init; }
+        [JsonPropertyName("data")] public List<OauthClientsListConsentsResponseDataItem>? Data { get; init; }
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+        /// <summary>Pass as starting_after for the next page.</summary>
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of ListConsents. Unset values are not sent.</summary>
+    public sealed record OauthClientsListConsentsQuery
+    {
+        /// <summary>active (default), revoked or all. One of: active, revoked, all.</summary>
+        public string? Status { get; init; }
+        /// <summary>Page size.</summary>
+        public long? Limit { get; init; }
+        /// <summary>The next_cursor of the previous page.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("status", Status);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A OauthClientsConsentsRevokeResponse object.</summary>
+    public sealed record OauthClientsConsentsRevokeResponse
+    {
+        /// <summary>One of: oauth_client_consents_revocation.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("client_id")] public string? ClientId { get; init; }
+        [JsonPropertyName("consents_revoked")] public long? ConsentsRevoked { get; init; }
+        /// <summary>Active refresh grants that were revoked with the consents.</summary>
+        [JsonPropertyName("tokens_revoked")] public long? TokensRevoked { get; init; }
+    }
+
+    /// <summary>A OauthClientsConsentsRevokeBody object.</summary>
+    public sealed record OauthClientsConsentsRevokeBody : ClearableBody
+    {
+        /// <summary>Only revoke these users. Omit to revoke every active consent.</summary>
+        [JsonPropertyName("user_ids")] public List<string>? UserIds { get; init; }
     }
 
     /// <summary>A OauthClientsSetOrganizationAccessResponse object.</summary>
@@ -9628,6 +10999,16 @@ namespace Atlas.Generated
         [JsonPropertyName("rate_limited")] public long? RateLimited { get; init; }
     }
 
+    /// <summary>The most recent failed token endpoint request in the window; null when there was none.</summary>
+    public sealed record OauthClientsGetUsageResponseLatestError
+    {
+        /// <summary>The OAuth error code, for example invalid_grant.</summary>
+        [JsonPropertyName("code")] public string? Code { get; init; }
+        [JsonPropertyName("endpoint")] public string? Endpoint { get; init; }
+        /// <summary>Unix ms.</summary>
+        [JsonPropertyName("at")] public long? At { get; init; }
+    }
+
     /// <summary>A OauthClientsGetUsageResponseDataItem object.</summary>
     public sealed record OauthClientsGetUsageResponseDataItem
     {
@@ -9640,6 +11021,8 @@ namespace Atlas.Generated
         [JsonPropertyName("active_users")] public long? ActiveUsers { get; init; }
         /// <summary>Token endpoint requests answered with an error.</summary>
         [JsonPropertyName("errors")] public long? Errors { get; init; }
+        /// <summary>The day's errors by OAuth error code, for example {"invalid_grant": 1}. Errors recorded without a code count under "unknown".</summary>
+        [JsonPropertyName("errors_by_code")] public Dictionary<string, long>? ErrorsByCode { get; init; }
         /// <summary>Requests refused by the per-client rate limit.</summary>
         [JsonPropertyName("rate_limited")] public long? RateLimited { get; init; }
     }
@@ -9656,6 +11039,8 @@ namespace Atlas.Generated
         /// <summary>Last day (UTC date).</summary>
         [JsonPropertyName("until")] public string? Until { get; init; }
         [JsonPropertyName("totals")] public OauthClientsGetUsageResponseTotals? Totals { get; init; }
+        /// <summary>The most recent failed token endpoint request in the window; null when there was none.</summary>
+        [JsonPropertyName("latest_error")] public OauthClientsGetUsageResponseLatestError? LatestError { get; init; }
         [JsonPropertyName("data")] public List<OauthClientsGetUsageResponseDataItem>? Data { get; init; }
     }
 
@@ -9702,6 +11087,101 @@ namespace Atlas.Generated
         [JsonPropertyName("enabled_events")] public List<string>? EnabledEvents { get; init; }
     }
 
+    /// <summary>A OauthConsentRequestsSetSwitchAccountResponse object.</summary>
+    public sealed record OauthConsentRequestsSetSwitchAccountResponse
+    {
+        /// <summary>One of: oauth_consent_redirect.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>Send the end user’s browser here next.</summary>
+        [JsonPropertyName("redirect_to")] public string? RedirectTo { get; init; }
+    }
+
+    /// <summary>Query parameters of SetSwitchAccount. Unset values are not sent.</summary>
+    public sealed record OauthConsentRequestsSetSwitchAccountQuery
+    {
+        /// <summary>The consent_challenge your consent page received from /oauth2/authorize.</summary>
+        public string? ConsentChallenge { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("consent_challenge", ConsentChallenge);
+        }
+    }
+
+    /// <summary>A OauthDeviceRequestsListResponseClient object.</summary>
+    public sealed record OauthDeviceRequestsListResponseClient
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("client_id")] public string? ClientId { get; init; }
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("first_party")] public bool? FirstParty { get; init; }
+    }
+
+    /// <summary>A OauthDeviceRequestsListResponse object.</summary>
+    public sealed record OauthDeviceRequestsListResponse
+    {
+        /// <summary>One of: oauth_device_request.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>The signed-in Atlas user id.</summary>
+        [JsonPropertyName("subject")] public string? Subject { get; init; }
+        /// <summary>The code the person entered.</summary>
+        [JsonPropertyName("user_code")] public string? UserCode { get; init; }
+        [JsonPropertyName("client")] public OauthDeviceRequestsListResponseClient? Client { get; init; }
+        [JsonPropertyName("requested_scope")] public List<string>? RequestedScope { get; init; }
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
+        /// <summary>The challenge expires (epoch ms).</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record OauthDeviceRequestsListQuery
+    {
+        /// <summary>The device_challenge your device-approval page received from /oauth2/device.</summary>
+        public string? DeviceChallenge { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("device_challenge", DeviceChallenge);
+        }
+    }
+
+    /// <summary>A OauthDeviceRequestsSetAcceptResponse object.</summary>
+    public sealed record OauthDeviceRequestsSetAcceptResponse
+    {
+        /// <summary>One of: oauth_device_redirect.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>Send the end user’s browser here next.</summary>
+        [JsonPropertyName("redirect_to")] public string? RedirectTo { get; init; }
+    }
+
+    /// <summary>Query parameters of SetAccept. Unset values are not sent.</summary>
+    public sealed record OauthDeviceRequestsSetAcceptQuery
+    {
+        /// <summary>The device_challenge your device-approval page received from /oauth2/device.</summary>
+        public string? DeviceChallenge { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("device_challenge", DeviceChallenge);
+        }
+    }
+
+    /// <summary>Query parameters of SetReject. Unset values are not sent.</summary>
+    public sealed record OauthDeviceRequestsSetRejectQuery
+    {
+        /// <summary>The device_challenge your device-approval page received from /oauth2/device.</summary>
+        public string? DeviceChallenge { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("device_challenge", DeviceChallenge);
+        }
+    }
+
     /// <summary>A OauthGrantsImportResponseResultsItem object.</summary>
     public sealed record OauthGrantsImportResponseResultsItem
     {
@@ -9714,6 +11194,14 @@ namespace Atlas.Generated
         [JsonPropertyName("refresh_tokens")] public long? RefreshTokens { get; init; }
         /// <summary>Why a row failed.</summary>
         [JsonPropertyName("message")] public string? Message { get; init; }
+    }
+
+    /// <summary>A OauthGrantsImportResponseDataItem object.</summary>
+    public sealed record OauthGrantsImportResponseDataItem
+    {
+        [JsonPropertyName("index")] public long? Index { get; init; }
+        /// <summary>One of: imported, failed.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
     }
 
     /// <summary>A OauthGrantsImportResponseErrorsItem object.</summary>
@@ -9735,6 +11223,8 @@ namespace Atlas.Generated
         [JsonPropertyName("refresh_tokens")] public long? RefreshTokens { get; init; }
         /// <summary>One entry per submitted grant, in order.</summary>
         [JsonPropertyName("results")] public List<OauthGrantsImportResponseResultsItem>? Results { get; init; }
+        /// <summary>The same entries as `results`, under the name every import report shares.</summary>
+        [JsonPropertyName("data")] public List<OauthGrantsImportResponseDataItem>? Data { get; init; }
         [JsonPropertyName("errors")] public List<OauthGrantsImportResponseErrorsItem>? Errors { get; init; }
         [JsonPropertyName("note")] public string? Note { get; init; }
     }
@@ -10270,6 +11760,41 @@ namespace Atlas.Generated
         [JsonPropertyName("accepted_by")] public string? AcceptedBy { get; init; }
     }
 
+    /// <summary>A OrganizationInvitationsListResponse object.</summary>
+    public sealed record OrganizationInvitationsListResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<Dictionary<string, object?>> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool HasMore { get; init; }
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record OrganizationInvitationsListQuery
+    {
+        /// <summary>Only invitations for this address.</summary>
+        public string? Email { get; init; }
+        /// <summary>Only invitations in this state. One of: pending, accepted, revoked, expired, declined.</summary>
+        public string? Status { get; init; }
+        /// <summary>Only invitations of this organization.</summary>
+        public string? OrganizationId { get; init; }
+        /// <summary>Page size, 1 to 100 (default 20).</summary>
+        public string? Limit { get; init; }
+        /// <summary>The next_cursor of the previous page.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("email", Email);
+            yield return new KeyValuePair<string, object?>("status", Status);
+            yield return new KeyValuePair<string, object?>("organization_id", OrganizationId);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>Where deliveries go: { type: "https" } or an event destination with its non-secret settings. Credentials are never returned (credentials_set says whether they are stored).</summary>
     public sealed record WebhookEndpointModelDestination
     {
@@ -10348,6 +11873,8 @@ namespace Atlas.Generated
         [JsonPropertyName("oauth")] public Dictionary<string, object?>? Oauth { get; init; }
         /// <summary>Deliveries per second this endpoint may receive; null = unlimited.</summary>
         [JsonPropertyName("max_rps")] public long? MaxRps { get; init; }
+        /// <summary>Membership events to this endpoint carry the seat private_metadata.</summary>
+        [JsonPropertyName("include_private_membership")] public bool? IncludePrivateMembership { get; init; }
         /// <summary>Where deliveries go: { type: "https" } or an event destination with its non-secret settings. Credentials are never returned (credentials_set says whether they are stored).</summary>
         [JsonPropertyName("destination")] public WebhookEndpointModelDestination? Destination { get; init; }
         /// <summary>One of: healthy, failing, disabled.</summary>
@@ -10435,6 +11962,8 @@ namespace Atlas.Generated
         [JsonPropertyName("oauth")] public Dictionary<string, object?>? Oauth { get; init; }
         /// <summary>Deliveries per second this endpoint may receive; null = unlimited.</summary>
         [JsonPropertyName("max_rps")] public long? MaxRps { get; init; }
+        /// <summary>Membership events to this endpoint carry the seat private_metadata.</summary>
+        [JsonPropertyName("include_private_membership")] public bool? IncludePrivateMembership { get; init; }
         /// <summary>Where deliveries go: { type: "https" } or an event destination with its non-secret settings. Credentials are never returned (credentials_set says whether they are stored).</summary>
         [JsonPropertyName("destination")] public WebhookEndpointModelDestination? Destination { get; init; }
         /// <summary>One of: healthy, failing, disabled.</summary>
@@ -11733,6 +13262,1602 @@ namespace Atlas.Generated
         [JsonPropertyName("ends_at")] public long? EndsAt { get; init; }
     }
 
+    /// <summary>A PcaGetActionRegistryResponseNamespacesItemCounts object.</summary>
+    public sealed record PcaGetActionRegistryResponseNamespacesItemCounts
+    {
+        [JsonPropertyName("actions")] public long? Actions { get; init; }
+        [JsonPropertyName("confirmed")] public long? Confirmed { get; init; }
+        [JsonPropertyName("unconfirmed")] public long? Unconfirmed { get; init; }
+        [JsonPropertyName("deprecated")] public long? Deprecated { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryResponseNamespacesItem object.</summary>
+    public sealed record PcaGetActionRegistryResponseNamespacesItem
+    {
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("active_version")] public string? ActiveVersion { get; init; }
+        [JsonPropertyName("digest")] public string? Digest { get; init; }
+        [JsonPropertyName("pinned")] public bool? Pinned { get; init; }
+        [JsonPropertyName("updated_at")] public string? UpdatedAt { get; init; }
+        [JsonPropertyName("counts")] public PcaGetActionRegistryResponseNamespacesItemCounts? Counts { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryResponsePublisherKeysItem object.</summary>
+    public sealed record PcaGetActionRegistryResponsePublisherKeysItem
+    {
+        [JsonPropertyName("kid")] public string? Kid { get; init; }
+        /// <summary>The Ed25519 public key.</summary>
+        [JsonPropertyName("pk")] public string? Pk { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryResponseReviewerKeysItem object.</summary>
+    public sealed record PcaGetActionRegistryResponseReviewerKeysItem
+    {
+        [JsonPropertyName("kid")] public string? Kid { get; init; }
+        /// <summary>The Ed25519 public key.</summary>
+        [JsonPropertyName("pk")] public string? Pk { get; init; }
+        [JsonPropertyName("reviewer_id")] public string? ReviewerId { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryResponse object.</summary>
+    public sealed record PcaGetActionRegistryResponse
+    {
+        /// <summary>One of: pca_action_registry.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>true once any namespace has a published version.</summary>
+        [JsonPropertyName("registry_mode")] public bool? RegistryMode { get; init; }
+        [JsonPropertyName("namespaces")] public List<PcaGetActionRegistryResponseNamespacesItem>? Namespaces { get; init; }
+        [JsonPropertyName("publisher_keys")] public List<PcaGetActionRegistryResponsePublisherKeysItem>? PublisherKeys { get; init; }
+        [JsonPropertyName("reviewer_keys")] public List<PcaGetActionRegistryResponseReviewerKeysItem>? ReviewerKeys { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryActionsResponseDataItem object.</summary>
+    public sealed record PcaListActionRegistryActionsResponseDataItem
+    {
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("version")] public string? Version { get; init; }
+        [JsonPropertyName("title")] public string? Title { get; init; }
+        /// <summary>One of: confirmed, unconfirmed, stale, deprecated.</summary>
+        [JsonPropertyName("state")] public string? State { get; init; }
+        [JsonPropertyName("traits")] public List<string>? Traits { get; init; }
+        [JsonPropertyName("risk")] public long? Risk { get; init; }
+        [JsonPropertyName("rules_text")] public List<string>? RulesText { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryActionsResponse object.</summary>
+    public sealed record PcaListActionRegistryActionsResponse
+    {
+        [JsonPropertyName("data")] public List<PcaListActionRegistryActionsResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListActionRegistryActions. Unset values are not sent.</summary>
+    public sealed record PcaListActionRegistryActionsQuery
+    {
+        /// <summary>Case-insensitive text matched against the verb, title, description and aliases.</summary>
+        public string? Q { get; init; }
+        /// <summary>Only actions in this review state. One of: confirmed, unconfirmed, stale, deprecated.</summary>
+        public string? State { get; init; }
+        /// <summary>Only actions of this namespace.</summary>
+        public string? Ns { get; init; }
+        /// <summary>The most actions to return.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("q", Q);
+            yield return new KeyValuePair<string, object?>("state", State);
+            yield return new KeyValuePair<string, object?>("ns", Ns);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaGetActionRegistryActionResponseCard object.</summary>
+    public sealed record PcaGetActionRegistryActionResponseCard
+    {
+        [JsonPropertyName("text")] public string? Text { get; init; }
+        [JsonPropertyName("lines")] public List<Dictionary<string, object?>>? Lines { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryActionResponseHistoryItemRules object.</summary>
+    public sealed record PcaGetActionRegistryActionResponseHistoryItemRules
+    {
+        /// <summary>One of: equal, narrow, widen, incomparable.</summary>
+        [JsonPropertyName("class")] public string? Class { get; init; }
+        [JsonPropertyName("reasons")] public List<string>? Reasons { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryActionResponseHistoryItem object.</summary>
+    public sealed record PcaGetActionRegistryActionResponseHistoryItem
+    {
+        [JsonPropertyName("version")] public string? Version { get; init; }
+        [JsonPropertyName("class")] public string? Class { get; init; }
+        [JsonPropertyName("reasons")] public List<string>? Reasons { get; init; }
+        [JsonPropertyName("rules")] public PcaGetActionRegistryActionResponseHistoryItemRules? Rules { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryActionResponse object.</summary>
+    public sealed record PcaGetActionRegistryActionResponse
+    {
+        /// <summary>One of: pca_action.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("version")] public string? Version { get; init; }
+        /// <summary>One of: confirmed, unconfirmed, stale, deprecated.</summary>
+        [JsonPropertyName("state")] public string? State { get; init; }
+        /// <summary>The ActionDef.</summary>
+        [JsonPropertyName("def")] public Dictionary<string, object?>? Def { get; init; }
+        [JsonPropertyName("def_digest")] public string? DefDigest { get; init; }
+        [JsonPropertyName("card")] public PcaGetActionRegistryActionResponseCard? Card { get; init; }
+        /// <summary>The effective profile and trait closure, and the hint (what the action would be if confirmed as suggested).</summary>
+        [JsonPropertyName("effective")] public Dictionary<string, object?>? Effective { get; init; }
+        [JsonPropertyName("rules")] public Dictionary<string, object?>? Rules { get; init; }
+        [JsonPropertyName("rules_text")] public List<string>? RulesText { get; init; }
+        [JsonPropertyName("compiled_rules")] public Dictionary<string, object?>? CompiledRules { get; init; }
+        [JsonPropertyName("history")] public List<PcaGetActionRegistryActionResponseHistoryItem>? History { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryActionsReviewResponseLintItem object.</summary>
+    public sealed record PcaActionRegistryActionsReviewResponseLintItem
+    {
+        [JsonPropertyName("rule")] public string? Rule { get; init; }
+        /// <summary>One of: error, warning, note.</summary>
+        [JsonPropertyName("severity")] public string? Severity { get; init; }
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        [JsonPropertyName("param")] public string? Param { get; init; }
+        [JsonPropertyName("message")] public string? Message { get; init; }
+    }
+
+    /// <summary>A definition in the review queue. Imported, synced, templated and edited definitions are never confirmed: until a reviewer confirms one it is treated as the most dangerous kind of action.</summary>
+    public sealed record PcaActionRegistryActionsReviewResponse
+    {
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        /// <summary>One of: import, template, sync, edit.</summary>
+        [JsonPropertyName("origin")] public string? Origin { get; init; }
+        /// <summary>`removed`: the source no longer has the operation; publishing deprecates it. One of: added, changed, removed.</summary>
+        [JsonPropertyName("change")] public string? Change { get; init; }
+        [JsonPropertyName("source_id")] public string? SourceId { get; init; }
+        /// <summary>The ActionDef.</summary>
+        [JsonPropertyName("def")] public Dictionary<string, object?>? Def { get; init; }
+        [JsonPropertyName("def_digest")] public string? DefDigest { get; init; }
+        /// <summary>One of: authored, unreviewed, suggested, confirmed, stale.</summary>
+        [JsonPropertyName("state")] public string? State { get; init; }
+        /// <summary>What the reviewer is shown: declared, implied and suggested traits, the effective profile, the policy card, the changes against the active definition.</summary>
+        [JsonPropertyName("review")] public Dictionary<string, object?>? Review { get; init; }
+        [JsonPropertyName("card_text")] public string? CardText { get; init; }
+        [JsonPropertyName("lint")] public List<PcaActionRegistryActionsReviewResponseLintItem>? Lint { get; init; }
+        /// <summary>The business rules of the action.</summary>
+        [JsonPropertyName("rules")] public Dictionary<string, object?>? Rules { get; init; }
+        /// <summary>The rules in plain sentences.</summary>
+        [JsonPropertyName("rules_text")] public List<string>? RulesText { get; init; }
+        [JsonPropertyName("rules_lint")] public List<PcaActionRegistryActionsReviewResponseLintItem>? RulesLint { get; init; }
+        [JsonPropertyName("rules_review")] public Dictionary<string, object?>? RulesReview { get; init; }
+        /// <summary>The rules widen against the active version and carry no valid rules review: publishing is refused until a reviewer signs them.</summary>
+        [JsonPropertyName("rules_review_needed")] public bool? RulesReviewNeeded { get; init; }
+        /// <summary>The custom traits of the namespace ([] = the core set): the trait registry the attestation is made against.</summary>
+        [JsonPropertyName("registry_traits")] public List<Dictionary<string, object?>>? RegistryTraits { get; init; }
+        [JsonPropertyName("diff_vs_active")] public PcaGetActionRegistryActionResponseHistoryItemRules? DiffVsActive { get; init; }
+        [JsonPropertyName("rules_diff_vs_active")] public PcaGetActionRegistryActionResponseHistoryItemRules? RulesDiffVsActive { get; init; }
+        [JsonPropertyName("updated_by")] public string? UpdatedBy { get; init; }
+        [JsonPropertyName("updated_at")] public string? UpdatedAt { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryDraftsResponse object.</summary>
+    public sealed record PcaListActionRegistryDraftsResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaActionRegistryActionsReviewResponse>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListActionRegistryDrafts. Unset values are not sent.</summary>
+    public sealed record PcaListActionRegistryDraftsQuery
+    {
+        /// <summary>Only drafts of this action namespace.</summary>
+        public string? Ns { get; init; }
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("ns", Ns);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>Any edit drops a confirmation and a rules review: the definition is unreviewed again.</summary>
+    public sealed record PcaUpdateActionRegistryDraftBody : ClearableBody
+    {
+        [JsonPropertyName("title")] public string? Title { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+        [JsonPropertyName("effects")] public List<string>? Effects { get; init; }
+        [JsonPropertyName("params")] public Dictionary<string, object?>? Params { get; init; }
+        /// <summary>The reversibility declaration of the action (class and, where reversible, its compensating action).</summary>
+        [JsonPropertyName("reversibility")] public Dictionary<string, object?>? Reversibility { get; init; }
+        [JsonPropertyName("compensates")] public string? Compensates { get; init; }
+        [JsonPropertyName("traits")] public List<string>? Traits { get; init; }
+        /// <summary>The business rules (null removes them).</summary>
+        [JsonPropertyName("rules")] public Dictionary<string, object?>? Rules { get; init; }
+        /// <summary>Send <c>null</c> for <c>description</c>, which clears it.</summary>
+        public PcaUpdateActionRegistryDraftBody ClearDescription() => this with { Cleared = Plus("description") };
+        /// <summary>Send <c>null</c> for <c>compensates</c>, which clears it.</summary>
+        public PcaUpdateActionRegistryDraftBody ClearCompensates() => this with { Cleared = Plus("compensates") };
+        /// <summary>Send <c>null</c> for <c>rules</c>, which clears it.</summary>
+        public PcaUpdateActionRegistryDraftBody ClearRules() => this with { Cleared = Plus("rules") };
+    }
+
+    /// <summary>A PcaDeleteActionRegistryDraftResponse object.</summary>
+    public sealed record PcaDeleteActionRegistryDraftResponse
+    {
+        /// <summary>One of: pca_action_draft.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        /// <summary>One of: True.</summary>
+        [JsonPropertyName("deleted")] public string? Deleted { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryDraftsConfirmBodyAttestationDismissedItem object.</summary>
+    public sealed record PcaActionRegistryDraftsConfirmBodyAttestationDismissedItem : ClearableBody
+    {
+        [JsonPropertyName("trait")] public string? Trait { get; init; }
+        [JsonPropertyName("reason")] public string? Reason { get; init; }
+    }
+
+    /// <summary>The reviewer's signed decision over the definition with `traits` = final_traits (signed in the browser with the reviewer key the passkey unwraps).</summary>
+    public sealed record PcaActionRegistryDraftsConfirmBodyAttestation : ClearableBody
+    {
+        [JsonPropertyName("def_digest")] public string? DefDigest { get; init; }
+        [JsonPropertyName("traits_digest")] public string? TraitsDigest { get; init; }
+        [JsonPropertyName("facts_digest")] public string? FactsDigest { get; init; }
+        [JsonPropertyName("final_traits")] public List<string>? FinalTraits { get; init; }
+        [JsonPropertyName("dismissed")] public List<PcaActionRegistryDraftsConfirmBodyAttestationDismissedItem>? Dismissed { get; init; }
+        [JsonPropertyName("reviewer_kid")] public string? ReviewerKid { get; init; }
+        /// <summary>Seconds; at most 10 minutes old and 2 minutes ahead.</summary>
+        [JsonPropertyName("ts")] public long? Ts { get; init; }
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+    }
+
+    /// <summary>A signed rules review (needed to publish widened rules).</summary>
+    public sealed record PcaActionRegistryDraftsConfirmBodyRulesReview : ClearableBody
+    {
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        [JsonPropertyName("def_digest")] public string? DefDigest { get; init; }
+        [JsonPropertyName("rules_digest")] public string? RulesDigest { get; init; }
+        [JsonPropertyName("reviewer_kid")] public string? ReviewerKid { get; init; }
+        [JsonPropertyName("ts")] public long? Ts { get; init; }
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+    }
+
+    /// <summary>WebAuthn assertion by the reviewer's passkey over sha256('atlas-pca/action-review-challenge/v1\0' || review message || rules review message).</summary>
+    public sealed record PcaActionRegistryDraftsConfirmBodyAssertion : ClearableBody
+    {
+        /// <summary>The passkey credential id.</summary>
+        [JsonPropertyName("credential_id")] public string? CredentialId { get; init; }
+        /// <summary>response.authenticatorData.</summary>
+        [JsonPropertyName("authenticatorData")] public string? AuthenticatorData { get; init; }
+        /// <summary>response.clientDataJSON.</summary>
+        [JsonPropertyName("clientDataJSON")] public string? ClientDataJSON { get; init; }
+        /// <summary>response.signature.</summary>
+        [JsonPropertyName("signature")] public string? Signature { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryDraftsConfirmBody object.</summary>
+    public sealed record PcaActionRegistryDraftsConfirmBody : ClearableBody
+    {
+        /// <summary>The reviewer's signed decision over the definition with `traits` = final_traits (signed in the browser with the reviewer key the passkey unwraps).</summary>
+        [JsonPropertyName("attestation")] public PcaActionRegistryDraftsConfirmBodyAttestation? Attestation { get; init; }
+        /// <summary>A signed rules review (needed to publish widened rules).</summary>
+        [JsonPropertyName("rules_review")] public PcaActionRegistryDraftsConfirmBodyRulesReview? RulesReview { get; init; }
+        /// <summary>WebAuthn assertion by the reviewer's passkey over sha256('atlas-pca/action-review-challenge/v1\0' || review message || rules review message).</summary>
+        [JsonPropertyName("assertion")] public PcaActionRegistryDraftsConfirmBodyAssertion? Assertion { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryImportsResponseTodoItem object.</summary>
+    public sealed record PcaActionRegistryImportsResponseTodoItem
+    {
+        [JsonPropertyName("where")] public string? Where { get; init; }
+        [JsonPropertyName("code")] public string? Code { get; init; }
+        [JsonPropertyName("message")] public string? Message { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryImportsResponse object.</summary>
+    public sealed record PcaActionRegistryImportsResponse
+    {
+        /// <summary>One of: pca_action_import.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>Drafts written (operations equal to the current definition are skipped).</summary>
+        [JsonPropertyName("imported")] public long? Imported { get; init; }
+        [JsonPropertyName("verbs")] public List<string>? Verbs { get; init; }
+        [JsonPropertyName("todo")] public List<PcaActionRegistryImportsResponseTodoItem>? Todo { get; init; }
+        [JsonPropertyName("source_id")] public string? SourceId { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryImportsBody object.</summary>
+    public sealed record PcaActionRegistryImportsBody : ClearableBody
+    {
+        /// <summary>The action namespace.</summary>
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        /// <summary>One of: openapi, mcp, graphql, grpc, asyncapi, jsonschema.</summary>
+        [JsonPropertyName("from")] public string? From { get; init; }
+        /// <summary>An https URL the server fetches (public addresses only, at most 8 MiB, redirects re-checked). For `mcp`, the server URL: initialize, then tools/list.</summary>
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        /// <summary>The document text instead of a URL (at most 8 MiB).</summary>
+        [JsonPropertyName("source")] public string? Source { get; init; }
+        /// <summary>jsonschema only: the verb to give the action.</summary>
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        /// <summary>Keep the URL as a source for manual or scheduled sync.</summary>
+        [JsonPropertyName("track")] public bool? Track { get; init; }
+        /// <summary>One of: off, hourly, daily.</summary>
+        [JsonPropertyName("schedule")] public string? Schedule { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryNamespacesDiffResponseChangesItem object.</summary>
+    public sealed record PcaGetActionRegistryNamespacesDiffResponseChangesItem
+    {
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        /// <summary>One of: equal, narrow, widen, incomparable, added, removed, deprecated.</summary>
+        [JsonPropertyName("class")] public string? Class { get; init; }
+        [JsonPropertyName("reasons")] public List<string>? Reasons { get; init; }
+        [JsonPropertyName("rules")] public PcaGetActionRegistryActionResponseHistoryItemRules? Rules { get; init; }
+        [JsonPropertyName("reviewed")] public bool? Reviewed { get; init; }
+    }
+
+    /// <summary>A PcaGetActionRegistryNamespacesDiffResponse object.</summary>
+    public sealed record PcaGetActionRegistryNamespacesDiffResponse
+    {
+        /// <summary>false when moving to `to` would need a reviewer signature that is missing.</summary>
+        [JsonPropertyName("ok")] public bool Ok { get; init; }
+        [JsonPropertyName("from")] public string From { get; init; } = "";
+        [JsonPropertyName("to")] public string To { get; init; } = "";
+        /// <summary>When not ok: the refusal code.</summary>
+        [JsonPropertyName("code")] public string? Code { get; init; }
+        /// <summary>When not ok: why.</summary>
+        [JsonPropertyName("message")] public string? Message { get; init; }
+        /// <summary>When not ok: the actions that need a reviewer.</summary>
+        [JsonPropertyName("verbs")] public List<string>? Verbs { get; init; }
+        [JsonPropertyName("changes")] public List<PcaGetActionRegistryNamespacesDiffResponseChangesItem> Changes { get; init; } = new();
+    }
+
+    /// <summary>Query parameters of GetActionRegistryNamespacesDiff. Unset values are not sent.</summary>
+    public sealed record PcaGetActionRegistryNamespacesDiffQuery
+    {
+        /// <summary>The version to compare from (MAJOR.MINOR.PATCH).</summary>
+        public string? From { get; init; }
+        /// <summary>The version to compare to (MAJOR.MINOR.PATCH).</summary>
+        public string? To { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("from", From);
+            yield return new KeyValuePair<string, object?>("to", To);
+        }
+    }
+
+    /// <summary>A PcaSetActionRegistryNamespacesPinResponse object.</summary>
+    public sealed record PcaSetActionRegistryNamespacesPinResponse
+    {
+        /// <summary>One of: pca_action_head.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("active_version")] public string? ActiveVersion { get; init; }
+        [JsonPropertyName("pinned")] public bool? Pinned { get; init; }
+        [JsonPropertyName("changes")] public List<PcaGetActionRegistryNamespacesDiffResponseChangesItem>? Changes { get; init; }
+    }
+
+    /// <summary>A PcaSetActionRegistryNamespacesPinBody object.</summary>
+    public sealed record PcaSetActionRegistryNamespacesPinBody : ClearableBody
+    {
+        /// <summary>The stored version to activate and pin (MAJOR.MINOR.PATCH).</summary>
+        [JsonPropertyName("version")] public string? Version { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryNamespacesVersionsResponseDataItem object.</summary>
+    public sealed record PcaListActionRegistryNamespacesVersionsResponseDataItem
+    {
+        [JsonPropertyName("version")] public string? Version { get; init; }
+        [JsonPropertyName("digest")] public string? Digest { get; init; }
+        [JsonPropertyName("prev")] public string? Prev { get; init; }
+        /// <summary>One of: active, staged.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        /// <summary>How it was published: `secret_key`, a console user, or a publisher key.</summary>
+        [JsonPropertyName("published_by")] public string? PublishedBy { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+        [JsonPropertyName("changes")] public List<PcaGetActionRegistryNamespacesDiffResponseChangesItem>? Changes { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryNamespacesVersionsResponse object.</summary>
+    public sealed record PcaListActionRegistryNamespacesVersionsResponse
+    {
+        [JsonPropertyName("data")] public List<PcaListActionRegistryNamespacesVersionsResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListActionRegistryNamespacesVersions. Unset values are not sent.</summary>
+    public sealed record PcaListActionRegistryNamespacesVersionsQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaGetActionRegistryNamespacesVersionResponse object.</summary>
+    public sealed record PcaGetActionRegistryNamespacesVersionResponse
+    {
+        /// <summary>One of: pca_action_version.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("version")] public string? Version { get; init; }
+        [JsonPropertyName("digest")] public string? Digest { get; init; }
+        [JsonPropertyName("prev")] public string? Prev { get; init; }
+        /// <summary>One of: active, staged.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        /// <summary>How it was published: `secret_key`, a console user, or a publisher key.</summary>
+        [JsonPropertyName("published_by")] public string? PublishedBy { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+        [JsonPropertyName("changes")] public List<PcaGetActionRegistryNamespacesDiffResponseChangesItem>? Changes { get; init; }
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("pack")] public Dictionary<string, object?>? Pack { get; init; }
+        [JsonPropertyName("rules")] public Dictionary<string, object?>? Rules { get; init; }
+        [JsonPropertyName("traits")] public Dictionary<string, object?>? Traits { get; init; }
+        [JsonPropertyName("deprecated")] public List<string>? Deprecated { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryPacksResponse object.</summary>
+    public sealed record PcaActionRegistryPacksResponse
+    {
+        /// <summary>One of: pca_action_version.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("version")] public string? Version { get; init; }
+        [JsonPropertyName("digest")] public string? Digest { get; init; }
+        [JsonPropertyName("prev")] public string? Prev { get; init; }
+        /// <summary>One of: active, staged.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("changes")] public List<PcaGetActionRegistryNamespacesDiffResponseChangesItem>? Changes { get; init; }
+        [JsonPropertyName("published_drafts")] public long? PublishedDrafts { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryPacksBody object.</summary>
+    public sealed record PcaActionRegistryPacksBody : ClearableBody
+    {
+        /// <summary>The signed action pack (its namespace, version, definitions and publisher signature).</summary>
+        [JsonPropertyName("pack")] public Dictionary<string, object?>? Pack { get; init; }
+        /// <summary>The business rules of the pack, keyed by verb.</summary>
+        [JsonPropertyName("rules")] public Dictionary<string, object?>? Rules { get; init; }
+        /// <summary>The custom traits of the namespace (omit for the core set).</summary>
+        [JsonPropertyName("traits")] public Dictionary<string, object?>? Traits { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryPublishBody object.</summary>
+    public sealed record PcaActionRegistryPublishBody : ClearableBody
+    {
+        /// <summary>The action namespace.</summary>
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        /// <summary>MAJOR.MINOR.PATCH; default: the next patch version.</summary>
+        [JsonPropertyName("version")] public string? Version { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryPublisherKeysResponse object.</summary>
+    public sealed record PcaActionRegistryPublisherKeysResponse
+    {
+        /// <summary>One of: pca_action_publisher_key.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("kid")] public string? Kid { get; init; }
+        [JsonPropertyName("pk")] public string? Pk { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryPublisherKeysBody object.</summary>
+    public sealed record PcaActionRegistryPublisherKeysBody : ClearableBody
+    {
+        /// <summary>The key id (not a reserved id, and never one starting with `rv_`).</summary>
+        [JsonPropertyName("kid")] public string? Kid { get; init; }
+        /// <summary>The Ed25519 public key (32 bytes). A key already pinned under another role or id is refused with 409.</summary>
+        [JsonPropertyName("pk")] public string? Pk { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryReviewersResponseDataItemCredentialsItem object.</summary>
+    public sealed record PcaListActionRegistryReviewersResponseDataItemCredentialsItem
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("transports")] public List<string>? Transports { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+        [JsonPropertyName("last_used_at")] public string? LastUsedAt { get; init; }
+        [JsonPropertyName("revoked_at")] public string? RevokedAt { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryReviewersResponseDataItem object.</summary>
+    public sealed record PcaListActionRegistryReviewersResponseDataItem
+    {
+        /// <summary>One of: pca_action_reviewer.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        /// <summary>`rv_&lt;id&gt;` once enrolled.</summary>
+        [JsonPropertyName("kid")] public string? Kid { get; init; }
+        [JsonPropertyName("pk")] public string? Pk { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        /// <summary>One of: pending, active, disabled.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+        [JsonPropertyName("credentials")] public List<PcaListActionRegistryReviewersResponseDataItemCredentialsItem>? Credentials { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryReviewersResponse object.</summary>
+    public sealed record PcaListActionRegistryReviewersResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaListActionRegistryReviewersResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListActionRegistryReviewers. Unset values are not sent.</summary>
+    public sealed record PcaListActionRegistryReviewersQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaActionRegistryReviewersEnrolmentsResponse object.</summary>
+    public sealed record PcaActionRegistryReviewersEnrolmentsResponse
+    {
+        /// <summary>One of: pca_action_reviewer_enrolment.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        /// <summary>Single-use link (24 hours).</summary>
+        [JsonPropertyName("enrolment_url")] public string? EnrolmentUrl { get; init; }
+        [JsonPropertyName("expires_at")] public string? ExpiresAt { get; init; }
+        [JsonPropertyName("reviewer_id")] public string? ReviewerId { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistryReviewersEnrolmentsBody object.</summary>
+    public sealed record PcaActionRegistryReviewersEnrolmentsBody : ClearableBody
+    {
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        /// <summary>The dashboard user who reviews from the console (default from the console: the signed-in user).</summary>
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistrySourcesResponseDataItem object.</summary>
+    public sealed record PcaListActionRegistrySourcesResponseDataItem
+    {
+        /// <summary>One of: pca_action_source.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        /// <summary>One of: openapi, mcp, graphql, grpc, asyncapi, jsonschema.</summary>
+        [JsonPropertyName("kind")] public string? Kind { get; init; }
+        [JsonPropertyName("uri")] public string? Uri { get; init; }
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        /// <summary>One of: off, hourly, daily.</summary>
+        [JsonPropertyName("schedule")] public string? Schedule { get; init; }
+        [JsonPropertyName("last_synced_at")] public string? LastSyncedAt { get; init; }
+        [JsonPropertyName("next_run_at")] public string? NextRunAt { get; init; }
+        /// <summary>One of: ok, changes, error.</summary>
+        [JsonPropertyName("last_status")] public string? LastStatus { get; init; }
+        [JsonPropertyName("last_error")] public string? LastError { get; init; }
+        [JsonPropertyName("failures")] public long? Failures { get; init; }
+        [JsonPropertyName("operations")] public long? Operations { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistrySourcesResponse object.</summary>
+    public sealed record PcaListActionRegistrySourcesResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaListActionRegistrySourcesResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListActionRegistrySources. Unset values are not sent.</summary>
+    public sealed record PcaListActionRegistrySourcesQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaCreateActionRegistrySourceBody object.</summary>
+    public sealed record PcaCreateActionRegistrySourceBody : ClearableBody
+    {
+        /// <summary>The action namespace.</summary>
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        /// <summary>One of: openapi, mcp, graphql, grpc, asyncapi, jsonschema.</summary>
+        [JsonPropertyName("from")] public string? From { get; init; }
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        /// <summary>One of: off, hourly, daily.</summary>
+        [JsonPropertyName("schedule")] public string? Schedule { get; init; }
+    }
+
+    /// <summary>A PcaUpdateActionRegistrySourceBody object.</summary>
+    public sealed record PcaUpdateActionRegistrySourceBody : ClearableBody
+    {
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        /// <summary>One of: off, hourly, daily.</summary>
+        [JsonPropertyName("schedule")] public string? Schedule { get; init; }
+    }
+
+    /// <summary>A PcaDeleteActionRegistrySourceResponse object.</summary>
+    public sealed record PcaDeleteActionRegistrySourceResponse
+    {
+        /// <summary>One of: pca_action_source.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        /// <summary>One of: True.</summary>
+        [JsonPropertyName("deleted")] public string? Deleted { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistrySourcesSyncResponseEntriesItem object.</summary>
+    public sealed record PcaActionRegistrySourcesSyncResponseEntriesItem
+    {
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        /// <summary>One of: added, changed, unchanged, removed.</summary>
+        [JsonPropertyName("change")] public string? Change { get; init; }
+        [JsonPropertyName("diff")] public PcaGetActionRegistryActionResponseHistoryItemRules? Diff { get; init; }
+    }
+
+    /// <summary>A PcaActionRegistrySourcesSyncResponse object.</summary>
+    public sealed record PcaActionRegistrySourcesSyncResponse
+    {
+        /// <summary>One of: pca_action_sync.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("source_id")] public string? SourceId { get; init; }
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("entries")] public List<PcaActionRegistrySourcesSyncResponseEntriesItem>? Entries { get; init; }
+        [JsonPropertyName("needs_review")] public bool? NeedsReview { get; init; }
+        [JsonPropertyName("drafted")] public List<string>? Drafted { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryTemplatesResponseDataItem object.</summary>
+    public sealed record PcaListActionRegistryTemplatesResponseDataItem
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("title")] public string? Title { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+        [JsonPropertyName("actions")] public long? Actions { get; init; }
+        [JsonPropertyName("traits")] public List<string>? Traits { get; init; }
+    }
+
+    /// <summary>A PcaListActionRegistryTemplatesResponse object.</summary>
+    public sealed record PcaListActionRegistryTemplatesResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaListActionRegistryTemplatesResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListActionRegistryTemplates. Unset values are not sent.</summary>
+    public sealed record PcaListActionRegistryTemplatesQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaActionRegistryTemplatesApplyBody object.</summary>
+    public sealed record PcaActionRegistryTemplatesApplyBody : ClearableBody
+    {
+        /// <summary>The action namespace.</summary>
+        [JsonPropertyName("ns")] public string? Ns { get; init; }
+    }
+
+    /// <summary>A PcaListApprovalsSettingsResponseChannels object.</summary>
+    public sealed record PcaListApprovalsSettingsResponseChannels
+    {
+        [JsonPropertyName("push")] public bool? Push { get; init; }
+        [JsonPropertyName("email")] public bool? Email { get; init; }
+        [JsonPropertyName("sms")] public bool? Sms { get; init; }
+        [JsonPropertyName("slack")] public bool? Slack { get; init; }
+        [JsonPropertyName("webhook")] public bool? Webhook { get; init; }
+    }
+
+    /// <summary>A PcaListApprovalsSettingsResponseCiba object.</summary>
+    public sealed record PcaListApprovalsSettingsResponseCiba
+    {
+        [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
+        /// <summary>notify: a CIBA deny denies; require: a member must also approve in their identity provider. One of: notify, require.</summary>
+        [JsonPropertyName("mode")] public string? Mode { get; init; }
+        [JsonPropertyName("backchannel_authentication_endpoint")] public string? BackchannelAuthenticationEndpoint { get; init; }
+        [JsonPropertyName("token_endpoint")] public string? TokenEndpoint { get; init; }
+        [JsonPropertyName("client_id")] public string? ClientId { get; init; }
+        /// <summary>One of: email, subject_id.</summary>
+        [JsonPropertyName("login_hint")] public string? LoginHint { get; init; }
+        [JsonPropertyName("client_secret_set")] public bool? ClientSecretSet { get; init; }
+    }
+
+    /// <summary>A PcaListApprovalsSettingsResponse object.</summary>
+    public sealed record PcaListApprovalsSettingsResponse
+    {
+        /// <summary>One of: pca_approval_settings.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("channels")] public PcaListApprovalsSettingsResponseChannels? Channels { get; init; }
+        [JsonPropertyName("default_member_channels")] public List<string>? DefaultMemberChannels { get; init; }
+        [JsonPropertyName("ciba")] public PcaListApprovalsSettingsResponseCiba? Ciba { get; init; }
+        [JsonPropertyName("slack_webhook_set")] public bool? SlackWebhookSet { get; init; }
+    }
+
+    /// <summary>A PcaSetApprovalsSettingsBodyChannels object.</summary>
+    public sealed record PcaSetApprovalsSettingsBodyChannels : ClearableBody
+    {
+        [JsonPropertyName("push")] public bool? Push { get; init; }
+        [JsonPropertyName("email")] public bool? Email { get; init; }
+        [JsonPropertyName("sms")] public bool? Sms { get; init; }
+        [JsonPropertyName("slack")] public bool? Slack { get; init; }
+        [JsonPropertyName("webhook")] public bool? Webhook { get; init; }
+    }
+
+    /// <summary>A PcaSetApprovalsSettingsBodyCiba object.</summary>
+    public sealed record PcaSetApprovalsSettingsBodyCiba : ClearableBody
+    {
+        [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
+        /// <summary>notify: a CIBA deny denies; require: a member must also approve in their identity provider. One of: notify, require.</summary>
+        [JsonPropertyName("mode")] public string? Mode { get; init; }
+        [JsonPropertyName("backchannel_authentication_endpoint")] public string? BackchannelAuthenticationEndpoint { get; init; }
+        [JsonPropertyName("token_endpoint")] public string? TokenEndpoint { get; init; }
+        [JsonPropertyName("client_id")] public string? ClientId { get; init; }
+        /// <summary>One of: email, subject_id.</summary>
+        [JsonPropertyName("login_hint")] public string? LoginHint { get; init; }
+    }
+
+    /// <summary>A PcaSetApprovalsSettingsBody object.</summary>
+    public sealed record PcaSetApprovalsSettingsBody : ClearableBody
+    {
+        [JsonPropertyName("channels")] public PcaSetApprovalsSettingsBodyChannels? Channels { get; init; }
+        [JsonPropertyName("default_member_channels")] public List<string>? DefaultMemberChannels { get; init; }
+        [JsonPropertyName("ciba")] public PcaSetApprovalsSettingsBodyCiba? Ciba { get; init; }
+        /// <summary>A hooks.slack.com incoming-webhook URL; stored encrypted, never returned. null clears.</summary>
+        [JsonPropertyName("slack_webhook_url")] public string? SlackWebhookUrl { get; init; }
+        /// <summary>Stored encrypted, never returned. null clears.</summary>
+        [JsonPropertyName("ciba_client_secret")] public string? CibaClientSecret { get; init; }
+        /// <summary>Send <c>null</c> for <c>ciba</c>, which clears it.</summary>
+        public PcaSetApprovalsSettingsBody ClearCiba() => this with { Cleared = Plus("ciba") };
+        /// <summary>Send <c>null</c> for <c>slack_webhook_url</c>, which clears it.</summary>
+        public PcaSetApprovalsSettingsBody ClearSlackWebhookUrl() => this with { Cleared = Plus("slack_webhook_url") };
+        /// <summary>Send <c>null</c> for <c>ciba_client_secret</c>, which clears it.</summary>
+        public PcaSetApprovalsSettingsBody ClearCibaClientSecret() => this with { Cleared = Plus("ciba_client_secret") };
+    }
+
+    /// <summary>A PcaListApproversResponseDataItemMembersItem object.</summary>
+    public sealed record PcaListApproversResponseDataItemMembersItem
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        [JsonPropertyName("phone")] public string? Phone { get; init; }
+        [JsonPropertyName("channels")] public List<string>? Channels { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+    }
+
+    /// <summary>A PcaListApproversResponseDataItemCredentialsItem object.</summary>
+    public sealed record PcaListApproversResponseDataItemCredentialsItem
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("member_id")] public string? MemberId { get; init; }
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("transports")] public List<string>? Transports { get; init; }
+        [JsonPropertyName("aaguid")] public string? Aaguid { get; init; }
+        /// <summary>One of: active, revoked.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+        [JsonPropertyName("last_used_at")] public string? LastUsedAt { get; init; }
+        [JsonPropertyName("revoked_at")] public string? RevokedAt { get; init; }
+    }
+
+    /// <summary>A PcaListApproversResponseDataItem object.</summary>
+    public sealed record PcaListApproversResponseDataItem
+    {
+        /// <summary>One of: pca_approver.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("principal_pub")] public string? PrincipalPub { get; init; }
+        /// <summary>One of: user, org, machine.</summary>
+        [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        [JsonPropertyName("subject_id")] public string? SubjectId { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        [JsonPropertyName("quorum")] public long? Quorum { get; init; }
+        /// <summary>One of: active, disabled.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("created_at")] public string? CreatedAt { get; init; }
+        [JsonPropertyName("members")] public List<PcaListApproversResponseDataItemMembersItem>? Members { get; init; }
+        [JsonPropertyName("credentials")] public List<PcaListApproversResponseDataItemCredentialsItem>? Credentials { get; init; }
+    }
+
+    /// <summary>A PcaListApproversResponse object.</summary>
+    public sealed record PcaListApproversResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaListApproversResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListApprovers. Unset values are not sent.</summary>
+    public sealed record PcaListApproversQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaApproversEnrolmentsResponse object.</summary>
+    public sealed record PcaApproversEnrolmentsResponse
+    {
+        /// <summary>One of: pca_approver_enrolment.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        /// <summary>Single-use link to the hosted enrolment page (valid 24 hours).</summary>
+        [JsonPropertyName("enrolment_url")] public string? EnrolmentUrl { get; init; }
+        [JsonPropertyName("expires_at")] public string? ExpiresAt { get; init; }
+        [JsonPropertyName("approver_id")] public string? ApproverId { get; init; }
+        [JsonPropertyName("member_id")] public string? MemberId { get; init; }
+    }
+
+    /// <summary>A PcaApproversEnrolmentsBody object.</summary>
+    public sealed record PcaApproversEnrolmentsBody : ClearableBody
+    {
+        /// <summary>New approver: the subject the principal key is bound to. One of: user, org, machine.</summary>
+        [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        [JsonPropertyName("subject_id")] public string? SubjectId { get; init; }
+        /// <summary>Add a delegate (or, with member_id, another passkey) to an existing approver.</summary>
+        [JsonPropertyName("approver_id")] public string? ApproverId { get; init; }
+        [JsonPropertyName("member_id")] public string? MemberId { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        /// <summary>E.164.</summary>
+        [JsonPropertyName("phone")] public string? Phone { get; init; }
+        /// <summary>Instance user of the member (push notifications go to their devices).</summary>
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        [JsonPropertyName("channels")] public List<string>? Channels { get; init; }
+    }
+
+    /// <summary>A PcaUpdateApproverBody object.</summary>
+    public sealed record PcaUpdateApproverBody : ClearableBody
+    {
+        /// <summary>Distinct members whose passkey approval is required (at most the active members).</summary>
+        [JsonPropertyName("quorum")] public long? Quorum { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        /// <summary>One of: active, disabled.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        /// <summary>Send <c>null</c> for <c>display_name</c>, which clears it.</summary>
+        public PcaUpdateApproverBody ClearDisplayName() => this with { Cleared = Plus("display_name") };
+    }
+
+    /// <summary>A PcaUpdateApproversMemberBody object.</summary>
+    public sealed record PcaUpdateApproversMemberBody : ClearableBody
+    {
+        [JsonPropertyName("channels")] public List<string>? Channels { get; init; }
+        [JsonPropertyName("email")] public string? Email { get; init; }
+        [JsonPropertyName("phone")] public string? Phone { get; init; }
+        [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
+        /// <summary>One of: active, disabled.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        /// <summary>Send <c>null</c> for <c>email</c>, which clears it.</summary>
+        public PcaUpdateApproversMemberBody ClearEmail() => this with { Cleared = Plus("email") };
+        /// <summary>Send <c>null</c> for <c>phone</c>, which clears it.</summary>
+        public PcaUpdateApproversMemberBody ClearPhone() => this with { Cleared = Plus("phone") };
+        /// <summary>Send <c>null</c> for <c>display_name</c>, which clears it.</summary>
+        public PcaUpdateApproversMemberBody ClearDisplayName() => this with { Cleared = Plus("display_name") };
+    }
+
+    /// <summary>A PcaBeaconsResponse object.</summary>
+    public sealed record PcaBeaconsResponse
+    {
+        /// <summary>One of: pca_beacon.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("beacon")] public Dictionary<string, object?>? Beacon { get; init; }
+        /// <summary>Bind this into the PCActn as freshness.beacon_ref.</summary>
+        [JsonPropertyName("beacon_ref")] public string? BeaconRef { get; init; }
+        /// <summary>One of: principal, operator.</summary>
+        [JsonPropertyName("issuer_kind")] public string? IssuerKind { get; init; }
+    }
+
+    /// <summary>A PcaBeaconsBody object.</summary>
+    public sealed record PcaBeaconsBody : ClearableBody
+    {
+        /// <summary>A signed v2 liveness beacon {v:2, instance, scope, epoch, seq, issued_at, not_after, issuer, sig} (principal path).</summary>
+        [JsonPropertyName("beacon")] public Dictionary<string, object?>? Beacon { get; init; }
+        /// <summary>Operator path: '*' (default) or a grant_ref.</summary>
+        [JsonPropertyName("scope")] public string? Scope { get; init; }
+        /// <summary>Operator path: validity in ms (default 300000, max 3600000).</summary>
+        [JsonPropertyName("validity_ms")] public long? ValidityMs { get; init; }
+    }
+
+    /// <summary>A PcaListBondAccountsResponse object.</summary>
+    public sealed record PcaListBondAccountsResponse
+    {
+        /// <summary>One of: pca_bond_account.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("account")] public string? Account { get; init; }
+        [JsonPropertyName("balance")] public double? Balance { get; init; }
+    }
+
+    /// <summary>Query parameters of ListBondAccounts. Unset values are not sent.</summary>
+    public sealed record PcaListBondAccountsQuery
+    {
+        /// <summary>The account to read.</summary>
+        public string? Account { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("account", Account);
+        }
+    }
+
+    /// <summary>A PcaCreateBondAccountBody object.</summary>
+    public sealed record PcaCreateBondAccountBody : ClearableBody
+    {
+        /// <summary>The depositor: a principal base64url Ed25519 public key.</summary>
+        [JsonPropertyName("account")] public string? Account { get; init; }
+        /// <summary>Positive amount to credit.</summary>
+        [JsonPropertyName("amount")] public double? Amount { get; init; }
+    }
+
+    /// <summary>A PcaConstitutionsResponse object.</summary>
+    public sealed record PcaConstitutionsResponse
+    {
+        /// <summary>One of: pca_constitution.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("constitution")] public Dictionary<string, object?>? Constitution { get; init; }
+        [JsonPropertyName("constitution_id")] public string? ConstitutionId { get; init; }
+        [JsonPropertyName("registered_at")] public string? RegisteredAt { get; init; }
+        /// <summary>Live monitor head: { seq, state_digest, updated_at } (null until the first admitted action).</summary>
+        [JsonPropertyName("monitor")] public Dictionary<string, object?>? Monitor { get; init; }
+        /// <summary>Proof-of-progress counters when the grant commits a goal: { goal_commitment, seq, spent, remaining, exploration_budget, state_digest, head }.</summary>
+        [JsonPropertyName("progress")] public Dictionary<string, object?>? Progress { get; init; }
+    }
+
+    /// <summary>A PcaConstitutionsBody object.</summary>
+    public sealed record PcaConstitutionsBody : ClearableBody
+    {
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        /// <summary>A `SignedConstitution`: { version, principal, invariants[], issued_at?, id, sig } (Ed25519 by the grant principal over the domain-separated content id).</summary>
+        [JsonPropertyName("constitution")] public Dictionary<string, object?>? Constitution { get; init; }
+    }
+
+    /// <summary>A PcaListGrantsResponseDataItem object.</summary>
+    public sealed record PcaListGrantsResponseDataItem
+    {
+        /// <summary>One of: pca_grant.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("principal")] public string? Principal { get; init; }
+        [JsonPropertyName("agent")] public string? Agent { get; init; }
+        [JsonPropertyName("chain_digest")] public string? ChainDigest { get; init; }
+    }
+
+    /// <summary>A PcaListGrantsResponse object.</summary>
+    public sealed record PcaListGrantsResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaListGrantsResponseDataItem>? Data { get; init; }
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of ListGrants. Unset values are not sent.</summary>
+    public sealed record PcaListGrantsQuery
+    {
+        /// <summary>Only grants issued by this principal public key.</summary>
+        public string? Principal { get; init; }
+        /// <summary>Only grants held by this agent (holder) public key.</summary>
+        public string? Agent { get; init; }
+        /// <summary>Only grants in this status. One of: active, revoked.</summary>
+        public string? Status { get; init; }
+        /// <summary>The most grants to return.</summary>
+        public long? Limit { get; init; }
+        /// <summary>The `next_cursor` of the previous page.</summary>
+        public string? Cursor { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("principal", Principal);
+            yield return new KeyValuePair<string, object?>("agent", Agent);
+            yield return new KeyValuePair<string, object?>("status", Status);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("cursor", Cursor);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaGetGrantResponse object.</summary>
+    public sealed record PcaGetGrantResponse
+    {
+        /// <summary>One of: pca_grant.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("grant")] public Dictionary<string, object?>? Grant { get; init; }
+        [JsonPropertyName("remaining_budget")] public Dictionary<string, object?>? RemainingBudget { get; init; }
+        [JsonPropertyName("revoked_capabilities")] public long? RevokedCapabilities { get; init; }
+        [JsonPropertyName("revocation_epoch")] public Dictionary<string, object?>? RevocationEpoch { get; init; }
+    }
+
+    /// <summary>A PcaDeleteGrantResponse object.</summary>
+    public sealed record PcaDeleteGrantResponse
+    {
+        /// <summary>One of: pca_grant_revocation.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("revoked")] public List<string>? Revoked { get; init; }
+        [JsonPropertyName("revocation_epoch")] public Dictionary<string, object?>? RevocationEpoch { get; init; }
+    }
+
+    /// <summary>A PcaDeleteGrantBody object.</summary>
+    public sealed record PcaDeleteGrantBody : ClearableBody
+    {
+        /// <summary>Ed25519 by the grant principal over the domain-separated {grant_ref, grant_ref} revocation message.</summary>
+        [JsonPropertyName("principal_sig")] public string? PrincipalSig { get; init; }
+    }
+
+    /// <summary>Query parameters of DeleteGrant. Unset values are not sent.</summary>
+    public sealed record PcaDeleteGrantQuery
+    {
+        /// <summary>`grant` revokes this grant; `agent` revokes every active grant of its principal and holder (operator key only). One of: grant, agent.</summary>
+        public string? Scope { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("scope", Scope);
+        }
+    }
+
+    /// <summary>A PcaGrantsAmendResponse object.</summary>
+    public sealed record PcaGrantsAmendResponse
+    {
+        /// <summary>One of: pca_grant_authority.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("rev")] public long? Rev { get; init; }
+        [JsonPropertyName("created")] public bool? Created { get; init; }
+        [JsonPropertyName("supersedes")] public string? Supersedes { get; init; }
+        [JsonPropertyName("authority")] public Dictionary<string, object?>? Authority { get; init; }
+    }
+
+    /// <summary>The comparable shape of a grant's authority: explicit verbs, resource patterns (exact, or a trailing * prefix), named numeric ceilings and an expiry. Admission enforces verbs, resources and expires_at; limits are recorded and compared.</summary>
+    public sealed record PcaGrantsAmendBodyAuthority : ClearableBody
+    {
+        [JsonPropertyName("verbs")] public List<string>? Verbs { get; init; }
+        [JsonPropertyName("resources")] public List<string>? Resources { get; init; }
+        /// <summary>Named non-negative ceilings, e.g. money.usd.</summary>
+        [JsonPropertyName("limits")] public Dictionary<string, object?>? Limits { get; init; }
+        /// <summary>Epoch milliseconds.</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+    }
+
+    /// <summary>A PcaGrantsAmendBody object.</summary>
+    public sealed record PcaGrantsAmendBody : ClearableBody
+    {
+        /// <summary>One of: narrow, merge, replace.</summary>
+        [JsonPropertyName("action")] public string? Action { get; init; }
+        /// <summary>The comparable shape of a grant's authority: explicit verbs, resource patterns (exact, or a trailing * prefix), named numeric ceilings and an expiry. Admission enforces verbs, resources and expires_at; limits are recorded and compared.</summary>
+        [JsonPropertyName("authority")] public PcaGrantsAmendBodyAuthority? Authority { get; init; }
+        /// <summary>Ed25519 over the grant-amend domain and {grant, rev, action, authority digest}.</summary>
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+        /// <summary>One of: holder, principal.</summary>
+        [JsonPropertyName("signed_by")] public string? SignedBy { get; init; }
+        [JsonPropertyName("step_up_ref")] public string? StepUpRef { get; init; }
+        [JsonPropertyName("new_grant_ref")] public string? NewGrantRef { get; init; }
+    }
+
+    /// <summary>A PcaSetGrantsAuthorityResponse object.</summary>
+    public sealed record PcaSetGrantsAuthorityResponse
+    {
+        /// <summary>One of: pca_grant_authority.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("rev")] public long? Rev { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        [JsonPropertyName("authority")] public Dictionary<string, object?>? Authority { get; init; }
+        [JsonPropertyName("authority_digest")] public string? AuthorityDigest { get; init; }
+    }
+
+    /// <summary>A PcaSetGrantsAuthorityBody object.</summary>
+    public sealed record PcaSetGrantsAuthorityBody : ClearableBody
+    {
+        /// <summary>The comparable shape of a grant's authority: explicit verbs, resource patterns (exact, or a trailing * prefix), named numeric ceilings and an expiry. Admission enforces verbs, resources and expires_at; limits are recorded and compared.</summary>
+        [JsonPropertyName("authority")] public PcaGrantsAmendBodyAuthority? Authority { get; init; }
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+    }
+
+    /// <summary>A PcaListGrantsNeedsResponse object.</summary>
+    public sealed record PcaListGrantsNeedsResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<Dictionary<string, object?>>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListGrantsNeeds. Unset values are not sent.</summary>
+    public sealed record PcaListGrantsNeedsQuery
+    {
+        /// <summary>Only need requests in this status. One of: pending, approved, denied.</summary>
+        public string? Status { get; init; }
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("status", Status);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaCreateGrantsNeedResponse object.</summary>
+    public sealed record PcaCreateGrantsNeedResponse
+    {
+        /// <summary>One of: pca_grant_need.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+    }
+
+    /// <summary>A PcaCreateGrantsNeedBodyNeedsItem object.</summary>
+    public sealed record PcaCreateGrantsNeedBodyNeedsItem : ClearableBody
+    {
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        [JsonPropertyName("resource")] public string? Resource { get; init; }
+        [JsonPropertyName("limits")] public Dictionary<string, object?>? Limits { get; init; }
+        [JsonPropertyName("adjustable")] public bool? Adjustable { get; init; }
+    }
+
+    /// <summary>A PcaCreateGrantsNeedBody object.</summary>
+    public sealed record PcaCreateGrantsNeedBody : ClearableBody
+    {
+        [JsonPropertyName("needs")] public List<PcaCreateGrantsNeedBodyNeedsItem>? Needs { get; init; }
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+    }
+
+    /// <summary>A PcaGrantsStepUpResponse object.</summary>
+    public sealed record PcaGrantsStepUpResponse
+    {
+        /// <summary>One of: pca_grant_step_up.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("step_up_ref")] public string? StepUpRef { get; init; }
+        [JsonPropertyName("nonce")] public string? Nonce { get; init; }
+        [JsonPropertyName("expires_at")] public string? ExpiresAt { get; init; }
+    }
+
+    /// <summary>A PcaGrantsStepUpApproveResponse object.</summary>
+    public sealed record PcaGrantsStepUpApproveResponse
+    {
+        /// <summary>One of: pca_grant_step_up.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("step_up_ref")] public string? StepUpRef { get; init; }
+        [JsonPropertyName("approved")] public bool? Approved { get; init; }
+    }
+
+    /// <summary>A PcaGrantsStepUpApproveBody object.</summary>
+    public sealed record PcaGrantsStepUpApproveBody : ClearableBody
+    {
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+    }
+
+    /// <summary>A PcaGuardianRotateResponsePrevious object.</summary>
+    public sealed record PcaGuardianRotateResponsePrevious
+    {
+        [JsonPropertyName("epoch")] public long? Epoch { get; init; }
+        [JsonPropertyName("public_key")] public string? PublicKey { get; init; }
+    }
+
+    /// <summary>A PcaGuardianRotateResponse object.</summary>
+    public sealed record PcaGuardianRotateResponse
+    {
+        /// <summary>One of: pca_guardian.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("epoch")] public long? Epoch { get; init; }
+        [JsonPropertyName("public_key")] public string? PublicKey { get; init; }
+        [JsonPropertyName("previous")] public PcaGuardianRotateResponsePrevious? Previous { get; init; }
+        [JsonPropertyName("keys")] public List<Dictionary<string, object?>>? Keys { get; init; }
+    }
+
+    /// <summary>A PcaListIntentMapsObservationsResponse object.</summary>
+    public sealed record PcaListIntentMapsObservationsResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<Dictionary<string, object?>>? Data { get; init; }
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of ListIntentMapsObservations. Unset values are not sent.</summary>
+    public sealed record PcaListIntentMapsObservationsQuery
+    {
+        /// <summary>Page size, 1 to 200 (default 50).</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor from the previous page.</summary>
+        public string? After { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("after", After);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaIntentSchemasResponse object.</summary>
+    public sealed record PcaIntentSchemasResponse
+    {
+        /// <summary>One of: pca_intent_schema.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("digest")] public string? Digest { get; init; }
+        [JsonPropertyName("aud")] public string? Aud { get; init; }
+        [JsonPropertyName("version")] public string? Version { get; init; }
+        [JsonPropertyName("schema")] public Dictionary<string, object?>? Schema { get; init; }
+        [JsonPropertyName("anchor")] public Dictionary<string, object?>? Anchor { get; init; }
+    }
+
+    /// <summary>A PcaIntentSchemasBody object.</summary>
+    public sealed record PcaIntentSchemasBody : ClearableBody
+    {
+        /// <summary>The signed schema { v: 1, kind: "pca-action-schema", site, aud, version, units?, state?, verbs, sig: { alg, kid, value, pq_value? } }.</summary>
+        [JsonPropertyName("schema")] public Dictionary<string, object?>? Schema { get; init; }
+        /// <summary>The site schema keys [{ kid, alg, pk, pq_pk? }] from its discovery document.</summary>
+        [JsonPropertyName("keys")] public List<Dictionary<string, object?>>? Keys { get; init; }
+    }
+
+    /// <summary>A PcaNeedsApproveResponse object.</summary>
+    public sealed record PcaNeedsApproveResponse
+    {
+        /// <summary>One of: pca_grant_authority.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("supersedes")] public string? Supersedes { get; init; }
+        [JsonPropertyName("authority")] public Dictionary<string, object?>? Authority { get; init; }
+    }
+
+    /// <summary>A PcaNeedsApproveBody object.</summary>
+    public sealed record PcaNeedsApproveBody : ClearableBody
+    {
+        [JsonPropertyName("approved")] public List<Dictionary<string, object?>>? Approved { get; init; }
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+        [JsonPropertyName("step_up_ref")] public string? StepUpRef { get; init; }
+        [JsonPropertyName("new_grant_ref")] public string? NewGrantRef { get; init; }
+    }
+
+    /// <summary>A PcaNeedsDenyResponse object.</summary>
+    public sealed record PcaNeedsDenyResponse
+    {
+        /// <summary>One of: pca_grant_need.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+    }
+
+    /// <summary>A PcaNeedsDenyBody object.</summary>
+    public sealed record PcaNeedsDenyBody : ClearableBody
+    {
+        [JsonPropertyName("sig")] public string? Sig { get; init; }
+    }
+
+    /// <summary>A PcaDeletePqPinResponse object.</summary>
+    public sealed record PcaDeletePqPinResponse
+    {
+        /// <summary>One of: pca_pq_pin.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("identity")] public string? Identity { get; init; }
+        [JsonPropertyName("deleted")] public bool? Deleted { get; init; }
+    }
+
+    /// <summary>A PcaListPrincipalsResponseDataItem object.</summary>
+    public sealed record PcaListPrincipalsResponseDataItem
+    {
+        /// <summary>One of: pca_principal.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+    }
+
+    /// <summary>A PcaListPrincipalsResponse object.</summary>
+    public sealed record PcaListPrincipalsResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaListPrincipalsResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListPrincipals. Unset values are not sent.</summary>
+    public sealed record PcaListPrincipalsQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaCreatePrincipalResponse object.</summary>
+    public sealed record PcaCreatePrincipalResponse
+    {
+        /// <summary>One of: pca_principal.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("principal_pub")] public string? PrincipalPub { get; init; }
+        [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        [JsonPropertyName("subject_id")] public string? SubjectId { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+    }
+
+    /// <summary>A PcaCreatePrincipalBody object.</summary>
+    public sealed record PcaCreatePrincipalBody : ClearableBody
+    {
+        /// <summary>The principal base64url Ed25519 public key to enrol.</summary>
+        [JsonPropertyName("principal_pub")] public string? PrincipalPub { get; init; }
+        /// <summary>One of: user, org, machine.</summary>
+        [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        /// <summary>The id of the user/org/machine, which must exist in this instance.</summary>
+        [JsonPropertyName("subject_id")] public string? SubjectId { get; init; }
+    }
+
+    /// <summary>A PcaDeletePrincipalResponse object.</summary>
+    public sealed record PcaDeletePrincipalResponse
+    {
+        /// <summary>One of: pca_principal.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("principal_pub")] public string? PrincipalPub { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+    }
+
+    /// <summary>A veto received by the instance and not yet applied by the resource server, or null.</summary>
+    public sealed record PcaUndoRecordsResponsePendingVeto
+    {
+        [JsonPropertyName("at")] public long? At { get; init; }
+        [JsonPropertyName("via")] public string? Via { get; init; }
+        [JsonPropertyName("by")] public string? By { get; init; }
+        [JsonPropertyName("evidence")] public string? Evidence { get; init; }
+    }
+
+    /// <summary>A PcaUndoRecordsResponse object.</summary>
+    public sealed record PcaUndoRecordsResponse
+    {
+        /// <summary>One of: pca_undo_record.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>The stored undo record without its encoded PCActn.</summary>
+        [JsonPropertyName("record")] public Dictionary<string, object?>? Record { get; init; }
+        /// <summary>A veto received by the instance and not yet applied by the resource server, or null.</summary>
+        [JsonPropertyName("pending_veto")] public PcaUndoRecordsResponsePendingVeto? PendingVeto { get; init; }
+    }
+
+    /// <summary>A PcaUndoRecordsBody object.</summary>
+    public sealed record PcaUndoRecordsBody : ClearableBody
+    {
+        /// <summary>The full undo record as the resource server holds it, receipts included.</summary>
+        [JsonPropertyName("record")] public Dictionary<string, object?>? Record { get; init; }
+    }
+
+    /// <summary>A veto: when (ms), how (`token` for a hosted veto), by whom (the principal) and the evidence digest (the token digest).</summary>
+    public sealed record PcaListUndoVetoesResponseDataItemVeto
+    {
+        [JsonPropertyName("at")] public long? At { get; init; }
+        [JsonPropertyName("via")] public string? Via { get; init; }
+        [JsonPropertyName("by")] public string? By { get; init; }
+        [JsonPropertyName("evidence")] public string? Evidence { get; init; }
+        /// <summary>The principal's encoded undo token: re-verify it as of `at` before applying the veto.</summary>
+        [JsonPropertyName("token")] public string? Token { get; init; }
+    }
+
+    /// <summary>A PcaListUndoVetoesResponseDataItem object.</summary>
+    public sealed record PcaListUndoVetoesResponseDataItem
+    {
+        /// <summary>One of: pca_undo_veto.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("record_id")] public string? RecordId { get; init; }
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("state")] public string? State { get; init; }
+        [JsonPropertyName("ver")] public long? Ver { get; init; }
+        [JsonPropertyName("window_end")] public long? WindowEnd { get; init; }
+        /// <summary>A veto: when (ms), how (`token` for a hosted veto), by whom (the principal) and the evidence digest (the token digest).</summary>
+        [JsonPropertyName("veto")] public PcaListUndoVetoesResponseDataItemVeto? Veto { get; init; }
+    }
+
+    /// <summary>A PcaListUndoVetoesResponse object.</summary>
+    public sealed record PcaListUndoVetoesResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PcaListUndoVetoesResponseDataItem>? Data { get; init; }
+    }
+
+    /// <summary>Query parameters of ListUndoVetoes. Unset values are not sent.</summary>
+    public sealed record PcaListUndoVetoesQuery
+    {
+        /// <summary>Page size, 1..200.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PcaWorkflowReceiptsResponse object.</summary>
+    public sealed record PcaWorkflowReceiptsResponse
+    {
+        /// <summary>One of: pca_workflow_receipt.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        [JsonPropertyName("receipt")] public Dictionary<string, object?>? Receipt { get; init; }
+        [JsonPropertyName("receipts")] public List<Dictionary<string, object?>>? Receipts { get; init; }
+    }
+
+    /// <summary>A PcaWorkflowReceiptsBody object.</summary>
+    public sealed record PcaWorkflowReceiptsBody : ClearableBody
+    {
+        [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
+        /// <summary>The signed workflow commitment {body, sig}; must verify against the grant principal key.</summary>
+        [JsonPropertyName("workflow")] public Dictionary<string, object?>? Workflow { get; init; }
+        /// <summary>The step id; must be a step of the workflow.</summary>
+        [JsonPropertyName("step")] public string? Step { get; init; }
+        /// <summary>One of: ok, failed.</summary>
+        [JsonPropertyName("outcome")] public string? Outcome { get; init; }
+        /// <summary>Digest of the params the step ran with.</summary>
+        [JsonPropertyName("params_digest")] public string? ParamsDigest { get; init; }
+        /// <summary>field -&gt; {digest, num, unit, labels} as produced by wfOutput.</summary>
+        [JsonPropertyName("outputs")] public Dictionary<string, object?>? Outputs { get; init; }
+        /// <summary>The receipts issued so far for this workflow (the caller keeps the chain).</summary>
+        [JsonPropertyName("receipts")] public List<Dictionary<string, object?>>? Receipts { get; init; }
+    }
+
+    /// <summary>A PermissionAliasesListResponseDataItem object.</summary>
+    public sealed record PermissionAliasesListResponseDataItem
+    {
+        /// <summary>One of: permission_alias.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("alias")] public string Alias { get; init; } = "";
+        [JsonPropertyName("permission_key")] public string PermissionKey { get; init; } = "";
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+    }
+
+    /// <summary>A PermissionAliasesListResponse object.</summary>
+    public sealed record PermissionAliasesListResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<PermissionAliasesListResponseDataItem> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record PermissionAliasesListQuery
+    {
+        /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A PermissionAliasesCreateBody object.</summary>
+    public sealed record PermissionAliasesCreateBody : ClearableBody
+    {
+        [JsonPropertyName("alias")] public string? Alias { get; init; }
+        [JsonPropertyName("permission_key")] public string? PermissionKey { get; init; }
+    }
+
+    /// <summary>A PermissionAliasesReplaceBody object.</summary>
+    public sealed record PermissionAliasesReplaceBody : ClearableBody
+    {
+        /// <summary>The canonical permission key the alias stands for.</summary>
+        [JsonPropertyName("permission_key")] public string? PermissionKey { get; init; }
+    }
+
+    /// <summary>A PermissionAliasesDeleteResponse object.</summary>
+    public sealed record PermissionAliasesDeleteResponse
+    {
+        /// <summary>One of: permission_alias.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("alias")] public string Alias { get; init; } = "";
+        /// <summary>One of: True.</summary>
+        [JsonPropertyName("deleted")] public string Deleted { get; init; } = "";
+    }
+
+    /// <summary>A PermissionsRenameResponse object.</summary>
+    public sealed record PermissionsRenameResponse
+    {
+        /// <summary>One of: permission.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("key")] public string Key { get; init; } = "";
+        [JsonPropertyName("previous_key")] public string PreviousKey { get; init; } = "";
+        [JsonPropertyName("alias")] public string Alias { get; init; } = "";
+    }
+
+    /// <summary>A PermissionsRenameBody object.</summary>
+    public sealed record PermissionsRenameBody : ClearableBody
+    {
+        /// <summary>The new key, e.g. org:store:orders:refund (2 to 5 parts after org:, each 2 to 64 characters, at most 160 in all).</summary>
+        [JsonPropertyName("key")] public string? Key { get; init; }
+    }
+
     /// <summary>A PlatformAppsListInstancesClonesResponseDataItem object.</summary>
     public sealed record PlatformAppsListInstancesClonesResponseDataItem
     {
@@ -11870,6 +14995,14 @@ namespace Atlas.Generated
         [JsonPropertyName("secret_key_preset")] public string? SecretKeyPreset { get; init; }
     }
 
+    /// <summary>A PlatformAppsInstancesClonesRefreshBody object.</summary>
+    public sealed record PlatformAppsInstancesClonesRefreshBody : ClearableBody
+    {
+        [JsonPropertyName("include")] public List<string>? Include { get; init; }
+        [JsonPropertyName("synthetic_users")] public InstanceStagingCopiesRefreshBodySyntheticUsers? SyntheticUsers { get; init; }
+        [JsonPropertyName("ttl_hours")] public long? TtlHours { get; init; }
+    }
+
     /// <summary>A PlatformAppsNarrowSecretKeysResponseNarrowedItem object.</summary>
     public sealed record PlatformAppsNarrowSecretKeysResponseNarrowedItem
     {
@@ -11900,6 +15033,32 @@ namespace Atlas.Generated
         /// <summary>Scope names. Not with preset.</summary>
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
         /// <summary>Narrow this instance of the app instead of the primary one.</summary>
+        [JsonPropertyName("instance_id")] public string? InstanceId { get; init; }
+    }
+
+    /// <summary>A PlatformAppsProvisioningKeyRenewResponseRenewedItem object.</summary>
+    public sealed record PlatformAppsProvisioningKeyRenewResponseRenewedItem
+    {
+        [JsonPropertyName("key_id")] public string? KeyId { get; init; }
+        [JsonPropertyName("prefix")] public string? Prefix { get; init; }
+    }
+
+    /// <summary>A PlatformAppsProvisioningKeyRenewResponse object.</summary>
+    public sealed record PlatformAppsProvisioningKeyRenewResponse
+    {
+        /// <summary>One of: app_provisioning_key_renewed.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("app_id")] public string? AppId { get; init; }
+        [JsonPropertyName("instance_id")] public string? InstanceId { get; init; }
+        [JsonPropertyName("renewed")] public List<PlatformAppsProvisioningKeyRenewResponseRenewedItem>? Renewed { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+    }
+
+    /// <summary>A PlatformAppsProvisioningKeyRenewBody object.</summary>
+    public sealed record PlatformAppsProvisioningKeyRenewBody : ClearableBody
+    {
+        /// <summary>Renew on this instance of the app instead of the primary one.</summary>
         [JsonPropertyName("instance_id")] public string? InstanceId { get; init; }
     }
 
@@ -12884,6 +16043,112 @@ namespace Atlas.Generated
         }
     }
 
+    /// <summary>Who ended it.</summary>
+    public sealed record RevocationsListResponseDataItemActor
+    {
+        /// <summary>api_key, user, scim, sso or system.</summary>
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+    }
+
+    /// <summary>A RevocationsListResponseDataItem object.</summary>
+    public sealed record RevocationsListResponseDataItem
+    {
+        /// <summary>One of: revocation.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>The event id.</summary>
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>Commit-ordered position in the stream. Pass it as `after` (or `Last-Event-ID`) to resume right after this event.</summary>
+        [JsonPropertyName("seq")] public long Seq { get; init; }
+        /// <summary>The event type: session.revoked, user.sessions_revoked, oauth_tokens.revoked, grant.revoked, api_key.revoked, machine.revoked, machine_grant.revoked, user.banned, user.deactivated or user.locked.</summary>
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        /// <summary>One of: session, user_sessions, token_family, grant, api_key, machine, machine_grant, user.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        /// <summary>When it happened (epoch ms).</summary>
+        [JsonPropertyName("at")] public long At { get; init; }
+        /// <summary>The user the ended thing belonged to, when it has one.</summary>
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        /// <summary>The ids of what ended: session_id, api_key_id, machine_id, machine_grant_id (with machine_id, resource_server_id and audience), family_id, grant_id, client_id, organization_id, kept_session_id. Only those the kind has.</summary>
+        [JsonPropertyName("ids")] public Dictionary<string, string?> Ids { get; init; } = new();
+        /// <summary>Why it ended, e.g. signed_out, signed_out_everywhere, token_reuse, revoked_by_api, revoked_by_admin, owner_signed_out, membership_ended, banned.</summary>
+        [JsonPropertyName("reason")] public string? Reason { get; init; }
+        /// <summary>Who ended it.</summary>
+        [JsonPropertyName("actor")] public RevocationsListResponseDataItemActor? Actor { get; init; }
+        /// <summary>`user_sessions`: how many sessions ended.</summary>
+        [JsonPropertyName("sessions_revoked")] public long? SessionsRevoked { get; init; }
+        /// <summary>`user_sessions`: the session that stayed signed in (sign out of the other devices).</summary>
+        [JsonPropertyName("kept_session_id")] public string? KeptSessionId { get; init; }
+        /// <summary>When it ended (epoch ms). For `user_sessions` the cutoff: every token issued at or before it is dead (except the kept session).</summary>
+        [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
+    }
+
+    /// <summary>How long events are kept.</summary>
+    public sealed record RevocationsListResponseRetention
+    {
+        [JsonPropertyName("days")] public long? Days { get; init; }
+    }
+
+    /// <summary>A RevocationsListResponse object.</summary>
+    public sealed record RevocationsListResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<RevocationsListResponseDataItem>? Data { get; init; }
+        /// <summary>True when a full page was returned: ask again at once.</summary>
+        [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
+        /// <summary>Pass as `after` on the next call.</summary>
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+        /// <summary>How long events are kept.</summary>
+        [JsonPropertyName("retention")] public RevocationsListResponseRetention? Retention { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record RevocationsListQuery
+    {
+        /// <summary>Resume after this position (the `next_cursor` of the previous answer, a whole number). Anything else is a 400. Omit, with no `since`, to start from now.</summary>
+        public string? After { get; init; }
+        /// <summary>Start from a point in time (ISO 8601 or epoch ms) instead of a cursor.</summary>
+        public string? Since { get; init; }
+        /// <summary>Only these kinds, comma separated: session, user_sessions, token_family, grant, api_key, machine, machine_grant, user. An unknown kind is a 400.</summary>
+        public string? Kinds { get; init; }
+        /// <summary>Most events in one answer, 1 to 100. Default 100.</summary>
+        public string? Limit { get; init; }
+        /// <summary>Seconds to wait for an event when there is none yet, 0 to 30. Default 0.</summary>
+        public string? Wait { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("after", After);
+            yield return new KeyValuePair<string, object?>("since", Since);
+            yield return new KeyValuePair<string, object?>("kinds", Kinds);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("wait", Wait);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>Query parameters of GetStream. Unset values are not sent.</summary>
+    public sealed record RevocationsGetStreamQuery
+    {
+        /// <summary>Resume after this position (the SSE `id` of the last event you handled). `Last-Event-ID` does the same. Omit both to start from now.</summary>
+        public string? After { get; init; }
+        /// <summary>Start from a point in time (ISO 8601 or epoch ms).</summary>
+        public string? Since { get; init; }
+        /// <summary>Only these kinds, comma separated: session, user_sessions, token_family, grant, api_key, machine, machine_grant, user.</summary>
+        public string? Kinds { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("after", After);
+            yield return new KeyValuePair<string, object?>("since", Since);
+            yield return new KeyValuePair<string, object?>("kinds", Kinds);
+        }
+    }
+
     /// <summary>A RiskBasedMfaReplayResponseWindow object.</summary>
     public sealed record RiskBasedMfaReplayResponseWindow
     {
@@ -13760,6 +17025,90 @@ namespace Atlas.Generated
         }
     }
 
+    /// <summary>Present for a native app session: kind unregistered, development or registered, the native app id when one was named, and binding device_key when its refresh token is bound to a key the device holds.</summary>
+    public sealed record SessionModelNativeClient
+    {
+        /// <summary>One of: unregistered, development, registered.</summary>
+        [JsonPropertyName("kind")] public string? Kind { get; init; }
+        [JsonPropertyName("app_id")] public string? AppId { get; init; }
+        /// <summary>One of: device_key.</summary>
+        [JsonPropertyName("binding")] public string? Binding { get; init; }
+    }
+
+    /// <summary>A SessionModelLocation object.</summary>
+    public sealed record SessionModelLocation
+    {
+        /// <summary>ISO country code.</summary>
+        [JsonPropertyName("country")] public string Country { get; init; } = "";
+        [JsonPropertyName("region")] public string? Region { get; init; }
+        [JsonPropertyName("city")] public string? City { get; init; }
+    }
+
+    /// <summary>A SessionModelRisk object.</summary>
+    public sealed record SessionModelRisk
+    {
+        [JsonPropertyName("score")] public long? Score { get; init; }
+        /// <summary>One of: low, medium, high.</summary>
+        [JsonPropertyName("level")] public string? Level { get; init; }
+        [JsonPropertyName("reasons")] public List<string>? Reasons { get; init; }
+        [JsonPropertyName("computed_at")] public long? ComputedAt { get; init; }
+    }
+
+    /// <summary>A SessionModel object.</summary>
+    public sealed record SessionModel
+    {
+        /// <summary>One of: session.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("user_id")] public string UserId { get; init; } = "";
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        [JsonPropertyName("last_active_organization_id")] public string? LastActiveOrganizationId { get; init; }
+        [JsonPropertyName("impersonated_by")] public string? ImpersonatedBy { get; init; }
+        /// <summary>Last active (epoch ms).</summary>
+        [JsonPropertyName("last_active_at")] public long LastActiveAt { get; init; }
+        /// <summary>Expires (epoch ms).</summary>
+        [JsonPropertyName("expire_at")] public long ExpireAt { get; init; }
+        /// <summary>Abandoned (epoch ms).</summary>
+        [JsonPropertyName("abandon_at")] public long AbandonAt { get; init; }
+        /// <summary>Epoch ms when the session ends from inactivity unless there is activity first (same value as abandon_at). Slides on activity and on POST /v1/sessions/{id}/touch; never past expire_at.</summary>
+        [JsonPropertyName("idle_expires_at")] public long IdleExpiresAt { get; init; }
+        /// <summary>Created (epoch ms).</summary>
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+        /// <summary>Custom per-session data the app attached (PUT/PATCH /v1/sessions/{id}/custom_data, or a post_login Action). Null when none.</summary>
+        [JsonPropertyName("custom_data")] public Dictionary<string, object?>? CustomData { get; init; }
+        /// <summary>How the session was signed in: the first-factor strategy (password, email_code, email_link, phone_code, passkey, oauth, sso, saml, ticket, ...). Null for a session created before this was recorded.</summary>
+        [JsonPropertyName("sign_in_method")] public string? SignInMethod { get; init; }
+        /// <summary>The social provider id when sign_in_method is oauth; otherwise null.</summary>
+        [JsonPropertyName("provider")] public string? Provider { get; init; }
+        /// <summary>Present for a native app session: kind unregistered, development or registered, the native app id when one was named, and binding device_key when its refresh token is bound to a key the device holds.</summary>
+        [JsonPropertyName("native_client")] public SessionModelNativeClient? NativeClient { get; init; }
+        /// <summary>Present for an unregistered or development native session: "Unregistered app on &lt;device&gt;" or "Development app on &lt;device&gt;".</summary>
+        [JsonPropertyName("device_label")] public string? DeviceLabel { get; init; }
+        /// <summary>The authentication methods proven at sign-in (RFC 8176, e.g. pwd, otp, webauthn, ext, mfa); updated by a step-up. Null for a session created before this was recorded.</summary>
+        [JsonPropertyName("amr")] public List<string>? Amr { get; init; }
+        /// <summary>The user agent of the device that signed in. Null when none was sent.</summary>
+        [JsonPropertyName("user_agent")] public string? UserAgent { get; init; }
+        /// <summary>The client IP at sign-in (through a path mount: the browser IP your proxy asserted with its proxy secret). Dropped 30 days after the session ends.</summary>
+        [JsonPropertyName("ip_address")] public string? IpAddress { get; init; }
+        /// <summary>Coarse location of the sign-in, when a geo source resolved one.</summary>
+        [JsonPropertyName("location")] public SessionModelLocation? Location { get; init; }
+        /// <summary>Advisory risk assessment. Null = not assessed (never "safe"). Atlas decides nothing from it.</summary>
+        [JsonPropertyName("risk")] public SessionModelRisk? Risk { get; init; }
+        /// <summary>Epoch ms when the session was ended (null while active, or when it simply ran out).</summary>
+        [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
+        /// <summary>Why the session was ended, e.g. signed_out, revoked_by_api, token_reuse (a refresh token was presented after it had been replaced and its grace window had passed). Null while active.</summary>
+        [JsonPropertyName("revoked_reason")] public string? RevokedReason { get; init; }
+    }
+
+    /// <summary>A SessionsSetActiveOrganizationBody object.</summary>
+    public sealed record SessionsSetActiveOrganizationBody : ClearableBody
+    {
+        /// <summary>The organization to make active, or null for none.</summary>
+        [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+        /// <summary>Send <c>null</c> for <c>organization_id</c>, which clears it.</summary>
+        public SessionsSetActiveOrganizationBody ClearOrganizationId() => this with { Cleared = Plus("organization_id") };
+    }
+
     /// <summary>A SessionsGetBindingResponse object.</summary>
     public sealed record SessionsGetBindingResponse
     {
@@ -13851,6 +17200,85 @@ namespace Atlas.Generated
         [JsonPropertyName("computed_at")] public long? ComputedAt { get; init; }
     }
 
+    /// <summary>A SsfAddSubjectBody object.</summary>
+    public sealed record SsfAddSubjectBody : ClearableBody
+    {
+        [JsonPropertyName("stream_id")] public string? StreamId { get; init; }
+        [JsonPropertyName("subject")] public Dictionary<string, object?>? Subject { get; init; }
+        [JsonPropertyName("verified")] public bool? Verified { get; init; }
+    }
+
+    /// <summary>Query parameters of GetConfiguration. Unset values are not sent.</summary>
+    public sealed record SsfGetConfigurationQuery
+    {
+        /// <summary>The stream to read (omit to list all of the receiver's streams).</summary>
+        public string? StreamId { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("stream_id", StreamId);
+        }
+    }
+
+    /// <summary>A SsfConfigurationResponse object.</summary>
+    public sealed record SsfConfigurationResponse
+    {
+        [JsonPropertyName("stream_id")] public string? StreamId { get; init; }
+        [JsonPropertyName("iss")] public string? Iss { get; init; }
+        [JsonPropertyName("aud")] public string? Aud { get; init; }
+        [JsonPropertyName("events_supported")] public List<string>? EventsSupported { get; init; }
+        [JsonPropertyName("events_delivered")] public List<string>? EventsDelivered { get; init; }
+        [JsonPropertyName("delivery")] public Dictionary<string, object?>? Delivery { get; init; }
+    }
+
+    /// <summary>A SsfConfigurationBodyDelivery object.</summary>
+    public sealed record SsfConfigurationBodyDelivery : ClearableBody
+    {
+        [JsonPropertyName("method")] public string? Method { get; init; }
+        [JsonPropertyName("endpoint_url")] public string? EndpointUrl { get; init; }
+    }
+
+    /// <summary>A SsfConfigurationBody object.</summary>
+    public sealed record SsfConfigurationBody : ClearableBody
+    {
+        [JsonPropertyName("iss")] public string? Iss { get; init; }
+        [JsonPropertyName("aud")] public string? Aud { get; init; }
+        [JsonPropertyName("events_supported")] public List<string>? EventsSupported { get; init; }
+        [JsonPropertyName("events_delivered")] public List<string>? EventsDelivered { get; init; }
+        [JsonPropertyName("min_verification_interval")] public long? MinVerificationInterval { get; init; }
+        [JsonPropertyName("events_requested")] public List<string>? EventsRequested { get; init; }
+        [JsonPropertyName("delivery")] public SsfConfigurationBodyDelivery? Delivery { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+    }
+
+    /// <summary>A SsfSetConfigurationBody object.</summary>
+    public sealed record SsfSetConfigurationBody : ClearableBody
+    {
+        [JsonPropertyName("iss")] public string? Iss { get; init; }
+        [JsonPropertyName("aud")] public string? Aud { get; init; }
+        [JsonPropertyName("events_supported")] public List<string>? EventsSupported { get; init; }
+        [JsonPropertyName("events_delivered")] public List<string>? EventsDelivered { get; init; }
+        [JsonPropertyName("min_verification_interval")] public long? MinVerificationInterval { get; init; }
+        [JsonPropertyName("stream_id")] public string? StreamId { get; init; }
+        [JsonPropertyName("events_requested")] public List<string>? EventsRequested { get; init; }
+        [JsonPropertyName("delivery")] public Dictionary<string, object?>? Delivery { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+    }
+
+    /// <summary>Query parameters of DeleteConfiguration. Unset values are not sent.</summary>
+    public sealed record SsfDeleteConfigurationQuery
+    {
+        /// <summary>The stream to delete.</summary>
+        public string? StreamId { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("stream_id", StreamId);
+        }
+    }
+
     /// <summary>A SsfEventsBody object.</summary>
     public sealed record SsfEventsBody : ClearableBody
     {
@@ -13858,6 +17286,23 @@ namespace Atlas.Generated
         [JsonPropertyName("event")] public string? Event { get; init; }
         [JsonPropertyName("subject")] public Dictionary<string, string>? Subject { get; init; }
         [JsonPropertyName("data")] public Dictionary<string, object?>? Data { get; init; }
+    }
+
+    /// <summary>A SsfGetMetadataResponse object.</summary>
+    public sealed record SsfGetMetadataResponse
+    {
+        [JsonPropertyName("issuer")] public string? Issuer { get; init; }
+        [JsonPropertyName("delivery_methods_supported")] public List<string>? DeliveryMethodsSupported { get; init; }
+        [JsonPropertyName("configuration_endpoint")] public string? ConfigurationEndpoint { get; init; }
+        [JsonPropertyName("status_endpoint")] public string? StatusEndpoint { get; init; }
+        [JsonPropertyName("verification_endpoint")] public string? VerificationEndpoint { get; init; }
+    }
+
+    /// <summary>A SsfRemoveSubjectBody object.</summary>
+    public sealed record SsfRemoveSubjectBody : ClearableBody
+    {
+        [JsonPropertyName("stream_id")] public string? StreamId { get; init; }
+        [JsonPropertyName("subject")] public Dictionary<string, object?>? Subject { get; init; }
     }
 
     /// <summary>A SsfGetStatusResponse object.</summary>
@@ -13927,6 +17372,22 @@ namespace Atlas.Generated
         }
     }
 
+    /// <summary>A SsfStreamsPollResponse object.</summary>
+    public sealed record SsfStreamsPollResponse
+    {
+        [JsonPropertyName("sets")] public Dictionary<string, object?>? Sets { get; init; }
+        [JsonPropertyName("moreAvailable")] public bool? MoreAvailable { get; init; }
+    }
+
+    /// <summary>A SsfStreamsPollBody object.</summary>
+    public sealed record SsfStreamsPollBody : ClearableBody
+    {
+        [JsonPropertyName("ack")] public List<string>? Ack { get; init; }
+        [JsonPropertyName("setErrs")] public Dictionary<string, object?>? SetErrs { get; init; }
+        [JsonPropertyName("maxEvents")] public long? MaxEvents { get; init; }
+        [JsonPropertyName("returnImmediately")] public bool? ReturnImmediately { get; init; }
+    }
+
     /// <summary>A SsfSubjectsAddBody object.</summary>
     public sealed record SsfSubjectsAddBody : ClearableBody
     {
@@ -13940,6 +17401,13 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("stream_id")] public string? StreamId { get; init; }
         [JsonPropertyName("subject")] public Dictionary<string, string>? Subject { get; init; }
+    }
+
+    /// <summary>A SsfVerificationBody object.</summary>
+    public sealed record SsfVerificationBody : ClearableBody
+    {
+        [JsonPropertyName("stream_id")] public string? StreamId { get; init; }
+        [JsonPropertyName("state")] public string? State { get; init; }
     }
 
     /// <summary>A SsfVerifyBody object.</summary>
@@ -14090,6 +17558,16 @@ namespace Atlas.Generated
         [JsonPropertyName("audience")] public string? Audience { get; init; }
     }
 
+    /// <summary>A StepUpListPoliciesResponseDataItemAcceptedFactorInfoItem object.</summary>
+    public sealed record StepUpListPoliciesResponseDataItemAcceptedFactorInfoItem
+    {
+        [JsonPropertyName("factor")] public string? Factor { get; init; }
+        [JsonPropertyName("label")] public string? Label { get; init; }
+        [JsonPropertyName("needs_input")] public bool? NeedsInput { get; init; }
+        /// <summary>One of: password, otp, none, redirect, push, webauthn.</summary>
+        [JsonPropertyName("input_kind")] public string? InputKind { get; init; }
+    }
+
     /// <summary>A StepUpListPoliciesResponseDataItem object.</summary>
     public sealed record StepUpListPoliciesResponseDataItem
     {
@@ -14115,6 +17593,8 @@ namespace Atlas.Generated
         [JsonPropertyName("allowed_methods")] public List<string>? AllowedMethods { get; init; }
         /// <summary>The step-up strategies that can satisfy it, after phishing resistance narrows allowed_methods.</summary>
         [JsonPropertyName("accepted_factors")] public List<string>? AcceptedFactors { get; init; }
+        /// <summary>Render info for each accepted factor: label, whether the person types something, and the kind of input. A factor added later still comes with a label.</summary>
+        [JsonPropertyName("accepted_factor_info")] public List<StepUpListPoliciesResponseDataItemAcceptedFactorInfoItem>? AcceptedFactorInfo { get; init; }
         /// <summary>How long a signed receipt for an allowed assertion lives (10 to 300).</summary>
         [JsonPropertyName("receipt_ttl_seconds")] public long? ReceiptTtlSeconds { get; init; }
         /// <summary>Created (epoch ms).</summary>
@@ -14478,6 +17958,224 @@ namespace Atlas.Generated
         [JsonPropertyName("expected_count")] public long? ExpectedCount { get; init; }
     }
 
+    /// <summary>A EmailAddressModelVerification object.</summary>
+    public sealed record EmailAddressModelVerification
+    {
+        /// <summary>verified only when the address was proven (an emailed code or link, a provider that vouches for it, or your backend). An address that signed up while requireEmailVerification was false is unverified. One of: verified, unverified.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        /// <summary>How the address was verified: email_code, email_link, oauth, admin, import, scim, lti; skipped when it signed up without proof (held for sign-in, reported unverified); null when not verified.</summary>
+        [JsonPropertyName("strategy")] public string? Strategy { get; init; }
+    }
+
+    /// <summary>A EmailAddressModel object.</summary>
+    public sealed record EmailAddressModel
+    {
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>One of: email_address.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("email_address")] public string EmailAddress { get; init; } = "";
+        [JsonPropertyName("verification")] public EmailAddressModelVerification? Verification { get; init; }
+        /// <summary>Same as verification.status === "verified": the address was proven.</summary>
+        [JsonPropertyName("verified")] public bool Verified { get; init; }
+        [JsonPropertyName("primary")] public bool Primary { get; init; }
+    }
+
+    /// <summary>A user's inbound referral: where attribution stands and, once attributed, who referred them.</summary>
+    public sealed record UserReferralModel
+    {
+        /// <summary>Where attribution stands: pending (the platform has not answered yet), attributed, none (not referred), failed, held or flagged. One of: pending, attributed, none, failed, held, flagged.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        /// <summary>The platform's id for the referring partner.</summary>
+        [JsonPropertyName("partner_id")] public string? PartnerId { get; init; }
+        /// <summary>The referrer as the platform knows them (your external_id for that user, or their Atlas id).</summary>
+        [JsonPropertyName("partner_external_ref")] public string? PartnerExternalRef { get; init; }
+        /// <summary>Same as partner_external_ref.</summary>
+        [JsonPropertyName("referrer_external_id")] public string? ReferrerExternalId { get; init; }
+        /// <summary>The referrer's Atlas user id, when they are a user of this instance.</summary>
+        [JsonPropertyName("referrer_user_id")] public string? ReferrerUserId { get; init; }
+        /// <summary>How the platform matched the referral, e.g. code, click, coupon.</summary>
+        [JsonPropertyName("matched_via")] public string? MatchedVia { get; init; }
+        /// <summary>The platform's own status for the referral (e.g. active).</summary>
+        [JsonPropertyName("referral_status")] public string? ReferralStatus { get; init; }
+        /// <summary>The platform's reasoning notes for its answer.</summary>
+        [JsonPropertyName("notes")] public List<string> Notes { get; init; } = new();
+        /// <summary>The risk level assessed at sign-up, when one was. One of: low, medium, high.</summary>
+        [JsonPropertyName("risk_level")] public string? RiskLevel { get; init; }
+        /// <summary>An admin marked the referral fraudulent.</summary>
+        [JsonPropertyName("flagged")] public bool? Flagged { get; init; }
+    }
+
+    /// <summary>A UserModelPhoneNumbersItem object.</summary>
+    public sealed record UserModelPhoneNumbersItem
+    {
+        /// <summary>One of: phone_number.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("phone_number")] public string? PhoneNumber { get; init; }
+        [JsonPropertyName("verified")] public bool? Verified { get; init; }
+        [JsonPropertyName("primary")] public bool? Primary { get; init; }
+    }
+
+    /// <summary>A provider identity linked to the user. Tokens and the raw provider profile are never included.</summary>
+    public sealed record UserExternalAccountModel
+    {
+        /// <summary>One of: external_account.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("provider")] public string Provider { get; init; } = "";
+        [JsonPropertyName("provider_user_id")] public string ProviderUserId { get; init; } = "";
+        /// <summary>The provider's address at the last sign-in or import (a snapshot, not proof of ownership).</summary>
+        [JsonPropertyName("provider_email")] public string? ProviderEmail { get; init; }
+        /// <summary>Whether the provider (or the import) said that address is verified.</summary>
+        [JsonPropertyName("email_verified")] public bool EmailVerified { get; init; }
+        [JsonPropertyName("first_name")] public string? FirstName { get; init; }
+        [JsonPropertyName("last_name")] public string? LastName { get; init; }
+        /// <summary>The provider's avatar for this identity.</summary>
+        [JsonPropertyName("image_url")] public string? ImageUrl { get; init; }
+        /// <summary>Linked (epoch ms).</summary>
+        [JsonPropertyName("connected_at")] public long ConnectedAt { get; init; }
+    }
+
+    /// <summary>A user as the Backend API serializes it. Never includes private/unsafe metadata (those are write-only here).</summary>
+    public sealed record UserModel
+    {
+        /// <summary>One of: user.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("username")] public string? Username { get; init; }
+        /// <summary>false for a link-only account added with POST /v1/users/{id}/external_accounts: it is shown and delivered but can never sign anyone in.</summary>
+        [JsonPropertyName("sign_in")] public bool? SignIn { get; init; }
+        [JsonPropertyName("first_name")] public string? FirstName { get; init; }
+        [JsonPropertyName("last_name")] public string? LastName { get; init; }
+        [JsonPropertyName("image_url")] public string? ImageUrl { get; init; }
+        [JsonPropertyName("email_addresses")] public List<EmailAddressModel> EmailAddresses { get; init; } = new();
+        [JsonPropertyName("primary_email_address_id")] public string? PrimaryEmailAddressId { get; init; }
+        /// <summary>The primary address as a flat string; null until a verified primary exists.</summary>
+        [JsonPropertyName("primary_email")] public string? PrimaryEmail { get; init; }
+        /// <summary>The relying party's own id for this user, if set/imported.</summary>
+        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
+        /// <summary>Whether the account has a usable password (never the hash).</summary>
+        [JsonPropertyName("password_enabled")] public bool PasswordEnabled { get; init; }
+        [JsonPropertyName("public_metadata")] public Dictionary<string, object?> PublicMetadata { get; init; } = new();
+        [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; init; }
+        /// <summary>Whether the user holds at least one passkey.</summary>
+        [JsonPropertyName("has_passkey")] public bool? HasPasskey { get; init; }
+        /// <summary>Factor classes this user must always use (POL-04); empty = none.</summary>
+        [JsonPropertyName("required_factors")] public List<string>? RequiredFactors { get; init; }
+        /// <summary>Whether this identity is still an anonymous guest.</summary>
+        [JsonPropertyName("is_anonymous")] public bool IsAnonymous { get; init; }
+        /// <summary>A sandbox user: set at creation, never changed. Nothing is ever sent to it (email, SMS, push, voice, WhatsApp), it is not counted as a monthly active user or billed, and its tokens carry `env: sandbox`.</summary>
+        [JsonPropertyName("sandbox")] public bool? Sandbox { get; init; }
+        [JsonPropertyName("banned")] public bool Banned { get; init; }
+        [JsonPropertyName("ban_reason")] public string? BanReason { get; init; }
+        [JsonPropertyName("ban_note")] public string? BanNote { get; init; }
+        [JsonPropertyName("locked")] public bool Locked { get; init; }
+        /// <summary>One account state, the same value as the ID token's account_status: banned (an active ban; deactivation by SCIM, directory sync or a workflow is a ban), suspended (a lock, suspension directive or sign-in lockout is in force), else active. One of: active, suspended, banned.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        /// <summary>Epoch-ms; non-null once soft-deleted.</summary>
+        [JsonPropertyName("deleted_at")] public long? DeletedAt { get; init; }
+        /// <summary>Epoch-ms.</summary>
+        [JsonPropertyName("last_sign_in_at")] public long? LastSignInAt { get; init; }
+        /// <summary>Epoch-ms when ALL of the user's sessions last ended together (BAPI revoke-all, dashboard revoke-all, sign out everywhere, a password change or reset that revokes all, a ban or lock, a compromise signal); null = never. Treat any token issued before it as ended. Also the `user.sessions_revoked` event.</summary>
+        [JsonPropertyName("sessions_revoked_at")] public long? SessionsRevokedAt { get; init; }
+        /// <summary>Created (epoch ms).</summary>
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+        /// <summary>Last updated (epoch ms).</summary>
+        [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
+        /// <summary>Strictly increases with every change to the user. Webhook payloads carry the same value: apply an update only if its version is higher than the one you hold.</summary>
+        [JsonPropertyName("version")] public long Version { get; init; }
+        /// <summary>How the user arrived through a referral program (referral attribution on). Null only when the user was never reported to the referral platform; otherwise `status` says where attribution stands (`pending` until the platform answers). Present on read, list, create and update responses.</summary>
+        [JsonPropertyName("referral")] public UserReferralModel? Referral { get; init; }
+        /// <summary>The user's own referral code: set once the referral platform enrolled the user as a partner (its answer carried a code) or an admin set one (PATCH /v1/users/{id} referral_code). null when the user is not enrolled, referrals are off, or the code was cleared.</summary>
+        [JsonPropertyName("referral_code")] public string? ReferralCode { get; init; }
+        /// <summary>PATCH answers only, when there is something to know: e.g. the referral platform has not confirmed a new referral_code yet (always so in a dry run, which does not ask it).</summary>
+        [JsonPropertyName("warnings")] public List<string>? Warnings { get; init; }
+        /// <summary>The user's own share link: the link the referral platform returned for the partner, else the referral settings' link_template with {code} replaced by the URL-encoded referral_code. null while there is no referral_code, or no platform link and no link_template.</summary>
+        [JsonPropertyName("referral_link")] public string? ReferralLink { get; init; }
+        /// <summary>Every phone number of the user. Present on read, list, update and user webhooks.</summary>
+        [JsonPropertyName("phone_numbers")] public List<UserModelPhoneNumbersItem>? PhoneNumbers { get; init; }
+        /// <summary>The primary phone number (E.164): the one the person made primary, else their oldest verified number; null when none.</summary>
+        [JsonPropertyName("primary_phone_number")] public string? PrimaryPhoneNumber { get; init; }
+        /// <summary>True only when the primary phone number was proven.</summary>
+        [JsonPropertyName("phone_number_verified")] public bool? PhoneNumberVerified { get; init; }
+        /// <summary>Every linked provider identity, however it was linked (a sign-in, a connect flow, identities on create, a bulk import or identities/import); the same set GET /v1/users/{id}/identities lists. Present on read, list, create, update and password responses.</summary>
+        [JsonPropertyName("external_accounts")] public List<UserExternalAccountModel>? ExternalAccounts { get; init; }
+    }
+
+    /// <summary>A UsersReplaceByExternalIdBody object.</summary>
+    public sealed record UsersReplaceByExternalIdBody : ClearableBody
+    {
+        /// <summary>Required when the call creates the user. Ignored on update.</summary>
+        [JsonPropertyName("email_address")] public string? EmailAddress { get; init; }
+        /// <summary>On create only: make the user a test user (no message of any kind is sent to it, it is not billed). Ignored, never applied, when the call updates or adopts an existing user.</summary>
+        [JsonPropertyName("sandbox")] public bool? Sandbox { get; init; }
+        /// <summary>On create only: whether a password or password hash in the body is usable at once (active) or held until an address on the account is proven (until_email_verified). Omitted: the instance setting accountUx.passwordImport.importedPasswordPolicy. One of: active, until_email_verified.</summary>
+        [JsonPropertyName("password_policy")] public string? PasswordPolicy { get; init; }
+        /// <summary>Adopt an existing user that has this address (verified in Atlas) and no external_id yet. Default false: that case is a 409.</summary>
+        [JsonPropertyName("link_by_verified_email")] public bool? LinkByVerifiedEmail { get; init; }
+        [JsonPropertyName("password")] public string? Password { get; init; }
+        [JsonPropertyName("password_hash")] public string? PasswordHash { get; init; }
+        [JsonPropertyName("first_name")] public string? FirstName { get; init; }
+        [JsonPropertyName("last_name")] public string? LastName { get; init; }
+        [JsonPropertyName("image_url")] public string? ImageUrl { get; init; }
+        /// <summary>Create only.</summary>
+        [JsonPropertyName("email_verified")] public bool? EmailVerified { get; init; }
+        /// <summary>Readable by the frontend (FAPI). Governed by trait rules.</summary>
+        [JsonPropertyName("public_metadata")] public Dictionary<string, object?>? PublicMetadata { get; init; }
+        /// <summary>Backend-only; never exposed to the browser.</summary>
+        [JsonPropertyName("private_metadata")] public Dictionary<string, object?>? PrivateMetadata { get; init; }
+        /// <summary>Writable by the end user from the frontend.</summary>
+        [JsonPropertyName("unsafe_metadata")] public Dictionary<string, object?>? UnsafeMetadata { get; init; }
+        [JsonPropertyName("referral_code")] public string? ReferralCode { get; init; }
+        /// <summary>Send <c>null</c> for <c>password_hash</c>, which clears it.</summary>
+        public UsersReplaceByExternalIdBody ClearPasswordHash() => this with { Cleared = Plus("password_hash") };
+        /// <summary>Send <c>null</c> for <c>image_url</c>, which clears it.</summary>
+        public UsersReplaceByExternalIdBody ClearImageUrl() => this with { Cleared = Plus("image_url") };
+        /// <summary>Send <c>null</c> for <c>referral_code</c>, which clears it.</summary>
+        public UsersReplaceByExternalIdBody ClearReferralCode() => this with { Cleared = Plus("referral_code") };
+    }
+
+    /// <summary>A UsersGetDeletedResponseDataItem object.</summary>
+    public sealed record UsersGetDeletedResponseDataItem
+    {
+        /// <summary>One of: deleted_user.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>Your own id for the user, when one was set.</summary>
+        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
+        /// <summary>Deleted, Unix ms.</summary>
+        [JsonPropertyName("deleted_at")] public long DeletedAt { get; init; }
+    }
+
+    /// <summary>A UsersGetDeletedResponse object.</summary>
+    public sealed record UsersGetDeletedResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<UsersGetDeletedResponseDataItem> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool HasMore { get; init; }
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+    }
+
+    /// <summary>Query parameters of GetDeleted. Unset values are not sent.</summary>
+    public sealed record UsersGetDeletedQuery
+    {
+        /// <summary>Unix milliseconds or an ISO 8601 timestamp. Users deleted at or after it are returned.</summary>
+        public string? Since { get; init; }
+        /// <summary>Page size.</summary>
+        public long? Limit { get; init; }
+        /// <summary>The `next_cursor` of the previous page.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("since", Since);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>A UsersDeletedAddressesResponse object.</summary>
     public sealed record UsersDeletedAddressesResponse
     {
@@ -14718,6 +18416,44 @@ namespace Atlas.Generated
         [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
     }
 
+    /// <summary>A UsersListApprovalRequestsResponseDataItem object.</summary>
+    public sealed record UsersListApprovalRequestsResponseDataItem
+    {
+        [JsonPropertyName("object")] public string? ObjectType { get; init; }
+        /// <summary>One of: approval_request, sign_in_approval.</summary>
+        [JsonPropertyName("kind")] public string? Kind { get; init; }
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("status")] public string? Status { get; init; }
+    }
+
+    /// <summary>A UsersListApprovalRequestsResponse object.</summary>
+    public sealed record UsersListApprovalRequestsResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<UsersListApprovalRequestsResponseDataItem> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool HasMore { get; init; }
+    }
+
+    /// <summary>Query parameters of ListApprovalRequests. Unset values are not sent.</summary>
+    public sealed record UsersListApprovalRequestsQuery
+    {
+        /// <summary>pending, approved, denied, expired or cancelled.</summary>
+        public string? Status { get; init; }
+        /// <summary>Page size, 1 to 100. Default 25.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("status", Status);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
     /// <summary>A UsersContainResponse object.</summary>
     public sealed record UsersContainResponse
     {
@@ -14745,129 +18481,65 @@ namespace Atlas.Generated
         [JsonPropertyName("reason")] public string? Reason { get; init; }
     }
 
-    /// <summary>A EmailAddressModelVerification object.</summary>
-    public sealed record EmailAddressModelVerification
+    /// <summary>A UsersDelegationTokensResponseActor object.</summary>
+    public sealed record UsersDelegationTokensResponseActor
     {
-        /// <summary>verified only when the address was proven (an emailed code or link, a provider that vouches for it, or your backend). An address that signed up while requireEmailVerification was false is unverified. One of: verified, unverified.</summary>
-        [JsonPropertyName("status")] public string Status { get; init; } = "";
-        /// <summary>How the address was verified: email_code, email_link, oauth, admin, import, scim, lti; skipped when it signed up without proof (held for sign-in, reported unverified); null when not verified.</summary>
-        [JsonPropertyName("strategy")] public string? Strategy { get; init; }
+        [JsonPropertyName("sub")] public string? Sub { get; init; }
+        [JsonPropertyName("type")] public string? Type { get; init; }
     }
 
-    /// <summary>A EmailAddressModel object.</summary>
-    public sealed record EmailAddressModel
+    /// <summary>A UsersDelegationTokensResponse object.</summary>
+    public sealed record UsersDelegationTokensResponse
     {
-        [JsonPropertyName("id")] public string Id { get; init; } = "";
-        /// <summary>One of: email_address.</summary>
+        /// <summary>One of: delegation_token.</summary>
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        [JsonPropertyName("email_address")] public string EmailAddress { get; init; } = "";
-        [JsonPropertyName("verification")] public EmailAddressModelVerification? Verification { get; init; }
-        /// <summary>Same as verification.status === "verified": the address was proven.</summary>
-        [JsonPropertyName("verified")] public bool Verified { get; init; }
-        [JsonPropertyName("primary")] public bool Primary { get; init; }
+        /// <summary>The signed JWT. Shown once; verify it with the instance JWKS.</summary>
+        [JsonPropertyName("token")] public string Token { get; init; } = "";
+        /// <summary>One of: Bearer.</summary>
+        [JsonPropertyName("token_type")] public string TokenType { get; init; } = "";
+        [JsonPropertyName("user_id")] public string UserId { get; init; } = "";
+        [JsonPropertyName("audience")] public string Audience { get; init; } = "";
+        [JsonPropertyName("scopes")] public List<string> Scopes { get; init; } = new();
+        [JsonPropertyName("actor")] public UsersDelegationTokensResponseActor? Actor { get; init; }
+        [JsonPropertyName("jti")] public string Jti { get; init; } = "";
+        /// <summary>ISO time.</summary>
+        [JsonPropertyName("expires_at")] public string ExpiresAt { get; init; } = "";
+        /// <summary>Seconds.</summary>
+        [JsonPropertyName("expires_in")] public long ExpiresIn { get; init; }
     }
 
-    /// <summary>A user's inbound referral: where attribution stands and, once attributed, who referred them.</summary>
-    public sealed record UserReferralModel
+    /// <summary>A UsersDelegationTokensBodyActor object.</summary>
+    public sealed record UsersDelegationTokensBodyActor : ClearableBody
     {
-        /// <summary>Where attribution stands: pending (the platform has not answered yet), attributed, none (not referred), failed, held or flagged. One of: pending, attributed, none, failed, held, flagged.</summary>
-        [JsonPropertyName("status")] public string Status { get; init; } = "";
-        /// <summary>The platform's id for the referring partner.</summary>
-        [JsonPropertyName("partner_id")] public string? PartnerId { get; init; }
-        /// <summary>The referrer as the platform knows them (your external_id for that user, or their Atlas id).</summary>
-        [JsonPropertyName("partner_external_ref")] public string? PartnerExternalRef { get; init; }
-        /// <summary>Same as partner_external_ref.</summary>
-        [JsonPropertyName("referrer_external_id")] public string? ReferrerExternalId { get; init; }
-        /// <summary>The referrer's Atlas user id, when they are a user of this instance.</summary>
-        [JsonPropertyName("referrer_user_id")] public string? ReferrerUserId { get; init; }
-        /// <summary>How the platform matched the referral, e.g. code, click, coupon.</summary>
-        [JsonPropertyName("matched_via")] public string? MatchedVia { get; init; }
-        /// <summary>The platform's own status for the referral (e.g. active).</summary>
-        [JsonPropertyName("referral_status")] public string? ReferralStatus { get; init; }
-        /// <summary>The platform's reasoning notes for its answer.</summary>
-        [JsonPropertyName("notes")] public List<string> Notes { get; init; } = new();
-        /// <summary>The risk level assessed at sign-up, when one was. One of: low, medium, high.</summary>
-        [JsonPropertyName("risk_level")] public string? RiskLevel { get; init; }
-        /// <summary>An admin marked the referral fraudulent.</summary>
-        [JsonPropertyName("flagged")] public bool? Flagged { get; init; }
+        /// <summary>Who is acting: a service name or a staff user id.</summary>
+        [JsonPropertyName("sub")] public string? Sub { get; init; }
+        /// <summary>What kind of actor `sub` is, for example `service` or `staff`.</summary>
+        [JsonPropertyName("type")] public string? Type { get; init; }
     }
 
-    /// <summary>A provider identity linked to the user. Tokens and the raw provider profile are never included.</summary>
-    public sealed record UserExternalAccountModel
+    /// <summary>A UsersDelegationTokensBody object.</summary>
+    public sealed record UsersDelegationTokensBody : ClearableBody
     {
-        /// <summary>One of: external_account.</summary>
-        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        [JsonPropertyName("id")] public string Id { get; init; } = "";
-        [JsonPropertyName("provider")] public string Provider { get; init; } = "";
-        [JsonPropertyName("provider_user_id")] public string ProviderUserId { get; init; } = "";
-        /// <summary>The provider's address at the last sign-in or import (a snapshot, not proof of ownership).</summary>
-        [JsonPropertyName("provider_email")] public string? ProviderEmail { get; init; }
-        /// <summary>Whether the provider (or the import) said that address is verified.</summary>
-        [JsonPropertyName("email_verified")] public bool EmailVerified { get; init; }
-        [JsonPropertyName("first_name")] public string? FirstName { get; init; }
-        [JsonPropertyName("last_name")] public string? LastName { get; init; }
-        /// <summary>The provider's avatar for this identity.</summary>
-        [JsonPropertyName("image_url")] public string? ImageUrl { get; init; }
-        /// <summary>Linked (epoch ms).</summary>
-        [JsonPropertyName("connected_at")] public long ConnectedAt { get; init; }
+        /// <summary>The service the token is for. Must be listed in `delegationTokens.audiences`.</summary>
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
+        /// <summary>What the token may do; each must be listed for the audience.</summary>
+        [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
+        [JsonPropertyName("actor")] public UsersDelegationTokensBodyActor? Actor { get; init; }
+        /// <summary>Lifetime in seconds, up to `delegationTokens.maxTtlSeconds` (300 at most). Default `delegationTokens.defaultTtlSeconds` (120).</summary>
+        [JsonPropertyName("ttl_seconds")] public long? TtlSeconds { get; init; }
+        /// <summary>Speak for the user inside this organization (they must be a member). Adds `org_id` to the token.</summary>
+        [JsonPropertyName("org_id")] public string? OrgId { get; init; }
+        /// <summary>Why, up to 500 characters, kept in the audit row.</summary>
+        [JsonPropertyName("reason")] public string? Reason { get; init; }
     }
 
-    /// <summary>A user as the Backend API serializes it. Never includes private/unsafe metadata (those are write-only here).</summary>
-    public sealed record UserModel
+    /// <summary>A UsersUpdateDeletionBody object.</summary>
+    public sealed record UsersUpdateDeletionBody : ClearableBody
     {
-        /// <summary>One of: user.</summary>
-        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        [JsonPropertyName("id")] public string Id { get; init; } = "";
-        [JsonPropertyName("username")] public string? Username { get; init; }
-        /// <summary>false for a link-only account added with POST /v1/users/{id}/external_accounts: it is shown and delivered but can never sign anyone in.</summary>
-        [JsonPropertyName("sign_in")] public bool? SignIn { get; init; }
-        [JsonPropertyName("first_name")] public string? FirstName { get; init; }
-        [JsonPropertyName("last_name")] public string? LastName { get; init; }
-        [JsonPropertyName("image_url")] public string? ImageUrl { get; init; }
-        [JsonPropertyName("email_addresses")] public List<EmailAddressModel> EmailAddresses { get; init; } = new();
-        [JsonPropertyName("primary_email_address_id")] public string? PrimaryEmailAddressId { get; init; }
-        /// <summary>The primary address as a flat string; null until a verified primary exists.</summary>
-        [JsonPropertyName("primary_email")] public string? PrimaryEmail { get; init; }
-        /// <summary>The relying party's own id for this user, if set/imported.</summary>
-        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
-        /// <summary>Whether the account has a usable password (never the hash).</summary>
-        [JsonPropertyName("password_enabled")] public bool PasswordEnabled { get; init; }
-        [JsonPropertyName("public_metadata")] public Dictionary<string, object?> PublicMetadata { get; init; } = new();
-        [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; init; }
-        /// <summary>Whether the user holds at least one passkey.</summary>
-        [JsonPropertyName("has_passkey")] public bool? HasPasskey { get; init; }
-        /// <summary>Factor classes this user must always use (POL-04); empty = none.</summary>
-        [JsonPropertyName("required_factors")] public List<string>? RequiredFactors { get; init; }
-        /// <summary>Whether this identity is still an anonymous guest.</summary>
-        [JsonPropertyName("is_anonymous")] public bool IsAnonymous { get; init; }
-        [JsonPropertyName("banned")] public bool Banned { get; init; }
-        [JsonPropertyName("ban_reason")] public string? BanReason { get; init; }
-        [JsonPropertyName("ban_note")] public string? BanNote { get; init; }
-        [JsonPropertyName("locked")] public bool Locked { get; init; }
-        /// <summary>One account state, the same value as the ID token's account_status: banned (an active ban; deactivation by SCIM, directory sync or a workflow is a ban), suspended (a lock, suspension directive or sign-in lockout is in force), else active. One of: active, suspended, banned.</summary>
-        [JsonPropertyName("status")] public string? Status { get; init; }
-        /// <summary>Epoch-ms; non-null once soft-deleted.</summary>
-        [JsonPropertyName("deleted_at")] public long? DeletedAt { get; init; }
-        /// <summary>Epoch-ms.</summary>
-        [JsonPropertyName("last_sign_in_at")] public long? LastSignInAt { get; init; }
-        /// <summary>Epoch-ms when ALL of the user's sessions last ended together (BAPI revoke-all, dashboard revoke-all, sign out everywhere, a password change or reset that revokes all, a ban or lock, a compromise signal); null = never. Treat any token issued before it as ended. Also the `user.sessions_revoked` event.</summary>
-        [JsonPropertyName("sessions_revoked_at")] public long? SessionsRevokedAt { get; init; }
-        /// <summary>Created (epoch ms).</summary>
-        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
-        /// <summary>Last updated (epoch ms).</summary>
-        [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
-        /// <summary>Strictly increases with every change to the user. Webhook payloads carry the same value: apply an update only if its version is higher than the one you hold.</summary>
-        [JsonPropertyName("version")] public long Version { get; init; }
-        /// <summary>How the user arrived through a referral program (referral attribution on). Null only when the user was never reported to the referral platform; otherwise `status` says where attribution stands (`pending` until the platform answers). Present on read, list, create and update responses.</summary>
-        [JsonPropertyName("referral")] public UserReferralModel? Referral { get; init; }
-        /// <summary>The user's own referral code: set once the referral platform enrolled the user as a partner (its answer carried a code) or an admin set one (PATCH /v1/users/{id} referral_code). null when the user is not enrolled, referrals are off, or the code was cleared.</summary>
-        [JsonPropertyName("referral_code")] public string? ReferralCode { get; init; }
-        /// <summary>PATCH answers only, when there is something to know: e.g. the referral platform has not confirmed a new referral_code yet (always so in a dry run, which does not ask it).</summary>
-        [JsonPropertyName("warnings")] public List<string>? Warnings { get; init; }
-        /// <summary>The user's own share link: the link the referral platform returned for the partner, else the referral settings' link_template with {code} replaced by the URL-encoded referral_code. null while there is no referral_code, or no platform link and no link_template.</summary>
-        [JsonPropertyName("referral_link")] public string? ReferralLink { get; init; }
-        /// <summary>Every linked provider identity, however it was linked (a sign-in, a connect flow, identities on create, a bulk import or identities/import); the same set GET /v1/users/{id}/identities lists. Present on read, list, create, update and password responses.</summary>
-        [JsonPropertyName("external_accounts")] public List<UserExternalAccountModel>? ExternalAccounts { get; init; }
+        /// <summary>The new deletion date. Not in the past.</summary>
+        [JsonPropertyName("effective_at")] public string? EffectiveAt { get; init; }
+        /// <summary>The new deletion date as seconds from now. Alternative to effective_at.</summary>
+        [JsonPropertyName("grace_seconds")] public double? GraceSeconds { get; init; }
     }
 
     /// <summary>A UsersExternalAccountsBody object.</summary>
@@ -14887,6 +18559,14 @@ namespace Atlas.Generated
         [JsonPropertyName("removed")] public bool Removed { get; init; }
     }
 
+    /// <summary>The latest failed attempt the person can retry: the check stays `pending` and `url` stays usable. Null when no attempt has failed.</summary>
+    public sealed record UsersIdentityVerificationsImportResponseLastError
+    {
+        /// <summary>The service's error code, e.g. `document_unverified_other`, `selfie_face_mismatch`.</summary>
+        [JsonPropertyName("code")] public string Code { get; init; } = "";
+        [JsonPropertyName("reason")] public string? Reason { get; init; }
+    }
+
     /// <summary>A UsersIdentityVerificationsImportResponse object.</summary>
     public sealed record UsersIdentityVerificationsImportResponse
     {
@@ -14896,10 +18576,14 @@ namespace Atlas.Generated
         [JsonPropertyName("user_id")] public string UserId { get; init; } = "";
         /// <summary>One of: persona, onfido, veriff, stripe_identity.</summary>
         [JsonPropertyName("provider")] public string Provider { get; init; } = "";
-        /// <summary>One of: pending, approved, declined, needs_review.</summary>
+        /// <summary>`pending` (not finished, or a failed attempt the person can retry), `processing` (submitted, being checked), then a verdict: `approved`, `declined` or `needs_review`. One of: pending, processing, approved, declined, needs_review.</summary>
         [JsonPropertyName("status")] public string Status { get; init; } = "";
         /// <summary>The service's short reason for a decline or review.</summary>
         [JsonPropertyName("reason")] public string? Reason { get; init; }
+        /// <summary>The latest failed attempt the person can retry: the check stays `pending` and `url` stays usable. Null when no attempt has failed.</summary>
+        [JsonPropertyName("last_error")] public UsersIdentityVerificationsImportResponseLastError? LastError { get; init; }
+        /// <summary>How many failed attempts the service reported for this check.</summary>
+        [JsonPropertyName("attempts")] public long Attempts { get; init; }
         /// <summary>True when the check was recorded from an existing session through the import route.</summary>
         [JsonPropertyName("imported")] public bool Imported { get; init; }
         /// <summary>When the verification service verified the person (epoch ms); an imported check keeps the service's own time.</summary>
@@ -14946,10 +18630,14 @@ namespace Atlas.Generated
         [JsonPropertyName("user_id")] public string UserId { get; init; } = "";
         /// <summary>One of: persona, onfido, veriff, stripe_identity.</summary>
         [JsonPropertyName("provider")] public string Provider { get; init; } = "";
-        /// <summary>One of: pending, approved, declined, needs_review.</summary>
+        /// <summary>`pending` (not finished, or a failed attempt the person can retry), `processing` (submitted, being checked), then a verdict: `approved`, `declined` or `needs_review`. One of: pending, processing, approved, declined, needs_review.</summary>
         [JsonPropertyName("status")] public string Status { get; init; } = "";
         /// <summary>The service's short reason for a decline or review.</summary>
         [JsonPropertyName("reason")] public string? Reason { get; init; }
+        /// <summary>The latest failed attempt the person can retry: the check stays `pending` and `url` stays usable. Null when no attempt has failed.</summary>
+        [JsonPropertyName("last_error")] public UsersIdentityVerificationsImportResponseLastError? LastError { get; init; }
+        /// <summary>How many failed attempts the service reported for this check.</summary>
+        [JsonPropertyName("attempts")] public long Attempts { get; init; }
         /// <summary>True when the check was recorded from an existing session through the import route.</summary>
         [JsonPropertyName("imported")] public bool Imported { get; init; }
         /// <summary>When the verification service verified the person (epoch ms); an imported check keeps the service's own time.</summary>
@@ -15042,6 +18730,7 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("source_user_id")] public string? SourceUserId { get; init; }
         [JsonPropertyName("dry_run")] public bool? DryRun { get; init; }
+        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
     }
 
     /// <summary>A UsersListOwnedOrganizationsResponseDataItem object.</summary>
@@ -15095,6 +18784,130 @@ namespace Atlas.Generated
         [JsonPropertyName("error")] public string? Error { get; init; }
         /// <summary>The user's referral record after the answer (as GET /v1/users/{id}/referral).</summary>
         [JsonPropertyName("referral")] public Dictionary<string, object?>? Referral { get; init; }
+    }
+
+    /// <summary>Query parameters of ListRiskSignals. Unset values are not sent.</summary>
+    public sealed record UsersListRiskSignalsQuery
+    {
+        /// <summary>Keep only live signals (`active`), or every one (`all`, the default). One of: active, all.</summary>
+        public string? Status { get; init; }
+        /// <summary>Page size, 1-200 (default 50).</summary>
+        public long? Limit { get; init; }
+        /// <summary>The `next_cursor` of the previous page (epoch milliseconds).</summary>
+        public string? Before { get; init; }
+        /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
+        public string? StartingAfter { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("status", Status);
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("before", Before);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+        }
+    }
+
+    /// <summary>A UsersCreateRiskSignalBody object.</summary>
+    public sealed record UsersCreateRiskSignalBody : ClearableBody
+    {
+        /// <summary>Your own type, e.g. `credential_stuffing`. Lowercase letters, digits and `_ . : -`.</summary>
+        [JsonPropertyName("signal_type")] public string? SignalType { get; init; }
+        /// <summary>One of: low, medium, high, critical.</summary>
+        [JsonPropertyName("severity")] public string? Severity { get; init; }
+        [JsonPropertyName("ttl_seconds")] public long? TtlSeconds { get; init; }
+        /// <summary>Up to 2 KB. Kept private: never sent in webhooks.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
+        /// <summary>Which of your systems reported it. Default `api`.</summary>
+        [JsonPropertyName("source")] public string? Source { get; init; }
+    }
+
+    /// <summary>A UsersDeleteRiskSignalsResponse object.</summary>
+    public sealed record UsersDeleteRiskSignalsResponse
+    {
+        /// <summary>One of: risk_signals_cleared.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        [JsonPropertyName("cleared")] public long? ClearedValue { get; init; }
+    }
+
+    /// <summary>A UsersGetSecuritySummaryResponseLinkedProvidersItem object.</summary>
+    public sealed record UsersGetSecuritySummaryResponseLinkedProvidersItem
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("provider")] public string? Provider { get; init; }
+        [JsonPropertyName("provider_user_id")] public string? ProviderUserId { get; init; }
+        [JsonPropertyName("email_address")] public string? EmailAddress { get; init; }
+        [JsonPropertyName("email_verified")] public bool? EmailVerified { get; init; }
+    }
+
+    /// <summary>A UsersGetSecuritySummaryResponseMfaFactorsItem object.</summary>
+    public sealed record UsersGetSecuritySummaryResponseMfaFactorsItem
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("type")] public string? Type { get; init; }
+        [JsonPropertyName("verified")] public bool? Verified { get; init; }
+        [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
+    }
+
+    /// <summary>A UsersGetSecuritySummaryResponsePasskeysItem object.</summary>
+    public sealed record UsersGetSecuritySummaryResponsePasskeysItem
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
+        [JsonPropertyName("last_used_at")] public long? LastUsedAt { get; init; }
+    }
+
+    /// <summary>A UsersGetSecuritySummaryResponseTrustedDevicesItem object.</summary>
+    public sealed record UsersGetSecuritySummaryResponseTrustedDevicesItem
+    {
+        /// <summary>One of: remembered_browser, device_key.</summary>
+        [JsonPropertyName("kind")] public string? Kind { get; init; }
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("label")] public string? Label { get; init; }
+        [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
+        [JsonPropertyName("last_used_at")] public long? LastUsedAt { get; init; }
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+    }
+
+    /// <summary>A UsersGetSecuritySummaryResponseActiveSessionsLatest object.</summary>
+    public sealed record UsersGetSecuritySummaryResponseActiveSessionsLatest
+    {
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("last_active_at")] public long? LastActiveAt { get; init; }
+        /// <summary>The end-user variant only: whether the newest session is the caller's own.</summary>
+        [JsonPropertyName("current")] public bool? Current { get; init; }
+        [JsonPropertyName("ip_address")] public string? IpAddress { get; init; }
+        [JsonPropertyName("country")] public string? Country { get; init; }
+    }
+
+    /// <summary>A UsersGetSecuritySummaryResponseActiveSessions object.</summary>
+    public sealed record UsersGetSecuritySummaryResponseActiveSessions
+    {
+        [JsonPropertyName("count")] public long? Count { get; init; }
+        [JsonPropertyName("latest")] public UsersGetSecuritySummaryResponseActiveSessionsLatest? Latest { get; init; }
+    }
+
+    /// <summary>A UsersGetSecuritySummaryResponse object.</summary>
+    public sealed record UsersGetSecuritySummaryResponse
+    {
+        /// <summary>One of: security_summary.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("user_id")] public string UserId { get; init; } = "";
+        [JsonPropertyName("password_enabled")] public bool PasswordEnabled { get; init; }
+        /// <summary>Epoch milliseconds.</summary>
+        [JsonPropertyName("password_changed_at")] public long? PasswordChangedAt { get; init; }
+        [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; init; }
+        [JsonPropertyName("has_passkey")] public bool HasPasskey { get; init; }
+        /// <summary>What the user can sign in with right now: password, passkey, email_code, email_link, phone_code, oauth_&lt;provider&gt;.</summary>
+        [JsonPropertyName("sign_in_methods")] public List<string> SignInMethods { get; init; } = new();
+        [JsonPropertyName("linked_providers")] public List<UsersGetSecuritySummaryResponseLinkedProvidersItem> LinkedProviders { get; init; } = new();
+        [JsonPropertyName("mfa_factors")] public List<UsersGetSecuritySummaryResponseMfaFactorsItem> MfaFactors { get; init; } = new();
+        [JsonPropertyName("backup_codes_remaining")] public long? BackupCodesRemaining { get; init; }
+        [JsonPropertyName("passkeys")] public List<UsersGetSecuritySummaryResponsePasskeysItem> Passkeys { get; init; } = new();
+        [JsonPropertyName("trusted_devices")] public List<UsersGetSecuritySummaryResponseTrustedDevicesItem> TrustedDevices { get; init; } = new();
+        [JsonPropertyName("active_sessions")] public UsersGetSecuritySummaryResponseActiveSessions? ActiveSessions { get; init; }
     }
 
     /// <summary>A UsersGetTemporaryAccessResponseDataItem object.</summary>
@@ -15322,6 +19135,43 @@ namespace Atlas.Generated
         [JsonPropertyName("deleted")] public bool? Deleted { get; init; }
     }
 
+    /// <summary>A WebhookDlqListResponseDataItem object.</summary>
+    public sealed record WebhookDlqListResponseDataItem
+    {
+        [JsonPropertyName("endpoint_id")] public string EndpointId { get; init; } = "";
+    }
+
+    /// <summary>A WebhookDlqListResponse object.</summary>
+    public sealed record WebhookDlqListResponse
+    {
+        /// <summary>One of: list.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("data")] public List<WebhookDlqListResponseDataItem> Data { get; init; } = new();
+        [JsonPropertyName("has_more")] public bool HasMore { get; init; }
+        [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
+        [JsonPropertyName("max_attempts")] public long? MaxAttempts { get; init; }
+        [JsonPropertyName("retention")] public Dictionary<string, object?>? Retention { get; init; }
+    }
+
+    /// <summary>Query parameters of List. Unset values are not sent.</summary>
+    public sealed record WebhookDlqListQuery
+    {
+        /// <summary>Page size. Defaults to 50; values above 1000 are capped at 1000.</summary>
+        public long? Limit { get; init; }
+        /// <summary>Cursor: return only items after this id. Pass the `next_cursor` (or the last item id) of the previous page.</summary>
+        public string? StartingAfter { get; init; }
+        /// <summary>Only deliveries of this event type (comma-separated for several).</summary>
+        public string? EventType { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("limit", Limit);
+            yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+            yield return new KeyValuePair<string, object?>("event_type", EventType);
+        }
+    }
+
     /// <summary>A WebhookEndpointsGetDlqResponse object.</summary>
     public sealed record WebhookEndpointsGetDlqResponse
     {
@@ -15343,12 +19193,15 @@ namespace Atlas.Generated
         public long? Limit { get; init; }
         /// <summary>Cursor: return only items after this id. Pass the `next_cursor` (or the last item id) of the previous page.</summary>
         public string? StartingAfter { get; init; }
+        /// <summary>Only deliveries of this event type (comma-separated for several).</summary>
+        public string? EventType { get; init; }
 
         /// <summary>Flatten to query key/value pairs.</summary>
         public IEnumerable<KeyValuePair<string, object?>> ToQuery()
         {
             yield return new KeyValuePair<string, object?>("limit", Limit);
             yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
+            yield return new KeyValuePair<string, object?>("event_type", EventType);
         }
     }
 
@@ -16715,7 +20568,7 @@ namespace Atlas.Generated
         public string? Q { get; init; }
         /// <summary>Only templates in this category. One of: security, access-control, tokens, integrations, notifications, enrichment, compliance, organizations, other.</summary>
         public string? Category { get; init; }
-        /// <summary>Only templates for this trigger. One of: post_login, pre_user_registration, post_user_registration, pre_organization_create, pre_member_add, pre_invitation_create, pre_authentication, pre_token, post_token_exchange, custom_token_exchange, pre_user_update, pre_user_deletion, mfa_verification_attempt, password_verification_attempt, account_link_decision, billing_plan_selected, pre_message_send, post_change_password, post_password_reset, post_user_update, post_email_verified, post_mfa_enroll, post_mfa_remove, post_logout, org_membership_changed, custom_challenge_create, custom_challenge_verify, workflow_step.</summary>
+        /// <summary>Only templates for this trigger. One of: post_login, pre_user_registration, post_user_registration, pre_organization_create, pre_member_add, pre_invitation_create, pre_authentication, pre_token, post_token_exchange, custom_token_exchange, pre_user_update, pre_user_deletion, pre_user_merge, mfa_verification_attempt, password_verification_attempt, account_link_decision, billing_plan_selected, pre_message_send, post_change_password, post_password_reset, post_user_update, post_email_verified, post_mfa_enroll, post_mfa_remove, post_logout, org_membership_changed, custom_challenge_create, custom_challenge_verify, workflow_step.</summary>
         public string? Trigger { get; init; }
         /// <summary>Only first-party (builtin) or community templates. One of: builtin, community.</summary>
         public string? Source { get; init; }
@@ -17778,7 +21631,7 @@ namespace Atlas.Generated
     /// <summary>Query parameters of GetBreakdown. Unset values are not sent.</summary>
     public sealed record AnalyticsGetBreakdownQuery
     {
-        /// <summary>Default method. One of: method, device, browser, os, country.</summary>
+        /// <summary>Default method. failure_code counts failed first- and second-factor attempts by the reason code they were refused with (no organization slice). One of: method, device, browser, os, country, failure_code.</summary>
         public string? Dimension { get; init; }
         /// <summary>Window start: Unix epoch milliseconds or an ISO 8601 time.</summary>
         public string? From { get; init; }
@@ -18239,6 +22092,14 @@ namespace Atlas.Generated
         [JsonPropertyName("window_seconds")] public long? WindowSeconds { get; init; }
     }
 
+    /// <summary>A ApiKeyModelRevokedBy object.</summary>
+    public sealed record ApiKeyModelRevokedBy
+    {
+        /// <summary>api_key, user, system, scim or sso.</summary>
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+    }
+
     /// <summary>A ApiKeyModel object.</summary>
     public sealed record ApiKeyModel
     {
@@ -18261,8 +22122,14 @@ namespace Atlas.Generated
         [JsonPropertyName("max_token_lifetime_seconds")] public long? MaxTokenLifetimeSeconds { get; init; }
         /// <summary>Registered SPKI PEM public key for proof-of-possession, or null for a bearer key.</summary>
         [JsonPropertyName("public_key")] public string? PublicKey { get; init; }
-        /// <summary>RFC 7638 JWK thumbprint of public_key — the cnf.jkt minted tokens carry.</summary>
+        /// <summary>RFC 7638 JWK thumbprint of public_key — the cnf.jkt minted tokens carry (a key_pair key's tokens carry none).</summary>
         [JsonPropertyName("public_key_jkt")] public string? PublicKeyJkt { get; init; }
+        /// <summary>`secret`: a shared `ak_` secret. `key_pair`: no secret exists; the holder signs short-lived JWT assertions with a private key Atlas never holds, and `public_key` verifies them. One of: secret, key_pair.</summary>
+        [JsonPropertyName("credential")] public string? Credential { get; init; }
+        /// <summary>key_pair only: the `aud` an assertion must carry (default: the instance id). Null for a secret key.</summary>
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
+        /// <summary>The key id (the same as `id`): the `kid` header and `iss` claim of an assertion.</summary>
+        [JsonPropertyName("key_id")] public string? KeyId { get; init; }
         /// <summary>Per-key spend caps, metered with POST /v1/api_keys/{id}/usage. null when the key has none.</summary>
         [JsonPropertyName("limits")] public List<ApiKeyLimitModel>? Limits { get; init; }
         /// <summary>Each cap with its current-window usage (empty when the key has no caps).</summary>
@@ -18284,6 +22151,16 @@ namespace Atlas.Generated
         [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
         /// <summary>The member who created an ORGANIZATION key, when recorded.</summary>
         [JsonPropertyName("created_by_user_id")] public string? CreatedByUserId { get; init; }
+        /// <summary>Why the key ended, always answered once it has: the stored `revoked_reason`, else `revoked_by_api` (a secret key or person revoked it) or `revoked_by_admin` (a dashboard user did); `signed_out_everywhere` for a key that died with the sign-out. Null while live.</summary>
+        [JsonPropertyName("end_reason")] public string? EndReason { get; init; }
+        /// <summary>Epoch ms the key ended (the same value as `revoked_at`).</summary>
+        [JsonPropertyName("ended_at")] public long? EndedAt { get; init; }
+        /// <summary>Who revoked the key. Null while live and for keys revoked before this was recorded.</summary>
+        [JsonPropertyName("revoked_by")] public ApiKeyModelRevokedBy? RevokedBy { get; init; }
+        /// <summary>`sign_out_everywhere`: the key is revoked when its user subject signs out everywhere. Null = independent of sessions. One of: sign_out_everywhere.</summary>
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
+        /// <summary>The same object as `claims`, under the name most integrators use: your own vocabulary (scopes, team, label), echoed back on verify.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
         /// <summary>Created (epoch ms).</summary>
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
     }
@@ -18350,8 +22227,14 @@ namespace Atlas.Generated
         [JsonPropertyName("max_token_lifetime_seconds")] public long? MaxTokenLifetimeSeconds { get; init; }
         /// <summary>Registered SPKI PEM public key for proof-of-possession, or null for a bearer key.</summary>
         [JsonPropertyName("public_key")] public string? PublicKey { get; init; }
-        /// <summary>RFC 7638 JWK thumbprint of public_key — the cnf.jkt minted tokens carry.</summary>
+        /// <summary>RFC 7638 JWK thumbprint of public_key — the cnf.jkt minted tokens carry (a key_pair key's tokens carry none).</summary>
         [JsonPropertyName("public_key_jkt")] public string? PublicKeyJkt { get; init; }
+        /// <summary>`secret`: a shared `ak_` secret. `key_pair`: no secret exists; the holder signs short-lived JWT assertions with a private key Atlas never holds, and `public_key` verifies them. One of: secret, key_pair.</summary>
+        [JsonPropertyName("credential")] public string? Credential { get; init; }
+        /// <summary>key_pair only: the `aud` an assertion must carry (default: the instance id). Null for a secret key.</summary>
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
+        /// <summary>The key id (the same as `id`): the `kid` header and `iss` claim of an assertion.</summary>
+        [JsonPropertyName("key_id")] public string? KeyId { get; init; }
         /// <summary>Per-key spend caps, metered with POST /v1/api_keys/{id}/usage. null when the key has none.</summary>
         [JsonPropertyName("limits")] public List<ApiKeyLimitModel>? Limits { get; init; }
         /// <summary>Each cap with its current-window usage (empty when the key has no caps).</summary>
@@ -18373,10 +22256,22 @@ namespace Atlas.Generated
         [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
         /// <summary>The member who created an ORGANIZATION key, when recorded.</summary>
         [JsonPropertyName("created_by_user_id")] public string? CreatedByUserId { get; init; }
+        /// <summary>Why the key ended, always answered once it has: the stored `revoked_reason`, else `revoked_by_api` (a secret key or person revoked it) or `revoked_by_admin` (a dashboard user did); `signed_out_everywhere` for a key that died with the sign-out. Null while live.</summary>
+        [JsonPropertyName("end_reason")] public string? EndReason { get; init; }
+        /// <summary>Epoch ms the key ended (the same value as `revoked_at`).</summary>
+        [JsonPropertyName("ended_at")] public long? EndedAt { get; init; }
+        /// <summary>Who revoked the key. Null while live and for keys revoked before this was recorded.</summary>
+        [JsonPropertyName("revoked_by")] public ApiKeyModelRevokedBy? RevokedBy { get; init; }
+        /// <summary>`sign_out_everywhere`: the key is revoked when its user subject signs out everywhere. Null = independent of sessions. One of: sign_out_everywhere.</summary>
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
+        /// <summary>The same object as `claims`, under the name most integrators use: your own vocabulary (scopes, team, label), echoed back on verify.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
         /// <summary>Created (epoch ms).</summary>
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
-        /// <summary>Reveal-once plaintext ak_ key (create-only).</summary>
-        [JsonPropertyName("secret")] public string Secret { get; init; } = "";
+        /// <summary>Reveal-once plaintext ak_ key (create-only). Null for a key_pair key, which has no secret.</summary>
+        [JsonPropertyName("secret")] public string? Secret { get; init; }
+        /// <summary>key_pair only, and only when Atlas generated the pair: the PKCS#8 PEM private key (the same format as an Apple .p8 file), shown once. Atlas never stores it and an Idempotency-Key retry does not return it. Absent when you supplied your own `public_key`.</summary>
+        [JsonPropertyName("private_key")] public string? PrivateKey { get; init; }
         [JsonPropertyName("note")] public string? Note { get; init; }
     }
 
@@ -18427,6 +22322,9 @@ namespace Atlas.Generated
         [JsonPropertyName("created_by_user_id")] public string? CreatedByUserId { get; init; }
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("claims")] public Dictionary<string, object?>? Claims { get; init; }
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
+        /// <summary>One of: sign_out_everywhere.</summary>
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
         [JsonPropertyName("expires_at")] public double? ExpiresAt { get; init; }
         [JsonPropertyName("expires_in_seconds")] public double? ExpiresInSeconds { get; init; }
         [JsonPropertyName("prefix")] public string? Prefix { get; init; }
@@ -18440,7 +22338,12 @@ namespace Atlas.Generated
         [JsonPropertyName("max_token_lifetime_seconds")] public double? MaxTokenLifetimeSeconds { get; init; }
         [JsonPropertyName("limits")] public List<ApiKeysCreateBodyLimitsItem>? Limits { get; init; }
         [JsonPropertyName("public_key")] public string? PublicKey { get; init; }
+        /// <summary>One of: secret, key_pair.</summary>
+        [JsonPropertyName("credential")] public string? Credential { get; init; }
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
         [JsonPropertyName("import")] public ApiKeysCreateBodyImport? Import { get; init; }
+        /// <summary>Send <c>null</c> for <c>dies_with</c>, which clears it.</summary>
+        public ApiKeysCreateBody ClearDiesWith() => this with { Cleared = Plus("dies_with") };
         /// <summary>Send <c>null</c> for <c>expires_at</c>, which clears it.</summary>
         public ApiKeysCreateBody ClearExpiresAt() => this with { Cleared = Plus("expires_at") };
         /// <summary>Send <c>null</c> for <c>rate_limit</c>, which clears it.</summary>
@@ -18457,6 +22360,13 @@ namespace Atlas.Generated
         public ApiKeysCreateBody ClearPublicKey() => this with { Cleared = Plus("public_key") };
     }
 
+    /// <summary>A RevokedApiKeyModelRevokedBy object.</summary>
+    public sealed record RevokedApiKeyModelRevokedBy
+    {
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+    }
+
     /// <summary>A RevokedApiKeyModel object.</summary>
     public sealed record RevokedApiKeyModel
     {
@@ -18471,6 +22381,10 @@ namespace Atlas.Generated
         [JsonPropertyName("subject_id")] public string? SubjectId { get; init; }
         /// <summary>The organization the key was bound to, if any.</summary>
         [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+        /// <summary>Always answered once the key ended (secret-key callers only): the stored reason, else `revoked_by_api` or `revoked_by_admin`.</summary>
+        [JsonPropertyName("end_reason")] public string? EndReason { get; init; }
+        /// <summary>Who revoked the key (secret-key callers only).</summary>
+        [JsonPropertyName("revoked_by")] public RevokedApiKeyModelRevokedBy? RevokedBy { get; init; }
     }
 
     /// <summary>A ApiKeysGetRevokedResponse object.</summary>
@@ -18551,9 +22465,11 @@ namespace Atlas.Generated
     public sealed record ApiKeysTokenBody : ClearableBody
     {
         [JsonPropertyName("secret")] public string? Secret { get; init; }
+        [JsonPropertyName("assertion")] public string? Assertion { get; init; }
         [JsonPropertyName("ttl_seconds")] public double? TtlSeconds { get; init; }
         [JsonPropertyName("audience")] public object? Audience { get; init; }
         [JsonPropertyName("client_ip")] public string? ClientIp { get; init; }
+        [JsonPropertyName("include_metadata")] public bool? IncludeMetadata { get; init; }
     }
 
     /// <summary>Present for a user key bound to an organization: the user's CURRENT membership. `effective_scopes` is then the key scopes (after implications) that the membership's `permissions` cover: a permission covers a scope of the same name, `*` covers every scope, `&lt;prefix&gt;:*` covers scopes starting `&lt;prefix&gt;:`.</summary>
@@ -18582,6 +22498,14 @@ namespace Atlas.Generated
         [JsonPropertyName("claims")] public Dictionary<string, object?> Claims { get; init; } = new();
         /// <summary>The key scopes (null when none are set).</summary>
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
+        /// <summary>Present only when a key-pair assertion was verified (send `token`). One of: key_pair.</summary>
+        [JsonPropertyName("credential")] public string? Credential { get; init; }
+        /// <summary>key_pair: the audience the assertion named and the key allows.</summary>
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
+        /// <summary>key_pair: the assertion `jti` (single-use until `exp`), null when it carried none.</summary>
+        [JsonPropertyName("jti")] public string? Jti { get; init; }
+        /// <summary>key_pair: the assertion `exp`, in epoch SECONDS as signed.</summary>
+        [JsonPropertyName("exp")] public long? Exp { get; init; }
         /// <summary>The key scopes (and any `claims.scope`) expanded through the instance scope implications (`endUserApiKeys.scopeImplications`, e.g. calls:write ⇒ calls:read; `*` = every scope the instance names). Sorted; equals the held scopes when no implications are configured. `required_scopes` is checked against this set.</summary>
         [JsonPropertyName("effective_scopes")] public List<string>? EffectiveScopes { get; init; }
         /// <summary>Present for a user key bound to an organization: the user's CURRENT membership. `effective_scopes` is then the key scopes (after implications) that the membership's `permissions` cover: a permission covers a scope of the same name, `*` covers every scope, `&lt;prefix&gt;:*` covers scopes starting `&lt;prefix&gt;:`.</summary>
@@ -18610,7 +22534,7 @@ namespace Atlas.Generated
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         /// <summary>One of: False.</summary>
         [JsonPropertyName("valid")] public string Valid { get; init; } = "";
-        /// <summary>Present only when a LIVE key was refused by its own policy. Absent for unknown, revoked, expired, disabled or subject-deleted keys (never says which). One of: insufficient_scope, rate_limited, usage_exhausted, ip_not_allowed, client_ip_required.</summary>
+        /// <summary>Present only when a LIVE key was refused by its own policy. Absent for unknown, revoked, expired, disabled or subject-deleted keys (never says which). For a `token` (key-pair assertion) check: `invalid_assertion` answers, with no id, everything that does not prove the holder signed it (malformed, unknown key, bad signature, wrong algorithm, iss not the kid, revoked or disabled key), and the other assertion codes appear only once the signature has verified. One of: insufficient_scope, rate_limited, usage_exhausted, ip_not_allowed, client_ip_required, invalid_assertion, assertion_expired, assertion_not_yet_valid, wrong_audience, assertion_lifetime_too_long, assertion_replayed, scope_not_granted.</summary>
         [JsonPropertyName("code")] public string? Code { get; init; }
         /// <summary>The key id (with code only).</summary>
         [JsonPropertyName("id")] public string? Id { get; init; }
@@ -18626,6 +22550,7 @@ namespace Atlas.Generated
     public sealed record ApiKeysVerifyBody : ClearableBody
     {
         [JsonPropertyName("secret")] public string? Secret { get; init; }
+        [JsonPropertyName("token")] public string? Token { get; init; }
         [JsonPropertyName("required_scopes")] public List<string>? RequiredScopes { get; init; }
         [JsonPropertyName("client_ip")] public string? ClientIp { get; init; }
     }
@@ -18635,6 +22560,9 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("claims")] public Dictionary<string, object?>? Claims { get; init; }
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
+        /// <summary>One of: sign_out_everywhere.</summary>
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
         [JsonPropertyName("expires_at")] public double? ExpiresAt { get; init; }
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
         [JsonPropertyName("constraints")] public Dictionary<string, object?>? Constraints { get; init; }
@@ -18646,6 +22574,8 @@ namespace Atlas.Generated
         [JsonPropertyName("allowed_ips")] public List<string>? AllowedIps { get; init; }
         /// <summary>Send <c>null</c> for <c>name</c>, which clears it.</summary>
         public ApiKeysUpdateBody ClearName() => this with { Cleared = Plus("name") };
+        /// <summary>Send <c>null</c> for <c>dies_with</c>, which clears it.</summary>
+        public ApiKeysUpdateBody ClearDiesWith() => this with { Cleared = Plus("dies_with") };
         /// <summary>Send <c>null</c> for <c>expires_at</c>, which clears it.</summary>
         public ApiKeysUpdateBody ClearExpiresAt() => this with { Cleared = Plus("expires_at") };
         /// <summary>Send <c>null</c> for <c>max_token_lifetime_seconds</c>, which clears it.</summary>
@@ -19199,54 +23129,6 @@ namespace Atlas.Generated
         [JsonPropertyName("revoked")] public string? Revoked { get; init; }
         [JsonPropertyName("tokens_revoked")] public long? TokensRevoked { get; init; }
         [JsonPropertyName("backchannel_logouts")] public long? BackchannelLogouts { get; init; }
-    }
-
-    /// <summary>Only where one exact Backend API call is the whole remedy: that call, ready to send. It is one of the remedies fix describes, so read fix first.</summary>
-    public sealed record PreflightFindingModelFixCall
-    {
-        /// <summary>One of: POST, PUT, PATCH.</summary>
-        [JsonPropertyName("method")] public string Method { get; init; } = "";
-        [JsonPropertyName("path")] public string Path { get; init; } = "";
-        [JsonPropertyName("body")] public Dictionary<string, object?>? Body { get; init; }
-    }
-
-    /// <summary>Present when the code is acknowledged (PUT /v1/instance/preflight/acks/{code}): a known, accepted warning or info finding that no longer counts. Never on an error.</summary>
-    public sealed record PreflightFindingModelAcknowledged
-    {
-        [JsonPropertyName("reason")] public string Reason { get; init; } = "";
-        /// <summary>The API key or dashboard user that acknowledged it.</summary>
-        [JsonPropertyName("by")] public string? By { get; init; }
-        /// <summary>Epoch ms.</summary>
-        [JsonPropertyName("at")] public long At { get; init; }
-        /// <summary>Epoch ms; null = until removed.</summary>
-        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
-    }
-
-    /// <summary>A PreflightFindingModel object.</summary>
-    public sealed record PreflightFindingModel
-    {
-        /// <summary>One of: error, warning, info.</summary>
-        [JsonPropertyName("severity")] public string Severity { get; init; } = "";
-        /// <summary>Stable snake_case identifier. Every code is listed by GET /v1/instance/preflight/codes.</summary>
-        [JsonPropertyName("code")] public string Code { get; init; } = "";
-        /// <summary>What is wrong, in a plain sentence.</summary>
-        [JsonPropertyName("message")] public string Message { get; init; } = "";
-        /// <summary>What to do about it, in a plain sentence.</summary>
-        [JsonPropertyName("fix")] public string Fix { get; init; } = "";
-        /// <summary>Only where one exact Backend API call is the whole remedy: that call, ready to send. It is one of the remedies fix describes, so read fix first.</summary>
-        [JsonPropertyName("fix_call")] public PreflightFindingModelFixCall? FixCall { get; init; }
-        /// <summary>With fix_call: true only when the call cannot lock anyone out or change sign-in for existing users.</summary>
-        [JsonPropertyName("safe_to_autofix")] public bool? SafeToAutofix { get; init; }
-        /// <summary>Ids of what the finding is about (provider, id/client_id, origin, domain_id/host, site_id, …).</summary>
-        [JsonPropertyName("subject")] public Dictionary<string, string>? Subject { get; init; }
-        /// <summary>Set on the security posture findings (weaker than the defaults new instances get). One of: security_posture.</summary>
-        [JsonPropertyName("group")] public string? Group { get; init; }
-        /// <summary>Only with include_suppressed=true: the finding does not apply to how the instance integrates. One of: True.</summary>
-        [JsonPropertyName("suppressed")] public string? Suppressed { get; init; }
-        /// <summary>Only with include_suppressed=true: why it does not apply.</summary>
-        [JsonPropertyName("suppressed_reason")] public string? SuppressedReason { get; init; }
-        /// <summary>Present when the code is acknowledged (PUT /v1/instance/preflight/acks/{code}): a known, accepted warning or info finding that no longer counts. Never on an error.</summary>
-        [JsonPropertyName("acknowledged")] public PreflightFindingModelAcknowledged? Acknowledged { get; init; }
     }
 
     /// <summary>How the app's authorize requests of the last 7 days started: button (atlasid_button=1), js (atlasid_button=js), fedcm (One Tap), fallback (the no-script link, atlasid_fallback=1) and unmarked (none of these). atlas_id_button_never_rendered fires when button, js and fedcm are all 0, at least one request came in, and the homepage includes the script.</summary>
@@ -22004,7 +25886,7 @@ namespace Atlas.Generated
     public sealed record ConnectionsCreateBodyModel : ClearableBody
     {
         [JsonPropertyName("owner")] public ConnectionsTransferBodyOwner? Owner { get; init; }
-        /// <summary>One of: oauth, api_key, client_credentials, bearer, basic, custom_header, hmac_secret, jwt_bearer, oauth1, github_app_installation, admin_consent.</summary>
+        /// <summary>One of: oauth, api_key, client_credentials, bearer, basic, custom_header, hmac_secret, jwt_bearer, oauth1, github_app_installation, admin_consent, cookie_jar.</summary>
         [JsonPropertyName("kind")] public string? Kind { get; init; }
         /// <summary>A built-in or custom OAuth provider key for oauth; any short key otherwise.</summary>
         [JsonPropertyName("provider")] public string? Provider { get; init; }
@@ -22025,6 +25907,36 @@ namespace Atlas.Generated
         [JsonPropertyName("purpose")] public string? Purpose { get; init; }
     }
 
+    /// <summary>A ConnectionsExportResponseConnectionsItem object.</summary>
+    public sealed record ConnectionsExportResponseConnectionsItem
+    {
+        /// <summary>oauth, or the credential kind (api_key, bearer, basic, custom_header, hmac_secret, client_credentials, jwt_bearer, oauth1, cookie_jar...). Also a valid import row field.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        /// <summary>The non-secret config of a non-oauth connection (absent for oauth).</summary>
+        [JsonPropertyName("config")] public Dictionary<string, object?>? Config { get; init; }
+        [JsonPropertyName("provider")] public string Provider { get; init; } = "";
+        [JsonPropertyName("owner")] public ConnectionsTransferResponseOwner? Owner { get; init; }
+        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
+        /// <summary>The provider environment the credential belongs to. sandbox selects the provider's test hosts (Salesforce test.salesforce.com, PayPal and QuickBooks sandboxes, DocuSign demo...). One of: production, sandbox.</summary>
+        [JsonPropertyName("environment")] public string Environment { get; init; } = "";
+        /// <summary>Values that fill the provider's host templates for this one connection, for example {"subdomain":"acme"} (Zendesk), {"shop":"acme"} (Shopify), {"domain":"acme.my.salesforce.com"} (Salesforce My Domain), {"data_center":"eu"} (Zoho), {"tenant":"contoso.onmicrosoft.com"} (Microsoft), {"host":"git.example.com"} (self-managed GitLab). Each key is checked against that provider's allowlist pattern; a value that is not a plain label or public hostname is refused with 400 `host_params.&lt;key&gt;`.</summary>
+        [JsonPropertyName("host_params")] public Dictionary<string, string>? HostParams { get; init; }
+        [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
+        [JsonPropertyName("metadata")] public Dictionary<string, string>? Metadata { get; init; }
+        [JsonPropertyName("name")] public string Name { get; init; } = "";
+        [JsonPropertyName("allowed_hosts")] public List<string> AllowedHosts { get; init; } = new();
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+        /// <summary>Rows with the same value came from one grant.</summary>
+        [JsonPropertyName("token_family")] public string? TokenFamily { get; init; }
+        /// <summary>Sealed export only, oauth connections.</summary>
+        [JsonPropertyName("refresh_token")] public string? RefreshToken { get; init; }
+        /// <summary>Sealed export only, oauth connections.</summary>
+        [JsonPropertyName("access_token")] public string? AccessToken { get; init; }
+        /// <summary>Sealed export only. oauth: extra token sets by name. Any other kind: the entered credential as credential entry takes it (api_key, consumer_secret or private_key, cookies...).</summary>
+        [JsonPropertyName("credentials")] public Dictionary<string, object?>? Credentials { get; init; }
+    }
+
     /// <summary>A ConnectionsExportResponse object.</summary>
     public sealed record ConnectionsExportResponse
     {
@@ -22036,7 +25948,7 @@ namespace Atlas.Generated
         [JsonPropertyName("has_more")] public bool HasMore { get; init; }
         [JsonPropertyName("next_cursor")] public string? NextCursor { get; init; }
         /// <summary>Present when sealed is false.</summary>
-        [JsonPropertyName("connections")] public List<Dictionary<string, object?>>? Connections { get; init; }
+        [JsonPropertyName("connections")] public List<ConnectionsExportResponseConnectionsItem>? Connections { get; init; }
         /// <summary>The thumbprint of the key the bundle is sealed to.</summary>
         [JsonPropertyName("recipient_key_id")] public string? RecipientKeyId { get; init; }
         /// <summary>Present when sealed is true: a compact JWE (RSA-OAEP-256 or ECDH-ES+A256KW with A256GCM) of {version, exported_at, connections}.</summary>
@@ -22049,6 +25961,8 @@ namespace Atlas.Generated
         /// <summary>One of: organization, user, external.</summary>
         [JsonPropertyName("owner_type")] public string? OwnerType { get; init; }
         [JsonPropertyName("owner_id")] public string? OwnerId { get; init; }
+        /// <summary>Export only these connections (a rollback of one).</summary>
+        [JsonPropertyName("connection_ids")] public List<string>? ConnectionIds { get; init; }
         /// <summary>Restrict to one provider-side account.</summary>
         [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
         [JsonPropertyName("provider")] public string? Provider { get; init; }
@@ -22113,6 +26027,10 @@ namespace Atlas.Generated
         [JsonPropertyName("would_create")] public long WouldCreate { get; init; }
         [JsonPropertyName("would_update")] public long WouldUpdate { get; init; }
         [JsonPropertyName("failed")] public long Failed { get; init; }
+        /// <summary>One entry per failed row.</summary>
+        [JsonPropertyName("errors")] public List<OauthGrantsImportResponseErrorsItem> Errors { get; init; } = new();
+        /// <summary>Dry run only: this same report, kept for older callers.</summary>
+        [JsonPropertyName("would_return")] public Dictionary<string, object?>? WouldReturn { get; init; }
         [JsonPropertyName("data")] public List<ConnectionsImportResponseDataItem> Data { get; init; } = new();
     }
 
@@ -22197,6 +26115,8 @@ namespace Atlas.Generated
         /// <summary>Values that fill the provider's host templates for this one connection, for example {"subdomain":"acme"} (Zendesk), {"shop":"acme"} (Shopify), {"domain":"acme.my.salesforce.com"} (Salesforce My Domain), {"data_center":"eu"} (Zoho), {"tenant":"contoso.onmicrosoft.com"} (Microsoft), {"host":"git.example.com"} (self-managed GitLab). Each key is checked against that provider's allowlist pattern; a value that is not a plain label or public hostname is refused with 400 `host_params.&lt;key&gt;`.</summary>
         [JsonPropertyName("host_params")] public Dictionary<string, string> HostParams { get; init; } = new();
         [JsonPropertyName("enabled")] public bool Enabled { get; init; }
+        /// <summary>eBay: the RuName consent runs with.</summary>
+        [JsonPropertyName("ru_name")] public string? RuName { get; init; }
         /// <summary>Your own https redirect URI for this client (set with `redirect_uri` on the backend API); null when Atlas's callback is used.</summary>
         [JsonPropertyName("redirect_uri")] public string? RedirectUri { get; init; }
         /// <summary>The redirect URI to register on this client at the provider: `redirect_uri` when set, else Atlas's callback.</summary>
@@ -22281,9 +26201,11 @@ namespace Atlas.Generated
         /// <summary>Write-only. Required when the client is first created; omit it to keep the stored secret.</summary>
         [JsonPropertyName("client_secret")] public string? ClientSecret { get; init; }
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
-        /// <summary>Values that fill the provider's host templates for this one connection, for example {"subdomain":"acme"} (Zendesk), {"shop":"acme"} (Shopify), {"domain":"acme.my.salesforce.com"} (Salesforce My Domain), {"data_center":"eu"} (Zoho), {"tenant":"contoso.onmicrosoft.com"} (Microsoft), {"host":"git.example.com"} (self-managed GitLab). Each key is checked against that provider's allowlist pattern; a value that is not a plain label or public hostname is refused with 400 `host_params.&lt;key&gt;`.</summary>
+        /// <summary>Defaults for connections that use this client: the provider's host values plus its own non-secret settings, such as {"service_id":"…"} for TikTok Shop (required for it). An unknown key or a malformed value is refused with 400 `host_params.&lt;key&gt;`.</summary>
         [JsonPropertyName("host_params")] public Dictionary<string, string>? HostParams { get; init; }
         [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
+        /// <summary>eBay only: the RuName registered for your eBay app (letters, digits, hyphen, underscore). Shorthand for host_params.ru_name. It is sent as redirect_uri on both legs of consent, so the owner authorizes at Atlas; set the client's callback_url as the RuName's accepted URL in the eBay developer portal. null clears it.</summary>
+        [JsonPropertyName("ru_name")] public string? RuName { get; init; }
         /// <summary>How Atlas authenticates to the provider's token endpoint. client_secret (default) keeps the provider's own style. private_key_jwt: send `generate_key: true` (Atlas keeps the key and publishes its public half) or your PKCS#8 private key in `client_secret`; Atlas then signs a fresh single-use assertion on every token request. tls_client_auth (mutual TLS): send the certificate in `mtls_cert` and its private key in `client_secret`; the pair is checked. One of: client_secret, private_key_jwt, tls_client_auth.</summary>
         [JsonPropertyName("auth_method")] public string? AuthMethod { get; init; }
         /// <summary>private_key_jwt: have Atlas generate the key pair.</summary>
@@ -22294,8 +26216,23 @@ namespace Atlas.Generated
         [JsonPropertyName("mtls_cert")] public string? MtlsCert { get; init; }
         /// <summary>An https redirect URI on your own domain, registered at the provider as this app's redirect URI. Atlas authorizes and exchanges the code with exactly this value. Forward the code and state your page receives to POST /v1/connections/oauth/complete, or 302 the browser to the client's `forward_url`. null clears it (Atlas's callback). Not settable by an organization on its own client.</summary>
         [JsonPropertyName("redirect_uri")] public string? RedirectUri { get; init; }
+        /// <summary>Send <c>null</c> for <c>ru_name</c>, which clears it.</summary>
+        public ConnectionsSetOauthClientsBody ClearRuName() => this with { Cleared = Plus("ru_name") };
         /// <summary>Send <c>null</c> for <c>redirect_uri</c>, which clears it.</summary>
         public ConnectionsSetOauthClientsBody ClearRedirectUri() => this with { Cleared = Plus("redirect_uri") };
+    }
+
+    /// <summary>Query parameters of DeleteOauthClient. Unset values are not sent.</summary>
+    public sealed record ConnectionsDeleteOauthClientQuery
+    {
+        /// <summary>The id of the OAuth client to move this client's connections to before deleting it.</summary>
+        public string? RehomeTo { get; init; }
+
+        /// <summary>Flatten to query key/value pairs.</summary>
+        public IEnumerable<KeyValuePair<string, object?>> ToQuery()
+        {
+            yield return new KeyValuePair<string, object?>("rehome_to", RehomeTo);
+        }
     }
 
     /// <summary>A ConnectionsTokensBatchResponseDataItemTokenCredentialsValue object.</summary>
@@ -22438,6 +26375,23 @@ namespace Atlas.Generated
         [JsonPropertyName("connect_user_id")] public string? ConnectUserId { get; init; }
     }
 
+    /// <summary>A ConnectionsSetCredentialsBodyModelCookiesItem object.</summary>
+    public sealed record ConnectionsSetCredentialsBodyModelCookiesItem : ClearableBody
+    {
+        [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("value")] public string? Value { get; init; }
+        [JsonPropertyName("domain")] public string? Domain { get; init; }
+        [JsonPropertyName("path")] public string? Path { get; init; }
+        /// <summary>Epoch seconds or milliseconds, or an ISO date; omit for a session cookie. The earliest expiry becomes the connection's secret expiry (reminders go out before it).</summary>
+        [JsonPropertyName("expires")] public object? Expires { get; init; }
+        [JsonPropertyName("secure")] public bool? Secure { get; init; }
+        [JsonPropertyName("http_only")] public bool? HttpOnly { get; init; }
+        /// <summary>One of: Strict, Lax, None.</summary>
+        [JsonPropertyName("same_site")] public string? SameSite { get; init; }
+        /// <summary>Send <c>null</c> for <c>expires</c>, which clears it.</summary>
+        public ConnectionsSetCredentialsBodyModelCookiesItem ClearExpires() => this with { Cleared = Plus("expires") };
+    }
+
     /// <summary>The fields of the connection's kind. Write-only: stored in the vault (the tenant's own KMS key when one is set) and never returned. The kind's non-secret settings (see config on POST /v1/connections: preset, issuer, subject, audience, auth_style, grant_type, account_id, mode, signature_method, realm, installation_id, placement, name, algorithm...) may be passed here too.</summary>
     public sealed record ConnectionsSetCredentialsBodyModel : ClearableBody
     {
@@ -22460,7 +26414,7 @@ namespace Atlas.Generated
         /// <summary>https token endpoint (client_credentials, jwt_bearer); `{name}` placeholders are filled from host_params.</summary>
         [JsonPropertyName("token_url")] public string? TokenUrl { get; init; }
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
-        /// <summary>jwt_bearer / github_app_installation: a PEM private key (RSA or P-256). Held in the vault; never returned.</summary>
+        /// <summary>jwt_bearer / github_app_installation: a PEM private key (RSA or P-256). oauth1 with config.signature_method RSA-SHA1 or RSA-SHA256: the consumer's RSA private key (2048 to 8192 bits) in place of consumer_secret. Held in the vault; never returned.</summary>
         [JsonPropertyName("private_key")] public string? PrivateKey { get; init; }
         /// <summary>jwt_bearer: have Atlas generate the key pair; the public JWK is returned in config.public_jwk for you to register at the provider.</summary>
         [JsonPropertyName("generate_key")] public bool? GenerateKey { get; init; }
@@ -22470,8 +26424,10 @@ namespace Atlas.Generated
         [JsonPropertyName("assertion")] public string? Assertion { get; init; }
         /// <summary>oauth1.</summary>
         [JsonPropertyName("consumer_key")] public string? ConsumerKey { get; init; }
-        /// <summary>oauth1.</summary>
+        /// <summary>oauth1 (not needed with an RSA signature method; send private_key instead).</summary>
         [JsonPropertyName("consumer_secret")] public string? ConsumerSecret { get; init; }
+        /// <summary>cookie_jar: the browser session (at most 200 cookies, 256 KiB). Write-only; your backend reads it with GET /v1/connections/{id}/secret. Atlas never sends requests with it.</summary>
+        [JsonPropertyName("cookies")] public List<ConnectionsSetCredentialsBodyModelCookiesItem>? Cookies { get; init; }
         /// <summary>oauth1.</summary>
         [JsonPropertyName("token_secret")] public string? TokenSecret { get; init; }
         /// <summary>Non-secret settings to merge (same keys as the connection config).</summary>
@@ -22663,7 +26619,7 @@ namespace Atlas.Generated
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         [JsonPropertyName("id")] public string Id { get; init; } = "";
         [JsonPropertyName("owner")] public ConnectionsTransferResponseOwner? Owner { get; init; }
-        /// <summary>oauth, github_app_installation, admin_consent and a three-legged oauth1 are authorized by a browser step; client_credentials and jwt_bearer mint tokens from a credential Atlas holds; api_key, bearer, basic, custom_header and hmac_secret are typed secrets the owner enters. One of: oauth, api_key, client_credentials, bearer, basic, custom_header, hmac_secret, jwt_bearer, oauth1, github_app_installation, admin_consent.</summary>
+        /// <summary>oauth, github_app_installation, admin_consent and a three-legged oauth1 are authorized by a browser step; client_credentials and jwt_bearer mint tokens from a credential Atlas holds; api_key, bearer, basic, custom_header and hmac_secret are typed secrets the owner enters. One of: oauth, api_key, client_credentials, bearer, basic, custom_header, hmac_secret, jwt_bearer, oauth1, github_app_installation, admin_consent, cookie_jar.</summary>
         [JsonPropertyName("kind")] public string Kind { get; init; } = "";
         [JsonPropertyName("provider")] public string Provider { get; init; } = "";
         /// <summary>Your label for this account, for example "Support inbox".</summary>
@@ -24483,58 +28439,6 @@ namespace Atlas.Generated
         }
     }
 
-    /// <summary>method path: the https file that proves the host. Its whole body is the token; the token is bound to this instance, host and base path.</summary>
-    public sealed record CustomDomainModelVerification
-    {
-        /// <summary>One of: https_file.</summary>
-        [JsonPropertyName("method")] public string Method { get; init; } = "";
-        [JsonPropertyName("url")] public string Url { get; init; } = "";
-        [JsonPropertyName("token")] public string Token { get; init; } = "";
-        [JsonPropertyName("content")] public string Content { get; init; } = "";
-        [JsonPropertyName("instructions")] public string Instructions { get; init; } = "";
-    }
-
-    /// <summary>A CustomDomainModelDns object.</summary>
-    public sealed record CustomDomainModelDns
-    {
-        /// <summary>One of: cloudflare.</summary>
-        [JsonPropertyName("provider")] public string Provider { get; init; } = "";
-        [JsonPropertyName("token_set")] public bool TokenSet { get; init; }
-    }
-
-    /// <summary>A CustomDomainModel object.</summary>
-    public sealed record CustomDomainModel
-    {
-        /// <summary>One of: custom_domain.</summary>
-        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        [JsonPropertyName("id")] public string Id { get; init; } = "";
-        [JsonPropertyName("role")] public string Role { get; init; } = "";
-        [JsonPropertyName("host")] public string Host { get; init; } = "";
-        [JsonPropertyName("status")] public string Status { get; init; } = "";
-        [JsonPropertyName("action")] public string Action { get; init; } = "";
-        [JsonPropertyName("live")] public bool Live { get; init; }
-        [JsonPropertyName("cname_target")] public string? CnameTarget { get; init; }
-        [JsonPropertyName("last_checked_at")] public long? LastCheckedAt { get; init; }
-        [JsonPropertyName("last_observed_target")] public string? LastObservedTarget { get; init; }
-        [JsonPropertyName("failure_reason")] public string? FailureReason { get; init; }
-        [JsonPropertyName("certificate_expires_at")] public long? CertificateExpiresAt { get; init; }
-        [JsonPropertyName("cookie_domain")] public string? CookieDomain { get; init; }
-        /// <summary>cname: proven by a CNAME to Atlas. path: a path mount on your own host, proven by an https file. One of: cname, path.</summary>
-        [JsonPropertyName("method")] public string? Method { get; init; }
-        /// <summary>method path: the prefix the Frontend API is served under.</summary>
-        [JsonPropertyName("base_path")] public string? BasePath { get; init; }
-        /// <summary>method path, once verified: atlas_ingress (the host is on Atlas's ingress, which routes the prefix) or customer_proxy (add the reverse-proxy rule in instructions). One of: atlas_ingress, customer_proxy.</summary>
-        [JsonPropertyName("routing")] public string? Routing { get; init; }
-        /// <summary>method path: the Frontend API (and, once verified, the issuer) — https://&lt;host&gt;&lt;base_path&gt;.</summary>
-        [JsonPropertyName("frontend_api_url")] public string? FrontendApiUrl { get; init; }
-        /// <summary>method path: the https file that proves the host. Its whole body is the token; the token is bound to this instance, host and base path.</summary>
-        [JsonPropertyName("verification")] public CustomDomainModelVerification? Verification { get; init; }
-        /// <summary>method path, once verified: type atlas_ingress (nothing to add) or reverse_proxy (upstream, the headers to forward, and nginx / Caddy / Traefik snippets).</summary>
-        [JsonPropertyName("instructions")] public Dictionary<string, object?>? Instructions { get; init; }
-        /// <summary>DNS automation: the provider Atlas writes this host's record with. The API token is write-only and never returned.</summary>
-        [JsonPropertyName("dns")] public CustomDomainModelDns? Dns { get; init; }
-    }
-
     /// <summary>A DomainsListResponseCookieChecksItem object.</summary>
     public sealed record DomainsListResponseCookieChecksItem
     {
@@ -26307,6 +30211,8 @@ namespace Atlas.Generated
         [JsonPropertyName("authorization_details")] public List<Dictionary<string, object?>>? AuthorizationDetails { get; init; }
         /// <summary>Bumped by every merge, replace and narrowing.</summary>
         [JsonPropertyName("revision")] public long Revision { get; init; }
+        /// <summary>The metadata you set on the grant.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
         [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
         [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
@@ -26363,6 +30269,8 @@ namespace Atlas.Generated
         /// <summary>One of: True.</summary>
         [JsonPropertyName("deleted")] public string Deleted { get; init; } = "";
         [JsonPropertyName("tokens_ended")] public long TokensEnded { get; init; }
+        /// <summary>Refresh grants the consent revoke ended beyond the grant's own.</summary>
+        [JsonPropertyName("tokens_revoked")] public long? TokensRevoked { get; init; }
     }
 
     /// <summary>A GrantsDeleteResponse object.</summary>
@@ -26371,6 +30279,8 @@ namespace Atlas.Generated
         /// <summary>One of: grant.</summary>
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>One of: consent, managed.</summary>
+        [JsonPropertyName("type")] public string? Type { get; init; }
         /// <summary>One of: True.</summary>
         [JsonPropertyName("deleted")] public string Deleted { get; init; } = "";
         [JsonPropertyName("tokens_revoked")] public long TokensRevoked { get; init; }
@@ -26700,7 +30610,7 @@ namespace Atlas.Generated
         [JsonPropertyName("as_challenge")] public bool AsChallenge { get; init; }
         /// <summary>Opt-in facts delivered ONCE after an approved check, on the `identity_verification.completed` webhook or the first read of the check. They are sealed in the vault, never written to user metadata or token claims, and destroyed on delivery or after `retention_days`. Null = off.</summary>
         [JsonPropertyName("verified_attributes")] public IdentityVerificationListSettingsResponseVerifiedAttributes? VerifiedAttributes { get; init; }
-        /// <summary>The URL to give the verification service for verdict webhooks (set the service's webhook secret on the connector as `webhook_secret`; Veriff uses its shared secret).</summary>
+        /// <summary>The URL to give the verification service for verdict webhooks (set the service's webhook secret on the connector as `webhook_secret`; Veriff uses its shared secret). Returned as soon as a connector is set, before checks are enabled; the same URL and the events to subscribe to are on the service connector (`webhook_url`, `webhook_events`). Persona: inquiry.created, started, completed (counts as approved), transitioned, approved, declined, failed, expired, marked-for-review. Stripe Identity: identity.verification_session.created, processing, verified, requires_input, canceled, redacted. Onfido: workflow_run.completed. Veriff: `decision` and `event` (Veriff sets webhook URLs per webhook type, not per event name, so set this URL as both the decision and the event webhook URL).</summary>
         [JsonPropertyName("webhook_url")] public string? WebhookUrl { get; init; }
     }
 
@@ -26744,7 +30654,7 @@ namespace Atlas.Generated
     /// <summary>Query parameters of List. Unset values are not sent.</summary>
     public sealed record IdentityVerificationsListQuery
     {
-        /// <summary>Only checks in this state. Defaults to needs_review. One of: pending, approved, declined, needs_review.</summary>
+        /// <summary>Only checks in this state. Defaults to needs_review. One of: pending, processing, approved, declined, needs_review.</summary>
         public string? Status { get; init; }
         /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
         public long? Limit { get; init; }
@@ -27802,6 +31712,12 @@ namespace Atlas.Generated
         [JsonPropertyName("notifyUser")] public bool NotifyUser { get; init; }
     }
 
+    /// <summary>A AuthConfigAccountUxLinking object.</summary>
+    public sealed record AuthConfigAccountUxLinking
+    {
+        [JsonPropertyName("requireExternalId")] public bool RequireExternalId { get; init; }
+    }
+
     /// <summary>A AuthConfigAccountUxPasskeyAdoptionEndpoints object.</summary>
     public sealed record AuthConfigAccountUxPasskeyAdoptionEndpoints
     {
@@ -27867,6 +31783,13 @@ namespace Atlas.Generated
         [JsonPropertyName("preferred")] public bool Preferred { get; init; }
     }
 
+    /// <summary>A AuthConfigAccountUxPasswordImport object.</summary>
+    public sealed record AuthConfigAccountUxPasswordImport
+    {
+        /// <summary>One of: active, until_email_verified.</summary>
+        [JsonPropertyName("importedPasswordPolicy")] public string ImportedPasswordPolicy { get; init; } = "";
+    }
+
     /// <summary>A AuthConfigAccountUxSecurityNotifications object.</summary>
     public sealed record AuthConfigAccountUxSecurityNotifications
     {
@@ -27893,8 +31816,10 @@ namespace Atlas.Generated
         [JsonPropertyName("emailVerification")] public string EmailVerification { get; init; } = "";
         [JsonPropertyName("impersonation")] public AuthConfigAccountUxImpersonation? Impersonation { get; init; }
         [JsonPropertyName("lastSignInMethod")] public AttackProtectionModelBreachedPassword? LastSignInMethod { get; init; }
+        [JsonPropertyName("linking")] public AuthConfigAccountUxLinking? Linking { get; init; }
         [JsonPropertyName("passkeyAdoption")] public AuthConfigAccountUxPasskeyAdoption? PasskeyAdoption { get; init; }
         [JsonPropertyName("passkeySignUp")] public AuthConfigAccountUxPasskeySignUp? PasskeySignUp { get; init; }
+        [JsonPropertyName("passwordImport")] public AuthConfigAccountUxPasswordImport? PasswordImport { get; init; }
         /// <summary>One of: both, code, link.</summary>
         [JsonPropertyName("passwordReset")] public string PasswordReset { get; init; } = "";
         [JsonPropertyName("securityNotifications")] public AuthConfigAccountUxSecurityNotifications? SecurityNotifications { get; init; }
@@ -27920,6 +31845,7 @@ namespace Atlas.Generated
     public sealed record AuthConfigAppApproval
     {
         [JsonPropertyName("firstFactor")] public bool FirstFactor { get; init; }
+        [JsonPropertyName("revealNoAccount")] public bool RevealNoAccount { get; init; }
         [JsonPropertyName("stepUp")] public bool StepUp { get; init; }
         [JsonPropertyName("ttlSeconds")] public double TtlSeconds { get; init; }
     }
@@ -28221,6 +32147,7 @@ namespace Atlas.Generated
         [JsonPropertyName("deletionReminders")] public List<string> DeletionReminders { get; init; } = new();
         [JsonPropertyName("dsrDueDays")] public double DsrDueDays { get; init; }
         [JsonPropertyName("erasureGraceDays")] public double ErasureGraceDays { get; init; }
+        [JsonPropertyName("maxPauses")] public double MaxPauses { get; init; }
         /// <summary>One of: block, off, require_action.</summary>
         [JsonPropertyName("ownershipTransfer")] public string OwnershipTransfer { get; init; } = "";
         [JsonPropertyName("requireFinalNotice")] public bool RequireFinalNotice { get; init; }
@@ -28236,6 +32163,27 @@ namespace Atlas.Generated
         [JsonPropertyName("inactiveUsers")] public AuthConfigComplianceInactiveUsers? InactiveUsers { get; init; }
         [JsonPropertyName("minors")] public AuthConfigComplianceMinors? Minors { get; init; }
         [JsonPropertyName("retention")] public AuthConfigComplianceRetention? Retention { get; init; }
+    }
+
+    /// <summary>A AuthConfigDelegationTokensAudiencesItem object.</summary>
+    public sealed record AuthConfigDelegationTokensAudiencesItem
+    {
+        [JsonPropertyName("audience")] public string Audience { get; init; } = "";
+        [JsonPropertyName("scopes")] public List<string> Scopes { get; init; } = new();
+    }
+
+    /// <summary>Server-minted delegation tokens (POST /v1/users/{id}/delegation_tokens and the token-exchange grant). Off by default.</summary>
+    public sealed record AuthConfigDelegationTokens
+    {
+        /// <summary>The audiences a token may be minted for, and the scopes allowed for each. Anything else is refused.</summary>
+        [JsonPropertyName("audiences")] public List<AuthConfigDelegationTokensAudiencesItem> Audiences { get; init; } = new();
+        /// <summary>30 to maxTtlSeconds, default 120.</summary>
+        [JsonPropertyName("defaultTtlSeconds")] public double DefaultTtlSeconds { get; init; }
+        [JsonPropertyName("enabled")] public bool Enabled { get; init; }
+        /// <summary>OAuth client ids of confidential clients that may use the token-exchange grant for delegation tokens. Empty means none.</summary>
+        [JsonPropertyName("exchangeClientIds")] public List<string> ExchangeClientIds { get; init; } = new();
+        /// <summary>30 to 300, default 300.</summary>
+        [JsonPropertyName("maxTtlSeconds")] public double MaxTtlSeconds { get; init; }
     }
 
     /// <summary>A AuthConfigEndUserApiKeys object.</summary>
@@ -28352,6 +32300,13 @@ namespace Atlas.Generated
         [JsonPropertyName("audienceKey")] public string? AudienceKey { get; init; }
         [JsonPropertyName("groups")] public List<AuthConfigIdentityTraitsGroupsItem>? Groups { get; init; }
         [JsonPropertyName("traits")] public List<AuthConfigIdentityTraitsTraitsItem> Traits { get; init; } = new();
+    }
+
+    /// <summary>A AuthConfigIssuerAliasesItem object.</summary>
+    public sealed record AuthConfigIssuerAliasesItem
+    {
+        [JsonPropertyName("acceptedUntil")] public string? AcceptedUntil { get; init; }
+        [JsonPropertyName("issuer")] public string Issuer { get; init; } = "";
     }
 
     /// <summary>A AuthConfigJwtTemplateSettingsValue object.</summary>
@@ -28567,11 +32522,39 @@ namespace Atlas.Generated
         [JsonPropertyName("sha256CertFingerprints")] public List<string> Sha256CertFingerprints { get; init; } = new();
     }
 
+    /// <summary>A AuthConfigNativeAppsAppsItem object.</summary>
+    public sealed record AuthConfigNativeAppsAppsItem
+    {
+        [JsonPropertyName("allowed_users")] public List<string>? AllowedUsers { get; init; }
+        [JsonPropertyName("bundle_id")] public string? BundleId { get; init; }
+        [JsonPropertyName("callback_urls")] public List<string> CallbackUrls { get; init; } = new();
+        [JsonPropertyName("created_at")] public double CreatedAt { get; init; }
+        [JsonPropertyName("expires_at")] public double? ExpiresAt { get; init; }
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("package_name")] public string? PackageName { get; init; }
+        /// <summary>One of: android, development, ios.</summary>
+        [JsonPropertyName("platform")] public string Platform { get; init; } = "";
+        [JsonPropertyName("sha256_cert_fingerprints")] public List<string>? Sha256CertFingerprints { get; init; }
+        [JsonPropertyName("team_id")] public string? TeamId { get; init; }
+    }
+
+    /// <summary>A AuthConfigNativeAppsUnregisteredSession object.</summary>
+    public sealed record AuthConfigNativeAppsUnregisteredSession
+    {
+        [JsonPropertyName("absoluteMs")] public double? AbsoluteMs { get; init; }
+        [JsonPropertyName("requireMfa")] public bool? RequireMfa { get; init; }
+    }
+
     /// <summary>A AuthConfigNativeApps object.</summary>
     public sealed record AuthConfigNativeApps
     {
         [JsonPropertyName("androidApps")] public List<AuthConfigNativeAppsAndroidAppsItem> AndroidApps { get; init; } = new();
         [JsonPropertyName("appleAppIds")] public List<string> AppleAppIds { get; init; } = new();
+        [JsonPropertyName("apps")] public List<AuthConfigNativeAppsAppsItem> Apps { get; init; } = new();
+        [JsonPropertyName("publishableKeyAppIds")] public List<string> PublishableKeyAppIds { get; init; } = new();
+        /// <summary>One of: allow, device_bound, refuse.</summary>
+        [JsonPropertyName("unregistered")] public string? Unregistered { get; init; }
+        [JsonPropertyName("unregisteredSession")] public AuthConfigNativeAppsUnregisteredSession? UnregisteredSession { get; init; }
     }
 
     /// <summary>A AuthConfigOauthProviderAdvancedClientAttestationIssuersItemJwks object.</summary>
@@ -28679,7 +32662,10 @@ namespace Atlas.Generated
         [JsonPropertyName("descriptions")] public Dictionary<string, string>? Descriptions { get; init; }
         [JsonPropertyName("labels")] public Dictionary<string, string>? Labels { get; init; }
         [JsonPropertyName("name")] public string Name { get; init; } = "";
+        [JsonPropertyName("ownerExempt")] public bool? OwnerExempt { get; init; }
         [JsonPropertyName("parameters")] public List<string>? Parameters { get; init; }
+        /// <summary>One of: any, certified, verified.</summary>
+        [JsonPropertyName("requiresClientLevel")] public string? RequiresClientLevel { get; init; }
         [JsonPropertyName("requiresVerifiedClient")] public bool? RequiresVerifiedClient { get; init; }
         [JsonPropertyName("sensitive")] public bool? Sensitive { get; init; }
     }
@@ -28792,12 +32778,92 @@ namespace Atlas.Generated
         [JsonPropertyName("requireUppercase")] public bool RequireUppercase { get; init; }
     }
 
+    /// <summary>A AuthConfigPcaObjectiveRiskGraphEdgesItem object.</summary>
+    public sealed record AuthConfigPcaObjectiveRiskGraphEdgesItem
+    {
+        [JsonPropertyName("from")] public string From { get; init; } = "";
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        [JsonPropertyName("to")] public string To { get; init; } = "";
+    }
+
+    /// <summary>A AuthConfigPcaObjectiveRiskGraphNodesItem object.</summary>
+    public sealed record AuthConfigPcaObjectiveRiskGraphNodesItem
+    {
+        [JsonPropertyName("harm")] public Dictionary<string, double>? Harm { get; init; }
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+    }
+
+    /// <summary>A AuthConfigPcaObjectiveRiskGraph object.</summary>
+    public sealed record AuthConfigPcaObjectiveRiskGraph
+    {
+        [JsonPropertyName("edges")] public List<AuthConfigPcaObjectiveRiskGraphEdgesItem>? Edges { get; init; }
+        [JsonPropertyName("nodes")] public List<AuthConfigPcaObjectiveRiskGraphNodesItem>? Nodes { get; init; }
+    }
+
+    /// <summary>A AuthConfigPcaObjectiveRiskRegistryEntriesItemVerification object.</summary>
+    public sealed record AuthConfigPcaObjectiveRiskRegistryEntriesItemVerification
+    {
+        [JsonPropertyName("evidence_digest")] public string EvidenceDigest { get; init; } = "";
+        [JsonPropertyName("verifier_id")] public string VerifierId { get; init; } = "";
+    }
+
+    /// <summary>A AuthConfigPcaObjectiveRiskRegistryEntriesItem object.</summary>
+    public sealed record AuthConfigPcaObjectiveRiskRegistryEntriesItem
+    {
+        /// <summary>One of: exact, partial.</summary>
+        [JsonPropertyName("fidelity")] public string Fidelity { get; init; } = "";
+        [JsonPropertyName("inverse_kind")] public string InverseKind { get; init; } = "";
+        [JsonPropertyName("verb")] public string Verb { get; init; } = "";
+        [JsonPropertyName("verification")] public AuthConfigPcaObjectiveRiskRegistryEntriesItemVerification? Verification { get; init; }
+    }
+
+    /// <summary>A AuthConfigPcaObjectiveRiskRegistry object.</summary>
+    public sealed record AuthConfigPcaObjectiveRiskRegistry
+    {
+        [JsonPropertyName("entries")] public List<AuthConfigPcaObjectiveRiskRegistryEntriesItem>? Entries { get; init; }
+        [JsonPropertyName("trusted_verifiers")] public List<string>? TrustedVerifiers { get; init; }
+    }
+
+    /// <summary>A AuthConfigPcaObjectiveRisk object.</summary>
+    public sealed record AuthConfigPcaObjectiveRisk
+    {
+        [JsonPropertyName("allow_heuristic_fallback")] public bool? AllowHeuristicFallback { get; init; }
+        [JsonPropertyName("calibration")] public List<double>? Calibration { get; init; }
+        [JsonPropertyName("graph")] public AuthConfigPcaObjectiveRiskGraph? Graph { get; init; }
+        [JsonPropertyName("registry")] public AuthConfigPcaObjectiveRiskRegistry? Registry { get; init; }
+    }
+
+    /// <summary>A AuthConfigPcaQuotas object.</summary>
+    public sealed record AuthConfigPcaQuotas
+    {
+        [JsonPropertyName("grantActionsPerMin")] public double? GrantActionsPerMin { get; init; }
+        [JsonPropertyName("instanceActionsPerMin")] public double? InstanceActionsPerMin { get; init; }
+        [JsonPropertyName("maxActiveGrants")] public double? MaxActiveGrants { get; init; }
+        [JsonPropertyName("maxActiveGrantsPerPrincipal")] public double? MaxActiveGrantsPerPrincipal { get; init; }
+        [JsonPropertyName("maxPlansPerGrant")] public double? MaxPlansPerGrant { get; init; }
+        [JsonPropertyName("maxRevocationsPerGrant")] public double? MaxRevocationsPerGrant { get; init; }
+        [JsonPropertyName("maxStepupsPerGrant")] public double? MaxStepupsPerGrant { get; init; }
+        [JsonPropertyName("maxUnverifiedGrants")] public double? MaxUnverifiedGrants { get; init; }
+        [JsonPropertyName("maxUnverifiedGrantsPerKey")] public double? MaxUnverifiedGrantsPerKey { get; init; }
+        [JsonPropertyName("pqVerifyUnitsPerSourcePerMin")] public double? PqVerifyUnitsPerSourcePerMin { get; init; }
+        [JsonPropertyName("publicPerNetworkPerMin")] public double? PublicPerNetworkPerMin { get; init; }
+        [JsonPropertyName("publicPreAuthGlobalPerMin")] public double? PublicPreAuthGlobalPerMin { get; init; }
+        [JsonPropertyName("unverifiedRegistrationsPerMin")] public double? UnverifiedRegistrationsPerMin { get; init; }
+    }
+
     /// <summary>A AuthConfigPca object.</summary>
     public sealed record AuthConfigPca
     {
+        [JsonPropertyName("allowedSuites")] public List<string>? AllowedSuites { get; init; }
+        /// <summary>One of: both, operator, principal.</summary>
+        [JsonPropertyName("beacons")] public string? Beacons { get; init; }
         [JsonPropertyName("enabled")] public bool Enabled { get; init; }
         [JsonPropertyName("maxPlanNodes")] public double MaxPlanNodes { get; init; }
+        [JsonPropertyName("objectiveRisk")] public AuthConfigPcaObjectiveRisk? ObjectiveRisk { get; init; }
+        [JsonPropertyName("optimistic")] public bool? Optimistic { get; init; }
         [JsonPropertyName("publicRateLimitPerMin")] public double PublicRateLimitPerMin { get; init; }
+        [JsonPropertyName("quotas")] public AuthConfigPcaQuotas? Quotas { get; init; }
+        [JsonPropertyName("undoSigner")] public string? UndoSigner { get; init; }
     }
 
     /// <summary>A AuthConfigPhoneChannels object.</summary>
@@ -29019,7 +33085,12 @@ namespace Atlas.Generated
         /// <summary>Absolute session lifetime in ms. At most 90 days; 365 days while longLived is on.</summary>
         [JsonPropertyName("absoluteMs")] public double AbsoluteMs { get; init; }
         [JsonPropertyName("audience")] public object? Audience { get; init; }
+        [JsonPropertyName("browserHandoff")] public bool BrowserHandoff { get; init; }
+        /// <summary>Explicit Domain for the session cookies, for example ".example.com". Needed by a path-mounted instance, where cookies are otherwise host-only. It must cover your sign-in host and can never be a public suffix or Atlas's own domain; an invalid value is refused on write. Default null.</summary>
+        [JsonPropertyName("cookieDomain")] public string? CookieDomain { get; init; }
         [JsonPropertyName("crossSubdomainCookies")] public bool CrossSubdomainCookies { get; init; }
+        /// <summary>Set a readable __atlas_csrf cookie with each session token: a signed token tied to the session, replaced whenever the session token is. Verify it in your backend with the instance JWKS. Default false.</summary>
+        [JsonPropertyName("csrfCookie")] public bool CsrfCookie { get; init; }
         [JsonPropertyName("customData")] public AuthConfigSessionCustomData? CustomData { get; init; }
         [JsonPropertyName("deviceBoundSessions")] public bool DeviceBoundSessions { get; init; }
         [JsonPropertyName("idleMs")] public double IdleMs { get; init; }
@@ -29030,7 +33101,10 @@ namespace Atlas.Generated
         /// <summary>Add the eu_orgs reader claim.</summary>
         [JsonPropertyName("includeEndUserPoolClaim")] public bool IncludeEndUserPoolClaim { get; init; }
         [JsonPropertyName("includeOrgsClaim")] public bool IncludeOrgsClaim { get; init; }
+        /// <summary>Add a res claim with the user direct resource role assignments (capped; resource_claims_truncated when over the cap).</summary>
+        [JsonPropertyName("includeResourceRoleClaims")] public bool IncludeResourceRoleClaims { get; init; }
         [JsonPropertyName("includeRiskClaim")] public bool IncludeRiskClaim { get; init; }
+        /// <summary>Lifetime of the session token (the __session JWT) in seconds, 30 to 900, default 60. A shorter lifetime means faster revocation: a signed-out or banned user stops being accepted by your backend sooner. A longer lifetime means fewer lapses in throttled background tabs, where the browser delays the timer that renews the token.</summary>
         [JsonPropertyName("jwtTtlSeconds")] public double JwtTtlSeconds { get; init; }
         /// <summary>Long first-party sessions: raises the absoluteMs ceiling from 90 to 365 days. Needs refreshRotation (refused while it is off). Organization caps still only shorten a session.</summary>
         [JsonPropertyName("longLived")] public bool LongLived { get; init; }
@@ -29038,8 +33112,12 @@ namespace Atlas.Generated
         [JsonPropertyName("multiSession")] public bool MultiSession { get; init; }
         [JsonPropertyName("nonPersistentAbsoluteMs")] public double? NonPersistentAbsoluteMs { get; init; }
         [JsonPropertyName("nonPersistentIdleMs")] public double? NonPersistentIdleMs { get; init; }
+        /// <summary>Seconds after a refresh token rotates during which presenting the previous one returns the same new token instead of ending the session. 0 to 30, default 30.</summary>
+        [JsonPropertyName("refreshGraceSeconds")] public double RefreshGraceSeconds { get; init; }
         [JsonPropertyName("refreshRotation")] public bool RefreshRotation { get; init; }
         [JsonPropertyName("rememberMe")] public bool RememberMe { get; init; }
+        /// <summary>Cap for the res claim (default 25).</summary>
+        [JsonPropertyName("resourceRoleClaimsMax")] public double ResourceRoleClaimsMax { get; init; }
         [JsonPropertyName("revokeOnPasswordChange")] public bool RevokeOnPasswordChange { get; init; }
         [JsonPropertyName("tokenIncludedSettingsKeys")] public List<string> TokenIncludedSettingsKeys { get; init; } = new();
         /// <summary>One of: refresh, sliding.</summary>
@@ -29190,6 +33268,8 @@ namespace Atlas.Generated
         [JsonPropertyName("compliance")] public AuthConfigCompliance? Compliance { get; init; }
         /// <summary>DANGEROUS. When true, addresses that skipped proof because requireEmailVerification was false are reported as verified again in users, tokens, webhooks and exports (the old behaviour). Anyone can then sign up as any address and present a verified claim. Atlas still treats those addresses as unproven when linking social sign-ins, auto-joining organizations and accepting invitations. Preflight reports email_verified_unproven while this is on.</summary>
         [JsonPropertyName("dangerouslyReportSkippedEmailsAsVerified")] public bool DangerouslyReportSkippedEmailsAsVerified { get; init; }
+        /// <summary>Server-minted delegation tokens (POST /v1/users/{id}/delegation_tokens and the token-exchange grant). Off by default.</summary>
+        [JsonPropertyName("delegationTokens")] public AuthConfigDelegationTokens? DelegationTokens { get; init; }
         /// <summary>One of: allow, block.</summary>
         [JsonPropertyName("deletedUserReturn")] public string DeletedUserReturn { get; init; } = "";
         [JsonPropertyName("endUserApiKeys")] public AuthConfigEndUserApiKeys? EndUserApiKeys { get; init; }
@@ -29197,6 +33277,8 @@ namespace Atlas.Generated
         /// <summary>Trust JWTs minted by an EXTERNAL issuer as a sign-in credential (e.g. a legacy IdP or your own token service). The linked identity is stored under provider ext_jwt:&lt;id&gt;.</summary>
         [JsonPropertyName("externalJwt")] public AuthConfigExternalJwt? ExternalJwt { get; init; }
         [JsonPropertyName("identityTraits")] public AuthConfigIdentityTraits? IdentityTraits { get; init; }
+        /// <summary>Previous issuers of this instance that verification should still accept, for a host or mount move made before Atlas recorded it. Listed in discovery as atlas_previous_issuers and accepted by @atlasauth/backend with previousIssuers "discovery". At most 10; acceptedUntil at most a year ahead.</summary>
+        [JsonPropertyName("issuerAliases")] public List<AuthConfigIssuerAliasesItem> IssuerAliases { get; init; } = new();
         [JsonPropertyName("jwtTemplates")] public Dictionary<string, Dictionary<string, string>> JwtTemplates { get; init; } = new();
         [JsonPropertyName("jwtTemplateSettings")] public Dictionary<string, AuthConfigJwtTemplateSettingsValue> JwtTemplateSettings { get; init; } = new();
         [JsonPropertyName("kerberos")] public AuthConfigKerberos? Kerberos { get; init; }
@@ -29213,6 +33295,7 @@ namespace Atlas.Generated
         [JsonPropertyName("passwordPolicy")] public AuthConfigPasswordPolicy? PasswordPolicy { get; init; }
         [JsonPropertyName("pca")] public AuthConfigPca? Pca { get; init; }
         [JsonPropertyName("phoneChannels")] public AuthConfigPhoneChannels? PhoneChannels { get; init; }
+        [JsonPropertyName("previousIssuerOverlapDays")] public double PreviousIssuerOverlapDays { get; init; }
         [JsonPropertyName("qrSignIn")] public AuthConfigQrSignIn? QrSignIn { get; init; }
         [JsonPropertyName("rateLimit")] public AuthConfigRateLimit? RateLimit { get; init; }
         /// <summary>Whether a password sign-up must prove the address with an emailed code before it completes. When false the sign-up completes at once, but the address stays unverified (verified, verification.status and email_verified report false) until the user proves it later.</summary>
@@ -29305,6 +33388,10 @@ namespace Atlas.Generated
         [JsonPropertyName("inactive_methods")] public List<InstanceListResponseInactiveMethodsItem>? InactiveMethods { get; init; }
         /// <summary>Sign-in methods that still work without an email provider, minus the parts that need email: password sign-in for users who already hold a password, without password reset (and without password sign-up while sign-up must verify the address by email).</summary>
         [JsonPropertyName("limited_methods")] public List<InstanceListResponseLimitedMethodsItem>? LimitedMethods { get; init; }
+        /// <summary>GET only. Whether a new user can create an account right now. False when no first-factor sign-up method is active (email methods without an email provider, no social provider, no SSO connection, no Sign in with Atlas); preflight reports the same as no_usable_signup_method.</summary>
+        [JsonPropertyName("signup_usable")] public bool? SignupUsable { get; init; }
+        /// <summary>GET only. When signup_usable is false: why, and the fix (turn on Sign in with Atlas first). Null otherwise.</summary>
+        [JsonPropertyName("signup_unusable_reason")] public string? SignupUnusableReason { get; init; }
         /// <summary>Created (epoch ms).</summary>
         [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
     }
@@ -29336,6 +33423,12 @@ namespace Atlas.Generated
     public sealed record AuthConfigPatchInputAccountUxImpersonation : ClearableBody
     {
         [JsonPropertyName("notifyUser")] public bool? NotifyUser { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputAccountUxLinking object.</summary>
+    public sealed record AuthConfigPatchInputAccountUxLinking : ClearableBody
+    {
+        [JsonPropertyName("requireExternalId")] public bool? RequireExternalId { get; init; }
     }
 
     /// <summary>A AuthConfigPatchInputAccountUxPasskeyAdoptionEndpoints object.</summary>
@@ -29407,6 +33500,13 @@ namespace Atlas.Generated
         [JsonPropertyName("preferred")] public bool? Preferred { get; init; }
     }
 
+    /// <summary>A AuthConfigPatchInputAccountUxPasswordImport object.</summary>
+    public sealed record AuthConfigPatchInputAccountUxPasswordImport : ClearableBody
+    {
+        /// <summary>One of: active, until_email_verified.</summary>
+        [JsonPropertyName("importedPasswordPolicy")] public string? ImportedPasswordPolicy { get; init; }
+    }
+
     /// <summary>A AuthConfigPatchInputAccountUxSecurityNotifications object.</summary>
     public sealed record AuthConfigPatchInputAccountUxSecurityNotifications : ClearableBody
     {
@@ -29433,8 +33533,10 @@ namespace Atlas.Generated
         [JsonPropertyName("emailVerification")] public string? EmailVerification { get; init; }
         [JsonPropertyName("impersonation")] public AuthConfigPatchInputAccountUxImpersonation? Impersonation { get; init; }
         [JsonPropertyName("lastSignInMethod")] public AttackProtectionUpdateBodyBruteForce? LastSignInMethod { get; init; }
+        [JsonPropertyName("linking")] public AuthConfigPatchInputAccountUxLinking? Linking { get; init; }
         [JsonPropertyName("passkeyAdoption")] public AuthConfigPatchInputAccountUxPasskeyAdoption? PasskeyAdoption { get; init; }
         [JsonPropertyName("passkeySignUp")] public AuthConfigPatchInputAccountUxPasskeySignUp? PasskeySignUp { get; init; }
+        [JsonPropertyName("passwordImport")] public AuthConfigPatchInputAccountUxPasswordImport? PasswordImport { get; init; }
         /// <summary>One of: both, code, link.</summary>
         [JsonPropertyName("passwordReset")] public string? PasswordReset { get; init; }
         [JsonPropertyName("securityNotifications")] public AuthConfigPatchInputAccountUxSecurityNotifications? SecurityNotifications { get; init; }
@@ -29464,6 +33566,7 @@ namespace Atlas.Generated
     public sealed record AuthConfigPatchInputAppApproval : ClearableBody
     {
         [JsonPropertyName("firstFactor")] public bool? FirstFactor { get; init; }
+        [JsonPropertyName("revealNoAccount")] public bool? RevealNoAccount { get; init; }
         [JsonPropertyName("stepUp")] public bool? StepUp { get; init; }
         [JsonPropertyName("ttlSeconds")] public double? TtlSeconds { get; init; }
     }
@@ -29779,6 +33882,7 @@ namespace Atlas.Generated
         [JsonPropertyName("deletionReminders")] public List<string>? DeletionReminders { get; init; }
         [JsonPropertyName("dsrDueDays")] public double? DsrDueDays { get; init; }
         [JsonPropertyName("erasureGraceDays")] public double? ErasureGraceDays { get; init; }
+        [JsonPropertyName("maxPauses")] public double? MaxPauses { get; init; }
         /// <summary>One of: block, off, require_action.</summary>
         [JsonPropertyName("ownershipTransfer")] public string? OwnershipTransfer { get; init; }
         [JsonPropertyName("requireFinalNotice")] public bool? RequireFinalNotice { get; init; }
@@ -29798,6 +33902,27 @@ namespace Atlas.Generated
         [JsonPropertyName("retention")] public AuthConfigPatchInputComplianceRetention? Retention { get; init; }
         /// <summary>Send <c>null</c> for <c>dataRegion</c>, which clears it.</summary>
         public AuthConfigPatchInputCompliance ClearDataRegion() => this with { Cleared = Plus("dataRegion") };
+    }
+
+    /// <summary>A AuthConfigPatchInputDelegationTokensAudiencesItem object.</summary>
+    public sealed record AuthConfigPatchInputDelegationTokensAudiencesItem : ClearableBody
+    {
+        [JsonPropertyName("audience")] public string? Audience { get; init; }
+        [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
+    }
+
+    /// <summary>Server-minted delegation tokens (POST /v1/users/{id}/delegation_tokens and the token-exchange grant). Off by default.</summary>
+    public sealed record AuthConfigPatchInputDelegationTokens : ClearableBody
+    {
+        /// <summary>The audiences a token may be minted for, and the scopes allowed for each. Anything else is refused.</summary>
+        [JsonPropertyName("audiences")] public List<AuthConfigPatchInputDelegationTokensAudiencesItem>? Audiences { get; init; }
+        /// <summary>30 to maxTtlSeconds, default 120.</summary>
+        [JsonPropertyName("defaultTtlSeconds")] public double? DefaultTtlSeconds { get; init; }
+        [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
+        /// <summary>OAuth client ids of confidential clients that may use the token-exchange grant for delegation tokens. Empty means none.</summary>
+        [JsonPropertyName("exchangeClientIds")] public List<string>? ExchangeClientIds { get; init; }
+        /// <summary>30 to 300, default 300.</summary>
+        [JsonPropertyName("maxTtlSeconds")] public double? MaxTtlSeconds { get; init; }
     }
 
     /// <summary>A AuthConfigPatchInputEndUserApiKeys object.</summary>
@@ -29926,6 +34051,13 @@ namespace Atlas.Generated
         [JsonPropertyName("audienceKey")] public string? AudienceKey { get; init; }
         [JsonPropertyName("groups")] public List<AuthConfigPatchInputIdentityTraitsGroupsItem>? Groups { get; init; }
         [JsonPropertyName("traits")] public List<AuthConfigPatchInputIdentityTraitsTraitsItem>? Traits { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputIssuerAliasesItem object.</summary>
+    public sealed record AuthConfigPatchInputIssuerAliasesItem : ClearableBody
+    {
+        [JsonPropertyName("acceptedUntil")] public string? AcceptedUntil { get; init; }
+        [JsonPropertyName("issuer")] public string? Issuer { get; init; }
     }
 
     /// <summary>A AuthConfigPatchInputJwtTemplateSettingsValue object.</summary>
@@ -30140,11 +34272,39 @@ namespace Atlas.Generated
         [JsonPropertyName("sha256CertFingerprints")] public List<string>? Sha256CertFingerprints { get; init; }
     }
 
+    /// <summary>A AuthConfigPatchInputNativeAppsAppsItem object.</summary>
+    public sealed record AuthConfigPatchInputNativeAppsAppsItem : ClearableBody
+    {
+        [JsonPropertyName("allowed_users")] public List<string>? AllowedUsers { get; init; }
+        [JsonPropertyName("bundle_id")] public string? BundleId { get; init; }
+        [JsonPropertyName("callback_urls")] public List<string>? CallbackUrls { get; init; }
+        [JsonPropertyName("created_at")] public double? CreatedAt { get; init; }
+        [JsonPropertyName("expires_at")] public double? ExpiresAt { get; init; }
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("package_name")] public string? PackageName { get; init; }
+        /// <summary>One of: android, development, ios.</summary>
+        [JsonPropertyName("platform")] public string? Platform { get; init; }
+        [JsonPropertyName("sha256_cert_fingerprints")] public List<string>? Sha256CertFingerprints { get; init; }
+        [JsonPropertyName("team_id")] public string? TeamId { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputNativeAppsUnregisteredSession object.</summary>
+    public sealed record AuthConfigPatchInputNativeAppsUnregisteredSession : ClearableBody
+    {
+        [JsonPropertyName("absoluteMs")] public double? AbsoluteMs { get; init; }
+        [JsonPropertyName("requireMfa")] public bool? RequireMfa { get; init; }
+    }
+
     /// <summary>A AuthConfigPatchInputNativeApps object.</summary>
     public sealed record AuthConfigPatchInputNativeApps : ClearableBody
     {
         [JsonPropertyName("androidApps")] public List<AuthConfigPatchInputNativeAppsAndroidAppsItem>? AndroidApps { get; init; }
         [JsonPropertyName("appleAppIds")] public List<string>? AppleAppIds { get; init; }
+        [JsonPropertyName("apps")] public List<AuthConfigPatchInputNativeAppsAppsItem>? Apps { get; init; }
+        [JsonPropertyName("publishableKeyAppIds")] public List<string>? PublishableKeyAppIds { get; init; }
+        /// <summary>One of: allow, device_bound, refuse.</summary>
+        [JsonPropertyName("unregistered")] public string? Unregistered { get; init; }
+        [JsonPropertyName("unregisteredSession")] public AuthConfigPatchInputNativeAppsUnregisteredSession? UnregisteredSession { get; init; }
     }
 
     /// <summary>A AuthConfigPatchInputOauthProviderAdvancedClientAttestationIssuersItemJwks object.</summary>
@@ -30256,7 +34416,10 @@ namespace Atlas.Generated
         [JsonPropertyName("descriptions")] public Dictionary<string, string>? Descriptions { get; init; }
         [JsonPropertyName("labels")] public Dictionary<string, string>? Labels { get; init; }
         [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("ownerExempt")] public bool? OwnerExempt { get; init; }
         [JsonPropertyName("parameters")] public List<string>? Parameters { get; init; }
+        /// <summary>One of: any, certified, verified.</summary>
+        [JsonPropertyName("requiresClientLevel")] public string? RequiresClientLevel { get; init; }
         [JsonPropertyName("requiresVerifiedClient")] public bool? RequiresVerifiedClient { get; init; }
         [JsonPropertyName("sensitive")] public bool? Sensitive { get; init; }
     }
@@ -30387,12 +34550,92 @@ namespace Atlas.Generated
         [JsonPropertyName("requireUppercase")] public bool? RequireUppercase { get; init; }
     }
 
+    /// <summary>A AuthConfigPatchInputPcaObjectiveRiskGraphEdgesItem object.</summary>
+    public sealed record AuthConfigPatchInputPcaObjectiveRiskGraphEdgesItem : ClearableBody
+    {
+        [JsonPropertyName("from")] public string? From { get; init; }
+        [JsonPropertyName("kind")] public string? Kind { get; init; }
+        [JsonPropertyName("to")] public string? To { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputPcaObjectiveRiskGraphNodesItem object.</summary>
+    public sealed record AuthConfigPatchInputPcaObjectiveRiskGraphNodesItem : ClearableBody
+    {
+        [JsonPropertyName("harm")] public Dictionary<string, double>? Harm { get; init; }
+        [JsonPropertyName("id")] public string? Id { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputPcaObjectiveRiskGraph object.</summary>
+    public sealed record AuthConfigPatchInputPcaObjectiveRiskGraph : ClearableBody
+    {
+        [JsonPropertyName("edges")] public List<AuthConfigPatchInputPcaObjectiveRiskGraphEdgesItem>? Edges { get; init; }
+        [JsonPropertyName("nodes")] public List<AuthConfigPatchInputPcaObjectiveRiskGraphNodesItem>? Nodes { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputPcaObjectiveRiskRegistryEntriesItemVerification object.</summary>
+    public sealed record AuthConfigPatchInputPcaObjectiveRiskRegistryEntriesItemVerification : ClearableBody
+    {
+        [JsonPropertyName("evidence_digest")] public string? EvidenceDigest { get; init; }
+        [JsonPropertyName("verifier_id")] public string? VerifierId { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputPcaObjectiveRiskRegistryEntriesItem object.</summary>
+    public sealed record AuthConfigPatchInputPcaObjectiveRiskRegistryEntriesItem : ClearableBody
+    {
+        /// <summary>One of: exact, partial.</summary>
+        [JsonPropertyName("fidelity")] public string? Fidelity { get; init; }
+        [JsonPropertyName("inverse_kind")] public string? InverseKind { get; init; }
+        [JsonPropertyName("verb")] public string? Verb { get; init; }
+        [JsonPropertyName("verification")] public AuthConfigPatchInputPcaObjectiveRiskRegistryEntriesItemVerification? Verification { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputPcaObjectiveRiskRegistry object.</summary>
+    public sealed record AuthConfigPatchInputPcaObjectiveRiskRegistry : ClearableBody
+    {
+        [JsonPropertyName("entries")] public List<AuthConfigPatchInputPcaObjectiveRiskRegistryEntriesItem>? Entries { get; init; }
+        [JsonPropertyName("trusted_verifiers")] public List<string>? TrustedVerifiers { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputPcaObjectiveRisk object.</summary>
+    public sealed record AuthConfigPatchInputPcaObjectiveRisk : ClearableBody
+    {
+        [JsonPropertyName("allow_heuristic_fallback")] public bool? AllowHeuristicFallback { get; init; }
+        [JsonPropertyName("calibration")] public List<double>? Calibration { get; init; }
+        [JsonPropertyName("graph")] public AuthConfigPatchInputPcaObjectiveRiskGraph? Graph { get; init; }
+        [JsonPropertyName("registry")] public AuthConfigPatchInputPcaObjectiveRiskRegistry? Registry { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputPcaQuotas object.</summary>
+    public sealed record AuthConfigPatchInputPcaQuotas : ClearableBody
+    {
+        [JsonPropertyName("grantActionsPerMin")] public double? GrantActionsPerMin { get; init; }
+        [JsonPropertyName("instanceActionsPerMin")] public double? InstanceActionsPerMin { get; init; }
+        [JsonPropertyName("maxActiveGrants")] public double? MaxActiveGrants { get; init; }
+        [JsonPropertyName("maxActiveGrantsPerPrincipal")] public double? MaxActiveGrantsPerPrincipal { get; init; }
+        [JsonPropertyName("maxPlansPerGrant")] public double? MaxPlansPerGrant { get; init; }
+        [JsonPropertyName("maxRevocationsPerGrant")] public double? MaxRevocationsPerGrant { get; init; }
+        [JsonPropertyName("maxStepupsPerGrant")] public double? MaxStepupsPerGrant { get; init; }
+        [JsonPropertyName("maxUnverifiedGrants")] public double? MaxUnverifiedGrants { get; init; }
+        [JsonPropertyName("maxUnverifiedGrantsPerKey")] public double? MaxUnverifiedGrantsPerKey { get; init; }
+        [JsonPropertyName("pqVerifyUnitsPerSourcePerMin")] public double? PqVerifyUnitsPerSourcePerMin { get; init; }
+        [JsonPropertyName("publicPerNetworkPerMin")] public double? PublicPerNetworkPerMin { get; init; }
+        [JsonPropertyName("publicPreAuthGlobalPerMin")] public double? PublicPreAuthGlobalPerMin { get; init; }
+        [JsonPropertyName("unverifiedRegistrationsPerMin")] public double? UnverifiedRegistrationsPerMin { get; init; }
+    }
+
     /// <summary>A AuthConfigPatchInputPca object.</summary>
     public sealed record AuthConfigPatchInputPca : ClearableBody
     {
+        [JsonPropertyName("allowedSuites")] public List<string>? AllowedSuites { get; init; }
+        /// <summary>One of: both, operator, principal.</summary>
+        [JsonPropertyName("beacons")] public string? Beacons { get; init; }
         [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
         [JsonPropertyName("maxPlanNodes")] public double? MaxPlanNodes { get; init; }
+        [JsonPropertyName("objectiveRisk")] public AuthConfigPatchInputPcaObjectiveRisk? ObjectiveRisk { get; init; }
+        [JsonPropertyName("optimistic")] public bool? Optimistic { get; init; }
         [JsonPropertyName("publicRateLimitPerMin")] public double? PublicRateLimitPerMin { get; init; }
+        [JsonPropertyName("quotas")] public AuthConfigPatchInputPcaQuotas? Quotas { get; init; }
+        [JsonPropertyName("undoSigner")] public string? UndoSigner { get; init; }
     }
 
     /// <summary>A AuthConfigPatchInputPhoneChannels object.</summary>
@@ -30614,7 +34857,12 @@ namespace Atlas.Generated
         /// <summary>Absolute session lifetime in ms. At most 90 days; 365 days while longLived is on.</summary>
         [JsonPropertyName("absoluteMs")] public double? AbsoluteMs { get; init; }
         [JsonPropertyName("audience")] public object? Audience { get; init; }
+        [JsonPropertyName("browserHandoff")] public bool? BrowserHandoff { get; init; }
+        /// <summary>Explicit Domain for the session cookies, for example ".example.com". Needed by a path-mounted instance, where cookies are otherwise host-only. It must cover your sign-in host and can never be a public suffix or Atlas's own domain; an invalid value is refused on write. Default null.</summary>
+        [JsonPropertyName("cookieDomain")] public string? CookieDomain { get; init; }
         [JsonPropertyName("crossSubdomainCookies")] public bool? CrossSubdomainCookies { get; init; }
+        /// <summary>Set a readable __atlas_csrf cookie with each session token: a signed token tied to the session, replaced whenever the session token is. Verify it in your backend with the instance JWKS. Default false.</summary>
+        [JsonPropertyName("csrfCookie")] public bool? CsrfCookie { get; init; }
         [JsonPropertyName("customData")] public AuthConfigPatchInputSessionCustomData? CustomData { get; init; }
         [JsonPropertyName("deviceBoundSessions")] public bool? DeviceBoundSessions { get; init; }
         [JsonPropertyName("idleMs")] public double? IdleMs { get; init; }
@@ -30625,7 +34873,10 @@ namespace Atlas.Generated
         /// <summary>Add the eu_orgs reader claim.</summary>
         [JsonPropertyName("includeEndUserPoolClaim")] public bool? IncludeEndUserPoolClaim { get; init; }
         [JsonPropertyName("includeOrgsClaim")] public bool? IncludeOrgsClaim { get; init; }
+        /// <summary>Add a res claim with the user direct resource role assignments (capped; resource_claims_truncated when over the cap).</summary>
+        [JsonPropertyName("includeResourceRoleClaims")] public bool? IncludeResourceRoleClaims { get; init; }
         [JsonPropertyName("includeRiskClaim")] public bool? IncludeRiskClaim { get; init; }
+        /// <summary>Lifetime of the session token (the __session JWT) in seconds, 30 to 900, default 60. A shorter lifetime means faster revocation: a signed-out or banned user stops being accepted by your backend sooner. A longer lifetime means fewer lapses in throttled background tabs, where the browser delays the timer that renews the token.</summary>
         [JsonPropertyName("jwtTtlSeconds")] public double? JwtTtlSeconds { get; init; }
         /// <summary>Long first-party sessions: raises the absoluteMs ceiling from 90 to 365 days. Needs refreshRotation (refused while it is off). Organization caps still only shorten a session.</summary>
         [JsonPropertyName("longLived")] public bool? LongLived { get; init; }
@@ -30633,12 +34884,18 @@ namespace Atlas.Generated
         [JsonPropertyName("multiSession")] public bool? MultiSession { get; init; }
         [JsonPropertyName("nonPersistentAbsoluteMs")] public double? NonPersistentAbsoluteMs { get; init; }
         [JsonPropertyName("nonPersistentIdleMs")] public double? NonPersistentIdleMs { get; init; }
+        /// <summary>Seconds after a refresh token rotates during which presenting the previous one returns the same new token instead of ending the session. 0 to 30, default 30.</summary>
+        [JsonPropertyName("refreshGraceSeconds")] public double? RefreshGraceSeconds { get; init; }
         [JsonPropertyName("refreshRotation")] public bool? RefreshRotation { get; init; }
         [JsonPropertyName("rememberMe")] public bool? RememberMe { get; init; }
+        /// <summary>Cap for the res claim (default 25).</summary>
+        [JsonPropertyName("resourceRoleClaimsMax")] public double? ResourceRoleClaimsMax { get; init; }
         [JsonPropertyName("revokeOnPasswordChange")] public bool? RevokeOnPasswordChange { get; init; }
         [JsonPropertyName("tokenIncludedSettingsKeys")] public List<string>? TokenIncludedSettingsKeys { get; init; }
         /// <summary>One of: refresh, sliding.</summary>
         [JsonPropertyName("tokenStrategy")] public string? TokenStrategy { get; init; }
+        /// <summary>Send <c>null</c> for <c>cookieDomain</c>, which clears it.</summary>
+        public AuthConfigPatchInputSession ClearCookieDomain() => this with { Cleared = Plus("cookieDomain") };
         /// <summary>Send <c>null</c> for <c>nonPersistentAbsoluteMs</c>, which clears it.</summary>
         public AuthConfigPatchInputSession ClearNonPersistentAbsoluteMs() => this with { Cleared = Plus("nonPersistentAbsoluteMs") };
         /// <summary>Send <c>null</c> for <c>nonPersistentIdleMs</c>, which clears it.</summary>
@@ -30800,6 +35057,8 @@ namespace Atlas.Generated
         [JsonPropertyName("compliance")] public AuthConfigPatchInputCompliance? Compliance { get; init; }
         /// <summary>DANGEROUS. When true, addresses that skipped proof because requireEmailVerification was false are reported as verified again in users, tokens, webhooks and exports (the old behaviour). Anyone can then sign up as any address and present a verified claim. Atlas still treats those addresses as unproven when linking social sign-ins, auto-joining organizations and accepting invitations. Preflight reports email_verified_unproven while this is on.</summary>
         [JsonPropertyName("dangerouslyReportSkippedEmailsAsVerified")] public bool? DangerouslyReportSkippedEmailsAsVerified { get; init; }
+        /// <summary>Server-minted delegation tokens (POST /v1/users/{id}/delegation_tokens and the token-exchange grant). Off by default.</summary>
+        [JsonPropertyName("delegationTokens")] public AuthConfigPatchInputDelegationTokens? DelegationTokens { get; init; }
         /// <summary>One of: allow, block.</summary>
         [JsonPropertyName("deletedUserReturn")] public string? DeletedUserReturn { get; init; }
         [JsonPropertyName("endUserApiKeys")] public AuthConfigPatchInputEndUserApiKeys? EndUserApiKeys { get; init; }
@@ -30807,6 +35066,8 @@ namespace Atlas.Generated
         /// <summary>Trust JWTs minted by an EXTERNAL issuer as a sign-in credential (e.g. a legacy IdP or your own token service). The linked identity is stored under provider ext_jwt:&lt;id&gt;.</summary>
         [JsonPropertyName("externalJwt")] public AuthConfigPatchInputExternalJwt? ExternalJwt { get; init; }
         [JsonPropertyName("identityTraits")] public AuthConfigPatchInputIdentityTraits? IdentityTraits { get; init; }
+        /// <summary>Previous issuers of this instance that verification should still accept, for a host or mount move made before Atlas recorded it. Listed in discovery as atlas_previous_issuers and accepted by @atlasauth/backend with previousIssuers "discovery". At most 10; acceptedUntil at most a year ahead.</summary>
+        [JsonPropertyName("issuerAliases")] public List<AuthConfigPatchInputIssuerAliasesItem>? IssuerAliases { get; init; }
         [JsonPropertyName("jwtTemplates")] public Dictionary<string, Dictionary<string, string>>? JwtTemplates { get; init; }
         [JsonPropertyName("jwtTemplateSettings")] public Dictionary<string, AuthConfigPatchInputJwtTemplateSettingsValue>? JwtTemplateSettings { get; init; }
         [JsonPropertyName("kerberos")] public AuthConfigPatchInputKerberos? Kerberos { get; init; }
@@ -30823,6 +35084,7 @@ namespace Atlas.Generated
         [JsonPropertyName("passwordPolicy")] public AuthConfigPatchInputPasswordPolicy? PasswordPolicy { get; init; }
         [JsonPropertyName("pca")] public AuthConfigPatchInputPca? Pca { get; init; }
         [JsonPropertyName("phoneChannels")] public AuthConfigPatchInputPhoneChannels? PhoneChannels { get; init; }
+        [JsonPropertyName("previousIssuerOverlapDays")] public double? PreviousIssuerOverlapDays { get; init; }
         [JsonPropertyName("qrSignIn")] public AuthConfigPatchInputQrSignIn? QrSignIn { get; init; }
         [JsonPropertyName("rateLimit")] public AuthConfigPatchInputRateLimit? RateLimit { get; init; }
         /// <summary>Whether a password sign-up must prove the address with an emailed code before it completes. When false the sign-up completes at once, but the address stays unverified (verified, verification.status and email_verified report false) until the user proves it later.</summary>
@@ -31114,7 +35376,7 @@ namespace Atlas.Generated
     {
         /// <summary>The base link text (English), e.g. "Cookie settings".</summary>
         [JsonPropertyName("label")] public string? Label { get; init; }
-        /// <summary>Per-language link text, keyed by page locale (en, es, fr, de, pt-BR, ja, nl; any other key is refused with a 400). Each value is 1-60 characters. The hosted page renders labels[&lt;page locale&gt;], else (on a non-English page) the preset's own translation of "Cookie settings", else label.</summary>
+        /// <summary>Per-language link text, keyed by page locale (any language the hosted pages speak: en, es, fr, de, pt-BR, ja, nl, ar, he, fa, hi, zh-Hans, zh-Hant, ko, it, pl, tr, ru, sv, id, vi, th; any other key is refused with a 400). Each value is 1-60 characters. The hosted page renders labels[&lt;page locale&gt;], else (on a non-English page) the preset's own translation of "Cookie settings", else label.</summary>
         [JsonPropertyName("labels")] public Dictionary<string, string>? Labels { get; init; }
         /// <summary>Fills in the CMP's reopen trigger: cookiemunch adds data-cc="show-settings"; cookiebot calls Cookiebot.renew(); onetrust calls OneTrust.ToggleInfoDisplay(); custom adds nothing (use attributes). One of: cookiemunch, cookiebot, onetrust, custom.</summary>
         [JsonPropertyName("preset")] public string? Preset { get; init; }
@@ -32278,7 +36540,7 @@ namespace Atlas.Generated
         [JsonPropertyName("secret_handed_off_at")] public long? SecretHandedOffAt { get; init; }
         /// <summary>Event receiver only: the first 8 hex characters of sha256 of the signing secret as handed off. Compare it with the fingerprint your receiver computes from the secret it holds; a match means both sides hold the same secret, and neither has to reveal it.</summary>
         [JsonPropertyName("secret_fingerprint")] public string? SecretFingerprint { get; init; }
-        /// <summary>Event receiver only: why it needs attention. `secret_missing`: never given the signing secret. `signature_rejected`: the secret was handed off (see secret_handed_off_at) but the receiver still answers 401/403, so its copy does not match: hand it off again. `backlog_pending`: the receiver is healthy and events failed with no retry left; Atlas re-sends them on its own shortly, or call POST /v1/instance/integrations/{id}/deliveries/redeliver now. null = nothing to do. One of: secret_missing, signature_rejected, backlog_pending.</summary>
+        /// <summary>Event receiver only: why it needs attention. `secret_missing`: never given the signing secret. `signature_rejected`: the secret was handed off (see secret_handed_off_at) but the receiver still answers 401/403, so its copy does not match: hand it off again. `backlog_pending`: the receiver is healthy and events failed with no retry left; Atlas re-sends them on its own shortly, or call POST /v1/instance/integrations/{id}/deliveries/redeliver now with `{ since: &lt;oldest_undelivered_at&gt; }` (`since` is required). null = nothing to do. One of: secret_missing, signature_rejected, backlog_pending.</summary>
         [JsonPropertyName("reason")] public string? Reason { get; init; }
         /// <summary>Event receiver only: what to do about `reason`, in words, with the exact call.</summary>
         [JsonPropertyName("hint")] public string? Hint { get; init; }
@@ -36696,6 +40958,14 @@ namespace Atlas.Generated
         [JsonPropertyName("deleted")] public string Deleted { get; init; } = "";
     }
 
+    /// <summary>A MachineModelRevokedBy object.</summary>
+    public sealed record MachineModelRevokedBy
+    {
+        /// <summary>api_key, user or system.</summary>
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+    }
+
     /// <summary>A MachineModel object.</summary>
     public sealed record MachineModel
     {
@@ -36725,6 +40995,14 @@ namespace Atlas.Generated
         [JsonPropertyName("enrolled_at")] public long? EnrolledAt { get; init; }
         /// <summary>When the machine last minted a token (epoch ms; null = never).</summary>
         [JsonPropertyName("last_token_at")] public long? LastTokenAt { get; init; }
+        /// <summary>Why a revoked machine ended: revoked_by_api, revoked_by_user, owner_signed_out, superseded, delegation_ended. Null while not revoked.</summary>
+        [JsonPropertyName("revoked_reason")] public string? RevokedReason { get; init; }
+        /// <summary>Who revoked the machine. Null while not revoked.</summary>
+        [JsonPropertyName("revoked_by")] public MachineModelRevokedBy? RevokedBy { get; init; }
+        /// <summary>Epoch ms the machine was revoked. Null while not revoked.</summary>
+        [JsonPropertyName("ended_at")] public long? EndedAt { get; init; }
+        /// <summary>`sign_out_everywhere`: the machine is revoked when its owner signs out everywhere. Needs an owner. One of: sign_out_everywhere.</summary>
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
         /// <summary>Created (epoch ms).</summary>
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
         /// <summary>Updated (epoch ms).</summary>
@@ -36803,6 +41081,14 @@ namespace Atlas.Generated
         [JsonPropertyName("enrolled_at")] public long? EnrolledAt { get; init; }
         /// <summary>When the machine last minted a token (epoch ms; null = never).</summary>
         [JsonPropertyName("last_token_at")] public long? LastTokenAt { get; init; }
+        /// <summary>Why a revoked machine ended: revoked_by_api, revoked_by_user, owner_signed_out, superseded, delegation_ended. Null while not revoked.</summary>
+        [JsonPropertyName("revoked_reason")] public string? RevokedReason { get; init; }
+        /// <summary>Who revoked the machine. Null while not revoked.</summary>
+        [JsonPropertyName("revoked_by")] public MachineModelRevokedBy? RevokedBy { get; init; }
+        /// <summary>Epoch ms the machine was revoked. Null while not revoked.</summary>
+        [JsonPropertyName("ended_at")] public long? EndedAt { get; init; }
+        /// <summary>`sign_out_everywhere`: the machine is revoked when its owner signs out everywhere. Needs an owner. One of: sign_out_everywhere.</summary>
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
         /// <summary>Created (epoch ms).</summary>
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
         /// <summary>Updated (epoch ms).</summary>
@@ -36817,6 +41103,9 @@ namespace Atlas.Generated
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("owner_user_id")] public string? OwnerUserId { get; init; }
         [JsonPropertyName("data")] public Dictionary<string, object?>? Data { get; init; }
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
+        /// <summary>Send <c>null</c> for <c>dies_with</c>, which clears it.</summary>
+        public MachinesCreateBody ClearDiesWith() => this with { Cleared = Plus("dies_with") };
     }
 
     /// <summary>A MachinesUpdateBody object.</summary>
@@ -36853,6 +41142,16 @@ namespace Atlas.Generated
         [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
         /// <summary>True once `expires_at` has passed. An expired grant mints nothing and is dropped from verify results.</summary>
         [JsonPropertyName("expired")] public bool? Expired { get; init; }
+        /// <summary>Recorded `sign_out_everywhere`. A grant of a machine that has an owner always ends with the owner signing out everywhere. One of: sign_out_everywhere.</summary>
+        [JsonPropertyName("dies_with")] public string? DiesWith { get; init; }
+        /// <summary>Epoch ms the grant was ended (it is kept as a record for 90 days; `GET .../grants?include_ended=true` lists it). Null while live.</summary>
+        [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
+        /// <summary>The same value as `revoked_at`.</summary>
+        [JsonPropertyName("ended_at")] public long? EndedAt { get; init; }
+        /// <summary>Why it ended: revoked_by_api or owner_signed_out.</summary>
+        [JsonPropertyName("revoked_reason")] public string? RevokedReason { get; init; }
+        /// <summary>Who ended it.</summary>
+        [JsonPropertyName("revoked_by")] public RevokedApiKeyModelRevokedBy? RevokedBy { get; init; }
         /// <summary>Created (epoch ms).</summary>
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
         /// <summary>Last updated (epoch ms).</summary>
@@ -36874,6 +41173,8 @@ namespace Atlas.Generated
     /// <summary>Query parameters of ListGrants. Unset values are not sent.</summary>
     public sealed record MachinesListGrantsQuery
     {
+        /// <summary>true to include ended grants. Default false.</summary>
+        public string? IncludeEnded { get; init; }
         /// <summary>Page size, 1-500. Without limit (and without starting_after) the whole list is returned.</summary>
         public long? Limit { get; init; }
         /// <summary>Cursor: return only items after this one. Pass the previous page's `next_cursor` (the last item's id). An unknown cursor is a 400.</summary>
@@ -36882,6 +41183,7 @@ namespace Atlas.Generated
         /// <summary>Flatten to query key/value pairs.</summary>
         public IEnumerable<KeyValuePair<string, object?>> ToQuery()
         {
+            yield return new KeyValuePair<string, object?>("include_ended", IncludeEnded);
             yield return new KeyValuePair<string, object?>("limit", Limit);
             yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
         }
@@ -37388,6 +41690,8 @@ namespace Atlas.Generated
         [JsonPropertyName("status")] public string Status { get; init; } = "";
         [JsonPropertyName("config")] public Dictionary<string, string> Config { get; init; } = new();
         [JsonPropertyName("secrets_set")] public Dictionary<string, bool> SecretsSet { get; init; } = new();
+        /// <summary>For each write-only secret config field that is set: the first 8 hex characters of sha256 of its value, to compare with the value you hold. Never the value.</summary>
+        [JsonPropertyName("secret_fingerprints")] public Dictionary<string, string>? SecretFingerprints { get; init; }
         /// <summary>Last updated (epoch ms).</summary>
         [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
     }
@@ -37653,7 +41957,7 @@ namespace Atlas.Generated
     {
         /// <summary>The id of your configured email provider (GET /v1/messaging_providers).</summary>
         [JsonPropertyName("provider_id")] public string? ProviderId { get; init; }
-        /// <summary>Instead of provider_id: your provider, configured as PUT /v1/messaging_providers/email takes it. One of: resend, ses, smtp, brevo, mailgun, smtp2go.</summary>
+        /// <summary>Instead of provider_id: your provider, configured as PUT /v1/messaging_providers/email takes it. One of: resend, ses, smtp, brevo, mailgun, smtp2go, hermetica, webhook.</summary>
         [JsonPropertyName("transport")] public string? Transport { get; init; }
         /// <summary>A sender your provider accepts without a verified domain. Default for Resend: onboarding@resend.dev (delivers only to your Resend account address). Required otherwise.</summary>
         [JsonPropertyName("from_address")] public string? FromAddress { get; init; }
@@ -38881,6 +43185,13 @@ namespace Atlas.Generated
         [JsonPropertyName("deleted")] public bool? Deleted { get; init; }
     }
 
+    /// <summary>A NotificationTemplatesListResponseDataItemLocalesValue object.</summary>
+    public sealed record NotificationTemplatesListResponseDataItemLocalesValue
+    {
+        [JsonPropertyName("subject")] public string? Subject { get; init; }
+        [JsonPropertyName("body")] public string? Body { get; init; }
+    }
+
     /// <summary>A NotificationTemplatesListResponseDataItem object.</summary>
     public sealed record NotificationTemplatesListResponseDataItem
     {
@@ -38894,6 +43205,8 @@ namespace Atlas.Generated
         [JsonPropertyName("body")] public string Body { get; init; } = "";
         /// <summary>The end-user notification category whose preference gates this template.</summary>
         [JsonPropertyName("category")] public string Category { get; init; } = "";
+        /// <summary>Language variants keyed by tag: { subject, body } each.</summary>
+        [JsonPropertyName("locales")] public Dictionary<string, NotificationTemplatesListResponseDataItemLocalesValue>? Locales { get; init; }
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
         [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
     }
@@ -38922,6 +43235,13 @@ namespace Atlas.Generated
         }
     }
 
+    /// <summary>A NotificationTemplatesCreateBodyLocalesValue object.</summary>
+    public sealed record NotificationTemplatesCreateBodyLocalesValue : ClearableBody
+    {
+        [JsonPropertyName("subject")] public string? Subject { get; init; }
+        [JsonPropertyName("body")] public string? Body { get; init; }
+    }
+
     /// <summary>A NotificationTemplatesCreateBody object.</summary>
     public sealed record NotificationTemplatesCreateBody : ClearableBody
     {
@@ -38932,6 +43252,8 @@ namespace Atlas.Generated
         [JsonPropertyName("body")] public string? Body { get; init; }
         /// <summary>A built-in or tenant-defined notification category key.</summary>
         [JsonPropertyName("category")] public string? Category { get; init; }
+        /// <summary>Language variants, keyed by tag (fr, pt-BR): { subject, body } each. `POST /v1/messages` sends the one matching its `locale`, else the user's own locale, else the base subject and body.</summary>
+        [JsonPropertyName("locales")] public Dictionary<string, NotificationTemplatesCreateBodyLocalesValue>? Locales { get; init; }
     }
 
     /// <summary>A NotificationTemplatesReplaceBody object.</summary>
@@ -38942,6 +43264,8 @@ namespace Atlas.Generated
         [JsonPropertyName("body")] public string? Body { get; init; }
         /// <summary>A built-in category (new_device, unattended_access, credential_change) or a tenant-defined one (POST /v1/notification_categories), so the send honours the opt-out.</summary>
         [JsonPropertyName("category")] public string? Category { get; init; }
+        /// <summary>Language variants, keyed by tag (fr, pt-BR): { subject, body } each. `POST /v1/messages` sends the one matching its `locale`, else the user's own locale, else the base subject and body.</summary>
+        [JsonPropertyName("locales")] public Dictionary<string, NotificationTemplatesCreateBodyLocalesValue>? Locales { get; init; }
     }
 
     /// <summary>A NotificationTemplatesDeleteResponse object.</summary>
@@ -39184,6 +43508,10 @@ namespace Atlas.Generated
         [JsonPropertyName("login_url")] public string? LoginUrl { get; init; }
         /// <summary>Your own consent page for this client.</summary>
         [JsonPropertyName("consent_url")] public string? ConsentUrl { get; init; }
+        /// <summary>'always' when a first-party client's consent is sent to consent_url. One of: always.</summary>
+        [JsonPropertyName("delegate_consent")] public string? DelegateConsent { get; init; }
+        /// <summary>Your own device-approval page for this client.</summary>
+        [JsonPropertyName("device_url")] public string? DeviceUrl { get; init; }
         /// <summary>`cimd` when the client was created from its Client ID Metadata Document (its client_id is that document's URL); null for a registered client. One of: cimd.</summary>
         [JsonPropertyName("discovery_source")] public string? DiscoverySource { get; init; }
         [JsonPropertyName("post_logout_redirect_uris")] public List<string>? PostLogoutRedirectUris { get; init; }
@@ -39208,8 +43536,19 @@ namespace Atlas.Generated
         [JsonPropertyName("approved_scopes")] public List<string>? ApprovedScopes { get; init; }
         /// <summary>Token endpoint requests per minute this client may make; null = no limit.</summary>
         [JsonPropertyName("rate_limit_per_minute")] public long? RateLimitPerMinute { get; init; }
-        /// <summary>The `sub` this client sees: the user id, or a per-sector pairwise identifier. One of: public, pairwise.</summary>
+        /// <summary>Scopes a request without `scope` gets; null = none.</summary>
+        [JsonPropertyName("default_scopes")] public List<string>? DefaultScopes { get; init; }
+        [JsonPropertyName("default_resource")] public string? DefaultResource { get; init; }
+        /// <summary>false = a pure-API client: no openid required, no ID token issued.</summary>
+        [JsonPropertyName("require_openid")] public bool? RequireOpenid { get; init; }
+        /// <summary>The instance certified this client (the level above approved).</summary>
+        [JsonPropertyName("certified")] public bool? Certified { get; init; }
+        /// <summary>When the client was certified (epoch ms); null = not certified.</summary>
+        [JsonPropertyName("certified_at")] public long? CertifiedAt { get; init; }
+        /// <summary>The `sub` this client sees: the user id, a per-sector pairwise identifier, or the user's external_id. One of: public, pairwise, external_id.</summary>
         [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        /// <summary>With subject_type external_id: what a user without an external_id gets. One of: atlas_user_id, refuse.</summary>
+        [JsonPropertyName("subject_fallback")] public string? SubjectFallback { get; init; }
         [JsonPropertyName("sector_identifier_uri")] public string? SectorIdentifierUri { get; init; }
         /// <summary>When the current client secret stops authenticating (epoch ms). Null = it does not expire.</summary>
         [JsonPropertyName("client_secret_expires_at")] public long? ClientSecretExpiresAt { get; init; }
@@ -39330,16 +43669,30 @@ namespace Atlas.Generated
         [JsonPropertyName("testers")] public List<string>? Testers { get; init; }
         /// <summary>Gated scopes (requires_verified_client) approved for this client alone, so it may request them before the whole app is approved. Only the instance sets this; changes are audited. The owner and testers of a client in development may request gated scopes without it.</summary>
         [JsonPropertyName("approved_scopes")] public List<string>? ApprovedScopes { get; init; }
+        /// <summary>The scopes an authorization or device request without `scope` gets (each must be one the client may request; include `openid` unless require_openid is false). Including offline_access here makes every sign-in a long-lived grant: a refresh token with offline_access already outlives the browser session. null clears.</summary>
+        [JsonPropertyName("default_scopes")] public List<string>? DefaultScopes { get; init; }
+        /// <summary>The identifier of the API (resource server) an authorization or device request without `resource` or `audience` is made for. Must be a registered API. null clears.</summary>
+        [JsonPropertyName("default_resource")] public string? DefaultResource { get; init; }
+        /// <summary>Default true. false makes this a pure-API client: /oauth2/authorize accepts a request without `openid` and the token response carries an access token and no ID token. Confidential clients without the implicit grant only; PKCE rules are unchanged.</summary>
+        [JsonPropertyName("require_openid")] public bool? RequireOpenid { get; init; }
+        /// <summary>The instance certifies (true) or withdraws certification of an approved client: the level above verified, for scopes whose requires_client_level is certified. Update only; an unapproved client cannot be certified.</summary>
+        [JsonPropertyName("certified")] public bool? Certified { get; init; }
         /// <summary>Most token endpoint requests per minute this client may make; over it the endpoint answers 429 with Retry-After. null removes the limit.</summary>
         [JsonPropertyName("rate_limit_per_minute")] public long? RateLimitPerMinute { get; init; }
         /// <summary>https URL of your own sign-in page; /oauth2/authorize then redirects there with a login_challenge. null clears (update).</summary>
         [JsonPropertyName("login_url")] public string? LoginUrl { get; init; }
         /// <summary>https URL of your own consent page (consent_challenge). null clears (update).</summary>
         [JsonPropertyName("consent_url")] public string? ConsentUrl { get; init; }
+        /// <summary>'always': a first-party client's consent is also sent to its consent_url instead of being granted silently. Needs the client's own consent_url. null clears (update). One of: always.</summary>
+        [JsonPropertyName("delegate_consent")] public string? DelegateConsent { get; init; }
+        /// <summary>https URL of your own device-approval page; /oauth2/device then sends the signed-in user there with a device_challenge. null clears (update).</summary>
+        [JsonPropertyName("device_url")] public string? DeviceUrl { get; init; }
         /// <summary>How long the issued client secret authenticates, in seconds (reported as client_secret_expires_at). Omit for a secret that does not expire. Ignored for a public client.</summary>
         [JsonPropertyName("secret_expires_in_seconds")] public long? SecretExpiresInSeconds { get; init; }
-        /// <summary>OpenID Connect `sub` for this client. `public` (default): the user id. `pairwise`: a per-sector identifier, the same in the id_token, access token, userinfo, introspection and back-channel logout tokens, that clients on other sectors cannot correlate. Changing it changes the `sub` of every user of the client. One of: public, pairwise.</summary>
+        /// <summary>OpenID Connect `sub` for this client. `public` (default): the user id. `pairwise`: a per-sector identifier, the same in the id_token, access token, userinfo, introspection and back-channel logout tokens, that clients on other sectors cannot correlate. `external_id`: the user's external_id, in all of those places (a user without one follows subject_fallback). Changing it changes the `sub` of every user of the client. One of: public, pairwise, external_id.</summary>
         [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        /// <summary>With subject_type external_id, for a user who has no external_id: `atlas_user_id` (default) uses the Atlas user id as `sub`; `refuse` fails the authorization with access_denied. One of: atlas_user_id, refuse.</summary>
+        [JsonPropertyName("subject_fallback")] public string? SubjectFallback { get; init; }
         /// <summary>An https URL serving a JSON array that lists every redirect_uri of the client. Its host is the pairwise sector. Required for a pairwise client whose redirect_uris span more than one host; null clears it.</summary>
         [JsonPropertyName("sector_identifier_uri")] public string? SectorIdentifierUri { get; init; }
         /// <summary>`jwt`: a signed JWT verifiable against the JWKS. `opaque`: a random `oat_…` reference validated at the introspection endpoint (and by Atlas's own endpoints). null inherits: the API's format, then the client's, then the instance default. One of: jwt, opaque.</summary>
@@ -39358,12 +43711,20 @@ namespace Atlas.Generated
         public OauthClientsCreateBody ClearFrontchannelLogoutUri() => this with { Cleared = Plus("frontchannel_logout_uri") };
         /// <summary>Send <c>null</c> for <c>owner</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearOwner() => this with { Cleared = Plus("owner") };
+        /// <summary>Send <c>null</c> for <c>default_scopes</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearDefaultScopes() => this with { Cleared = Plus("default_scopes") };
+        /// <summary>Send <c>null</c> for <c>default_resource</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearDefaultResource() => this with { Cleared = Plus("default_resource") };
         /// <summary>Send <c>null</c> for <c>rate_limit_per_minute</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearRateLimitPerMinute() => this with { Cleared = Plus("rate_limit_per_minute") };
         /// <summary>Send <c>null</c> for <c>login_url</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearLoginUrl() => this with { Cleared = Plus("login_url") };
         /// <summary>Send <c>null</c> for <c>consent_url</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearConsentUrl() => this with { Cleared = Plus("consent_url") };
+        /// <summary>Send <c>null</c> for <c>delegate_consent</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearDelegateConsent() => this with { Cleared = Plus("delegate_consent") };
+        /// <summary>Send <c>null</c> for <c>device_url</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearDeviceUrl() => this with { Cleared = Plus("device_url") };
         /// <summary>Send <c>null</c> for <c>sector_identifier_uri</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearSectorIdentifierUri() => this with { Cleared = Plus("sector_identifier_uri") };
         /// <summary>Send <c>null</c> for <c>access_token_format</c>, which clears it.</summary>
@@ -39499,16 +43860,30 @@ namespace Atlas.Generated
         [JsonPropertyName("testers")] public List<string>? Testers { get; init; }
         /// <summary>Gated scopes (requires_verified_client) approved for this client alone, so it may request them before the whole app is approved. Only the instance sets this; changes are audited. The owner and testers of a client in development may request gated scopes without it.</summary>
         [JsonPropertyName("approved_scopes")] public List<string>? ApprovedScopes { get; init; }
+        /// <summary>The scopes an authorization or device request without `scope` gets (each must be one the client may request; include `openid` unless require_openid is false). Including offline_access here makes every sign-in a long-lived grant: a refresh token with offline_access already outlives the browser session. null clears.</summary>
+        [JsonPropertyName("default_scopes")] public List<string>? DefaultScopes { get; init; }
+        /// <summary>The identifier of the API (resource server) an authorization or device request without `resource` or `audience` is made for. Must be a registered API. null clears.</summary>
+        [JsonPropertyName("default_resource")] public string? DefaultResource { get; init; }
+        /// <summary>Default true. false makes this a pure-API client: /oauth2/authorize accepts a request without `openid` and the token response carries an access token and no ID token. Confidential clients without the implicit grant only; PKCE rules are unchanged.</summary>
+        [JsonPropertyName("require_openid")] public bool? RequireOpenid { get; init; }
+        /// <summary>The instance certifies (true) or withdraws certification of an approved client: the level above verified, for scopes whose requires_client_level is certified. Update only; an unapproved client cannot be certified.</summary>
+        [JsonPropertyName("certified")] public bool? Certified { get; init; }
         /// <summary>Most token endpoint requests per minute this client may make; over it the endpoint answers 429 with Retry-After. null removes the limit.</summary>
         [JsonPropertyName("rate_limit_per_minute")] public long? RateLimitPerMinute { get; init; }
         /// <summary>https URL of your own sign-in page; /oauth2/authorize then redirects there with a login_challenge. null clears (update).</summary>
         [JsonPropertyName("login_url")] public string? LoginUrl { get; init; }
         /// <summary>https URL of your own consent page (consent_challenge). null clears (update).</summary>
         [JsonPropertyName("consent_url")] public string? ConsentUrl { get; init; }
+        /// <summary>'always': a first-party client's consent is also sent to its consent_url instead of being granted silently. Needs the client's own consent_url. null clears (update). One of: always.</summary>
+        [JsonPropertyName("delegate_consent")] public string? DelegateConsent { get; init; }
+        /// <summary>https URL of your own device-approval page; /oauth2/device then sends the signed-in user there with a device_challenge. null clears (update).</summary>
+        [JsonPropertyName("device_url")] public string? DeviceUrl { get; init; }
         /// <summary>How long the issued client secret authenticates, in seconds (reported as client_secret_expires_at). Omit for a secret that does not expire. Ignored for a public client.</summary>
         [JsonPropertyName("secret_expires_in_seconds")] public long? SecretExpiresInSeconds { get; init; }
-        /// <summary>OpenID Connect `sub` for this client. `public` (default): the user id. `pairwise`: a per-sector identifier, the same in the id_token, access token, userinfo, introspection and back-channel logout tokens, that clients on other sectors cannot correlate. Changing it changes the `sub` of every user of the client. One of: public, pairwise.</summary>
+        /// <summary>OpenID Connect `sub` for this client. `public` (default): the user id. `pairwise`: a per-sector identifier, the same in the id_token, access token, userinfo, introspection and back-channel logout tokens, that clients on other sectors cannot correlate. `external_id`: the user's external_id, in all of those places (a user without one follows subject_fallback). Changing it changes the `sub` of every user of the client. One of: public, pairwise, external_id.</summary>
         [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        /// <summary>With subject_type external_id, for a user who has no external_id: `atlas_user_id` (default) uses the Atlas user id as `sub`; `refuse` fails the authorization with access_denied. One of: atlas_user_id, refuse.</summary>
+        [JsonPropertyName("subject_fallback")] public string? SubjectFallback { get; init; }
         /// <summary>An https URL serving a JSON array that lists every redirect_uri of the client. Its host is the pairwise sector. Required for a pairwise client whose redirect_uris span more than one host; null clears it.</summary>
         [JsonPropertyName("sector_identifier_uri")] public string? SectorIdentifierUri { get; init; }
         /// <summary>`jwt`: a signed JWT verifiable against the JWKS. `opaque`: a random `oat_…` reference validated at the introspection endpoint (and by Atlas's own endpoints). null inherits: the API's format, then the client's, then the instance default. One of: jwt, opaque.</summary>
@@ -39525,12 +43900,20 @@ namespace Atlas.Generated
         public OauthClientsUpdateBody ClearFrontchannelLogoutUri() => this with { Cleared = Plus("frontchannel_logout_uri") };
         /// <summary>Send <c>null</c> for <c>owner</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearOwner() => this with { Cleared = Plus("owner") };
+        /// <summary>Send <c>null</c> for <c>default_scopes</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearDefaultScopes() => this with { Cleared = Plus("default_scopes") };
+        /// <summary>Send <c>null</c> for <c>default_resource</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearDefaultResource() => this with { Cleared = Plus("default_resource") };
         /// <summary>Send <c>null</c> for <c>rate_limit_per_minute</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearRateLimitPerMinute() => this with { Cleared = Plus("rate_limit_per_minute") };
         /// <summary>Send <c>null</c> for <c>login_url</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearLoginUrl() => this with { Cleared = Plus("login_url") };
         /// <summary>Send <c>null</c> for <c>consent_url</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearConsentUrl() => this with { Cleared = Plus("consent_url") };
+        /// <summary>Send <c>null</c> for <c>delegate_consent</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearDelegateConsent() => this with { Cleared = Plus("delegate_consent") };
+        /// <summary>Send <c>null</c> for <c>device_url</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearDeviceUrl() => this with { Cleared = Plus("device_url") };
         /// <summary>Send <c>null</c> for <c>sector_identifier_uri</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearSectorIdentifierUri() => this with { Cleared = Plus("sector_identifier_uri") };
         /// <summary>Send <c>null</c> for <c>access_token_format</c>, which clears it.</summary>
@@ -39742,6 +44125,9 @@ namespace Atlas.Generated
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
         [JsonPropertyName("login_url")] public string? LoginUrl { get; init; }
         [JsonPropertyName("consent_url")] public string? ConsentUrl { get; init; }
+        /// <summary>One of: always.</summary>
+        [JsonPropertyName("delegate_consent")] public string? DelegateConsent { get; init; }
+        [JsonPropertyName("device_url")] public string? DeviceUrl { get; init; }
     }
 
     /// <summary>A OauthClientsSetDelegatedUiBody object.</summary>
@@ -39751,10 +44137,18 @@ namespace Atlas.Generated
         [JsonPropertyName("login_url")] public string? LoginUrl { get; init; }
         /// <summary>https URL of your consent page; null clears it. Omit to leave unchanged.</summary>
         [JsonPropertyName("consent_url")] public string? ConsentUrl { get; init; }
+        /// <summary>'always' sends a first-party client's consent to consent_url too (needs the client's own consent_url); null clears it. One of: always.</summary>
+        [JsonPropertyName("delegate_consent")] public string? DelegateConsent { get; init; }
+        /// <summary>https URL of your device-approval page (device_challenge); null clears it.</summary>
+        [JsonPropertyName("device_url")] public string? DeviceUrl { get; init; }
         /// <summary>Send <c>null</c> for <c>login_url</c>, which clears it.</summary>
         public OauthClientsSetDelegatedUiBody ClearLoginUrl() => this with { Cleared = Plus("login_url") };
         /// <summary>Send <c>null</c> for <c>consent_url</c>, which clears it.</summary>
         public OauthClientsSetDelegatedUiBody ClearConsentUrl() => this with { Cleared = Plus("consent_url") };
+        /// <summary>Send <c>null</c> for <c>delegate_consent</c>, which clears it.</summary>
+        public OauthClientsSetDelegatedUiBody ClearDelegateConsent() => this with { Cleared = Plus("delegate_consent") };
+        /// <summary>Send <c>null</c> for <c>device_url</c>, which clears it.</summary>
+        public OauthClientsSetDelegatedUiBody ClearDeviceUrl() => this with { Cleared = Plus("device_url") };
     }
 
     /// <summary>A OauthClientsGetExchangePolicyResponse object.</summary>
@@ -39879,6 +44273,10 @@ namespace Atlas.Generated
         [JsonPropertyName("login_url")] public string? LoginUrl { get; init; }
         /// <summary>Your own consent page for this client.</summary>
         [JsonPropertyName("consent_url")] public string? ConsentUrl { get; init; }
+        /// <summary>'always' when a first-party client's consent is sent to consent_url. One of: always.</summary>
+        [JsonPropertyName("delegate_consent")] public string? DelegateConsent { get; init; }
+        /// <summary>Your own device-approval page for this client.</summary>
+        [JsonPropertyName("device_url")] public string? DeviceUrl { get; init; }
         /// <summary>`cimd` when the client was created from its Client ID Metadata Document (its client_id is that document's URL); null for a registered client. One of: cimd.</summary>
         [JsonPropertyName("discovery_source")] public string? DiscoverySource { get; init; }
         [JsonPropertyName("post_logout_redirect_uris")] public List<string>? PostLogoutRedirectUris { get; init; }
@@ -39903,8 +44301,19 @@ namespace Atlas.Generated
         [JsonPropertyName("approved_scopes")] public List<string>? ApprovedScopes { get; init; }
         /// <summary>Token endpoint requests per minute this client may make; null = no limit.</summary>
         [JsonPropertyName("rate_limit_per_minute")] public long? RateLimitPerMinute { get; init; }
-        /// <summary>The `sub` this client sees: the user id, or a per-sector pairwise identifier. One of: public, pairwise.</summary>
+        /// <summary>Scopes a request without `scope` gets; null = none.</summary>
+        [JsonPropertyName("default_scopes")] public List<string>? DefaultScopes { get; init; }
+        [JsonPropertyName("default_resource")] public string? DefaultResource { get; init; }
+        /// <summary>false = a pure-API client: no openid required, no ID token issued.</summary>
+        [JsonPropertyName("require_openid")] public bool? RequireOpenid { get; init; }
+        /// <summary>The instance certified this client (the level above approved).</summary>
+        [JsonPropertyName("certified")] public bool? Certified { get; init; }
+        /// <summary>When the client was certified (epoch ms); null = not certified.</summary>
+        [JsonPropertyName("certified_at")] public long? CertifiedAt { get; init; }
+        /// <summary>The `sub` this client sees: the user id, a per-sector pairwise identifier, or the user's external_id. One of: public, pairwise, external_id.</summary>
         [JsonPropertyName("subject_type")] public string? SubjectType { get; init; }
+        /// <summary>With subject_type external_id: what a user without an external_id gets. One of: atlas_user_id, refuse.</summary>
+        [JsonPropertyName("subject_fallback")] public string? SubjectFallback { get; init; }
         [JsonPropertyName("sector_identifier_uri")] public string? SectorIdentifierUri { get; init; }
         /// <summary>When the current client secret stops authenticating (epoch ms). Null = it does not expire.</summary>
         [JsonPropertyName("client_secret_expires_at")] public long? ClientSecretExpiresAt { get; init; }
@@ -40066,6 +44475,12 @@ namespace Atlas.Generated
         [JsonPropertyName("authorization_details")] public List<Dictionary<string, object?>>? AuthorizationDetails { get; init; }
         [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
         [JsonPropertyName("redirect_uri")] public string? RedirectUri { get; init; }
+        /// <summary>The application's original /oauth2/authorize request on this instance, every parameter included (use switch_account to restart it at login). Null when too large to carry.</summary>
+        [JsonPropertyName("request_url")] public string? RequestUrl { get; init; }
+        /// <summary>The prompt values the application sent.</summary>
+        [JsonPropertyName("prompt")] public List<string>? Prompt { get; init; }
+        /// <summary>The max_age (seconds) the application sent, if any.</summary>
+        [JsonPropertyName("max_age")] public long? MaxAge { get; init; }
         /// <summary>The challenge expires (epoch ms).</summary>
         [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
     }
@@ -40099,6 +44514,8 @@ namespace Atlas.Generated
         [JsonPropertyName("grant_scope")] public List<string>? GrantScope { get; init; }
         /// <summary>Record the consent so the user is not asked again. Default true.</summary>
         [JsonPropertyName("remember")] public bool? Remember { get; init; }
+        /// <summary>Your own JSON (at most 4 KB) stored on the recorded consent and returned by the grant API and in grant.revoked. Atlas adds `granted_by`, the actor that accepted. Not stored when remember is false.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
     }
 
     /// <summary>Query parameters of SetAccept. Unset values are not sent.</summary>
@@ -40241,6 +44658,14 @@ namespace Atlas.Generated
         [JsonPropertyName("session_subject")] public string? SessionSubject { get; init; }
         [JsonPropertyName("ui_locales")] public string? UiLocales { get; init; }
         [JsonPropertyName("login_hint")] public string? LoginHint { get; init; }
+        /// <summary>The application's original /oauth2/authorize request on this instance, every parameter included. Null when the request was too large to carry.</summary>
+        [JsonPropertyName("request_url")] public string? RequestUrl { get; init; }
+        /// <summary>The prompt values the application sent.</summary>
+        [JsonPropertyName("prompt")] public List<string>? Prompt { get; init; }
+        /// <summary>true when the application sent prompt=select_account: let the visitor choose an account instead of reusing session_subject.</summary>
+        [JsonPropertyName("select_account")] public bool? SelectAccount { get; init; }
+        /// <summary>The max_age (seconds) the application sent, if any.</summary>
+        [JsonPropertyName("max_age")] public long? MaxAge { get; init; }
         /// <summary>The challenge expires (epoch ms).</summary>
         [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
     }
@@ -40306,6 +44731,40 @@ namespace Atlas.Generated
         }
     }
 
+    /// <summary>A OAuthProviderModelModesNative object.</summary>
+    public sealed record OAuthProviderModelModesNative
+    {
+        [JsonPropertyName("credential_fields")] public List<Dictionary<string, object?>>? CredentialFields { get; init; }
+        [JsonPropertyName("hint")] public string? Hint { get; init; }
+    }
+
+    /// <summary>For a provider with a native (in-page) mode: the credential fields and a hint for each sign-in mode. Native needs no client secret. Null for a redirect-only provider.</summary>
+    public sealed record OAuthProviderModelModes
+    {
+        [JsonPropertyName("native")] public OAuthProviderModelModesNative? Native { get; init; }
+        [JsonPropertyName("redirect")] public OAuthProviderModelModesNative? Redirect { get; init; }
+    }
+
+    /// <summary>A OAuthProviderModelConnectionExtrasItem object.</summary>
+    public sealed record OAuthProviderModelConnectionExtrasItem
+    {
+        /// <summary>The `host_params` key.</summary>
+        [JsonPropertyName("key")] public string Key { get; init; } = "";
+        [JsonPropertyName("label")] public string Label { get; init; } = "";
+        /// <summary>Must be present on a connection OAuth client of this provider.</summary>
+        [JsonPropertyName("required")] public bool Required { get; init; }
+        /// <summary>Anchored regular expression the whole value must match.</summary>
+        [JsonPropertyName("pattern")] public string? Pattern { get; init; }
+        [JsonPropertyName("description")] public string Description { get; init; } = "";
+    }
+
+    /// <summary>For a provider whose authorize page can return an id_token (google, apple, microsoft, twitch): sign-in with only the client_id on every platform (native apps, Expo Go, desktop, web), used automatically while the provider has no client secret. `available` says whether that is the case now; `redirect_uri` is the URL to register with the provider for it. Null for other providers.</summary>
+    public sealed record OAuthProviderModelHostedIdToken
+    {
+        [JsonPropertyName("available")] public bool Available { get; init; }
+        [JsonPropertyName("redirect_uri")] public string RedirectUri { get; init; } = "";
+    }
+
     /// <summary>A social/OAuth provider config. Secrets never returned (has_secret marks presence).</summary>
     public sealed record OAuthProviderModel
     {
@@ -40318,8 +44777,13 @@ namespace Atlas.Generated
         [JsonPropertyName("setup_docs_url")] public string? SetupDocsUrl { get; init; }
         [JsonPropertyName("default_scopes")] public List<string>? DefaultScopes { get; init; }
         [JsonPropertyName("api_scopes")] public List<string>? ApiScopes { get; init; }
+        /// <summary>The fields the redirect flow needs (client id and secret).</summary>
         [JsonPropertyName("credential_fields")] public List<Dictionary<string, object?>>? CredentialFields { get; init; }
+        /// <summary>For a provider with a native (in-page) mode: the credential fields and a hint for each sign-in mode. Native needs no client secret. Null for a redirect-only provider.</summary>
+        [JsonPropertyName("modes")] public OAuthProviderModelModes? Modes { get; init; }
         [JsonPropertyName("settings")] public List<Dictionary<string, object?>>? Settings { get; init; }
+        /// <summary>Non-secret settings a connection OAuth client of this provider (`PUT /v1/connections/oauth_clients`) carries in `host_params`, such as TikTok Shop's `service_id`. A required one must be sent; an unknown key is refused.</summary>
+        [JsonPropertyName("connection_extras")] public List<OAuthProviderModelConnectionExtrasItem>? ConnectionExtras { get; init; }
         /// <summary>Credential-less providers only (siwe, siws, siwb, siwf): the stored verifier settings, e.g. { domain, chain_ids, rpc_url }. Empty for every other provider.</summary>
         [JsonPropertyName("setting_values")] public Dictionary<string, string>? SettingValues { get; init; }
         /// <summary>True when this provider signs in through an in-page native library (e.g. Google One Tap / GSI) that verifies an id_token, rather than a redirect. A native provider also requires its `javascript_origins` to be registered on the provider console.</summary>
@@ -40332,10 +44796,12 @@ namespace Atlas.Generated
         [JsonPropertyName("redirect_uri")] public string? RedirectUri { get; init; }
         /// <summary>Atlas's own callback URL; a custom_redirect_uri forwards ?code&amp;state here.</summary>
         [JsonPropertyName("atlas_callback")] public string? AtlasCallback { get; init; }
-        /// <summary>The extra audiences a native app id_token may carry (set with settings.native_client_ids on PUT, a comma list; an empty string clears it). Empty when none.</summary>
+        /// <summary>The extra audiences a native app id_token may carry (set with `native_client_ids` on PUT, an array or a comma list, or settings.native_client_ids; an empty array or string clears it). Empty when none.</summary>
         [JsonPropertyName("native_client_ids")] public List<string>? NativeClientIds { get; init; }
         /// <summary>A tenant's own already-registered callback (migration): Atlas uses it in the authorize + token exchange and it forwards to atlas_callback. Null when unset.</summary>
         [JsonPropertyName("custom_redirect_uri")] public string? CustomRedirectUri { get; init; }
+        /// <summary>For a provider whose authorize page can return an id_token (google, apple, microsoft, twitch): sign-in with only the client_id on every platform (native apps, Expo Go, desktop, web), used automatically while the provider has no client secret. `available` says whether that is the case now; `redirect_uri` is the URL to register with the provider for it. Null for other providers.</summary>
+        [JsonPropertyName("hosted_id_token")] public OAuthProviderModelHostedIdToken? HostedIdToken { get; init; }
         [JsonPropertyName("configured")] public bool Configured { get; init; }
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
         [JsonPropertyName("has_secret")] public bool? HasSecret { get; init; }
@@ -40407,6 +44873,8 @@ namespace Atlas.Generated
         /// <summary>Non-secret provider settings. For a redirect provider: e.g. redirect_uri. For a native provider: native_client_ids, the extra audiences an app id_token may carry (a comma-separated string; "" clears it; read back as the native_client_ids array). For the wallet providers (credential-less) the verifier settings — siwe: domain (hostname[:port]), chain_ids (positive integers, array or comma list), rpc_url (https URL, enables EIP-1271 contract wallets); siws: domain, networks (mainnet/devnet/testnet); siwf: domain, chain_ids, optimism_rpc_url (https URL, required to verify FID ownership), id_registry_address (0x address). null or "" clears one; an unknown key is a 400.</summary>
         [JsonPropertyName("settings")] public Dictionary<string, object?>? Settings { get; init; }
         [JsonPropertyName("custom_redirect_uri")] public string? CustomRedirectUri { get; init; }
+        /// <summary>The extra audiences a native app id_token may carry (an iOS bundle or Android client id), as GET returns them: an array, or a comma-separated string. The provider's own client_id is always accepted. Same as settings.native_client_ids; an empty array or "" clears the list.</summary>
+        [JsonPropertyName("native_client_ids")] public object? NativeClientIds { get; init; }
         [JsonPropertyName("native")] public bool? Native { get; init; }
         /// <summary>Force the sign-in mode; "" clears the override. Applied together with credentials in one call. One of: native, redirect, .</summary>
         [JsonPropertyName("mode")] public string? Mode { get; init; }
@@ -40414,6 +44882,8 @@ namespace Atlas.Generated
         [JsonPropertyName("display_name")] public string? DisplayName { get; init; }
         /// <summary>An http(s) or data:image icon URL for the button; empty clears.</summary>
         [JsonPropertyName("icon_url")] public string? IconUrl { get; init; }
+        /// <summary>The built-in atlas_test provider only (development instances): its whole configuration. Other providers are enabled with POST /v1/oauth_providers/{provider}/enabled.</summary>
+        [JsonPropertyName("enabled")] public bool? Enabled { get; init; }
     }
 
     /// <summary>A OauthProvidersDeleteResponse object.</summary>
@@ -42145,6 +46615,7 @@ namespace Atlas.Generated
     public sealed record OrganizationsInvitationsResendBody : ClearableBody
     {
         [JsonPropertyName("redirect_url")] public string? RedirectUrl { get; init; }
+        [JsonPropertyName("keep_old_link")] public bool? KeepOldLink { get; init; }
     }
 
     /// <summary>A OrganizationsInvitationsRevokeResponse object.</summary>
@@ -43503,6 +47974,8 @@ namespace Atlas.Generated
         [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
         [JsonPropertyName("cap_id")] public string? CapId { get; init; }
         [JsonPropertyName("revoked")] public bool? Revoked { get; init; }
+        /// <summary>The bumped guardian-signed revocation epoch.</summary>
+        [JsonPropertyName("revocation_epoch")] public Dictionary<string, object?>? RevocationEpoch { get; init; }
     }
 
     /// <summary>A PcaRevocationsBody object.</summary>
@@ -43510,6 +47983,8 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("grant_ref")] public string? GrantRef { get; init; }
         [JsonPropertyName("cap_id")] public string? CapId { get; init; }
+        /// <summary>Principal-signed revocation (no Authorization header): Ed25519 over the domain-separated {grant_ref, cap_id}, by the grant principal key.</summary>
+        [JsonPropertyName("principal_sig")] public string? PrincipalSig { get; init; }
     }
 
     /// <summary>A PcaStepupsDenyResponse object.</summary>
@@ -43746,6 +48221,14 @@ namespace Atlas.Generated
         /// <summary>With `provisioning_key: true`: a full-scope setup key, shown once, that expires at `onboarding_secret_expires_at`.</summary>
         [JsonPropertyName("onboarding_secret")] public string? OnboardingSecret { get; init; }
         [JsonPropertyName("onboarding_key_id")] public string? OnboardingKeyId { get; init; }
+        /// <summary>With `secret_key_profile: "web_app"`: the narrow key for the app's server, shown once.</summary>
+        [JsonPropertyName("runtime_secret")] public string? RuntimeSecret { get; init; }
+        [JsonPropertyName("runtime_key_id")] public string? RuntimeKeyId { get; init; }
+        [JsonPropertyName("runtime_secret_scopes")] public List<string>? RuntimeSecretScopes { get; init; }
+        /// <summary>With `secret_key_profile`: the name of `secret` (`provisioning`).</summary>
+        [JsonPropertyName("secret_key_label")] public string? SecretKeyLabel { get; init; }
+        /// <summary>With `secret_key_profile`: when `secret` stops working (epoch ms) unless renewed.</summary>
+        [JsonPropertyName("secret_expires_at")] public long? SecretExpiresAt { get; init; }
         /// <summary>When the setup key stops working (epoch ms), 24 hours after the create.</summary>
         [JsonPropertyName("onboarding_secret_expires_at")] public long? OnboardingSecretExpiresAt { get; init; }
         /// <summary>Present when `secret` holds every scope (`full_scope_secret_key`).</summary>
@@ -43801,6 +48284,14 @@ namespace Atlas.Generated
         /// <summary>With `provisioning_key: true`: a full-scope setup key, shown once, that expires at `onboarding_secret_expires_at`.</summary>
         [JsonPropertyName("onboarding_secret")] public string? OnboardingSecret { get; init; }
         [JsonPropertyName("onboarding_key_id")] public string? OnboardingKeyId { get; init; }
+        /// <summary>With `secret_key_profile: "web_app"`: the narrow key for the app's server, shown once.</summary>
+        [JsonPropertyName("runtime_secret")] public string? RuntimeSecret { get; init; }
+        [JsonPropertyName("runtime_key_id")] public string? RuntimeKeyId { get; init; }
+        [JsonPropertyName("runtime_secret_scopes")] public List<string>? RuntimeSecretScopes { get; init; }
+        /// <summary>With `secret_key_profile`: the name of `secret` (`provisioning`).</summary>
+        [JsonPropertyName("secret_key_label")] public string? SecretKeyLabel { get; init; }
+        /// <summary>With `secret_key_profile`: when `secret` stops working (epoch ms) unless renewed.</summary>
+        [JsonPropertyName("secret_expires_at")] public long? SecretExpiresAt { get; init; }
         /// <summary>When the setup key stops working (epoch ms), 24 hours after the create.</summary>
         [JsonPropertyName("onboarding_secret_expires_at")] public long? OnboardingSecretExpiresAt { get; init; }
         /// <summary>Present when `secret` holds every scope (`full_scope_secret_key`).</summary>
@@ -43823,6 +48314,7 @@ namespace Atlas.Generated
         [JsonPropertyName("create_development_sibling")] public bool? CreateDevelopmentSibling { get; init; }
         [JsonPropertyName("secret_key_preset")] public string? SecretKeyPreset { get; init; }
         [JsonPropertyName("provisioning_key")] public bool? ProvisioningKey { get; init; }
+        [JsonPropertyName("secret_key_profile")] public string? SecretKeyProfile { get; init; }
         [JsonPropertyName("tags")] public List<string>? Tags { get; init; }
         [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
         [JsonPropertyName("external_ref")] public string? ExternalRef { get; init; }
@@ -45498,6 +49990,14 @@ namespace Atlas.Generated
         [JsonPropertyName("revoked")] public string? Revoked { get; init; }
     }
 
+    /// <summary>What this key may hand out through POST /v1/secret_keys: nothing without secret_keys:write; otherwise only scopes it holds itself.</summary>
+    public sealed record PlatformWhoamiListResponseKeyCanMint
+    {
+        [JsonPropertyName("secret_keys")] public bool? SecretKeys { get; init; }
+        [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
+        [JsonPropertyName("presets")] public List<string>? Presets { get; init; }
+    }
+
     /// <summary>A PlatformWhoamiListResponseKey object.</summary>
     public sealed record PlatformWhoamiListResponseKey
     {
@@ -45509,6 +50009,14 @@ namespace Atlas.Generated
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
         /// <summary>Presets (read_only, privacy:execute, …) expanded.</summary>
         [JsonPropertyName("effective_scopes")] public List<string>? EffectiveScopes { get; init; }
+        /// <summary>The named key preset (app-runtime, provisioning, integrations) whose scopes are exactly this key's; null otherwise.</summary>
+        [JsonPropertyName("preset")] public string? Preset { get; init; }
+        /// <summary>What this key may hand out through POST /v1/secret_keys: nothing without secret_keys:write; otherwise only scopes it holds itself.</summary>
+        [JsonPropertyName("can_mint")] public PlatformWhoamiListResponseKeyCanMint? CanMint { get; init; }
+        /// <summary>What the key is scoped to: { type: "instance", id } (or the platform/account for a platform key).</summary>
+        [JsonPropertyName("resource")] public Dictionary<string, object?>? Resource { get; init; }
+        /// <summary>Backend API route prefixes (for example /v1/domains) with at least one route this key's scopes allow, sorted.</summary>
+        [JsonPropertyName("route_prefixes")] public List<string>? RoutePrefixes { get; init; }
         [JsonPropertyName("owner")] public string? Owner { get; init; }
         [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
         [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
@@ -45952,12 +50460,14 @@ namespace Atlas.Generated
         [JsonPropertyName("principal")] public string? Principal { get; init; }
     }
 
-    /// <summary>Provide `emails` or `atlas.sub` / `atlas.ext`.</summary>
+    /// <summary>Provide `emails` or `atlas.sub` / `atlas.ext`. `identity` is an alias of `atlas`; send either, or both with identical values (differing values are a 400 on `identity`). An identity match wins over an email match.</summary>
     public sealed record PrivacyLookupBodyModel : ClearableBody
     {
         [JsonPropertyName("emails")] public List<string>? Emails { get; init; }
         /// <summary>The person as the suite knows them. `sub` (with `iss`) is matched ALONE when present — never an email fallback. `iss` may be this instance's issuer (current or previous) or, with Sign in with Atlas on, the Sign in with Atlas issuer.</summary>
         [JsonPropertyName("atlas")] public PrivacyLookupBodyModelAtlas? Atlas { get; init; }
+        /// <summary>Alias of `atlas`: same object, same validation and lookup order.</summary>
+        [JsonPropertyName("identity")] public PrivacyLookupBodyModelAtlas? Identity { get; init; }
     }
 
     /// <summary>A PrivacyRequestModelRetentionItem object.</summary>
@@ -47594,7 +52104,7 @@ namespace Atlas.Generated
         [JsonPropertyName("overlap_seconds")] public long? OverlapSeconds { get; init; }
         /// <summary>One of: atlas, legacy.</summary>
         [JsonPropertyName("key_format")] public string? KeyFormat { get; init; }
-        /// <summary>Give the replacement this named scope set instead of the old key's scopes. The calling key must hold them. One of: app-runtime.</summary>
+        /// <summary>Give the replacement this named scope set instead of the old key's scopes. The calling key must hold them. One of: app-runtime, web-app, provisioning, integrations.</summary>
         [JsonPropertyName("preset")] public string? Preset { get; init; }
     }
 
@@ -47710,6 +52220,10 @@ namespace Atlas.Generated
         [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
         /// <summary>Updated (epoch ms).</summary>
         [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
+        /// <summary>Identity verification kinds only (Persona, Onfido, Veriff, Stripe Identity), present as soon as the connector exists, whether or not identity verification is enabled. Give it to the verification service as its webhook endpoint.</summary>
+        [JsonPropertyName("webhook_url")] public string? WebhookUrl { get; init; }
+        /// <summary>Identity verification kinds only: the events to subscribe to at the service. Persona: `inquiry.created`, `started`, `completed` (counts as approved), `transitioned`, `approved`, `declined`, `failed`, `expired`, `marked-for-review`. Stripe Identity: `identity.verification_session.created`, `processing`, `verified`, `requires_input`, `canceled`, `redacted`. Onfido: `workflow_run.completed`. Veriff: `decision` and `event` (Veriff sets webhook URLs per webhook type, not per event name, so set this URL as both the decision and the event webhook URL).</summary>
+        [JsonPropertyName("webhook_events")] public List<string>? WebhookEvents { get; init; }
     }
 
     /// <summary>A ServiceConnectorsListResponse object.</summary>
@@ -47859,67 +52373,6 @@ namespace Atlas.Generated
         [JsonPropertyName("id")] public string? Id { get; init; }
         /// <summary>One of: True.</summary>
         [JsonPropertyName("deleted")] public string? Deleted { get; init; }
-    }
-
-    /// <summary>A SessionModelLocation object.</summary>
-    public sealed record SessionModelLocation
-    {
-        /// <summary>ISO country code.</summary>
-        [JsonPropertyName("country")] public string Country { get; init; } = "";
-        [JsonPropertyName("region")] public string? Region { get; init; }
-        [JsonPropertyName("city")] public string? City { get; init; }
-    }
-
-    /// <summary>A SessionModelRisk object.</summary>
-    public sealed record SessionModelRisk
-    {
-        [JsonPropertyName("score")] public long? Score { get; init; }
-        /// <summary>One of: low, medium, high.</summary>
-        [JsonPropertyName("level")] public string? Level { get; init; }
-        [JsonPropertyName("reasons")] public List<string>? Reasons { get; init; }
-        [JsonPropertyName("computed_at")] public long? ComputedAt { get; init; }
-    }
-
-    /// <summary>A SessionModel object.</summary>
-    public sealed record SessionModel
-    {
-        /// <summary>One of: session.</summary>
-        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        [JsonPropertyName("id")] public string Id { get; init; } = "";
-        [JsonPropertyName("user_id")] public string UserId { get; init; } = "";
-        [JsonPropertyName("status")] public string Status { get; init; } = "";
-        [JsonPropertyName("last_active_organization_id")] public string? LastActiveOrganizationId { get; init; }
-        [JsonPropertyName("impersonated_by")] public string? ImpersonatedBy { get; init; }
-        /// <summary>Last active (epoch ms).</summary>
-        [JsonPropertyName("last_active_at")] public long LastActiveAt { get; init; }
-        /// <summary>Expires (epoch ms).</summary>
-        [JsonPropertyName("expire_at")] public long ExpireAt { get; init; }
-        /// <summary>Abandoned (epoch ms).</summary>
-        [JsonPropertyName("abandon_at")] public long AbandonAt { get; init; }
-        /// <summary>Epoch ms when the session ends from inactivity unless there is activity first (same value as abandon_at). Slides on activity and on POST /v1/sessions/{id}/touch; never past expire_at.</summary>
-        [JsonPropertyName("idle_expires_at")] public long IdleExpiresAt { get; init; }
-        /// <summary>Created (epoch ms).</summary>
-        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
-        /// <summary>Custom per-session data the app attached (PUT/PATCH /v1/sessions/{id}/custom_data, or a post_login Action). Null when none.</summary>
-        [JsonPropertyName("custom_data")] public Dictionary<string, object?>? CustomData { get; init; }
-        /// <summary>How the session was signed in: the first-factor strategy (password, email_code, email_link, phone_code, passkey, oauth, sso, saml, ticket, ...). Null for a session created before this was recorded.</summary>
-        [JsonPropertyName("sign_in_method")] public string? SignInMethod { get; init; }
-        /// <summary>The social provider id when sign_in_method is oauth; otherwise null.</summary>
-        [JsonPropertyName("provider")] public string? Provider { get; init; }
-        /// <summary>The authentication methods proven at sign-in (RFC 8176, e.g. pwd, otp, webauthn, ext, mfa); updated by a step-up. Null for a session created before this was recorded.</summary>
-        [JsonPropertyName("amr")] public List<string>? Amr { get; init; }
-        /// <summary>The user agent of the device that signed in. Null when none was sent.</summary>
-        [JsonPropertyName("user_agent")] public string? UserAgent { get; init; }
-        /// <summary>The client IP at sign-in (through a path mount: the browser IP your proxy asserted with its proxy secret). Dropped 30 days after the session ends.</summary>
-        [JsonPropertyName("ip_address")] public string? IpAddress { get; init; }
-        /// <summary>Coarse location of the sign-in, when a geo source resolved one.</summary>
-        [JsonPropertyName("location")] public SessionModelLocation? Location { get; init; }
-        /// <summary>Advisory risk assessment. Null = not assessed (never "safe"). Atlas decides nothing from it.</summary>
-        [JsonPropertyName("risk")] public SessionModelRisk? Risk { get; init; }
-        /// <summary>Epoch ms when the session was ended (null while active, or when it simply ran out).</summary>
-        [JsonPropertyName("revoked_at")] public long? RevokedAt { get; init; }
-        /// <summary>Why the session was ended, e.g. signed_out, revoked_by_api, token_reuse (a refresh token was presented after it had been replaced and its grace window had passed). Null while active.</summary>
-        [JsonPropertyName("revoked_reason")] public string? RevokedReason { get; init; }
     }
 
     /// <summary>A SessionsListResponse object.</summary>
@@ -49158,6 +53611,10 @@ namespace Atlas.Generated
         public string? PhoneNumber { get; init; }
         /// <summary>Exact external_id match.</summary>
         public string? ExternalId { get; init; }
+        /// <summary>With provider_user_id: the user who holds that identity at that provider (for example discord). Both are required together.</summary>
+        public string? Provider { get; init; }
+        /// <summary>The provider's own id for the person (for example a Discord user id). Needs provider.</summary>
+        public string? ProviderUserId { get; init; }
         /// <summary>true: only users under an active ban; false: only users who are not (a timed ban that has expired counts as not banned).</summary>
         public bool? Banned { get; init; }
         /// <summary>true: users with at least one verified email address; false: users with none.</summary>
@@ -49190,6 +53647,8 @@ namespace Atlas.Generated
             yield return new KeyValuePair<string, object?>("username", Username);
             yield return new KeyValuePair<string, object?>("phone_number", PhoneNumber);
             yield return new KeyValuePair<string, object?>("external_id", ExternalId);
+            yield return new KeyValuePair<string, object?>("provider", Provider);
+            yield return new KeyValuePair<string, object?>("provider_user_id", ProviderUserId);
             yield return new KeyValuePair<string, object?>("banned", Banned);
             yield return new KeyValuePair<string, object?>("email_verified", EmailVerified);
             yield return new KeyValuePair<string, object?>("organization_id", OrganizationId);
@@ -49273,6 +53732,7 @@ namespace Atlas.Generated
         [JsonPropertyName("referral")] public UsersCreateBodyReferral? Referral { get; init; }
         [JsonPropertyName("referral_code")] public string? ReferralCode { get; init; }
         [JsonPropertyName("notify")] public bool? Notify { get; init; }
+        [JsonPropertyName("sandbox")] public bool? Sandbox { get; init; }
         [JsonPropertyName("mfa")] public UsersCreateBodyMfa? Mfa { get; init; }
         /// <summary>Send <c>null</c> for <c>password_hash</c>, which clears it.</summary>
         public UsersCreateBody ClearPasswordHash() => this with { Cleared = Plus("password_hash") };
@@ -49583,10 +54043,14 @@ namespace Atlas.Generated
         [JsonPropertyName("context")] public Dictionary<string, string>? Context { get; init; }
         /// <summary>How long the request stays open: 10 to 604800 seconds. Default 120.</summary>
         [JsonPropertyName("ttl_seconds")] public long? TtlSeconds { get; init; }
-        /// <summary>Who decides. Leave out for the v1 flow (the user answers on their own device with number matching). Name `user_ids` (1 to 20) or an `organization_id` with a `role`; `required` of them must approve (default 1, at most the number of user ids). Any one denial ends the request. A role with fewer holders than `required` is refused with 422 (`meta.reason` = `approvers_insufficient`). A request with approvers always needs signed approvals.</summary>
+        /// <summary>Who decides. Leave out for the v1 flow (the user answers on their own device with number matching). Name `user_ids` (1 to 20), a `group_id` (every member of the group may decide), or an `organization_id` with a `role` (or up to 10 `roles`; a holder of any of them may decide). A role or group is the way to name a big set: "any 2 of ops" is the role `ops` with `required: 2`. `required` of them must approve (default 1; at most the number of user ids, and at most 50 for a role or group). Membership is read when someone decides, so leaving the group or role ends the right to decide. Any one denial ends the request. A role or group with fewer members than `required` is refused with 422 (`meta.reason` = `approvers_insufficient`). A request with approvers always needs signed approvals.</summary>
         [JsonPropertyName("approvers")] public ApprovalRequestsCreateBodyApprovers? Approvers { get; init; }
         /// <summary>Demand a signature over the canonical request even from the user themselves. Default false.</summary>
         [JsonPropertyName("require_signature")] public bool? RequireSignature { get; init; }
+        /// <summary>The user the request is about can never approve or reject it, even holding the approver role (403 with `meta.reason` = `requester_excluded`). Needs `approvers`; refused with 422 when too few other approvers remain to reach `required`. Default false.</summary>
+        [JsonPropertyName("exclude_requester")] public bool? ExcludeRequester { get; init; }
+        /// <summary>Name of a step-up policy. An approver may then approve from a signed-in session that has just met that policy (within its max age) instead of signing with a device key or passkey; the receipt records the method as `step_up`. Device-signature approvals keep working. Refused with 400 when the policy does not exist or is disabled.</summary>
+        [JsonPropertyName("step_up_policy")] public string? StepUpPolicy { get; init; }
         /// <summary>Only an approval from a device the approver trusted (a signing key, passkey or push device marked trusted) counts; a denial never needs one. Refused with 422 (`meta.reason` = `no_trusted_device`) when too few approvers have a trusted device. The instance setting approvals.requireTrustedDevice makes this the rule for every request. Default false.</summary>
         [JsonPropertyName("require_trusted_device")] public bool? RequireTrustedDevice { get; init; }
         /// <summary>An opaque value (for example a hash of the tool and its arguments) the receipt can only be consumed against.</summary>
@@ -49849,9 +54313,12 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
         [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>One of: consent.</summary>
+        [JsonPropertyName("type")] public string? Type { get; init; }
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
         [JsonPropertyName("client_name")] public string? ClientName { get; init; }
         [JsonPropertyName("scopes")] public List<string> Scopes { get; init; } = new();
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
         [JsonPropertyName("granted_at")] public long GrantedAt { get; init; }
         [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
     }
@@ -50114,6 +54581,7 @@ namespace Atlas.Generated
         [JsonPropertyName("secondary_user_id")] public string? SecondaryUserId { get; init; }
         [JsonPropertyName("user_id")] public string? UserId { get; init; }
         [JsonPropertyName("link_with")] public string? LinkWith { get; init; }
+        [JsonPropertyName("external_id")] public string? ExternalId { get; init; }
     }
 
     /// <summary>A UsersDeleteIdentitiesByProviderResponse object.</summary>
@@ -50149,6 +54617,12 @@ namespace Atlas.Generated
             yield return new KeyValuePair<string, object?>("limit", Limit);
             yield return new KeyValuePair<string, object?>("starting_after", StartingAfter);
         }
+    }
+
+    /// <summary>A UsersCreateIdentityVerificationBody object.</summary>
+    public sealed record UsersCreateIdentityVerificationBody : ClearableBody
+    {
+        [JsonPropertyName("redirect_url")] public string? RedirectUrl { get; init; }
     }
 
     /// <summary>A verification or reset proof minted for a user without sending it. A credential: handle it like a password.</summary>
@@ -51523,6 +55997,8 @@ namespace Atlas.Generated
         [JsonPropertyName("headers")] public Dictionary<string, string>? Headers { get; init; }
         /// <summary>Have Atlas get an OAuth bearer token with the client-credentials grant and send it as `Authorization: Bearer` on every delivery. Replaces the whole setting. The client secret is stored encrypted and never returned. null clears it.</summary>
         [JsonPropertyName("oauth")] public WebhookEndpointsCreateBodyOauth? Oauth { get; init; }
+        /// <summary>Opt in to the seat private_metadata on organization_membership events sent to this endpoint. Only instance-owned endpoints can; org-owned and per-app endpoints never receive it. Default false.</summary>
+        [JsonPropertyName("include_private_membership")] public bool? IncludePrivateMembership { get; init; }
         /// <summary>Most deliveries per second Atlas sends to this endpoint; the rest wait their turn. null = unlimited.</summary>
         [JsonPropertyName("max_rps")] public long? MaxRps { get; init; }
         /// <summary>Where deliveries go instead of an HTTPS URL: { type: "aws_eventbridge", region, event_bus_name, source? } | { type: "gcp_pubsub", project_id, topic_id } | { type: "cloudflare_queue", account_id, queue_id } | { type: "segment" | "mixpanel" | "posthog" | "amplitude" | "customerio", region? } | { type: "ga4", measurement_id } | { type: "slack" } (analytics and messaging types also take include_pii? and event_map?) | { type: "lucida", host? } | { type: "heap", region? } | { type: "rudderstack", data_plane_url } | { type: "hermetica", host? } | { type: "hubspot", external_id_property? } | { type: "brevo", list_ids? } | { type: "mailchimp", list_id, status_if_new? } | { type: "loops" } | { type: "klaviyo" } | { type: "intercom", region? } | { type: "seolyticize", conversion_event? ("user.created" default, or "user.attributed": the signed_up conversion is then sent on user.attributed with the referrer, landing page and utm params, and the endpoint must subscribe to user.attributed) } (Lucida, Heap, RudderStack and Seolyticize also take include_pii? and event_map?; the contact types - Hermetica, HubSpot, Brevo, Mailchimp, Loops, Klaviyo, Intercom - sync user.created/updated/unbanned as a contact and user.banned/deleted as an unsubscribe or removal) | { type: "https" }.</summary>
@@ -51577,6 +56053,8 @@ namespace Atlas.Generated
         [JsonPropertyName("oauth")] public Dictionary<string, object?>? Oauth { get; init; }
         /// <summary>Deliveries per second this endpoint may receive; null = unlimited.</summary>
         [JsonPropertyName("max_rps")] public long? MaxRps { get; init; }
+        /// <summary>Membership events to this endpoint carry the seat private_metadata.</summary>
+        [JsonPropertyName("include_private_membership")] public bool? IncludePrivateMembership { get; init; }
         /// <summary>Where deliveries go: { type: "https" } or an event destination with its non-secret settings. Credentials are never returned (credentials_set says whether they are stored).</summary>
         [JsonPropertyName("destination")] public WebhookEndpointModelDestination? Destination { get; init; }
         /// <summary>One of: healthy, failing, disabled.</summary>
@@ -51638,6 +56116,8 @@ namespace Atlas.Generated
         [JsonPropertyName("headers")] public Dictionary<string, string>? Headers { get; init; }
         /// <summary>Have Atlas get an OAuth bearer token with the client-credentials grant and send it as `Authorization: Bearer` on every delivery. Replaces the whole setting. The client secret is stored encrypted and never returned. null clears it.</summary>
         [JsonPropertyName("oauth")] public WebhookEndpointsCreateBodyOauth? Oauth { get; init; }
+        /// <summary>Opt in to the seat private_metadata on organization_membership events sent to this endpoint. Only instance-owned endpoints can; org-owned and per-app endpoints never receive it. Default false.</summary>
+        [JsonPropertyName("include_private_membership")] public bool? IncludePrivateMembership { get; init; }
         /// <summary>Most deliveries per second Atlas sends to this endpoint; the rest wait their turn. null = unlimited.</summary>
         [JsonPropertyName("max_rps")] public long? MaxRps { get; init; }
         /// <summary>Where deliveries go instead of an HTTPS URL: { type: "aws_eventbridge", region, event_bus_name, source? } | { type: "gcp_pubsub", project_id, topic_id } | { type: "cloudflare_queue", account_id, queue_id } | { type: "segment" | "mixpanel" | "posthog" | "amplitude" | "customerio", region? } | { type: "ga4", measurement_id } | { type: "slack" } (analytics and messaging types also take include_pii? and event_map?) | { type: "lucida", host? } | { type: "heap", region? } | { type: "rudderstack", data_plane_url } | { type: "hermetica", host? } | { type: "hubspot", external_id_property? } | { type: "brevo", list_ids? } | { type: "mailchimp", list_id, status_if_new? } | { type: "loops" } | { type: "klaviyo" } | { type: "intercom", region? } | { type: "seolyticize", conversion_event? ("user.created" default, or "user.attributed": the signed_up conversion is then sent on user.attributed with the referrer, landing page and utm params, and the endpoint must subscribe to user.attributed) } (Lucida, Heap, RudderStack and Seolyticize also take include_pii? and event_map?; the contact types - Hermetica, HubSpot, Brevo, Mailchimp, Loops, Klaviyo, Intercom - sync user.created/updated/unbanned as a contact and user.banned/deleted as an unsubscribe or removal) | { type: "https" }.</summary>
@@ -51686,6 +56166,8 @@ namespace Atlas.Generated
         [JsonPropertyName("headers")] public Dictionary<string, string>? Headers { get; init; }
         /// <summary>Have Atlas get an OAuth bearer token with the client-credentials grant and send it as `Authorization: Bearer` on every delivery. Replaces the whole setting. The client secret is stored encrypted and never returned. null clears it.</summary>
         [JsonPropertyName("oauth")] public WebhookEndpointsCreateBodyOauth? Oauth { get; init; }
+        /// <summary>Opt in to the seat private_metadata on organization_membership events sent to this endpoint. Only instance-owned endpoints can; org-owned and per-app endpoints never receive it. Default false.</summary>
+        [JsonPropertyName("include_private_membership")] public bool? IncludePrivateMembership { get; init; }
         /// <summary>Most deliveries per second Atlas sends to this endpoint; the rest wait their turn. null = unlimited.</summary>
         [JsonPropertyName("max_rps")] public long? MaxRps { get; init; }
         /// <summary>Where deliveries go instead of an HTTPS URL: { type: "aws_eventbridge", region, event_bus_name, source? } | { type: "gcp_pubsub", project_id, topic_id } | { type: "cloudflare_queue", account_id, queue_id } | { type: "segment" | "mixpanel" | "posthog" | "amplitude" | "customerio", region? } | { type: "ga4", measurement_id } | { type: "slack" } (analytics and messaging types also take include_pii? and event_map?) | { type: "lucida", host? } | { type: "heap", region? } | { type: "rudderstack", data_plane_url } | { type: "hermetica", host? } | { type: "hubspot", external_id_property? } | { type: "brevo", list_ids? } | { type: "mailchimp", list_id, status_if_new? } | { type: "loops" } | { type: "klaviyo" } | { type: "intercom", region? } | { type: "seolyticize", conversion_event? ("user.created" default, or "user.attributed": the signed_up conversion is then sent on user.attributed with the referrer, landing page and utm params, and the endpoint must subscribe to user.attributed) } (Lucida, Heap, RudderStack and Seolyticize also take include_pii? and event_map?; the contact types - Hermetica, HubSpot, Brevo, Mailchimp, Loops, Klaviyo, Intercom - sync user.created/updated/unbanned as a contact and user.banned/deleted as an unsubscribe or removal) | { type: "https" }.</summary>
@@ -51854,7 +56336,7 @@ namespace Atlas.Generated
     /// <summary>Query parameters of Test. Unset values are not sent.</summary>
     public sealed record WebhookEndpointsTestQuery
     {
-        /// <summary>Attempt the delivery now and return its result in the response: a duration such as 10s or 5000ms (at most 10 s). Omit to queue it for the worker.</summary>
+        /// <summary>How long to wait for the attempt: a duration such as 10s or 5000ms (at most 10 s, the default). `0` queues the delivery for the worker and answers 201 without waiting.</summary>
         public string? Wait { get; init; }
 
         /// <summary>Flatten to query key/value pairs.</summary>
