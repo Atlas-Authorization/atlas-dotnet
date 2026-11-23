@@ -40,6 +40,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/abac/token_mapping. Scope: <c>abac:write</c>.</remarks>
         public Task<Dictionary<string, object?>> SetTokenMappingAsync(AbacSetTokenMappingBody? body = null, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Put, $"/v1/abac/token_mapping", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Set the claim mapping used by `authorize_token`: the principal type and id claim, claims that become parent entities (org, role, groups), claims copied as attributes, and trusted issuers with their JWKS URLs.</summary>
+        /// <remarks>PUT /v1/abac/token_mapping. Scope: <c>abac:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> SetTokenMappingAsync(AbacSetTokenMappingBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Put, $"/v1/abac/token_mapping", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>AbacPolicies</c> operations.</summary>
@@ -109,6 +114,11 @@ namespace Atlas.Generated
         public Task<ActionModel> UpdateRolloutAsync(string id, ActionsUpdateRolloutBody body, CancellationToken cancellationToken = default) =>
             Req<ActionModel>(HttpVerb.Patch, $"/v1/actions/{Enc(id)}/rollout", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Move a staged rollout: 1-99 changes its share, 100 promotes the staged version to current, 0 aborts it and drops it. 409 when the Action has no staged version.</summary>
+        /// <remarks>PATCH /v1/actions/{id}/rollout. Scope: <c>actions:write</c>.</remarks>
+        public Task<ActionModel> UpdateRolloutAsync(string id, ActionsUpdateRolloutBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ActionModel>(HttpVerb.Patch, $"/v1/actions/{Enc(id)}/rollout", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Every kept version of an Action (up to 50, newest first), with which one is live and which one is staged. Each is an immutable snapshot of the code (or HTTP target); the first change to an Action that predates versions snapshots what it was.</summary>
         /// <remarks>GET /v1/actions/{id}/versions. Scope: <c>actions:read</c>.</remarks>
         public Task<ActionsListVersionsResponse> ListVersionsAsync(string id, ActionsListVersionsQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -150,10 +160,20 @@ namespace Atlas.Generated
         public Task<AdministrativeUnitsListResponseDataItem> UpdateAsync(string id, AdministrativeUnitsUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<AdministrativeUnitsListResponseDataItem>(HttpVerb.Patch, $"/v1/administrative_units/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a unit's name, description or filter.</summary>
+        /// <remarks>PATCH /v1/administrative_units/{id}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<AdministrativeUnitsListResponseDataItem> UpdateAsync(string id, AdministrativeUnitsUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AdministrativeUnitsListResponseDataItem>(HttpVerb.Patch, $"/v1/administrative_units/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a unit. A membership scope that named it stops reaching those people.</summary>
         /// <remarks>DELETE /v1/administrative_units/{id}. Scope: <c>organizations:write</c>.</remarks>
         public Task<AdministrativeUnitsDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<AdministrativeUnitsDeleteResponse>(HttpVerb.Delete, $"/v1/administrative_units/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a unit. A membership scope that named it stops reaching those people.</summary>
+        /// <remarks>DELETE /v1/administrative_units/{id}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<AdministrativeUnitsDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AdministrativeUnitsDeleteResponse>(HttpVerb.Delete, $"/v1/administrative_units/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The listed members of a static unit (409 for a dynamic unit).</summary>
         /// <remarks>GET /v1/administrative_units/{id}/members. Scope: <c>organizations:read</c>.</remarks>
@@ -263,6 +283,11 @@ namespace Atlas.Generated
         public Task<AgentsGetLifecycleResponse> SetLifecycleAsync(string id, AgentsSetLifecycleBody body, CancellationToken cancellationToken = default) =>
             Req<AgentsGetLifecycleResponse>(HttpVerb.Put, $"/v1/agents/{Enc(id)}/lifecycle", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set an agent's sponsor, backup sponsor and expiry (omitted fields keep their value; null clears). Emits agent.sponsor_changed. When the sponsor's account is gone, banned or locked the backup is promoted automatically; at the expiry the agent's grants are revoked and the agent is revoked, after an agent.expiring warning 14 days ahead.</summary>
+        /// <remarks>PUT /v1/agents/{id}/lifecycle. Scope: <c>machines:write</c>.</remarks>
+        public Task<AgentsGetLifecycleResponse> SetLifecycleAsync(string id, AgentsSetLifecycleBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AgentsGetLifecycleResponse>(HttpVerb.Put, $"/v1/agents/{Enc(id)}/lifecycle", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Extend an agent's registration by extend_days (1 to 365) from its current expiry (or now, when that has passed). A revoked agent cannot be renewed.</summary>
         /// <remarks>POST /v1/agents/{id}/renew. Scope: <c>machines:write</c>.</remarks>
         public Task<AgentsGetLifecycleResponse> RenewAsync(string id, AgentsRenewBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
@@ -297,6 +322,27 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/allowlist_identifiers/{id}. Scope: <c>restrictions:write</c>.</remarks>
         public Task<AllowlistIdentifiersDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<AllowlistIdentifiersDeleteResponse>(HttpVerb.Delete, $"/v1/allowlist_identifiers/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove an allowlist identifier. Another instance id is 404, never 403.</summary>
+        /// <remarks>DELETE /v1/allowlist_identifiers/{id}. Scope: <c>restrictions:write</c>.</remarks>
+        public Task<AllowlistIdentifiersDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AllowlistIdentifiersDeleteResponse>(HttpVerb.Delete, $"/v1/allowlist_identifiers/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>Analytics</c> operations.</summary>
+    public sealed class AnalyticsOperations : ResourceBase
+    {
+        internal AnalyticsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>Captcha challenges per provider and flow: issued, passed, failed, refused, and the solve rate (passed over passed plus failed). No organization slice. A provider that records no issue event shows 0 issued.</summary>
+        /// <remarks>GET /v1/analytics/captcha. Scope: <c>analytics:read</c>.</remarks>
+        public Task<AnalyticsGetCaptchaResponse> GetCaptchaAsync(AnalyticsGetCaptchaQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<AnalyticsGetCaptchaResponse>(HttpVerb.Get, $"/v1/analytics/captcha", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>SMS messages by destination country: sent, delivered, failed. Atlas sends through your own provider, which bills you; pass `rate_per_message` (and optionally `currency`) to add `estimated_cost` (messages times that rate, not a billed amount). No organization slice.</summary>
+        /// <remarks>GET /v1/analytics/sms. Scope: <c>analytics:read</c>.</remarks>
+        public Task<AnalyticsListSmsResponse> ListSmsAsync(AnalyticsListSmsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<AnalyticsListSmsResponse>(HttpVerb.Get, $"/v1/analytics/sms", query: query?.ToQuery(), cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>ApiKeys</c> operations.</summary>
@@ -349,6 +395,11 @@ namespace Atlas.Generated
         public Task DeleteCustomPresetAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/app_catalog/custom_presets/{Enc(id)}", cancellationToken: cancellationToken);
 
+        /// <summary>Delete a private preset. Apps already installed from it keep working.</summary>
+        /// <remarks>DELETE /v1/app_catalog/custom_presets/{id}. Scope: <c>app_catalog:write</c>.</remarks>
+        public Task DeleteCustomPresetAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/app_catalog/custom_presets/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>The queue of apps people asked for, most wanted first. Filter with status (open, building, available, declined).</summary>
         /// <remarks>GET /v1/app_catalog/requests. Scope: <c>app_catalog:read</c>.</remarks>
         public Task<AppCatalogListRequestsResponse> ListRequestsAsync(AppCatalogListRequestsQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -364,10 +415,20 @@ namespace Atlas.Generated
         public Task UpdateRequestAsync(string id, AppCatalogUpdateRequestBody body, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Patch, $"/v1/app_catalog/requests/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Move a request along: status open, building, available or declined, and a note.</summary>
+        /// <remarks>PATCH /v1/app_catalog/requests/{id}. Scope: <c>app_catalog:write</c>.</remarks>
+        public Task UpdateRequestAsync(string id, AppCatalogUpdateRequestBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Patch, $"/v1/app_catalog/requests/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove an app catalog request.</summary>
         /// <remarks>DELETE /v1/app_catalog/requests/{id}. Scope: <c>app_catalog:write</c>.</remarks>
         public Task DeleteRequestAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/app_catalog/requests/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove an app catalog request.</summary>
+        /// <remarks>DELETE /v1/app_catalog/requests/{id}. Scope: <c>app_catalog:write</c>.</remarks>
+        public Task DeleteRequestAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/app_catalog/requests/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Add one vote to an open or in-progress app request (409 when it is available or declined, 404 when unknown). One vote per person or key: a repeat vote changes nothing.</summary>
         /// <remarks>POST /v1/app_catalog/requests/{id}/vote. Scope: <c>app_catalog:write</c>.</remarks>
@@ -446,6 +507,11 @@ namespace Atlas.Generated
         public Task<AuditGetChainResponse> SetChainAsync(AuditSetChainBody body, CancellationToken cancellationToken = default) =>
             Req<AuditGetChainResponse>(HttpVerb.Put, $"/v1/audit/chain", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Turn the tamper-evident audit chain on. From then on every audit row is hashed and chained to the one before (by the worker, about a minute after it is written) and signed checkpoints pin the head. A chain that is on cannot be turned off: its links are the evidence. Needs a recent MFA sign-in. Idempotent; call again to change checkpoint_interval_seconds.</summary>
+        /// <remarks>PUT /v1/audit/chain. Scope: <c>audit:write</c>.</remarks>
+        public Task<AuditGetChainResponse> SetChainAsync(AuditSetChainBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AuditGetChainResponse>(HttpVerb.Put, $"/v1/audit/chain", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Signed checkpoints, oldest first. Each is a JWS the instance's signing key made; verify it against jwks_uri.</summary>
         /// <remarks>GET /v1/audit/chain/checkpoints. Scope: <c>audit:read</c>.</remarks>
         public Task<AuditListChainCheckpointsResponse> ListChainCheckpointsAsync(AuditListChainCheckpointsQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -481,6 +547,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/audit_retention. Scope: <c>audit:write</c>.</remarks>
         public Task<Dictionary<string, object?>> SetAsync(AuditRetentionSetBody? body = null, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Put, $"/v1/audit_retention", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Set audit log retention in days (`null` returns to the default). Entries older than the retention are deleted by an hourly sweep, so shortening it needs `confirm_deletion: true`.</summary>
+        /// <remarks>PUT /v1/audit_retention. Scope: <c>audit:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> SetAsync(AuditRetentionSetBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Put, $"/v1/audit_retention", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>AuthenticatorPolicies</c> operations.</summary>
@@ -522,10 +593,20 @@ namespace Atlas.Generated
         public Task<AuthenticatorPoliciesListResponseDataItem> UpdateAsync(string id, AuthenticatorPoliciesCreateBody? body = null, CancellationToken cancellationToken = default) =>
             Req<AuthenticatorPoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/authenticator_policies/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Update an authenticator policy.</summary>
+        /// <remarks>PATCH /v1/authenticator_policies/{id}. Scope: <c>access_policies:write</c>.</remarks>
+        public Task<AuthenticatorPoliciesListResponseDataItem> UpdateAsync(string id, AuthenticatorPoliciesCreateBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AuthenticatorPoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/authenticator_policies/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete an authenticator policy.</summary>
         /// <remarks>DELETE /v1/authenticator_policies/{id}. Scope: <c>access_policies:write</c>.</remarks>
         public Task<AuthenticatorPoliciesDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<AuthenticatorPoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/authenticator_policies/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete an authenticator policy.</summary>
+        /// <remarks>DELETE /v1/authenticator_policies/{id}. Scope: <c>access_policies:write</c>.</remarks>
+        public Task<AuthenticatorPoliciesDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AuthenticatorPoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/authenticator_policies/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Authz</c> operations.</summary>
@@ -567,6 +648,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/authz/what_if/{id}. Scope: <c>authz_decisions:write</c>.</remarks>
         public Task<AuthzDeleteWhatIfResponse> DeleteWhatIfAsync(string id, CancellationToken cancellationToken = default) =>
             Req<AuthzDeleteWhatIfResponse>(HttpVerb.Delete, $"/v1/authz/what_if/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a saved what-if run.</summary>
+        /// <remarks>DELETE /v1/authz/what_if/{id}. Scope: <c>authz_decisions:write</c>.</remarks>
+        public Task<AuthzDeleteWhatIfResponse> DeleteWhatIfAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AuthzDeleteWhatIfResponse>(HttpVerb.Delete, $"/v1/authz/what_if/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>AuthzDecisions</c> operations.</summary>
@@ -594,6 +680,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/authz_pdps/{id}. Scope: <c>authz_decisions:write</c>.</remarks>
         public Task<AuthzPdpsDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<AuthzPdpsDeleteResponse>(HttpVerb.Delete, $"/v1/authz_pdps/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Forget a local policy decision point (it reappears if it checks in again).</summary>
+        /// <remarks>DELETE /v1/authz_pdps/{id}. Scope: <c>authz_decisions:write</c>.</remarks>
+        public Task<AuthzPdpsDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<AuthzPdpsDeleteResponse>(HttpVerb.Delete, $"/v1/authz_pdps/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Billing</c> operations.</summary>
@@ -684,10 +775,20 @@ namespace Atlas.Generated
         public Task<BillingListCouponsResponseDataItem> UpdateCouponAsync(string id, BillingUpdateCouponBody? body = null, CancellationToken cancellationToken = default) =>
             Req<BillingListCouponsResponseDataItem>(HttpVerb.Patch, $"/v1/billing/coupons/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Deactivate or reactivate a code, rename it, or change its redemption cap, expiry (`expires_at`, null removes it), eligible plans (`plan_ids`, null means every plan) or first-time-only rule. The discount itself cannot change; create a new code for that. Atlas enforces these when it validates a code at checkout; the promotion code on your payment provider keeps the limits it was created with, so the provider's own hosted page is still bound by those.</summary>
+        /// <remarks>PATCH /v1/billing/coupons/{id}. Scope: <c>billing:write</c>.</remarks>
+        public Task<BillingListCouponsResponseDataItem> UpdateCouponAsync(string id, BillingUpdateCouponBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<BillingListCouponsResponseDataItem>(HttpVerb.Patch, $"/v1/billing/coupons/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a code and stop it being used. Subscriptions that already have the discount keep it.</summary>
         /// <remarks>DELETE /v1/billing/coupons/{id}. Scope: <c>billing:write</c>.</remarks>
         public Task<BillingDeleteCouponResponse> DeleteCouponAsync(string id, CancellationToken cancellationToken = default) =>
             Req<BillingDeleteCouponResponse>(HttpVerb.Delete, $"/v1/billing/coupons/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a code and stop it being used. Subscriptions that already have the discount keep it.</summary>
+        /// <remarks>DELETE /v1/billing/coupons/{id}. Scope: <c>billing:write</c>.</remarks>
+        public Task<BillingDeleteCouponResponse> DeleteCouponAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<BillingDeleteCouponResponse>(HttpVerb.Delete, $"/v1/billing/coupons/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>A subject's account-credit ledger and its balance per currency.</summary>
         /// <remarks>GET /v1/billing/credits. Scope: <c>billing:read</c>.</remarks>
@@ -772,6 +873,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/blocklist_identifiers/{id}. Scope: <c>restrictions:write</c>.</remarks>
         public Task<BlocklistIdentifiersDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<BlocklistIdentifiersDeleteResponse>(HttpVerb.Delete, $"/v1/blocklist_identifiers/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a blocklist identifier. Another instance id is 404, never 403.</summary>
+        /// <remarks>DELETE /v1/blocklist_identifiers/{id}. Scope: <c>restrictions:write</c>.</remarks>
+        public Task<BlocklistIdentifiersDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<BlocklistIdentifiersDeleteResponse>(HttpVerb.Delete, $"/v1/blocklist_identifiers/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Changes</c> operations.</summary>
@@ -798,6 +904,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/changes/consumers/{name}/ack. Scope: <c>events:read</c>.</remarks>
         public Task<ChangesGetConsumerResponse> SetConsumersAckAsync(string name, ChangesSetConsumersAckBody body, CancellationToken cancellationToken = default) =>
             Req<ChangesGetConsumerResponse>(HttpVerb.Put, $"/v1/changes/consumers/{Enc(name)}/ack", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Acknowledge that a consumer has processed the feed up to `seq`. The position only moves forward: a lower or equal `seq` is accepted and changes nothing, so a retry is safe. A `seq` beyond `head_seq` is a 400. Consumer name: 1-64 characters from letters, digits, dot, dash and underscore. Names belong to the API key that uses them, so two keys can use the same name without sharing a position.</summary>
+        /// <remarks>PUT /v1/changes/consumers/{name}/ack. Scope: <c>events:read</c>.</remarks>
+        public Task<ChangesGetConsumerResponse> SetConsumersAckAsync(string name, ChangesSetConsumersAckBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ChangesGetConsumerResponse>(HttpVerb.Put, $"/v1/changes/consumers/{Enc(name)}/ack", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>A paginated, full list of the live resources of one type, in id order, pinned to the feed position it was taken at. Walk every page, then follow `GET /v1/changes?after={snapshot_seq}`: no change between the snapshot and the feed is missed, and an entry already reflected in a page is applied again harmlessly (apply by version). `next_cursor` carries the pin, so every page of one walk reports the same `snapshot_seq`. 410 `RESYNC_REQUIRED` when the pinned position has since been trimmed.</summary>
         /// <remarks>GET /v1/changes/snapshot/{resource_type}. Scope: <c>events:read</c>.</remarks>
@@ -830,10 +941,20 @@ namespace Atlas.Generated
         public Task<ChatIntegrationsListResponseDataItem> UpdateAsync(string id, ChatIntegrationsUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<ChatIntegrationsListResponseDataItem>(HttpVerb.Patch, $"/v1/chat_integrations/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Turn an integration on or off, change its routing, settings or credentials. `config.agent_approver_user_ids` lists who may decide agent access requests from chat.</summary>
+        /// <remarks>PATCH /v1/chat_integrations/{id}. Scope: <c>service_connectors:write</c>.</remarks>
+        public Task<ChatIntegrationsListResponseDataItem> UpdateAsync(string id, ChatIntegrationsUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ChatIntegrationsListResponseDataItem>(HttpVerb.Patch, $"/v1/chat_integrations/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove an integration and its stored credentials.</summary>
         /// <remarks>DELETE /v1/chat_integrations/{id}. Scope: <c>service_connectors:write</c>.</remarks>
         public Task<ChatIntegrationsDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<ChatIntegrationsDeleteResponse>(HttpVerb.Delete, $"/v1/chat_integrations/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove an integration and its stored credentials.</summary>
+        /// <remarks>DELETE /v1/chat_integrations/{id}. Scope: <c>service_connectors:write</c>.</remarks>
+        public Task<ChatIntegrationsDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ChatIntegrationsDeleteResponse>(HttpVerb.Delete, $"/v1/chat_integrations/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The latest button clicks and what became of them (applied, refused, unlinked, stale).</summary>
         /// <remarks>GET /v1/chat_integrations/{id}/interactions. Scope: <c>service_connectors:read</c>.</remarks>
@@ -859,6 +980,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/chat_integrations/{id}/user_links/{linkId}. Scope: <c>service_connectors:write</c>.</remarks>
         public Task<ChatIntegrationsDeleteResponse> DeleteUserLinkAsync(string id, string linkId, CancellationToken cancellationToken = default) =>
             Req<ChatIntegrationsDeleteResponse>(HttpVerb.Delete, $"/v1/chat_integrations/{Enc(id)}/user_links/{Enc(linkId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove the link between a chat user and an Atlas user.</summary>
+        /// <remarks>DELETE /v1/chat_integrations/{id}/user_links/{linkId}. Scope: <c>service_connectors:write</c>.</remarks>
+        public Task<ChatIntegrationsDeleteResponse> DeleteUserLinkAsync(string id, string linkId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ChatIntegrationsDeleteResponse>(HttpVerb.Delete, $"/v1/chat_integrations/{Enc(id)}/user_links/{Enc(linkId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>CloudAccess</c> operations.</summary>
@@ -886,10 +1012,20 @@ namespace Atlas.Generated
         public Task<CloudAccessListTargetsResponseDataItem> UpdateTargetAsync(string id, CloudAccessUpdateTargetBody body, CancellationToken cancellationToken = default) =>
             Req<CloudAccessListTargetsResponseDataItem>(HttpVerb.Patch, $"/v1/cloud_access/targets/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a target's name, config or assignment. The provider cannot change.</summary>
+        /// <remarks>PATCH /v1/cloud_access/targets/{id}. Scope: <c>app_catalog:write</c>.</remarks>
+        public Task<CloudAccessListTargetsResponseDataItem> UpdateTargetAsync(string id, CloudAccessUpdateTargetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<CloudAccessListTargetsResponseDataItem>(HttpVerb.Patch, $"/v1/cloud_access/targets/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a target and its launcher tile.</summary>
         /// <remarks>DELETE /v1/cloud_access/targets/{id}. Scope: <c>app_catalog:write</c>.</remarks>
         public Task DeleteTargetAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/cloud_access/targets/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a target and its launcher tile.</summary>
+        /// <remarks>DELETE /v1/cloud_access/targets/{id}. Scope: <c>app_catalog:write</c>.</remarks>
+        public Task DeleteTargetAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/cloud_access/targets/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>What to configure on the cloud side for this target, with ready-to-run snippets: the AWS CLI command and role trust policy, the gcloud command for the workforce pool provider, or the Azure federated credential.</summary>
         /// <remarks>GET /v1/cloud_access/targets/{id}/setup. Scope: <c>app_catalog:read</c>.</remarks>
@@ -978,10 +1114,20 @@ namespace Atlas.Generated
         public Task<ConnectionActionsListResponseDataItem> ReplaceAsync(string provider, string name, ConnectionActionsReplaceBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionActionsListResponseDataItem>(HttpVerb.Put, $"/v1/connection_actions/{Enc(provider)}/{Enc(name)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Define or replace a custom action: data only (an input schema, a request template, a response mapping), never code. A definition with a first-party action's name replaces it for this instance.</summary>
+        /// <remarks>PUT /v1/connection_actions/{provider}/{name}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionActionsListResponseDataItem> ReplaceAsync(string provider, string name, ConnectionActionsReplaceBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionActionsListResponseDataItem>(HttpVerb.Put, $"/v1/connection_actions/{Enc(provider)}/{Enc(name)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a custom action definition (a first-party action of the same name comes back).</summary>
         /// <remarks>DELETE /v1/connection_actions/{provider}/{name}. Scope: <c>organizations:write</c>.</remarks>
         public Task DeleteAsync(string provider, string name, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/connection_actions/{Enc(provider)}/{Enc(name)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a custom action definition (a first-party action of the same name comes back).</summary>
+        /// <remarks>DELETE /v1/connection_actions/{provider}/{name}. Scope: <c>organizations:write</c>.</remarks>
+        public Task DeleteAsync(string provider, string name, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/connection_actions/{Enc(provider)}/{Enc(name)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>ConnectionProviderChanges</c> operations.</summary>
@@ -1049,16 +1195,35 @@ namespace Atlas.Generated
         public Task<ConnectionProviderTopicsListResponse> ListAsync(CancellationToken cancellationToken = default) =>
             Req<ConnectionProviderTopicsListResponse>(HttpVerb.Get, $"/v1/connection_provider_topics", cancellationToken: cancellationToken);
 
-        /// <summary>Replace the instance's business topics: { topics: { shopify: [...], ebay: [...] } }, up to 50 per provider, spelled as the provider spells them (Shopify orders/create; eBay Trading events such as ItemSold, or Commerce Notification topic ids in UPPER_SNAKE_CASE). Connections made afterwards subscribe automatically; call POST /v1/connections/{id}/provider_subscriptions/sync for existing ones. A topic not listed here is acknowledged and ignored on delivery.</summary>
+        /// <summary>Replace the instance's business topics: { topics: { shopify: [...], ebay: [...], bigcommerce: [...], square: [...], etsy: [...], tiktok_shop: [...] } }, up to 50 per provider (or ["*"] to pass every topic the provider sends through as connection.provider_event with the raw payload), spelled as the provider spells them (Shopify orders/create; eBay Trading events such as ItemSold, or Commerce Notification topic ids in UPPER_SNAKE_CASE). Connections made afterwards subscribe automatically; call POST /v1/connections/{id}/provider_subscriptions/sync for existing ones. A topic not listed here is acknowledged and ignored on delivery.</summary>
         /// <remarks>PUT /v1/connection_provider_topics. Scope: <c>organizations:write</c>.</remarks>
         public Task<ConnectionProviderTopicsListResponse> SetAsync(ConnectionProviderTopicsSetBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionProviderTopicsListResponse>(HttpVerb.Put, $"/v1/connection_provider_topics", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Replace the instance's business topics: { topics: { shopify: [...], ebay: [...], bigcommerce: [...], square: [...], etsy: [...], tiktok_shop: [...] } }, up to 50 per provider (or ["*"] to pass every topic the provider sends through as connection.provider_event with the raw payload), spelled as the provider spells them (Shopify orders/create; eBay Trading events such as ItemSold, or Commerce Notification topic ids in UPPER_SNAKE_CASE). Connections made afterwards subscribe automatically; call POST /v1/connections/{id}/provider_subscriptions/sync for existing ones. A topic not listed here is acknowledged and ignored on delivery.</summary>
+        /// <remarks>PUT /v1/connection_provider_topics. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionProviderTopicsListResponse> SetAsync(ConnectionProviderTopicsSetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionProviderTopicsListResponse>(HttpVerb.Put, $"/v1/connection_provider_topics", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>ConnectionProviders</c> operations.</summary>
     public sealed class ConnectionProvidersOperations : ResourceBase
     {
         internal ConnectionProvidersOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>List every provider that has a stored instance policy, in the shape of the single-provider read (unique_external_id, whether a webhook secret or dev id is stored, events_url). Secrets are never returned.</summary>
+        /// <remarks>GET /v1/connection_providers/policies. Scope: <c>organizations:read</c>.</remarks>
+        public Task<ConnectionProvidersListPoliciesResponse> ListPoliciesAsync(ConnectionProvidersListPoliciesQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<ConnectionProvidersListPoliciesResponse>(HttpVerb.Get, $"/v1/connection_providers/policies", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListPoliciesAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<ConnectionProvidersListPoliciesResponseDataItem> ListPoliciesAllAsync(ConnectionProvidersListPoliciesQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<ConnectionProvidersListPoliciesResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new ConnectionProvidersListPoliciesQuery();
+                var _page = await ListPoliciesAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<ConnectionProvidersListPoliciesResponseDataItem> { Data = _page.Data ?? new List<ConnectionProvidersListPoliciesResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
 
         /// <summary>Read the instance policy for one provider's connections: unique_external_id, whether a webhook secret is stored, and the one ingress URL (events_url) for that provider's uninstall and revocation notices (shopify, bigcommerce, wix, square, ebay).</summary>
         /// <remarks>GET /v1/connection_providers/{provider}/policy. Scope: <c>organizations:read</c>.</remarks>
@@ -1070,10 +1235,20 @@ namespace Atlas.Generated
         public Task<ConnectionProvidersGetPolicyResponse> SetPolicyAsync(string provider, ConnectionProvidersSetPolicyBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionProvidersGetPolicyResponse>(HttpVerb.Put, $"/v1/connection_providers/{Enc(provider)}/policy", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set the instance policy for one provider's connections. unique_external_id: true makes a connect or import answer 409 external_id_taken (with the other connection's id) when another owner already holds that provider account (a revoked connection does not count). webhook_secret is the secret the provider's uninstall ingress verifies with where it is not the app's client secret: eBay verification token, Square signature key, Wix public key (PEM), Etsy webhook signing secret; null clears it. Write-only.</summary>
+        /// <remarks>PUT /v1/connection_providers/{provider}/policy. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionProvidersGetPolicyResponse> SetPolicyAsync(string provider, ConnectionProvidersSetPolicyBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionProvidersGetPolicyResponse>(HttpVerb.Put, $"/v1/connection_providers/{Enc(provider)}/policy", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove the instance policy for a provider (back to the defaults).</summary>
         /// <remarks>DELETE /v1/connection_providers/{provider}/policy. Scope: <c>organizations:write</c>.</remarks>
         public Task DeletePolicyAsync(string provider, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/connection_providers/{Enc(provider)}/policy", cancellationToken: cancellationToken);
+
+        /// <summary>Remove the instance policy for a provider (back to the defaults).</summary>
+        /// <remarks>DELETE /v1/connection_providers/{provider}/policy. Scope: <c>organizations:write</c>.</remarks>
+        public Task DeletePolicyAsync(string provider, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/connection_providers/{Enc(provider)}/policy", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>ConnectionReconnectSettings</c> operations.</summary>
@@ -1090,6 +1265,31 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/connection_reconnect_settings. Scope: <c>organizations:write</c>.</remarks>
         public Task<ConnectionReconnectSettingsListResponse> SetAsync(ConnectionReconnectSettingsSetBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionReconnectSettingsListResponse>(HttpVerb.Put, $"/v1/connection_reconnect_settings", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Replace the hosted-reconnect settings (a field left out returns to its default). With enabled true, the owner of an oauth connection that needs authorization again (a user, or an organization's technical contacts) gets one email per episode through the instance's own mail provider, never an Atlas key, with a link to a hosted page that restarts the provider consent. Nothing is sent while enabled is false, which is the default.</summary>
+        /// <remarks>PUT /v1/connection_reconnect_settings. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionReconnectSettingsListResponse> SetAsync(ConnectionReconnectSettingsSetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionReconnectSettingsListResponse>(HttpVerb.Put, $"/v1/connection_reconnect_settings", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>ConnectionTemplates</c> operations.</summary>
+    public sealed class ConnectionTemplatesOperations : ResourceBase
+    {
+        internal ConnectionTemplatesOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>The marketplace connection templates (Discogs, Trade Me, BrickLink, Cardmarket, WooCommerce, Bonanza, Poizon, browser-session cookie jars, RSA-signed OAuth 1.0a): for each, the connection kind, whether the owner authorizes or you enter the secrets, which secret fields, the hosts to allow and the config to send. Read-only.</summary>
+        /// <remarks>GET /v1/connection_templates. Scope: <c>organizations:read</c>.</remarks>
+        public Task<ConnectionTemplatesListResponse> ListAsync(ConnectionTemplatesListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<ConnectionTemplatesListResponse>(HttpVerb.Get, $"/v1/connection_templates", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<ConnectionTemplatesListResponseDataItem> ListAllAsync(ConnectionTemplatesListQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<ConnectionTemplatesListResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new ConnectionTemplatesListQuery();
+                var _page = await ListAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<ConnectionTemplatesListResponseDataItem> { Data = _page.Data ?? new List<ConnectionTemplatesListResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
     }
 
     /// <summary>The <c>Connections</c> operations.</summary>
@@ -1107,6 +1307,11 @@ namespace Atlas.Generated
         public Task<Dictionary<string, object?>> OauthClientsRegisterAsync(ConnectionsOauthClientsRegisterBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Post, $"/v1/connections/oauth_clients/register", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
+        /// <summary>Move OAuth connections from one owner client to another (a retired owner client you can now delete, two clients merged). Both clients must be the same provider and environment. When both are the same provider app (same client_id) every token stays valid and the rows simply move. Otherwise (verify, the default and the only allowed mode) one real refresh is made per connection with the TARGET client's credentials and only connections the provider accepts move; the others stay on the old client untouched and are reported failed with a reason (a failed probe changes no status). Token-family siblings move together. Dry run reports what would move without calling the provider. Never returns tokens. Idempotent on Idempotency-Key; audited as connection.rehomed (ids and counts).</summary>
+        /// <remarks>POST /v1/connections/rehome. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionsRehomeResponse> RehomeAsync(ConnectionsRehomeBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<ConnectionsRehomeResponse>(HttpVerb.Post, $"/v1/connections/rehome", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>The relay size limits of this instance: the largest request body and response body, in bytes. Defaults are 256 KiB and 1 MiB.</summary>
         /// <remarks>GET /v1/connections/relay_limits. Scope: <c>organizations:read</c>.</remarks>
         public Task<ConnectionsListRelayLimitsResponse> ListRelayLimitsAsync(CancellationToken cancellationToken = default) =>
@@ -1116,6 +1321,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/connections/relay_limits. Scope: <c>organizations:write</c>.</remarks>
         public Task<ConnectionsListRelayLimitsResponse> SetRelayLimitsAsync(ConnectionsSetRelayLimitsBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionsListRelayLimitsResponse>(HttpVerb.Put, $"/v1/connections/relay_limits", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Raise the relay size limits of this instance, up to 25 MiB (26214400 bytes) each: request_bytes for the body or multipart sent through POST /v1/connections/{id}/relay, response_bytes for what comes back. The relay never reads more than the limit into memory, and a response over it is cut with truncated true. Values below the defaults (256 KiB, 1 MiB) are refused.</summary>
+        /// <remarks>PUT /v1/connections/relay_limits. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionsListRelayLimitsResponse> SetRelayLimitsAsync(ConnectionsSetRelayLimitsBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionsListRelayLimitsResponse>(HttpVerb.Put, $"/v1/connections/relay_limits", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The connection-token rate limits of this instance (requests per minute on GET /v1/connections/{id}/token, POST /v1/connections/{id}/token/refresh and POST /v1/connections/tokens/batch) and how much of the current one-minute window is used: per_key (the calling secret key, all connections; default 6,000), per_connection (one connection, per key; default 300; no usage shown) per_app (one provider app client: the instance client shared by every owner, or an owner's own client; no limit unless you set one) and providers (one provider across all of the instance's keys; no limit unless you set one). With per_app set, token reads carry x-app-ratelimit-limit, x-app-ratelimit-remaining and x-app-ratelimit-reset (seconds) for the app client the connection runs under. Conditional reads (If-None-Match) get ten times the per-key and per-connection budgets and do not count against provider limits.</summary>
         /// <remarks>GET /v1/connections/token_limits. Scope: <c>organizations:read</c>.</remarks>
@@ -1127,6 +1337,11 @@ namespace Atlas.Generated
         public Task<ConnectionsListTokenLimitsResponse> SetTokenLimitsAsync(ConnectionsSetTokenLimitsBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionsListTokenLimitsResponse>(HttpVerb.Put, $"/v1/connections/token_limits", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set this instance's connection-token rate limits, in requests per minute. per_key goes up to 60,000 and per_connection up to 3,000 (ten times the defaults); null restores the default. per_app (up to 60,000; null removes it) is one shared budget per provider app client, on top of the per-key and per-connection ones, answered with 429 and Retry-After when spent. providers maps a provider id to an instance-wide limit for that provider's connections (up to 60,000; null removes one; up to 100 providers) and merges into the stored map; providers null clears them all. Takes effect at once. Over a provider limit, the token routes answer 429 with Retry-After and the batch route marks those ids rate_limited / provider_limit.</summary>
+        /// <remarks>PUT /v1/connections/token_limits. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionsListTokenLimitsResponse> SetTokenLimitsAsync(ConnectionsSetTokenLimitsBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionsListTokenLimitsResponse>(HttpVerb.Put, $"/v1/connections/token_limits", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Who may use this connection's credential. No rule means open to every key that has the route's scope; one rule or more restricts the connection to the principals the rules name.</summary>
         /// <remarks>GET /v1/connections/{id}/access_rules. Scope: <c>organizations:read</c>.</remarks>
         public Task<ConnectionsListAccessRulesResponse> ListAccessRulesAsync(string id, CancellationToken cancellationToken = default) =>
@@ -1137,10 +1352,20 @@ namespace Atlas.Generated
         public Task<ConnectionsListAccessRulesResponse> SetAccessRulesAsync(string id, ConnectionsSetAccessRulesBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionsListAccessRulesResponse>(HttpVerb.Put, $"/v1/connections/{Enc(id)}/access_rules", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Replace the connection's access rules (at most 100; an empty list opens the connection again). Rules gate credential use: `read_token` (token reads and refreshes), `relay`, `run_actions` and `sign`; a key that no rule names gets 403 with reason `connection_access_denied`. Managing the connection and its rules stays under organizations:read and organizations:write.</summary>
+        /// <remarks>PUT /v1/connections/{id}/access_rules. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionsListAccessRulesResponse> SetAccessRulesAsync(string id, ConnectionsSetAccessRulesBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionsListAccessRulesResponse>(HttpVerb.Put, $"/v1/connections/{Enc(id)}/access_rules", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove every access rule: the connection is open again.</summary>
         /// <remarks>DELETE /v1/connections/{id}/access_rules. Scope: <c>organizations:write</c>.</remarks>
         public Task DeleteAccessRulesAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/connections/{Enc(id)}/access_rules", cancellationToken: cancellationToken);
+
+        /// <summary>Remove every access rule: the connection is open again.</summary>
+        /// <remarks>DELETE /v1/connections/{id}/access_rules. Scope: <c>organizations:write</c>.</remarks>
+        public Task DeleteAccessRulesAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/connections/{Enc(id)}/access_rules", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The actions available on a connection (its provider's catalog).</summary>
         /// <remarks>GET /v1/connections/{id}/actions. Scope: <c>organizations:read</c>.</remarks>
@@ -1250,10 +1475,20 @@ namespace Atlas.Generated
         public Task<ConnectionsListTriggersResponseDataItem> UpdateTriggerAsync(string id, string triggerId, ConnectionsUpdateTriggerBody body, CancellationToken cancellationToken = default) =>
             Req<ConnectionsListTriggersResponseDataItem>(HttpVerb.Patch, $"/v1/connections/{Enc(id)}/triggers/{Enc(triggerId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Pause or resume a trigger.</summary>
+        /// <remarks>PATCH /v1/connections/{id}/triggers/{triggerId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionsListTriggersResponseDataItem> UpdateTriggerAsync(string id, string triggerId, ConnectionsUpdateTriggerBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionsListTriggersResponseDataItem>(HttpVerb.Patch, $"/v1/connections/{Enc(id)}/triggers/{Enc(triggerId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove a trigger: the provider webhook is deleted first when Atlas registered it (`provider_unregistered` says what happened; the connection must allow DELETE for that), then the ingress endpoint.</summary>
         /// <remarks>DELETE /v1/connections/{id}/triggers/{triggerId}. Scope: <c>organizations:write</c>.</remarks>
         public Task<ConnectionsDeleteTriggerResponse> DeleteTriggerAsync(string id, string triggerId, CancellationToken cancellationToken = default) =>
             Req<ConnectionsDeleteTriggerResponse>(HttpVerb.Delete, $"/v1/connections/{Enc(id)}/triggers/{Enc(triggerId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a trigger: the provider webhook is deleted first when Atlas registered it (`provider_unregistered` says what happened; the connection must allow DELETE for that), then the ingress endpoint.</summary>
+        /// <remarks>DELETE /v1/connections/{id}/triggers/{triggerId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<ConnectionsDeleteTriggerResponse> DeleteTriggerAsync(string id, string triggerId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ConnectionsDeleteTriggerResponse>(HttpVerb.Delete, $"/v1/connections/{Enc(id)}/triggers/{Enc(triggerId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Containments</c> operations.</summary>
@@ -1304,6 +1539,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/cookie_consents/subjects/{subject}. Scope: <c>data_subject_requests:write</c>.</remarks>
         public Task<CookieConsentsDeleteSubjectResponse> DeleteSubjectAsync(string subject, CancellationToken cancellationToken = default) =>
             Req<CookieConsentsDeleteSubjectResponse>(HttpVerb.Delete, $"/v1/cookie_consents/subjects/{Enc(subject)}", cancellationToken: cancellationToken);
+
+        /// <summary>Erase one visitor's records (an erasure request from someone who is not a user). Audited.</summary>
+        /// <remarks>DELETE /v1/cookie_consents/subjects/{subject}. Scope: <c>data_subject_requests:write</c>.</remarks>
+        public Task<CookieConsentsDeleteSubjectResponse> DeleteSubjectAsync(string subject, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<CookieConsentsDeleteSubjectResponse>(HttpVerb.Delete, $"/v1/cookie_consents/subjects/{Enc(subject)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Choices recorded in the last days (default 30): distinct visitors, how many sent a Global Privacy Control signal, and how many allow each category.</summary>
         /// <remarks>GET /v1/cookie_consents/summary. Scope: <c>data_subject_requests:read</c>.</remarks>
@@ -1364,6 +1604,11 @@ namespace Atlas.Generated
         /// <remarks>PATCH /v1/data_subject_requests/{id}/triage. Scope: <c>data_subject_requests:write</c>.</remarks>
         public Task<Dictionary<string, object?>> UpdateTriageAsync(string id, DataSubjectRequestsUpdateTriageBody body, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Patch, $"/v1/data_subject_requests/{Enc(id)}/triage", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Triage a request: who works it, how urgent it is, free labels. Only what is sent changes; send at least one. Audited.</summary>
+        /// <remarks>PATCH /v1/data_subject_requests/{id}/triage. Scope: <c>data_subject_requests:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> UpdateTriageAsync(string id, DataSubjectRequestsUpdateTriageBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Patch, $"/v1/data_subject_requests/{Enc(id)}/triage", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>DesktopMfa</c> operations.</summary>
@@ -1389,6 +1634,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/desktop_mfa/devices/{id}/passkeys/{passkeyId}. Scope: <c>desktop_mfa:write</c>.</remarks>
         public Task<DesktopMfaDeleteDevicesPasskeyResponse> DeleteDevicesPasskeyAsync(string id, string passkeyId, CancellationToken cancellationToken = default) =>
             Req<DesktopMfaDeleteDevicesPasskeyResponse>(HttpVerb.Delete, $"/v1/desktop_mfa/devices/{Enc(id)}/passkeys/{Enc(passkeyId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a passkey registered through a workstation. It stops answering the passkey factor at once.</summary>
+        /// <remarks>DELETE /v1/desktop_mfa/devices/{id}/passkeys/{passkeyId}. Scope: <c>desktop_mfa:write</c>.</remarks>
+        public Task<DesktopMfaDeleteDevicesPasskeyResponse> DeleteDevicesPasskeyAsync(string id, string passkeyId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<DesktopMfaDeleteDevicesPasskeyResponse>(HttpVerb.Delete, $"/v1/desktop_mfa/devices/{Enc(id)}/passkeys/{Enc(passkeyId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Dev</c> operations.</summary>
@@ -1405,6 +1655,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/dev/emails. Scope: <c>instance:write</c>.</remarks>
         public Task<DevDeleteEmailsResponse> DeleteEmailsAsync(CancellationToken cancellationToken = default) =>
             Req<DevDeleteEmailsResponse>(HttpVerb.Delete, $"/v1/dev/emails", cancellationToken: cancellationToken);
+
+        /// <summary>Empty the development email inbox (development instances only). Refused on a production instance (422 TEST_MODE_ONLY).</summary>
+        /// <remarks>DELETE /v1/dev/emails. Scope: <c>instance:write</c>.</remarks>
+        public Task<DevDeleteEmailsResponse> DeleteEmailsAsync(string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<DevDeleteEmailsResponse>(HttpVerb.Delete, $"/v1/dev/emails", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>DeviceAssurancePolicies</c> operations.</summary>
@@ -1446,10 +1701,20 @@ namespace Atlas.Generated
         public Task<DeviceAssurancePoliciesListResponseDataItem> UpdateAsync(string id, DeviceAssurancePoliciesCreateBody? body = null, CancellationToken cancellationToken = default) =>
             Req<DeviceAssurancePoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/device_assurance_policies/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Update a device assurance policy. Devices are re-evaluated.</summary>
+        /// <remarks>PATCH /v1/device_assurance_policies/{id}. Scope: <c>device_assurance:write</c>.</remarks>
+        public Task<DeviceAssurancePoliciesListResponseDataItem> UpdateAsync(string id, DeviceAssurancePoliciesCreateBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<DeviceAssurancePoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/device_assurance_policies/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a device assurance policy. Devices are re-evaluated.</summary>
         /// <remarks>DELETE /v1/device_assurance_policies/{id}. Scope: <c>device_assurance:write</c>.</remarks>
         public Task<DeviceAssurancePoliciesDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<DeviceAssurancePoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/device_assurance_policies/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a device assurance policy. Devices are re-evaluated.</summary>
+        /// <remarks>DELETE /v1/device_assurance_policies/{id}. Scope: <c>device_assurance:write</c>.</remarks>
+        public Task<DeviceAssurancePoliciesDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<DeviceAssurancePoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/device_assurance_policies/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>DeviceIntegrations</c> operations.</summary>
@@ -1486,10 +1751,20 @@ namespace Atlas.Generated
         public Task<DeviceIntegrationsListResponseDataItem> UpdateAsync(string id, DeviceIntegrationsCreateBody? body = null, CancellationToken cancellationToken = default) =>
             Req<DeviceIntegrationsListResponseDataItem>(HttpVerb.Patch, $"/v1/device_integrations/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a device integration (name, config, credentials, interval, paused or active).</summary>
+        /// <remarks>PATCH /v1/device_integrations/{id}. Scope: <c>device_assurance:write</c>.</remarks>
+        public Task<DeviceIntegrationsListResponseDataItem> UpdateAsync(string id, DeviceIntegrationsCreateBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<DeviceIntegrationsListResponseDataItem>(HttpVerb.Patch, $"/v1/device_integrations/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a device integration. Devices already pulled stay in the registry.</summary>
         /// <remarks>DELETE /v1/device_integrations/{id}. Scope: <c>device_assurance:write</c>.</remarks>
         public Task<DeviceIntegrationsDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<DeviceIntegrationsDeleteResponse>(HttpVerb.Delete, $"/v1/device_integrations/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a device integration. Devices already pulled stay in the registry.</summary>
+        /// <remarks>DELETE /v1/device_integrations/{id}. Scope: <c>device_assurance:write</c>.</remarks>
+        public Task<DeviceIntegrationsDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<DeviceIntegrationsDeleteResponse>(HttpVerb.Delete, $"/v1/device_integrations/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Pull the integration now.</summary>
         /// <remarks>POST /v1/device_integrations/{id}/sync. Scope: <c>device_assurance:write</c>.</remarks>
@@ -1525,6 +1800,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/device_sso/registrations/{id}. Scope: <c>desktop_mfa:write</c>.</remarks>
         public Task<DeviceSsoDeleteRegistrationResponse> DeleteRegistrationAsync(string id, CancellationToken cancellationToken = default) =>
             Req<DeviceSsoDeleteRegistrationResponse>(HttpVerb.Delete, $"/v1/device_sso/registrations/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a device registration and its sessions.</summary>
+        /// <remarks>DELETE /v1/device_sso/registrations/{id}. Scope: <c>desktop_mfa:write</c>.</remarks>
+        public Task<DeviceSsoDeleteRegistrationResponse> DeleteRegistrationAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<DeviceSsoDeleteRegistrationResponse>(HttpVerb.Delete, $"/v1/device_sso/registrations/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Revoke a device registration. Every refresh token it holds stops working at once and its next call is refused.</summary>
         /// <remarks>POST /v1/device_sso/registrations/{id}/revoke. Scope: <c>desktop_mfa:write</c>.</remarks>
@@ -1566,6 +1846,22 @@ namespace Atlas.Generated
         /// <remarks>GET /v1/diagnostics/traces/{id}. Scope: <c>diagnostics:read</c>.</remarks>
         public Task<DiagnosticsListTracesResponseDataItem> GetTraceAsync(string id, CancellationToken cancellationToken = default) =>
             Req<DiagnosticsListTracesResponseDataItem>(HttpVerb.Get, $"/v1/diagnostics/traces/{Enc(id)}", cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>Domains</c> operations.</summary>
+    public sealed class DomainsOperations : ResourceBase
+    {
+        internal DomainsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>Read one custom domain: the same object as a list item, including a path mount's verification file and what the last failed check observed.</summary>
+        /// <remarks>GET /v1/domains/{id}. Scope: <c>domains:read</c>.</remarks>
+        public Task<CustomDomainModel> GetAsync(string id, CancellationToken cancellationToken = default) =>
+            Req<CustomDomainModel>(HttpVerb.Get, $"/v1/domains/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Issue a new random verification token for a path-mounted domain and return the domain with the new `verification.token` and `url`. The previous token keeps verifying for 24 hours (`verification.previous_url`, `previous_valid_until`). Use it when a CDN cache has stored a wrong answer for the old URL: the new URL has never been requested, so nothing is cached for it. A CNAME domain has no token (400).</summary>
+        /// <remarks>POST /v1/domains/{id}/verification/rotate. Scope: <c>domains:write</c>.</remarks>
+        public Task<CustomDomainModel> VerificationRotateAsync(string id, Dictionary<string, object?> body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<CustomDomainModel>(HttpVerb.Post, $"/v1/domains/{Enc(id)}/verification/rotate", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>DsrConsole</c> operations.</summary>
@@ -1654,10 +1950,20 @@ namespace Atlas.Generated
         public Task<ErasureConnectorsListResponseDataItem> UpdateAsync(string id, ErasureConnectorsCreateBody body, CancellationToken cancellationToken = default) =>
             Req<ErasureConnectorsListResponseDataItem>(HttpVerb.Patch, $"/v1/erasure_connectors/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a connector's name, mode, ack_source, enabled or notes. The key cannot change.</summary>
+        /// <remarks>PATCH /v1/erasure_connectors/{id}. Scope: <c>data_subject_requests:write</c>.</remarks>
+        public Task<ErasureConnectorsListResponseDataItem> UpdateAsync(string id, ErasureConnectorsCreateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ErasureConnectorsListResponseDataItem>(HttpVerb.Patch, $"/v1/erasure_connectors/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Stop tracking a downstream system. Past request records of it are removed with it. 204.</summary>
         /// <remarks>DELETE /v1/erasure_connectors/{id}. Scope: <c>data_subject_requests:write</c>.</remarks>
         public Task DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/erasure_connectors/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Stop tracking a downstream system. Past request records of it are removed with it. 204.</summary>
+        /// <remarks>DELETE /v1/erasure_connectors/{id}. Scope: <c>data_subject_requests:write</c>.</remarks>
+        public Task DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/erasure_connectors/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>A read-only call to the vendor that proves the connector's saved key works. Nothing is deleted. Audited.</summary>
         /// <remarks>POST /v1/erasure_connectors/{id}/probe. Scope: <c>data_subject_requests:write</c>.</remarks>
@@ -1701,6 +2007,11 @@ namespace Atlas.Generated
         public Task<FgaSettings> SetSettingsAsync(FgaSetSettingsBody? body = null, CancellationToken cancellationToken = default) =>
             Req<FgaSettings>(HttpVerb.Put, $"/v1/fga/settings", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change the instance FGA settings. Fields you omit keep their value. `cache_ttl_ms` null uses the platform default and 0 turns the result cache off; a request that carries its own `consistency` always wins over `default_consistency`; `changelog_retention_days` null keeps the whole tuple change log, otherwise older changes are removed in the background.</summary>
+        /// <remarks>PUT /v1/fga/settings. Scope: <c>fga:write</c>.</remarks>
+        public Task<FgaSettings> SetSettingsAsync(FgaSetSettingsBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<FgaSettings>(HttpVerb.Put, $"/v1/fga/settings", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Run the stored assertions of a model version against the real store tuples.</summary>
         /// <remarks>POST /v1/fga/stores/{id}/authorization-models/{mid}/assertions/run. Scope: <c>fga:read</c>.</remarks>
         public Task<Dictionary<string, object?>> StoresAuthorizationModelsAssertionsRunAsync(string id, string mid, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
@@ -1741,6 +2052,11 @@ namespace Atlas.Generated
         public Task<Dictionary<string, object?>> DeleteStoresMaterializationAsync(string id, string mid, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/fga/stores/{Enc(id)}/materializations/{Enc(mid)}", cancellationToken: cancellationToken);
 
+        /// <summary>Remove a materialization; list-objects is then always computed live.</summary>
+        /// <remarks>DELETE /v1/fga/stores/{id}/materializations/{mid}. Scope: <c>fga:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> DeleteStoresMaterializationAsync(string id, string mid, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/fga/stores/{Enc(id)}/materializations/{Enc(mid)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Rebuild one materialization now.</summary>
         /// <remarks>POST /v1/fga/stores/{id}/materializations/{mid}/rebuild. Scope: <c>fga:write</c>.</remarks>
         public Task<Dictionary<string, object?>> StoresMaterializationsRebuildAsync(string id, string mid, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
@@ -1770,6 +2086,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/fga/sync. Scope: <c>fga:write</c>.</remarks>
         public Task<FgaGetSyncResponse> SetSyncAsync(FgaSetSyncBody body, CancellationToken cancellationToken = default) =>
             Req<FgaGetSyncResponse>(HttpVerb.Put, $"/v1/fga/sync", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Configure the managed sync that turns organization memberships, org roles and groups into FGA tuples, so a model can say `viewer: member from organization` without mirroring anything by hand. Opt-in per instance; nothing is written until `enabled` is true with a `store_id`. Enabling starts from the current end of the change feed and queues a backfill. The sync only ever removes tuples it wrote; a tuple that existed first is left alone. Tuples the store's model has no relation for are skipped and counted. A store or a tuple name cannot change while the sync owns tuples (409): disable it and `POST /v1/fga/sync/purge` first. Emits nothing itself; its writes emit fga.tuple_written and fga.tuple_deleted.</summary>
+        /// <remarks>PUT /v1/fga/sync. Scope: <c>fga:write</c>.</remarks>
+        public Task<FgaGetSyncResponse> SetSyncAsync(FgaSetSyncBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<FgaGetSyncResponse>(HttpVerb.Put, $"/v1/fga/sync", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Queue a backfill: walk every membership, group member and group and write the tuples that are missing, then remove owned tuples whose source is gone. `repair: true` rewrites every desired tuple, healing tuples someone deleted by hand. Resumable and processed by the worker; read the run to follow it. One backfill runs at a time: asking again returns the one in flight (200). Honours Idempotency-Key. Emits fga_sync.completed or fga_sync.failed when it ends.</summary>
         /// <remarks>POST /v1/fga/sync/backfill. Scope: <c>fga:write</c>.</remarks>
@@ -1827,6 +2148,11 @@ namespace Atlas.Generated
         public Task DeleteExperimentAsync(string id, string experimentId, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/flows/{Enc(id)}/experiments/{Enc(experimentId)}", cancellationToken: cancellationToken);
 
+        /// <summary>Delete a draft or stopped experiment and its assignments. Stop a running one first.</summary>
+        /// <remarks>DELETE /v1/flows/{id}/experiments/{experimentId}. Scope: <c>actions:write</c>.</remarks>
+        public Task DeleteExperimentAsync(string id, string experimentId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/flows/{Enc(id)}/experiments/{Enc(experimentId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Results per variant. Users are counted from when they were assigned: assigned (reached the journey), started (a run began, meaning the journey held them), completed, abandoned, in progress, completion and abandon rates, the 95% interval of the completion rate, average time to complete, and against the first variant the relative lift and a two-sided p-value (two-proportion z-test) with significant at 0.05. A difference is only worth acting on when significant is true and the sample is large enough.</summary>
         /// <remarks>GET /v1/flows/{id}/experiments/{experimentId}/readout. Scope: <c>actions:read</c>.</remarks>
         public Task<FlowsGetExperimentsReadoutResponse> GetExperimentsReadoutAsync(string id, string experimentId, CancellationToken cancellationToken = default) =>
@@ -1877,12 +2203,31 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/fraud/email_risk/settings. Scope: <c>email_suppressions:write</c>.</remarks>
         public Task<FraudListEmailRiskSettingsResponse> SetEmailRiskSettingsAsync(FraudSetEmailRiskSettingsBody? body = null, CancellationToken cancellationToken = default) =>
             Req<FraudListEmailRiskSettingsResponse>(HttpVerb.Put, $"/v1/fraud/email_risk/settings", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Change email risk settings. `mode`: off, mx or provider (your own verification account; the key is write-only). With `gate_sign_up` a `block` verdict refuses the sign-up.</summary>
+        /// <remarks>PUT /v1/fraud/email_risk/settings. Scope: <c>email_suppressions:write</c>.</remarks>
+        public Task<FraudListEmailRiskSettingsResponse> SetEmailRiskSettingsAsync(FraudSetEmailRiskSettingsBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<FraudListEmailRiskSettingsResponse>(HttpVerb.Put, $"/v1/fraud/email_risk/settings", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Grants</c> operations.</summary>
     public sealed class GrantsOperations : ResourceBase
     {
         internal GrantsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>List every grant in one cursor-paged list: users' consent grants and OpenID Grant Management grants, told apart by `type`. Filter by `user_id`, `client_id` (the public client id), `type` (consent, managed, all) and `status` (active by default; revoking a consent removes it, so revoked grants are managed ones).</summary>
+        /// <remarks>GET /v1/grants. Scope: <c>grants:read</c>.</remarks>
+        public Task<GrantsListResponse> ListAsync(GrantsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<GrantsListResponse>(HttpVerb.Get, $"/v1/grants", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<GrantsListResponseDataItem> ListAllAsync(GrantsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<GrantsListResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new GrantsListQuery();
+                var _page = await ListAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<GrantsListResponseDataItem> { Data = _page.Data ?? new List<GrantsListResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
 
         /// <summary>Take an amount from one of a grant's counters, atomically. A denial is a 200 decision with `allowed: false`.</summary>
         /// <remarks>POST /v1/grants/{grantType}/{id}/consume. Scope: <c>machines:write</c>.</remarks>
@@ -1903,6 +2248,16 @@ namespace Atlas.Generated
         /// <remarks>GET /v1/grants/{grantType}/{id}/usage. Scope: <c>machines:read</c>.</remarks>
         public Task<GrantsGetUsageResponse> GetUsageAsync(string grantType, string id, CancellationToken cancellationToken = default) =>
             Req<GrantsGetUsageResponse>(HttpVerb.Get, $"/v1/grants/{Enc(grantType)}/{Enc(id)}/usage", cancellationToken: cancellationToken);
+
+        /// <summary>Read one grant of either kind, with its metadata.</summary>
+        /// <remarks>GET /v1/grants/{id}. Scope: <c>grants:read</c>.</remarks>
+        public Task<GrantsListResponseDataItem> GetAsync(string id, CancellationToken cancellationToken = default) =>
+            Req<GrantsListResponseDataItem>(HttpVerb.Get, $"/v1/grants/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Change a grant's `metadata` (secret key only). The keys you send are merged into what is stored: a key sent as null is removed. The result is at most 4 KB of JSON. Audited; idempotent.</summary>
+        /// <remarks>PATCH /v1/grants/{id}. Scope: <c>grants:write</c>.</remarks>
+        public Task<GrantsListResponseDataItem> UpdateAsync(string id, GrantsUpdateBody? body = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<GrantsListResponseDataItem>(HttpVerb.Patch, $"/v1/grants/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Iga</c> operations.</summary>
@@ -1963,10 +2318,20 @@ namespace Atlas.Generated
         public Task<IgaListBundlesResponseDataItem> UpdateBundleAsync(string id, IgaUpdateBundleBody body, CancellationToken cancellationToken = default) =>
             Req<IgaListBundlesResponseDataItem>(HttpVerb.Patch, $"/v1/iga/bundles/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change an access bundle, its entitlements, form fields or policy.</summary>
+        /// <remarks>PATCH /v1/iga/bundles/{id}. Scope: <c>iga:write</c>.</remarks>
+        public Task<IgaListBundlesResponseDataItem> UpdateBundleAsync(string id, IgaUpdateBundleBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<IgaListBundlesResponseDataItem>(HttpVerb.Patch, $"/v1/iga/bundles/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a bundle (access already granted stays).</summary>
         /// <remarks>DELETE /v1/iga/bundles/{id}. Scope: <c>iga:write</c>.</remarks>
         public Task<IgaDeleteBundleResponse> DeleteBundleAsync(string id, CancellationToken cancellationToken = default) =>
             Req<IgaDeleteBundleResponse>(HttpVerb.Delete, $"/v1/iga/bundles/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a bundle (access already granted stays).</summary>
+        /// <remarks>DELETE /v1/iga/bundles/{id}. Scope: <c>iga:write</c>.</remarks>
+        public Task<IgaDeleteBundleResponse> DeleteBundleAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<IgaDeleteBundleResponse>(HttpVerb.Delete, $"/v1/iga/bundles/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Request every entitlement of a bundle for a person. Each one follows its own approval steps and separation-of-duties rules; the response says which were requested, skipped (already held or pending) or failed.</summary>
         /// <remarks>POST /v1/iga/bundles/{id}/request. Scope: <c>iga:write</c>.</remarks>
@@ -2039,6 +2404,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/iga/eligibilities/{id}. Scope: <c>iga:write</c>.</remarks>
         public Task<IgaDeleteEligibilityResponse> DeleteEligibilityAsync(string id, CancellationToken cancellationToken = default) =>
             Req<IgaDeleteEligibilityResponse>(HttpVerb.Delete, $"/v1/iga/eligibilities/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove an eligibility. Access already activated stays until it ends.</summary>
+        /// <remarks>DELETE /v1/iga/eligibilities/{id}. Scope: <c>iga:write</c>.</remarks>
+        public Task<IgaDeleteEligibilityResponse> DeleteEligibilityAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<IgaDeleteEligibilityResponse>(HttpVerb.Delete, $"/v1/iga/eligibilities/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Add catalog entitlements (not requestable, no approval steps) for the groups or app roles that exist but are not in the catalog yet.</summary>
         /// <remarks>POST /v1/iga/entitlements/import. Scope: <c>iga:write</c>.</remarks>
@@ -2115,6 +2485,11 @@ namespace Atlas.Generated
         public Task<InstanceListAppEventTypesResponse> SetAppEventTypesAsync(List<InstanceSetAppEventTypesBodyItem> body, CancellationToken cancellationToken = default) =>
             Req<InstanceListAppEventTypesResponse>(HttpVerb.Put, $"/v1/instance/app_event_types", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Replace the event types third-party apps can subscribe to (send an array, or { types: [...] }). Each has a type (lowercase dotted, not an Atlas event name), an optional description and schema, and a required_scope that must exist in the scope catalogue. Publish with POST /v1/app_events { user_id }; subscribe a client with PUT /v1/oauth_clients/{id}/webhook.</summary>
+        /// <remarks>PUT /v1/instance/app_event_types. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceListAppEventTypesResponse> SetAppEventTypesAsync(List<InstanceSetAppEventTypesBodyItem> body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<InstanceListAppEventTypesResponse>(HttpVerb.Put, $"/v1/instance/app_event_types", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>The configuration snapshots of the instance, newest first. Filter by source: manual, auto, pre_restore (saved before a restore), cli, clone.</summary>
         /// <remarks>GET /v1/instance/config_snapshots. Scope: <c>instance:read</c>.</remarks>
         public Task<InstanceListConfigSnapshotsResponse> ListConfigSnapshotsAsync(InstanceListConfigSnapshotsQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -2149,10 +2524,20 @@ namespace Atlas.Generated
         public Task<InstanceDeleteConfigSnapshotResponse> DeleteConfigSnapshotAsync(string id, CancellationToken cancellationToken = default) =>
             Req<InstanceDeleteConfigSnapshotResponse>(HttpVerb.Delete, $"/v1/instance/config_snapshots/{Enc(id)}", cancellationToken: cancellationToken);
 
+        /// <summary>Delete one snapshot. Audited.</summary>
+        /// <remarks>DELETE /v1/instance/config_snapshots/{id}. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceDeleteConfigSnapshotResponse> DeleteConfigSnapshotAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<InstanceDeleteConfigSnapshotResponse>(HttpVerb.Delete, $"/v1/instance/config_snapshots/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Put a snapshot back: the configuration returns to what it was, the secrets the instance holds today stay, and the state being replaced is first saved as a pre_restore snapshot so the restore can be undone the same way. dry_run: true returns the changes and writes nothing; send its current_sha256 as expected_sha256 to apply exactly what you saw (409 if the configuration moved). Allowed origins are left alone unless include_allowed_origins is true. The restored configuration must pass the same checks as any configuration write (422 otherwise). Needs instance:write. Honours Idempotency-Key. Audited. Emits config_snapshot.restored.</summary>
         /// <remarks>POST /v1/instance/config_snapshots/{id}/restore. Scope: <c>instance:write</c>.</remarks>
         public Task<InstanceConfigSnapshotsRestoreResponse> ConfigSnapshotsRestoreAsync(string id, InstanceConfigSnapshotsRestoreBody? body = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<InstanceConfigSnapshotsRestoreResponse>(HttpVerb.Post, $"/v1/instance/config_snapshots/{Enc(id)}/restore", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Change part of the cookie-consent setting: the fields sent are merged over the stored setting and the rest is kept (PUT replaces the whole setting). `null` clears a field; sending site_id drops a stored site reference and the other way round. With no stored setting, script_url is required. The answer and warnings are those of PUT.</summary>
+        /// <remarks>PATCH /v1/instance/cookie_consent. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceUpdateCookieConsentResponse> UpdateCookieConsentAsync(InstanceUpdateCookieConsentBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceUpdateCookieConsentResponse>(HttpVerb.Patch, $"/v1/instance/cookie_consent", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Customer-managed encryption status: whether it is on, the key provider, the data key versions, the last health check and how long a revoked key keeps working before Atlas fails closed.</summary>
         /// <remarks>GET /v1/instance/data_key_provider. Scope: <c>vault:manage</c>.</remarks>
@@ -2169,10 +2554,20 @@ namespace Atlas.Generated
         public Task<Dictionary<string, object?>> SetDataKeyProviderAsync(InstanceSetDataKeyProviderBody? body = null, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Put, $"/v1/instance/data_key_provider", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set the cache window: how long Atlas may use a loaded data key without your KMS confirming it, which is how long a revoked key keeps working (60 to 3,600 seconds, default 300). Shorter revokes faster but depends on the KMS being reachable more tightly: Atlas re-confirms every 20 seconds, so a KMS outage longer than the window takes the instance down.</summary>
+        /// <remarks>PUT /v1/instance/data_key_provider. Scope: <c>vault:manage</c>.</remarks>
+        public Task<Dictionary<string, object?>> SetDataKeyProviderAsync(InstanceSetDataKeyProviderBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Put, $"/v1/instance/data_key_provider", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove customer-managed encryption by deleting the wrapped data keys. This crypto-shreds everything encrypted under them and cannot be undone; send { "confirm": "shred" }.</summary>
         /// <remarks>DELETE /v1/instance/data_key_provider. Scope: <c>vault:manage</c>.</remarks>
         public Task<Dictionary<string, object?>> DeleteDataKeyProviderAsync(InstanceDeleteDataKeyProviderBody body, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/instance/data_key_provider", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Remove customer-managed encryption by deleting the wrapped data keys. This crypto-shreds everything encrypted under them and cannot be undone; send { "confirm": "shred" }.</summary>
+        /// <remarks>DELETE /v1/instance/data_key_provider. Scope: <c>vault:manage</c>.</remarks>
+        public Task<Dictionary<string, object?>> DeleteDataKeyProviderAsync(InstanceDeleteDataKeyProviderBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/instance/data_key_provider", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Check the customer key now: wrap and unwrap a random key through it and open the current data keys. `reason` names a failure: key_disabled, key_not_found, access_denied, unreachable or invalid_config.</summary>
         /// <remarks>POST /v1/instance/data_key_provider/check. Scope: <c>vault:manage</c>.</remarks>
@@ -2248,12 +2643,32 @@ namespace Atlas.Generated
         public Task<InstanceListExportsResponseDataItem> ExportsRevokeLinksAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<InstanceListExportsResponseDataItem>(HttpVerb.Post, $"/v1/instance/exports/{Enc(id)}/revoke_links", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
+        /// <summary>Read the before_first_session hook: the endpoint Atlas calls once per user, after their email is verified and before their first session token, so your app can link the account and stamp its own external_id on that very token. The signing secret is reported as signing_secret_set only.</summary>
+        /// <remarks>GET /v1/instance/hooks/before_first_session. Scope: <c>instance:read</c>.</remarks>
+        public Task<InstanceGetHooksBeforeFirstSessionResponse> GetHooksBeforeFirstSessionAsync(CancellationToken cancellationToken = default) =>
+            Req<InstanceGetHooksBeforeFirstSessionResponse>(HttpVerb.Get, $"/v1/instance/hooks/before_first_session", cancellationToken: cancellationToken);
+
+        /// <summary>Update the before_first_session hook. Only the fields you send change; null clears. Atlas POSTs {"type":"before_first_session","data":{user_id,email,email_verified,provider,provider_user_id,name,external_id}} signed like a webhook (atlas-id, atlas-timestamp, atlas-signature). Answer 200 {"external_id":"…"} to set it: it is stored only when the user has none and no other user holds it (never overwritten). A timeout or failure never blocks the sign-in (it is audited and counted in failed_calls). Not called for impersonation or anonymous guests.</summary>
+        /// <remarks>PATCH /v1/instance/hooks/before_first_session. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceGetHooksBeforeFirstSessionResponse> UpdateHooksBeforeFirstSessionAsync(InstanceUpdateHooksBeforeFirstSessionBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceGetHooksBeforeFirstSessionResponse>(HttpVerb.Patch, $"/v1/instance/hooks/before_first_session", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Turn the hook off and clear its url and signing secret, the same as PATCH with {enabled:false, url:null, signing_secret:null}. Audited. Idempotent.</summary>
+        /// <remarks>DELETE /v1/instance/hooks/before_first_session. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceGetHooksBeforeFirstSessionResponse> DeleteHooksBeforeFirstSessionAsync(string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceGetHooksBeforeFirstSessionResponse>(HttpVerb.Delete, $"/v1/instance/hooks/before_first_session", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Send a signed sample call (a user that does not exist) to the hook and report its answer. Nothing is stored on any user.</summary>
+        /// <remarks>POST /v1/instance/hooks/before_first_session/test. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceHooksBeforeFirstSessionTestResponse> HooksBeforeFirstSessionTestAsync(string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceHooksBeforeFirstSessionTestResponse>(HttpVerb.Post, $"/v1/instance/hooks/before_first_session/test", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Read the instance's before_user_create hook: the endpoint Atlas calls for every self-service sign-up so your app can set the user's external_id and metadata first. The signing secret is reported as signing_secret_set only.</summary>
         /// <remarks>GET /v1/instance/hooks/before_user_create. Scope: <c>instance:read</c>.</remarks>
         public Task<InstanceGetHooksBeforeUserCreateResponse> GetHooksBeforeUserCreateAsync(CancellationToken cancellationToken = default) =>
             Req<InstanceGetHooksBeforeUserCreateResponse>(HttpVerb.Get, $"/v1/instance/hooks/before_user_create", cancellationToken: cancellationToken);
 
-        /// <summary>Update the before_user_create hook. Only the fields you send change; null clears. The hook is called (signed like a webhook) after the user id is assigned and before user.created, the referral call and any session. It may answer {external_id, public_metadata, private_metadata, unsafe_metadata}, or deny the sign-up with {"deny": true, "reason": "..."} or HTTP 403: the person gets 403 SIGN_UP_DENIED with your reason, no user is kept and no user.created is sent. A slow or failing hook does not block the sign-up unless fail_closed is true. The body carries data.user, data.strategy, data.referral, data.request ({client_id, app_context, login_hint} of the authorize request, nulls when absent) and data.invitation (the pending instance invitation for the address, or null) and data.organization ({id, external_id, role, role_mapped, via: sso | domain} when the sign-up comes through an organization SSO connection or a captured auto-join domain, else null). Turning the hook on, or changing the url or signing_secret of a fail_closed enabled one (or turning fail_closed on for it), first sends the signed test call: unless it returns a valid answer (an answer object, possibly empty, or a deny) the change is refused with 409 HOOK_TEST_FAILED (meta: url, status, the first 200 bytes of the response body, outcome) and the hook stays as it was. ?force=true (or force in the body) skips the test and is audit-logged. enabled: "pending" stores the hook OFF without testing (sign-ups proceed and the hook is not called, fail_closed included) and Atlas turns it on in the background once the test passes (see GET: pending, pending_since, last_test_at, last_test_error). A dry run (?dry_run=true) makes the same test call and changes nothing: it answers would_return (the hook exactly as the PATCH would leave it, e.g. enabled: true) and changes [{section, before, after}] with would_return_status 200, or would_return_status 409 with the refusal. An enabled hook that is not fail_closed is not re-tested when its url or secret changes.</summary>
+        /// <summary>Update the before_user_create hook. Only the fields you send change; null clears. The hook is called (signed like a webhook) after the user id is assigned and before user.created, the referral call and any session. It may answer {external_id, public_metadata, private_metadata, unsafe_metadata}, or deny the sign-up with {"deny": true, "reason": "..."} or HTTP 403: the person gets 403 SIGN_UP_DENIED with your reason, no user is kept and no user.created is sent. A slow or failing hook does not block the sign-up unless fail_closed is true. The body (schema BeforeUserCreateHookRequest; your answer is BeforeUserCreateHookResponse) carries data.user, data.strategy, data.referral, data.request ({client_id, app_context, login_hint} of the authorize request, nulls when absent) and data.invitation (the pending instance invitation for the address, or null) and data.organization ({id, external_id, role, role_mapped, via: sso | domain} when the sign-up comes through an organization SSO connection or a captured auto-join domain, else null). Turning the hook on, or changing the url or signing_secret of a fail_closed enabled one (or turning fail_closed on for it), first sends the signed test call: unless it returns a valid answer (an answer object, possibly empty, or a deny) the change is refused with 409 HOOK_TEST_FAILED (meta: url, status, the first 200 bytes of the response body, outcome) and the hook stays as it was. ?force=true (or force in the body) skips the test and is audit-logged. enabled: "pending" stores the hook OFF without testing (sign-ups proceed and the hook is not called, fail_closed included) and Atlas turns it on in the background once the test passes (see GET: pending, pending_since, last_test_at, last_test_error). A dry run (?dry_run=true) makes the same test call and changes nothing: it answers would_return (the hook exactly as the PATCH would leave it, e.g. enabled: true) and changes [{section, before, after}] with would_return_status 200, or would_return_status 409 with the refusal. An enabled hook that is not fail_closed is not re-tested when its url or secret changes.</summary>
         /// <remarks>PATCH /v1/instance/hooks/before_user_create. Scope: <c>instance:write</c>.</remarks>
         public Task<InstanceGetHooksBeforeUserCreateResponse> UpdateHooksBeforeUserCreateAsync(InstanceUpdateHooksBeforeUserCreateBody body, InstanceUpdateHooksBeforeUserCreateQuery? query = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<InstanceGetHooksBeforeUserCreateResponse>(HttpVerb.Patch, $"/v1/instance/hooks/before_user_create", body: body, query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
@@ -2277,6 +2692,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/instance/impersonation_policy. Scope: <c>instance:write</c>.</remarks>
         public Task SetImpersonationPolicyAsync(InstanceSetImpersonationPolicyBody body, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Put, $"/v1/instance/impersonation_policy", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Change the staff impersonation policy. Send only the fields to change; unknown fields are refused. Audited.</summary>
+        /// <remarks>PUT /v1/instance/impersonation_policy. Scope: <c>instance:write</c>.</remarks>
+        public Task SetImpersonationPolicyAsync(InstanceSetImpersonationPolicyBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Put, $"/v1/instance/impersonation_policy", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The tenant imports of the instance, newest first.</summary>
         /// <remarks>GET /v1/instance/imports. Scope: <c>instance:read</c>.</remarks>
@@ -2302,6 +2722,26 @@ namespace Atlas.Generated
         public Task<InstanceListExportsResponseDataItem> GetImportAsync(string id, CancellationToken cancellationToken = default) =>
             Req<InstanceListExportsResponseDataItem>(HttpVerb.Get, $"/v1/instance/imports/{Enc(id)}", cancellationToken: cancellationToken);
 
+        /// <summary>Read the stored sign-up forwarding for a destination: its managed endpoint, active flag and non-secret settings. The destination key is never returned. 404 when sign-ups are not forwarded there.</summary>
+        /// <remarks>GET /v1/instance/integrations/forwarding/{destination}. Scope: <c>webhooks:read</c>.</remarks>
+        public Task<InstanceGetIntegrationsForwardingResponse> GetIntegrationsForwardingAsync(string destination, CancellationToken cancellationToken = default) =>
+            Req<InstanceGetIntegrationsForwardingResponse>(HttpVerb.Get, $"/v1/instance/integrations/forwarding/{Enc(destination)}", cancellationToken: cancellationToken);
+
+        /// <summary>Forward every sign-up (`user.created`) to Lucida, Hermetica or Seolyticize with your own server key, or to any HTTPS webhook.</summary>
+        /// <remarks>PUT /v1/instance/integrations/forwarding/{destination}. Scope: <c>webhooks:write</c>.</remarks>
+        public Task<InstanceReplaceIntegrationsForwardingResponse> ReplaceIntegrationsForwardingAsync(string destination, InstanceReplaceIntegrationsForwardingBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceReplaceIntegrationsForwardingResponse>(HttpVerb.Put, $"/v1/instance/integrations/forwarding/{Enc(destination)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Stop forwarding sign-ups to a destination (removes its managed endpoint).</summary>
+        /// <remarks>DELETE /v1/instance/integrations/forwarding/{destination}. Scope: <c>webhooks:write</c>.</remarks>
+        public Task DeleteIntegrationsForwardingAsync(string destination, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/instance/integrations/forwarding/{Enc(destination)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Every connected integration and receiver with its last delivery status and time, in one list.</summary>
+        /// <remarks>GET /v1/instance/integrations/health. Scope: <c>instance:read</c>.</remarks>
+        public Task<InstanceGetIntegrationsHealthResponse> GetIntegrationsHealthAsync(InstanceGetIntegrationsHealthQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceGetIntegrationsHealthResponse>(HttpVerb.Get, $"/v1/instance/integrations/health", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
         /// <summary>The integration's mint log: every getToken({ for }) attempt, from the browser and from the server call, newest first, with its outcome (ok, or refused with the reason code), the route kind and the user id. No tokens are stored. Kept 7 days. Use it when health.last_minted_at stays null: an empty log means nothing is calling Atlas, a refused row says why.</summary>
         /// <remarks>GET /v1/instance/integrations/{product}/mints. Scope: <c>instance:read</c>.</remarks>
         public Task<InstanceListIntegrationsMintsResponse> ListIntegrationsMintsAsync(string product, InstanceListIntegrationsMintsQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -2311,6 +2751,11 @@ namespace Atlas.Generated
         /// <remarks>POST /v1/instance/integrations/{product}/test. Scope: <c>instance:write</c>.</remarks>
         public Task<object> IntegrationsTestAsync(string product, InstanceIntegrationsTestQuery? query = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<object>(HttpVerb.Post, $"/v1/instance/integrations/{Enc(product)}/test", query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The token issuers a verifier should accept: the active one, the planned one while a domain claim is pending, and earlier ones still in their overlap window.</summary>
+        /// <remarks>GET /v1/instance/issuers. Scope: <c>instance:read</c>.</remarks>
+        public Task<InstanceListIssuersResponse> ListIssuersAsync(CancellationToken cancellationToken = default) =>
+            Req<InstanceListIssuersResponse>(HttpVerb.Get, $"/v1/instance/issuers", cancellationToken: cancellationToken);
 
         /// <summary>The OpenID provider keys beyond the instance signing key: PS256, ES384 and EdDSA signing keys and the RSA-OAEP-256 / ECDH-ES keys request objects are encrypted to, with their status.</summary>
         /// <remarks>GET /v1/instance/op_keys. Scope: <c>instance:read</c>.</remarks>
@@ -2332,6 +2777,11 @@ namespace Atlas.Generated
         public Task SetOrgDeparturePolicyAsync(InstanceSetOrgDeparturePolicyBody body, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Put, $"/v1/instance/org_departure_policy", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set the departure policy. `transfer_to`: oldest_admin, user (needs `user_id`, who must still be a member) or none.</summary>
+        /// <remarks>PUT /v1/instance/org_departure_policy. Scope: <c>instance:write</c>.</remarks>
+        public Task SetOrgDeparturePolicyAsync(InstanceSetOrgDeparturePolicyBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Put, $"/v1/instance/org_departure_policy", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>The map of organization role key to the feature keys a seat in that role grants. Those features join the token's `fea` claim for a member whose active organization role matches, on top of (or without) a plan.</summary>
         /// <remarks>GET /v1/instance/org_role_entitlements. Scope: <c>instance:read</c>.</remarks>
         public Task<InstanceListOrgRoleEntitlementsResponse> ListOrgRoleEntitlementsAsync(CancellationToken cancellationToken = default) =>
@@ -2341,6 +2791,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/instance/org_role_entitlements. Scope: <c>instance:write</c>.</remarks>
         public Task SetOrgRoleEntitlementsAsync(InstanceSetOrgRoleEntitlementsBody body, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Put, $"/v1/instance/org_role_entitlements", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Replace the role to features map. A role left out grants nothing. Takes effect on the next token.</summary>
+        /// <remarks>PUT /v1/instance/org_role_entitlements. Scope: <c>instance:write</c>.</remarks>
+        public Task SetOrgRoleEntitlementsAsync(InstanceSetOrgRoleEntitlementsBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Put, $"/v1/instance/org_role_entitlements", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Acknowledge a preflight finding by code, in the body: the same as PUT /v1/instance/preflight/acks/{code}, with the reason optional. An acknowledged finding stays listed with acknowledged_at and acknowledged, drops out of the failing count, and GET /v1/integration-health reports it as a note (ok stays true when only notes and acknowledged findings remain). subject narrows it to one subject of the finding; expires_at makes it lapse. Errors cannot be acknowledged (422). Audited (preflight_ack.saved).</summary>
         /// <remarks>POST /v1/instance/preflight/acks. Scope: <c>instance:write</c>.</remarks>
@@ -2372,10 +2827,20 @@ namespace Atlas.Generated
         public Task<InstanceListScopesResponse> ListScopesAsync(InstanceListScopesQuery? query = null, CancellationToken cancellationToken = default) =>
             Req<InstanceListScopesResponse>(HttpVerb.Get, $"/v1/instance/scopes", query: query?.ToQuery(), cancellationToken: cancellationToken);
 
-        /// <summary>Replace the scope catalogue. Each scope has a `name`, a `label` and a `description` per locale ({ "en": "…", "es": "…" }), `sensitive`, and `requires_verified_client`. The consent screen shows the label and description in the user's language (falling back to its base language, then `en`). A scope with `requires_verified_client` is refused at /oauth2/authorize with `invalid_scope` unless the app's status is `approved` or that scope is in the client's `approved_scopes` (per-scope review). The owner and testers of a client still in development may request it too. A client still needs the scope in its allowed scopes to request it.</summary>
+        /// <summary>Replace the scope catalogue. Each scope has a `name`, a `label` and a `description` per locale ({ "en": "…", "es": "…" }), `sensitive`, and `requires_verified_client`. The consent screen shows the label and description in the user's language (falling back to its base language, then `en`). A scope with `requires_verified_client` is refused at /oauth2/authorize with `invalid_scope` unless the app's status is `approved` or that scope is in the client's `approved_scopes` (per-scope review). The owner and testers of a client still in development may request it too. A client still needs the scope in its allowed scopes to request it. `requires_client_level` (`any`, `verified` or `certified`) sets the level a client needs (`requires_verified_client: true` means `verified`; the stricter wins); a `certified` client is an approved one the instance has certified (PATCH /v1/oauth_clients/{id} `certified`). `owner_exempt: true` lets the developer who owns a client request the scope with it on their own account whatever the client's level. A name ending `:*` (`listings:*`) is a wildcard entry: it covers every `listings:&lt;anything&gt;` for gating, consent text and released claims, and a client or grant that holds `listings:*` holds each of them. By default the whole list is checked and nothing is written if any entry is bad (422, one problem per field). `?mode=partial` applies the valid entries and answers 200 with `rejected: [{ index, name, errors }]` (a rejected entry leaves the scope of that name as it was). `?too_long=truncate` cuts over-long labels and descriptions instead of refusing them and lists each cut in `warnings`.</summary>
         /// <remarks>PUT /v1/instance/scopes. Scope: <c>instance:write</c>.</remarks>
         public Task SetScopesAsync(InstanceSetScopesBody body, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Put, $"/v1/instance/scopes", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Replace the scope catalogue. Each scope has a `name`, a `label` and a `description` per locale ({ "en": "…", "es": "…" }), `sensitive`, and `requires_verified_client`. The consent screen shows the label and description in the user's language (falling back to its base language, then `en`). A scope with `requires_verified_client` is refused at /oauth2/authorize with `invalid_scope` unless the app's status is `approved` or that scope is in the client's `approved_scopes` (per-scope review). The owner and testers of a client still in development may request it too. A client still needs the scope in its allowed scopes to request it. `requires_client_level` (`any`, `verified` or `certified`) sets the level a client needs (`requires_verified_client: true` means `verified`; the stricter wins); a `certified` client is an approved one the instance has certified (PATCH /v1/oauth_clients/{id} `certified`). `owner_exempt: true` lets the developer who owns a client request the scope with it on their own account whatever the client's level. A name ending `:*` (`listings:*`) is a wildcard entry: it covers every `listings:&lt;anything&gt;` for gating, consent text and released claims, and a client or grant that holds `listings:*` holds each of them. By default the whole list is checked and nothing is written if any entry is bad (422, one problem per field). `?mode=partial` applies the valid entries and answers 200 with `rejected: [{ index, name, errors }]` (a rejected entry leaves the scope of that name as it was). `?too_long=truncate` cuts over-long labels and descriptions instead of refusing them and lists each cut in `warnings`.</summary>
+        /// <remarks>PUT /v1/instance/scopes. Scope: <c>instance:write</c>.</remarks>
+        public Task SetScopesAsync(InstanceSetScopesBody body, InstanceSetScopesQuery? query, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Put, $"/v1/instance/scopes", body: body, query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Replace the scope catalogue. Each scope has a `name`, a `label` and a `description` per locale ({ "en": "…", "es": "…" }), `sensitive`, and `requires_verified_client`. The consent screen shows the label and description in the user's language (falling back to its base language, then `en`). A scope with `requires_verified_client` is refused at /oauth2/authorize with `invalid_scope` unless the app's status is `approved` or that scope is in the client's `approved_scopes` (per-scope review). The owner and testers of a client still in development may request it too. A client still needs the scope in its allowed scopes to request it. `requires_client_level` (`any`, `verified` or `certified`) sets the level a client needs (`requires_verified_client: true` means `verified`; the stricter wins); a `certified` client is an approved one the instance has certified (PATCH /v1/oauth_clients/{id} `certified`). `owner_exempt: true` lets the developer who owns a client request the scope with it on their own account whatever the client's level. A name ending `:*` (`listings:*`) is a wildcard entry: it covers every `listings:&lt;anything&gt;` for gating, consent text and released claims, and a client or grant that holds `listings:*` holds each of them. By default the whole list is checked and nothing is written if any entry is bad (422, one problem per field). `?mode=partial` applies the valid entries and answers 200 with `rejected: [{ index, name, errors }]` (a rejected entry leaves the scope of that name as it was). `?too_long=truncate` cuts over-long labels and descriptions instead of refusing them and lists each cut in `warnings`.</summary>
+        /// <remarks>PUT /v1/instance/scopes. Scope: <c>instance:write</c>.</remarks>
+        public Task SetScopesAsync(InstanceSetScopesBody body, InstanceSetScopesQuery? query, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Put, $"/v1/instance/scopes", body: body, query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Alias of GET /v1/secret_keys. List this instance's secret keys with scopes, owner, expiry, last use, last-used IP and provisioning tags. Revoked keys stay listed. Filter by tag with ?metadata[key]=value.</summary>
         /// <remarks>GET /v1/instance/secret_keys. Scope: <c>secret_keys:read</c>.</remarks>
@@ -2391,7 +2856,7 @@ namespace Atlas.Generated
                 return new CursorPage<InstanceListSecretKeysResponseDataItem> { Data = _page.Data ?? new List<InstanceListSecretKeysResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
             }, query?.StartingAfter, cancellationToken);
 
-        /// <summary>Alias of POST /v1/secret_keys. Create a scoped secret key: `name`, `scopes[]` (refused when unknown, or when the calling key does not hold them; presets `read_only`, `privacy:execute`, `privacy:grants:revoke`; or `preset: "app-runtime"` for an app server runtime key), `expires_at` (at most a year; default one year; "never" is refused), `allowed_ips` (CIDRs), `allowed_origins` (browser origins; a request with another Origin gets 403 ORIGIN_NOT_ALLOWED), `owner` (default: the creating person or key), `external_ref` (idempotent create: a repeat returns the existing key, 200, idempotent_replay, no secret), `metadata` (tags; filter the list with ?metadata[key]=value) and `key_format` (`atlas`, the default `atlas_&lt;env&gt;_sk_…`, or `legacy` `sk_&lt;env&gt;_…`). The secret is returned once. Minting with an operator token needs multi-factor sign-in within 5 minutes (403 STEP_UP_REQUIRED). Send `X-Secret-Recipient: x25519:&lt;public key&gt;` to receive the secret sealed (libsodium sealed box) as `sealed_secret` instead of in plaintext. Example: a data-rights tool's key, { "name": "DSAR executor", "scopes": ["privacy:execute", "privacy:grants:revoke"], "expires_at": "2027-04-01" }.</summary>
+        /// <summary>Alias of POST /v1/secret_keys. Create a scoped secret key: `name`, `scopes[]` (refused when unknown, or when the calling key does not hold them; presets `read_only`, `privacy:execute`, `privacy:grants:revoke`; or `preset: "app-runtime"` for an app server runtime key, or `preset: "integrations"` for the key a connected platform (consent manager, referral or support platform) connects with, or `preset: "provisioning"` for a deploy-script key that configures the instance: instance settings, domains, messaging providers, integrations, webhooks, OAuth clients and providers, redirect URLs, branding and keys, with no user, session or organization-member access), `expires_at` (at most a year; default one year; "never" is refused), `allowed_ips` (CIDRs), `allowed_origins` (browser origins; a request with another Origin gets 403 ORIGIN_NOT_ALLOWED), `owner` (default: the creating person or key), `external_ref` (idempotent create: a repeat returns the existing key, 200, idempotent_replay, no secret), `metadata` (tags; filter the list with ?metadata[key]=value) and `key_format` (`atlas`, the default `atlas_&lt;env&gt;_sk_…`, or `legacy` `sk_&lt;env&gt;_…`). The secret is returned once. Minting with an operator token needs multi-factor sign-in within 5 minutes (403 STEP_UP_REQUIRED). Send `X-Secret-Recipient: x25519:&lt;public key&gt;` to receive the secret sealed (libsodium sealed box) as `sealed_secret` instead of in plaintext. Example: a data-rights tool's key, { "name": "DSAR executor", "scopes": ["privacy:execute", "privacy:grants:revoke"], "expires_at": "2027-04-01" }.</summary>
         /// <remarks>POST /v1/instance/secret_keys. Scope: <c>secret_keys:write</c>.</remarks>
         public Task<InstanceListSecretKeysResponseDataItem> CreateSecretKeyAsync(InstanceCreateSecretKeyBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<InstanceListSecretKeysResponseDataItem>(HttpVerb.Post, $"/v1/instance/secret_keys", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
@@ -2406,10 +2871,54 @@ namespace Atlas.Generated
         public Task<InstanceGetSigningKeyScheduleResponse> SetSigningKeyScheduleAsync(InstanceSetSigningKeyScheduleBody body, CancellationToken cancellationToken = default) =>
             Req<InstanceGetSigningKeyScheduleResponse>(HttpVerb.Put, $"/v1/instance/signing_key_schedule", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Rotate the instance signing key automatically. Every interval_days the worker publishes a new key (prepublish_hours before it signs), switches to it, and keeps the previous key published until every token it signed has expired: at least the longest token lifetime the instance uses plus the key set cache, never under 24 hours, and never dropped while one of its tokens can still be presented. Keys in a cloud KMS rotate at the scheduled time (they cannot be held back) and are limited to RS256 and ES256. An earlier rotation still inside its grace window postpones the next one. Needs a recent MFA sign-in.</summary>
+        /// <remarks>PUT /v1/instance/signing_key_schedule. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceGetSigningKeyScheduleResponse> SetSigningKeyScheduleAsync(InstanceSetSigningKeyScheduleBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<InstanceGetSigningKeyScheduleResponse>(HttpVerb.Put, $"/v1/instance/signing_key_schedule", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Turn scheduled rotation off. Keys already published stay as they are.</summary>
         /// <remarks>DELETE /v1/instance/signing_key_schedule. Scope: <c>instance:write</c>.</remarks>
         public Task<InstanceDeleteSigningKeyScheduleResponse> DeleteSigningKeyScheduleAsync(CancellationToken cancellationToken = default) =>
             Req<InstanceDeleteSigningKeyScheduleResponse>(HttpVerb.Delete, $"/v1/instance/signing_key_schedule", cancellationToken: cancellationToken);
+
+        /// <summary>Turn scheduled rotation off. Keys already published stay as they are.</summary>
+        /// <remarks>DELETE /v1/instance/signing_key_schedule. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceDeleteSigningKeyScheduleResponse> DeleteSigningKeyScheduleAsync(string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<InstanceDeleteSigningKeyScheduleResponse>(HttpVerb.Delete, $"/v1/instance/signing_key_schedule", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The staging copies and previews of this instance, newest first (deleted ones are left out).</summary>
+        /// <remarks>GET /v1/instance/staging_copies. Scope: <c>instance:read</c>.</remarks>
+        public Task<InstanceListStagingCopiesResponse> ListStagingCopiesAsync(InstanceListStagingCopiesQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceListStagingCopiesResponse>(HttpVerb.Get, $"/v1/instance/staging_copies", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListStagingCopiesAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<InstanceListStagingCopiesResponseDataItem> ListStagingCopiesAllAsync(InstanceListStagingCopiesQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<InstanceListStagingCopiesResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new InstanceListStagingCopiesQuery();
+                var _page = await ListStagingCopiesAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<InstanceListStagingCopiesResponseDataItem> { Data = _page.Data ?? new List<InstanceListStagingCopiesResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
+
+        /// <summary>Make a staging copy of this instance with its own secret key: a new development-mode instance of the same app, with or without data (same body and rules as the platform clone route, without secret_key_preset: the key it answers with holds the app-runtime preset). For an instance that is not provisioned under a platform app. The copy never carries secrets (configuration secrets are removed; API keys and provider connections are not copied), private metadata of users and organizations, webhook endpoints, signing keys, passwords or second factors. The new instance is in development mode: no email or SMS is sent until it has its own provider keys. Needs instance:write (and users:read when include has users). Honours Idempotency-Key; a repeat for a live ref returns it (200, no secret). Audited.</summary>
+        /// <remarks>POST /v1/instance/staging_copies. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceCreateStagingCopyResponse> CreateStagingCopyAsync(InstanceCreateStagingCopyBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceCreateStagingCopyResponse>(HttpVerb.Post, $"/v1/instance/staging_copies", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>One staging copy: status, what was copied, what could not be placed.</summary>
+        /// <remarks>GET /v1/instance/staging_copies/{id}. Scope: <c>instance:read</c>.</remarks>
+        public Task<InstanceListStagingCopiesResponseDataItem> GetStagingCopyAsync(string id, CancellationToken cancellationToken = default) =>
+            Req<InstanceListStagingCopiesResponseDataItem>(HttpVerb.Get, $"/v1/instance/staging_copies/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a staging copy together with its instance and everything in it. Only an instance a copy created can be removed this way. Audited.</summary>
+        /// <remarks>DELETE /v1/instance/staging_copies/{id}. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceListStagingCopiesResponseDataItem> DeleteStagingCopyAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceListStagingCopiesResponseDataItem>(HttpVerb.Delete, $"/v1/instance/staging_copies/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Bring a completed staging copy up to date in place: the same instance, keys and host, with this instance's configuration merged in again (and the data sections asked for, at most the ones it was made with, up to 2000 rows each). synthetic_users { count (1-500), seed } adds seeded test users (example.com addresses, the same seed gives the same users, so repeating it adds none twice). ttl_hours extends a preview. Emails stay masked consistently, so a refresh does not duplicate users. Audited.</summary>
+        /// <remarks>POST /v1/instance/staging_copies/{id}/refresh. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceListStagingCopiesResponseDataItem> StagingCopiesRefreshAsync(string id, InstanceStagingCopiesRefreshBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<InstanceListStagingCopiesResponseDataItem>(HttpVerb.Post, $"/v1/instance/staging_copies/{Enc(id)}/refresh", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The instance user traits schema: a JSON Schema per metadata bag (public, unsafe and private user metadata; public and private organization metadata) and how strictly it applies. enforcement is off (the default and what an instance without a schema reports), warn or enforce. version is 0 until a schema is stored, then counts up on every change.</summary>
         /// <remarks>GET /v1/instance/user_traits_schema. Scope: <c>instance:read</c>.</remarks>
@@ -2421,6 +2930,11 @@ namespace Atlas.Generated
         public Task<UserTraitsSchema> SetUserTraitsSchemaAsync(InstanceSetUserTraitsSchemaBody body, CancellationToken cancellationToken = default) =>
             Req<UserTraitsSchema>(HttpVerb.Put, $"/v1/instance/user_traits_schema", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Store the user traits schema and/or change its enforcement. Omit schemas or enforcement to keep the stored one. Each schema is checked before it is stored (a 422 names the offending path): a subset of JSON Schema 2020-12 with type, properties, required, enum, default, items, maxLength, pattern, description and additionalProperties (true or false); any other keyword is refused, a root must have type "object", patterns that repeat a repeated group are refused, and a default must satisfy its own schema (it is documentation, never written into metadata). Enforcement: off checks nothing; warn lets every write through and records each violation in the audit log (field paths and messages, never values); enforce answers 422 with one error per field path on a write that breaks the schema. It applies to backend (secret key) writes, the dashboard and a signed-in user writing their own unsafe_metadata. Imports, migrations, SCIM provisioning and other Atlas-internal writes are never checked, so a bulk job is never stopped halfway. Existing metadata is not re-validated. Send version (the one you last read) to refuse a concurrent change with 409; sending the same content again changes nothing.</summary>
+        /// <remarks>PUT /v1/instance/user_traits_schema. Scope: <c>instance:write</c>.</remarks>
+        public Task<UserTraitsSchema> SetUserTraitsSchemaAsync(InstanceSetUserTraitsSchemaBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<UserTraitsSchema>(HttpVerb.Put, $"/v1/instance/user_traits_schema", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>The instance write budgets: writes (mutating Backend API requests), counter_writes (grant consume, refund and lease release), events and webhook_fanout, each per 60-second window, the mode (observe or enforce), and when a budget was last exceeded.</summary>
         /// <remarks>GET /v1/instance/write_budget. Scope: <c>instance:read</c>.</remarks>
         public Task<InstanceGetWriteBudgetResponse> GetWriteBudgetAsync(CancellationToken cancellationToken = default) =>
@@ -2431,10 +2945,20 @@ namespace Atlas.Generated
         public Task<InstanceGetWriteBudgetResponse> SetWriteBudgetAsync(InstanceSetWriteBudgetBody body, CancellationToken cancellationToken = default) =>
             Req<InstanceGetWriteBudgetResponse>(HttpVerb.Put, $"/v1/instance/write_budget", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set the write-budget mode and any limit. A limit is an integer from 1 to 10,000,000 per minute; null returns one to its default. Unknown fields are refused.</summary>
+        /// <remarks>PUT /v1/instance/write_budget. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceGetWriteBudgetResponse> SetWriteBudgetAsync(InstanceSetWriteBudgetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<InstanceGetWriteBudgetResponse>(HttpVerb.Put, $"/v1/instance/write_budget", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Back to the platform defaults in observe mode.</summary>
         /// <remarks>DELETE /v1/instance/write_budget. Scope: <c>instance:write</c>.</remarks>
         public Task<InstanceGetWriteBudgetResponse> DeleteWriteBudgetAsync(CancellationToken cancellationToken = default) =>
             Req<InstanceGetWriteBudgetResponse>(HttpVerb.Delete, $"/v1/instance/write_budget", cancellationToken: cancellationToken);
+
+        /// <summary>Back to the platform defaults in observe mode.</summary>
+        /// <remarks>DELETE /v1/instance/write_budget. Scope: <c>instance:write</c>.</remarks>
+        public Task<InstanceGetWriteBudgetResponse> DeleteWriteBudgetAsync(string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<InstanceGetWriteBudgetResponse>(HttpVerb.Delete, $"/v1/instance/write_budget", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>LegalHolds</c> operations.</summary>
@@ -2517,10 +3041,20 @@ namespace Atlas.Generated
         public Task<MachineTrustPoliciesListResponseDataItem> UpdateAsync(string id, MachineTrustPoliciesUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<MachineTrustPoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/machine_trust_policies/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a trust policy. kind and machine_id cannot change. Needs a recent MFA sign-in.</summary>
+        /// <remarks>PATCH /v1/machine_trust_policies/{id}. Scope: <c>machines:write</c>.</remarks>
+        public Task<MachineTrustPoliciesListResponseDataItem> UpdateAsync(string id, MachineTrustPoliciesUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MachineTrustPoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/machine_trust_policies/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a trust policy. Tokens already minted through it live out their lifetime (at most max_ttl_seconds).</summary>
         /// <remarks>DELETE /v1/machine_trust_policies/{id}. Scope: <c>machines:write</c>.</remarks>
         public Task<MachineTrustPoliciesDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<MachineTrustPoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/machine_trust_policies/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a trust policy. Tokens already minted through it live out their lifetime (at most max_ttl_seconds).</summary>
+        /// <remarks>DELETE /v1/machine_trust_policies/{id}. Scope: <c>machines:write</c>.</remarks>
+        public Task<MachineTrustPoliciesDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MachineTrustPoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/machine_trust_policies/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Dry run: would this external token (or signed AWS request) be accepted by this policy? Returns the subject and claims it saw, or the reasons it was refused. Mints nothing and spends nothing, and works on a disabled policy.</summary>
         /// <remarks>POST /v1/machine_trust_policies/{id}/test. Scope: <c>machines:read</c>.</remarks>
@@ -2533,10 +3067,29 @@ namespace Atlas.Generated
     {
         internal MachinesOperations(AtlasTransport transport) : base(transport) { }
 
+        /// <summary>The machine deny feed: machines revoked and machine grants ended since a cursor (since=&lt;iso|cursor&gt;), oldest first, so a service that verifies machine tokens offline can deny a revoked machine within one poll. A `machine` entry denies every token with that `sub` issued before `revoked_at`; a `machine_grant` entry denies tokens with that `sub` and `aud` (the `audience`) issued before it. Readable with an sk_ bearer or a publishable key; a publishable key sees ids, audiences and times only. The revocation stream carries the same events as pushes.</summary>
+        /// <remarks>GET /v1/machines/revoked. Scope: <c>machines:read</c>.</remarks>
+        public Task<MachinesGetRevokedResponse> GetRevokedAsync(MachinesGetRevokedQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<MachinesGetRevokedResponse>(HttpVerb.Get, $"/v1/machines/revoked", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>GetRevokedAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<MachinesGetRevokedResponseDataItem> GetRevokedAllAsync(MachinesGetRevokedQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<MachinesGetRevokedResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new MachinesGetRevokedQuery();
+                var _page = await GetRevokedAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<MachinesGetRevokedResponseDataItem> { Data = _page.Data ?? new List<MachinesGetRevokedResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
+
         /// <summary>Change a machine's grant in place: scopes, constraints or expiry. 409 once the grant has expired.</summary>
         /// <remarks>PATCH /v1/machines/{id}/grants/{grantId}. Scope: <c>machines:write</c>.</remarks>
         public Task UpdateGrantAsync(string id, string grantId, MachinesUpdateGrantBody body, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Patch, $"/v1/machines/{Enc(id)}/grants/{Enc(grantId)}", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Change a machine's grant in place: scopes, constraints or expiry. 409 once the grant has expired.</summary>
+        /// <remarks>PATCH /v1/machines/{id}/grants/{grantId}. Scope: <c>machines:write</c>.</remarks>
+        public Task UpdateGrantAsync(string id, string grantId, MachinesUpdateGrantBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Patch, $"/v1/machines/{Enc(id)}/grants/{Enc(grantId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Mcp</c> operations.</summary>
@@ -2575,10 +3128,20 @@ namespace Atlas.Generated
         public Task<McpGatewaysListPacksResponseDataItem> UpdatePackAsync(string id, string packId, McpGatewaysCreatePackBody body, CancellationToken cancellationToken = default) =>
             Req<McpGatewaysListPacksResponseDataItem>(HttpVerb.Patch, $"/v1/mcp_gateways/{Enc(id)}/packs/{Enc(packId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a tool pack; omitted fields keep their value.</summary>
+        /// <remarks>PATCH /v1/mcp_gateways/{id}/packs/{packId}. Scope: <c>machines:write</c>.</remarks>
+        public Task<McpGatewaysListPacksResponseDataItem> UpdatePackAsync(string id, string packId, McpGatewaysCreatePackBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<McpGatewaysListPacksResponseDataItem>(HttpVerb.Patch, $"/v1/mcp_gateways/{Enc(id)}/packs/{Enc(packId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a tool pack from an MCP gateway.</summary>
         /// <remarks>DELETE /v1/mcp_gateways/{id}/packs/{packId}. Scope: <c>machines:write</c>.</remarks>
         public Task<McpGatewaysDeletePackResponse> DeletePackAsync(string id, string packId, CancellationToken cancellationToken = default) =>
             Req<McpGatewaysDeletePackResponse>(HttpVerb.Delete, $"/v1/mcp_gateways/{Enc(id)}/packs/{Enc(packId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a tool pack from an MCP gateway.</summary>
+        /// <remarks>DELETE /v1/mcp_gateways/{id}/packs/{packId}. Scope: <c>machines:write</c>.</remarks>
+        public Task<McpGatewaysDeletePackResponse> DeletePackAsync(string id, string packId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<McpGatewaysDeletePackResponse>(HttpVerb.Delete, $"/v1/mcp_gateways/{Enc(id)}/packs/{Enc(packId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The pinned tool definitions of a gateway with `guard.pin_tools` on: each tool's description and schema is hashed when first seen; a changed definition is blocked (status changed) until approved.</summary>
         /// <remarks>GET /v1/mcp_gateways/{id}/pins. Scope: <c>machines:read</c>.</remarks>
@@ -2589,6 +3152,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/mcp_gateways/{id}/pins/{tool}. Scope: <c>machines:write</c>.</remarks>
         public Task<Dictionary<string, object?>> DeletePinAsync(string id, string tool, CancellationToken cancellationToken = default) =>
             Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/mcp_gateways/{Enc(id)}/pins/{Enc(tool)}", cancellationToken: cancellationToken);
+
+        /// <summary>Forget a pin; the next tools/list pins whatever the upstream serves then.</summary>
+        /// <remarks>DELETE /v1/mcp_gateways/{id}/pins/{tool}. Scope: <c>machines:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> DeletePinAsync(string id, string tool, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/mcp_gateways/{Enc(id)}/pins/{Enc(tool)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Accept the definition the upstream serves now for a tool whose definition changed. Unblocks the tool.</summary>
         /// <remarks>POST /v1/mcp_gateways/{id}/pins/{tool}/approve. Scope: <c>machines:write</c>.</remarks>
@@ -2615,10 +3183,20 @@ namespace Atlas.Generated
         public Task<McpGatewaysListUpstreamsResponseDataItem> UpdateUpstreamAsync(string id, string upstreamId, McpGatewaysCreateUpstreamBody body, CancellationToken cancellationToken = default) =>
             Req<McpGatewaysListUpstreamsResponseDataItem>(HttpVerb.Patch, $"/v1/mcp_gateways/{Enc(id)}/upstreams/{Enc(upstreamId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change an upstream. Omitted fields keep their value; sending `openapi` recompiles the tools.</summary>
+        /// <remarks>PATCH /v1/mcp_gateways/{id}/upstreams/{upstreamId}. Scope: <c>machines:write</c>.</remarks>
+        public Task<McpGatewaysListUpstreamsResponseDataItem> UpdateUpstreamAsync(string id, string upstreamId, McpGatewaysCreateUpstreamBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<McpGatewaysListUpstreamsResponseDataItem>(HttpVerb.Patch, $"/v1/mcp_gateways/{Enc(id)}/upstreams/{Enc(upstreamId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove an upstream and its tools from the gateway.</summary>
         /// <remarks>DELETE /v1/mcp_gateways/{id}/upstreams/{upstreamId}. Scope: <c>machines:write</c>.</remarks>
         public Task<McpGatewaysDeleteUpstreamResponse> DeleteUpstreamAsync(string id, string upstreamId, CancellationToken cancellationToken = default) =>
             Req<McpGatewaysDeleteUpstreamResponse>(HttpVerb.Delete, $"/v1/mcp_gateways/{Enc(id)}/upstreams/{Enc(upstreamId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove an upstream and its tools from the gateway.</summary>
+        /// <remarks>DELETE /v1/mcp_gateways/{id}/upstreams/{upstreamId}. Scope: <c>machines:write</c>.</remarks>
+        public Task<McpGatewaysDeleteUpstreamResponse> DeleteUpstreamAsync(string id, string upstreamId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<McpGatewaysDeleteUpstreamResponse>(HttpVerb.Delete, $"/v1/mcp_gateways/{Enc(id)}/upstreams/{Enc(upstreamId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Reach the upstream with its own auth and list the tools it would add to the gateway. Never fails the request: `ok` is false with an `error` instead.</summary>
         /// <remarks>POST /v1/mcp_gateways/{id}/upstreams/{upstreamId}/test. Scope: <c>machines:write</c>.</remarks>
@@ -2646,10 +3224,26 @@ namespace Atlas.Generated
         public Task<McpRegistryDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<McpRegistryDeleteResponse>(HttpVerb.Delete, $"/v1/mcp_registry/{Enc(id)}", cancellationToken: cancellationToken);
 
+        /// <summary>Remove a registry entry.</summary>
+        /// <remarks>DELETE /v1/mcp_registry/{id}. Scope: <c>machines:write</c>.</remarks>
+        public Task<McpRegistryDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<McpRegistryDeleteResponse>(HttpVerb.Delete, $"/v1/mcp_registry/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Approve or reject a registry entry.</summary>
         /// <remarks>POST /v1/mcp_registry/{id}/decide. Scope: <c>machines:write</c>.</remarks>
         public Task<McpRegistryListResponseDataItem> DecideAsync(string id, McpRegistryDecideBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<McpRegistryListResponseDataItem>(HttpVerb.Post, $"/v1/mcp_registry/{Enc(id)}/decide", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>MessageLinks</c> operations.</summary>
+    public sealed class MessageLinksOperations : ResourceBase
+    {
+        internal MessageLinksOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>Mint a link to the hosted unsubscribe (type `unsubscribe`, needs `category`) or the hosted email-preference page (type `preferences`) for one address, for your own pages and mail. Atlas fills the same links in for you when you send with `unsubscribe: true` or put {{unsubscribe_url}} / {{preferences_url}} in a message. The link works for that address and category only and does not expire. Audited. → 201.</summary>
+        /// <remarks>POST /v1/message_links. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessageLinksCreateResponse> CreateAsync(MessageLinksCreateBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<MessageLinksCreateResponse>(HttpVerb.Post, $"/v1/message_links", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>MessageReceivers</c> operations.</summary>
@@ -2676,10 +3270,20 @@ namespace Atlas.Generated
         public Task<MessageReceiversListResponseDataItem> ReplaceAsync(string provider, MessageReceiversReplaceBody body, CancellationToken cancellationToken = default) =>
             Req<MessageReceiversListResponseDataItem>(HttpVerb.Put, $"/v1/message_receivers/{Enc(provider)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Store the secret Atlas verifies this provider's callbacks with (your Mailgun webhook signing key, SendGrid public key, Resend webhook secret, Vonage signature secret, MessageBird signing key, or the SNS topic ARNs to accept). Write-only: it is never returned. Twilio needs none (it uses the auth token of your SMS provider).</summary>
+        /// <remarks>PUT /v1/message_receivers/{provider}. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessageReceiversListResponseDataItem> ReplaceAsync(string provider, MessageReceiversReplaceBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessageReceiversListResponseDataItem>(HttpVerb.Put, $"/v1/message_receivers/{Enc(provider)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Forget the stored verification secret of a provider.</summary>
         /// <remarks>DELETE /v1/message_receivers/{provider}. Scope: <c>messaging:write</c>.</remarks>
         public Task<MessageReceiversDeleteResponse> DeleteAsync(string provider, CancellationToken cancellationToken = default) =>
             Req<MessageReceiversDeleteResponse>(HttpVerb.Delete, $"/v1/message_receivers/{Enc(provider)}", cancellationToken: cancellationToken);
+
+        /// <summary>Forget the stored verification secret of a provider.</summary>
+        /// <remarks>DELETE /v1/message_receivers/{provider}. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessageReceiversDeleteResponse> DeleteAsync(string provider, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessageReceiversDeleteResponse>(HttpVerb.Delete, $"/v1/message_receivers/{Enc(provider)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Messages</c> operations.</summary>
@@ -2700,6 +3304,11 @@ namespace Atlas.Generated
                 var _page = await ListAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
                 return new CursorPage<MessagesListResponseDataItem> { Data = _page.Data ?? new List<MessagesListResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
             }, query?.StartingAfter, cancellationToken);
+
+        /// <summary>Send a transactional email from your app through your own email provider and its failover. Give `to` (one address, or up to 10, each sent separately) and either `template` (the name or id of a template from POST /v1/notification_templates, with `data` variables) or `subject` with `html` and/or `text`, sent exactly as you wrote them. The message is recorded in the ledger (GET /v1/messages) with category `transactional`, your `category` and `tags`, and your provider's delivery callbacks fill in its timeline; bounces and complaints suppress the address like sign-in mail. An address on the suppression list is not sent to: the message is recorded with status `suppressed` and returned. Returns 422 when the instance has no email provider of its own (Atlas never sends your mail from its own sender). Accepts an Idempotency-Key. One address returns the message; several return a list.</summary>
+        /// <remarks>POST /v1/messages. Scope: <c>messaging:write</c>.</remarks>
+        public Task<object> CreateAsync(MessagesCreateBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<object>(HttpVerb.Post, $"/v1/messages", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>How many messages are in each status over the last `hours` (default 24, up to 720).</summary>
         /// <remarks>GET /v1/messages/summary. Scope: <c>messaging:read</c>.</remarks>
@@ -2736,10 +3345,20 @@ namespace Atlas.Generated
         public Task<MessagingListCountryRoutesResponseDataItem> SetCountryRoutesAsync(MessagingSetCountryRoutesBody body, CancellationToken cancellationToken = default) =>
             Req<MessagingListCountryRoutesResponseDataItem>(HttpVerb.Put, $"/v1/messaging/country_routes", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Route SMS to a country through a provider. `provider_id` is the id of your SMS provider or one of its fallback providers; the other providers still back it up when failover is on. Replaces an earlier route for the country.</summary>
+        /// <remarks>PUT /v1/messaging/country_routes. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessagingListCountryRoutesResponseDataItem> SetCountryRoutesAsync(MessagingSetCountryRoutesBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessagingListCountryRoutesResponseDataItem>(HttpVerb.Put, $"/v1/messaging/country_routes", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove the route for a country.</summary>
         /// <remarks>DELETE /v1/messaging/country_routes/{country}. Scope: <c>messaging:write</c>.</remarks>
         public Task<MessagingDeleteCountryRouteResponse> DeleteCountryRouteAsync(string country, CancellationToken cancellationToken = default) =>
             Req<MessagingDeleteCountryRouteResponse>(HttpVerb.Delete, $"/v1/messaging/country_routes/{Enc(country)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove the route for a country.</summary>
+        /// <remarks>DELETE /v1/messaging/country_routes/{country}. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessagingDeleteCountryRouteResponse> DeleteCountryRouteAsync(string country, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessagingDeleteCountryRouteResponse>(HttpVerb.Delete, $"/v1/messaging/country_routes/{Enc(country)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Messaging behaviour: automatic suppression, failover and ledger retention.</summary>
         /// <remarks>GET /v1/messaging/settings. Scope: <c>messaging:read</c>.</remarks>
@@ -2750,6 +3369,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/messaging/settings. Scope: <c>messaging:write</c>.</remarks>
         public Task<MessagingListSettingsResponse> SetSettingsAsync(MessagingSetSettingsBody body, CancellationToken cancellationToken = default) =>
             Req<MessagingListSettingsResponse>(HttpVerb.Put, $"/v1/messaging/settings", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Change messaging behaviour. Send only the fields to change. Audited.</summary>
+        /// <remarks>PUT /v1/messaging/settings. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessagingListSettingsResponse> SetSettingsAsync(MessagingSetSettingsBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessagingListSettingsResponse>(HttpVerb.Put, $"/v1/messaging/settings", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The email suppression list, or one address with `email`.</summary>
         /// <remarks>GET /v1/messaging/suppressions. Scope: <c>email_suppressions:read</c>.</remarks>
@@ -2774,6 +3398,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/messaging/suppressions/{email}. Scope: <c>email_suppressions:write</c>.</remarks>
         public Task<MessagingDeleteSuppressionResponse> DeleteSuppressionAsync(string email, CancellationToken cancellationToken = default) =>
             Req<MessagingDeleteSuppressionResponse>(HttpVerb.Delete, $"/v1/messaging/suppressions/{Enc(email)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove an address from the suppression list.</summary>
+        /// <remarks>DELETE /v1/messaging/suppressions/{email}. Scope: <c>email_suppressions:write</c>.</remarks>
+        public Task<MessagingDeleteSuppressionResponse> DeleteSuppressionAsync(string email, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessagingDeleteSuppressionResponse>(HttpVerb.Delete, $"/v1/messaging/suppressions/{Enc(email)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>MessagingProviders</c> operations.</summary>
@@ -2785,6 +3414,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/messaging_providers/push. Scope: <c>messaging:write</c>.</remarks>
         public Task SetPushAsync(object body, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Put, $"/v1/messaging_providers/push", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Configure the push sender used for push MFA and in-app sign-in approval. The body is discriminated by `transport`: `apns_fcm` (one row carrying APNS and/or FCM credentials; devices are routed by their platform) or `expo` (an Expo access token, write-only; delivers to ExponentPushToken devices registered with platform `expo`). Unknown or missing keys are refused with a 422 naming `config.&lt;key&gt;`. Secrets are write-only.</summary>
+        /// <remarks>PUT /v1/messaging_providers/push. Scope: <c>messaging:write</c>.</remarks>
+        public Task SetPushAsync(object body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Put, $"/v1/messaging_providers/push", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The fallback providers of a channel (`email`, `sms` or `push`), in the order they are tried after your own provider. `failover_order` lists `primary` then each active fallback.</summary>
         /// <remarks>GET /v1/messaging_providers/{channel}/fallbacks. Scope: <c>messaging:read</c>.</remarks>
@@ -2810,15 +3444,30 @@ namespace Atlas.Generated
         public Task<MessagingProvidersListFallbacksResponse> SetFallbacksOrderAsync(string channel, MessagingProvidersSetFallbacksOrderBody body, CancellationToken cancellationToken = default) =>
             Req<MessagingProvidersListFallbacksResponse>(HttpVerb.Put, $"/v1/messaging_providers/{Enc(channel)}/fallbacks/order", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set the order of the channel's fallback providers. `ids` lists every fallback exactly once.</summary>
+        /// <remarks>PUT /v1/messaging_providers/{channel}/fallbacks/order. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessagingProvidersListFallbacksResponse> SetFallbacksOrderAsync(string channel, MessagingProvidersSetFallbacksOrderBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessagingProvidersListFallbacksResponse>(HttpVerb.Put, $"/v1/messaging_providers/{Enc(channel)}/fallbacks/order", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Change a fallback provider. An omitted secret keeps the stored one.</summary>
         /// <remarks>PUT /v1/messaging_providers/{channel}/fallbacks/{id}. Scope: <c>messaging:write</c>.</remarks>
         public Task<MessagingProvidersListFallbacksResponseDataItem> ReplaceFallbackAsync(string channel, string id, MessagingProvidersReplaceFallbackBody body, CancellationToken cancellationToken = default) =>
             Req<MessagingProvidersListFallbacksResponseDataItem>(HttpVerb.Put, $"/v1/messaging_providers/{Enc(channel)}/fallbacks/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a fallback provider. An omitted secret keeps the stored one.</summary>
+        /// <remarks>PUT /v1/messaging_providers/{channel}/fallbacks/{id}. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessagingProvidersListFallbacksResponseDataItem> ReplaceFallbackAsync(string channel, string id, MessagingProvidersReplaceFallbackBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessagingProvidersListFallbacksResponseDataItem>(HttpVerb.Put, $"/v1/messaging_providers/{Enc(channel)}/fallbacks/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove a fallback provider, and any country route that pointed at it.</summary>
         /// <remarks>DELETE /v1/messaging_providers/{channel}/fallbacks/{id}. Scope: <c>messaging:write</c>.</remarks>
         public Task<MessagingProvidersDeleteFallbackResponse> DeleteFallbackAsync(string channel, string id, CancellationToken cancellationToken = default) =>
             Req<MessagingProvidersDeleteFallbackResponse>(HttpVerb.Delete, $"/v1/messaging_providers/{Enc(channel)}/fallbacks/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a fallback provider, and any country route that pointed at it.</summary>
+        /// <remarks>DELETE /v1/messaging_providers/{channel}/fallbacks/{id}. Scope: <c>messaging:write</c>.</remarks>
+        public Task<MessagingProvidersDeleteFallbackResponse> DeleteFallbackAsync(string channel, string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MessagingProvidersDeleteFallbackResponse>(HttpVerb.Delete, $"/v1/messaging_providers/{Enc(channel)}/fallbacks/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>MfaCampaigns</c> operations.</summary>
@@ -2855,10 +3504,20 @@ namespace Atlas.Generated
         public Task<MfaCampaignsListResponseDataItem> UpdateAsync(string id, MfaCampaignsUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<MfaCampaignsListResponseDataItem>(HttpVerb.Patch, $"/v1/mfa_campaigns/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a running campaign: name, required factors, deadline (null removes it), nag interval or enforcement. The target is fixed; end the campaign and start another to change who it reaches.</summary>
+        /// <remarks>PATCH /v1/mfa_campaigns/{id}. Scope: <c>mfa_campaigns:write</c>.</remarks>
+        public Task<MfaCampaignsListResponseDataItem> UpdateAsync(string id, MfaCampaignsUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MfaCampaignsListResponseDataItem>(HttpVerb.Patch, $"/v1/mfa_campaigns/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>End a campaign now. The nag and the enforcement stop at once; the campaign and its numbers stay readable.</summary>
         /// <remarks>DELETE /v1/mfa_campaigns/{id}. Scope: <c>mfa_campaigns:write</c>.</remarks>
         public Task<MfaCampaignsListResponseDataItem> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<MfaCampaignsListResponseDataItem>(HttpVerb.Delete, $"/v1/mfa_campaigns/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>End a campaign now. The nag and the enforcement stop at once; the campaign and its numbers stay readable.</summary>
+        /// <remarks>DELETE /v1/mfa_campaigns/{id}. Scope: <c>mfa_campaigns:write</c>.</remarks>
+        public Task<MfaCampaignsListResponseDataItem> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MfaCampaignsListResponseDataItem>(HttpVerb.Delete, $"/v1/mfa_campaigns/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>List the users a campaign has touched (nagged, exempted or given their own required factors), newest first. `limit` up to 500.</summary>
         /// <remarks>GET /v1/mfa_campaigns/{id}/users. Scope: <c>mfa_campaigns:read</c>.</remarks>
@@ -2883,6 +3542,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/mfa_campaigns/{id}/users/{user_id}. Scope: <c>mfa_campaigns:write</c>.</remarks>
         public Task<MfaCampaignsListUsersResponseDataItem> ReplaceUserAsync(string id, string userId, MfaCampaignsReplaceUserBody body, CancellationToken cancellationToken = default) =>
             Req<MfaCampaignsListUsersResponseDataItem>(HttpVerb.Put, $"/v1/mfa_campaigns/{Enc(id)}/users/{Enc(userId)}", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Set one user's own required factors and/or an exemption until a date. Send null to clear either. The user's own factors replace the campaign's for them.</summary>
+        /// <remarks>PUT /v1/mfa_campaigns/{id}/users/{user_id}. Scope: <c>mfa_campaigns:write</c>.</remarks>
+        public Task<MfaCampaignsListUsersResponseDataItem> ReplaceUserAsync(string id, string userId, MfaCampaignsReplaceUserBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<MfaCampaignsListUsersResponseDataItem>(HttpVerb.Put, $"/v1/mfa_campaigns/{Enc(id)}/users/{Enc(userId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>MfaFactorQuarantines</c> operations.</summary>
@@ -2915,15 +3579,70 @@ namespace Atlas.Generated
     {
         internal MigrationsOperations(AtlasTransport transport) : base(transport) { }
 
-        /// <summary>Where the move stands: imported users by credential type (bcrypt, argon2, scrypt, pbkdf2, other, social, none; imported = has an external_id), bridged sessions, imported legacy sessions still live, failed bridge attempts by reason, daily use per source, and `safe_to_delete_old_auth` with the blockers that keep it false (recent use, live sessions, an open dual-run window, an enabled bridge, or `no_enabled_source` when no bridge or verifier was ever enabled or used, so nothing has been proven quiet). `quiet_days` (default 14, max 90) sets how long the old auth must be unused.</summary>
+        /// <summary>Where the move stands: imported users by credential type (bcrypt, argon2, scrypt, pbkdf2, other, social, none; imported = has an external_id), bridged sessions, imported legacy sessions still live, failed bridge attempts by reason, daily use per source, and `safe_to_delete_old_auth` with the blockers that keep it false (recent use, live sessions, an open dual-run window, an enabled bridge, `unmigrated_users` (imported users who never signed in on Atlas and hold no session; counted in `unmigrated_users` with a `unmigrated_user_sample` of ids), or `no_enabled_source` when no bridge or verifier was ever enabled or used, so nothing has been proven quiet). `quiet_days` (default 14, max 90) sets how long the old auth must be unused.</summary>
         /// <remarks>GET /v1/migrations/status. Scope: <c>legacy_auth:read</c>.</remarks>
         public Task<MigrationsGetStatusResponse> GetStatusAsync(MigrationsGetStatusQuery? query = null, CancellationToken cancellationToken = default) =>
             Req<MigrationsGetStatusResponse>(HttpVerb.Get, $"/v1/migrations/status", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Bulk-import live legacy sessions (up to 1000 a call) so the bridge can answer from Atlas alone (`mode: session_table`) and close early: the old system no longer has to be reachable for a person to cross over. Each row names the legacy session (`token`, or its SHA-256 hex as `token_hash`), the person (an Atlas `user_id` or your `external_id`) and `expires_at`; `mfa_verified` carries a completed second factor. Rows that cannot be linked to a person or have expired are reported in `errors` (`user_not_found`, `session_expired`, `invalid_row`, `unknown_field`, `already_exchanged`), never guessed. Re-sending a row only refreshes it, so a retry is safe. `dry_run: true` validates and counts without writing.</summary>
+        /// <remarks>POST /v1/migrations/{source}/sessions. Scope: <c>legacy_auth:write</c>.</remarks>
+        public Task<MigrationsSessionsResponse> SessionsAsync(string source, MigrationsSessionsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<MigrationsSessionsResponse>(HttpVerb.Post, $"/v1/migrations/{Enc(source)}/sessions", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Dual-run check: is this old `source` token valid? Answers only while the source's `dual_run_until` window is open (403 closed otherwise). Nothing is consumed and no session is created. Every call is counted per day in GET /v1/migrations/status. Returns `valid`, `reason` (invalid | expired | unavailable) and the mapped Atlas `user_id` when the user was imported.</summary>
         /// <remarks>POST /v1/migrations/{source}/verify. Scope: <c>legacy_auth:read</c>.</remarks>
         public Task<MigrationsVerifyResponse> VerifyAsync(string source, MigrationsVerifyBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<MigrationsVerifyResponse>(HttpVerb.Post, $"/v1/migrations/{Enc(source)}/verify", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>NativeApps</c> operations.</summary>
+    public sealed class NativeAppsOperations : ResourceBase
+    {
+        internal NativeAppsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>List the registered native apps with their callback URLs.</summary>
+        /// <remarks>GET /v1/native_apps. Scope: <c>native_apps:read</c>.</remarks>
+        public Task<NativeAppsListResponse> ListAsync(NativeAppsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<NativeAppsListResponse>(HttpVerb.Get, $"/v1/native_apps", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<NativeAppsListResponseDataItem> ListAllAsync(NativeAppsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<NativeAppsListResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new NativeAppsListQuery();
+                var _page = await ListAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<NativeAppsListResponseDataItem> { Data = _page.Data ?? new List<NativeAppsListResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
+
+        /// <summary>Register a native app. A development app (platform development, no store identity) needs allowed_users (1 to 100) and expires_at (at most 90 days ahead) and may use exp:// callbacks on production. An ios app needs bundle_id and team_id; an android app needs package_name and sha256_cert_fingerprints; every app needs 1 to 10 callback_urls. The app is added to the Apple App Site Association and Android Digital Asset Links files served on the Frontend API host (https callbacks on that host become Universal / App Links) and to the passkey app origins. 409 when the same app is already registered.</summary>
+        /// <remarks>POST /v1/native_apps. Scope: <c>native_apps:write</c>.</remarks>
+        public Task<NativeAppsListResponseDataItem> CreateAsync(NativeAppsCreateBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<NativeAppsListResponseDataItem>(HttpVerb.Post, $"/v1/native_apps", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Read which registered native apps may use the instance publishable key (an empty list = any).</summary>
+        /// <remarks>GET /v1/native_apps/publishable_key. Scope: <c>native_apps:read</c>.</remarks>
+        public Task<NativeAppsGetPublishableKeyResponse> GetPublishableKeyAsync(CancellationToken cancellationToken = default) =>
+            Req<NativeAppsGetPublishableKeyResponse>(HttpVerb.Get, $"/v1/native_apps/publishable_key", cancellationToken: cancellationToken);
+
+        /// <summary>Restrict the publishable key to the listed native apps (an empty list removes the restriction). With a restriction, a native Frontend API request must send `X-Atlas-App-Id` with one of these ids (403 APP_NOT_ALLOWED otherwise); web requests, which carry an Origin header and no app id, are not affected. 400 NATIVE_APP_NOT_REGISTERED for an id that is not registered.</summary>
+        /// <remarks>PUT /v1/native_apps/publishable_key. Scope: <c>native_apps:write</c>.</remarks>
+        public Task<NativeAppsGetPublishableKeyResponse> SetPublishableKeyAsync(NativeAppsSetPublishableKeyBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<NativeAppsGetPublishableKeyResponse>(HttpVerb.Put, $"/v1/native_apps/publishable_key", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Fetch one registered native app.</summary>
+        /// <remarks>GET /v1/native_apps/{id}. Scope: <c>native_apps:read</c>.</remarks>
+        public Task<NativeAppsListResponseDataItem> GetAsync(string id, CancellationToken cancellationToken = default) =>
+            Req<NativeAppsListResponseDataItem>(HttpVerb.Get, $"/v1/native_apps/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Change a native app: only the fields you send change; callback_urls is replaced as a whole. The platform cannot be changed. A development app may have expires_at extended (at most 90 days from now) and allowed_users changed.</summary>
+        /// <remarks>PATCH /v1/native_apps/{id}. Scope: <c>native_apps:write</c>.</remarks>
+        public Task<NativeAppsListResponseDataItem> UpdateAsync(string id, NativeAppsCreateBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<NativeAppsListResponseDataItem>(HttpVerb.Patch, $"/v1/native_apps/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Unregister a native app. Its callbacks stop working at once, and it is removed from the publishable key restriction.</summary>
+        /// <remarks>DELETE /v1/native_apps/{id}. Scope: <c>native_apps:write</c>.</remarks>
+        public Task<NativeAppsDeleteResponse> DeleteAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<NativeAppsDeleteResponse>(HttpVerb.Delete, $"/v1/native_apps/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>OauthApplicationTypes</c> operations.</summary>
@@ -2942,10 +3661,34 @@ namespace Atlas.Generated
     {
         internal OauthClientsOperations(AtlasTransport transport) : base(transport) { }
 
+        /// <summary>The users who authorized one OAuth client, one cursor page at a time: user id, granted scopes, when they first authorized it and when it was last used. status is active (default), revoked or all. The path takes the oac_ id or the public client_id. The developer can read the same list at GET /oauth2/register/{client_id}/consents with the client's registration_access_token.</summary>
+        /// <remarks>GET /v1/oauth_clients/{id}/consents. Scope: <c>grants:read</c>.</remarks>
+        public Task<OauthClientsListConsentsResponse> ListConsentsAsync(string id, OauthClientsListConsentsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<OauthClientsListConsentsResponse>(HttpVerb.Get, $"/v1/oauth_clients/{Enc(id)}/consents", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListConsentsAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<OauthClientsListConsentsResponseDataItem> ListConsentsAllAsync(string id, OauthClientsListConsentsQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<OauthClientsListConsentsResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new OauthClientsListConsentsQuery();
+                var _page = await ListConsentsAsync(id, _q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<OauthClientsListConsentsResponseDataItem> { Data = _page.Data ?? new List<OauthClientsListConsentsResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
+
+        /// <summary>Revoke the consents users gave one OAuth client, and their refresh and access tokens, the same way revoking a single grant does: every active consent, or only the users in user_ids. The app receives grant.revoked per user and the instance gets the usual token revocation events. Audited. Idempotent.</summary>
+        /// <remarks>POST /v1/oauth_clients/{id}/consents/revoke. Scope: <c>grants:write</c>.</remarks>
+        public Task<OauthClientsConsentsRevokeResponse> ConsentsRevokeAsync(string id, OauthClientsConsentsRevokeBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<OauthClientsConsentsRevokeResponse>(HttpVerb.Post, $"/v1/oauth_clients/{Enc(id)}/consents/revoke", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Set who may use an application. `open` (default): any organization. `restricted`: only organizations granted access (and, when a grant lists roles, members holding them); a sign-in outside an entitled organization is refused with `access_denied` at the authorize endpoint.</summary>
         /// <remarks>PUT /v1/oauth_clients/{id}/organization_access. Scope: <c>oauth_clients:write</c>.</remarks>
         public Task<OauthClientsSetOrganizationAccessResponse> SetOrganizationAccessAsync(string id, OauthClientsSetOrganizationAccessBody body, CancellationToken cancellationToken = default) =>
             Req<OauthClientsSetOrganizationAccessResponse>(HttpVerb.Put, $"/v1/oauth_clients/{Enc(id)}/organization_access", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Set who may use an application. `open` (default): any organization. `restricted`: only organizations granted access (and, when a grant lists roles, members holding them); a sign-in outside an entitled organization is refused with `access_denied` at the authorize endpoint.</summary>
+        /// <remarks>PUT /v1/oauth_clients/{id}/organization_access. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthClientsSetOrganizationAccessResponse> SetOrganizationAccessAsync(string id, OauthClientsSetOrganizationAccessBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OauthClientsSetOrganizationAccessResponse>(HttpVerb.Put, $"/v1/oauth_clients/{Enc(id)}/organization_access", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The organizations that have access to an application, with the application's access mode.</summary>
         /// <remarks>GET /v1/oauth_clients/{id}/organizations. Scope: <c>oauth_clients:read</c>.</remarks>
@@ -2967,12 +3710,22 @@ namespace Atlas.Generated
         public Task UpdateTokenExchangeProfileAsync(string id, string profileId, OauthClientsUpdateTokenExchangeProfileBody? body = null, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Patch, $"/v1/oauth_clients/{Enc(id)}/token_exchange_profiles/{Enc(profileId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Rename or enable / disable a token exchange profile.</summary>
+        /// <remarks>PATCH /v1/oauth_clients/{id}/token_exchange_profiles/{profileId}. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task UpdateTokenExchangeProfileAsync(string id, string profileId, OauthClientsUpdateTokenExchangeProfileBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Patch, $"/v1/oauth_clients/{Enc(id)}/token_exchange_profiles/{Enc(profileId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove a token exchange profile.</summary>
         /// <remarks>DELETE /v1/oauth_clients/{id}/token_exchange_profiles/{profileId}. Scope: <c>oauth_clients:write</c>.</remarks>
         public Task DeleteTokenExchangeProfileAsync(string id, string profileId, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(id)}/token_exchange_profiles/{Enc(profileId)}", cancellationToken: cancellationToken);
 
-        /// <summary>Per-day usage of one OAuth client for the last `days` days (1 to 90, default 30): token endpoint calls, access tokens issued, distinct active users, errors and rate-limited calls, with totals. The path takes the oac_ id or the public client_id. The developer can read the same report at GET /oauth2/register/{client_id}/usage with the client's registration_access_token.</summary>
+        /// <summary>Remove a token exchange profile.</summary>
+        /// <remarks>DELETE /v1/oauth_clients/{id}/token_exchange_profiles/{profileId}. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task DeleteTokenExchangeProfileAsync(string id, string profileId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(id)}/token_exchange_profiles/{Enc(profileId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Per-day usage of one OAuth client for the last `days` days (1 to 90, default 30): token endpoint calls, access tokens issued, distinct active users, errors and rate-limited calls, with totals, a per-day errors_by_code breakdown and the latest error (code, endpoint, time). The path takes the oac_ id or the public client_id. The developer can read the same report at GET /oauth2/register/{client_id}/usage with the client's registration_access_token.</summary>
         /// <remarks>GET /v1/oauth_clients/{id}/usage. Scope: <c>oauth_clients:read</c>.</remarks>
         public Task<OauthClientsGetUsageResponse> GetUsageAsync(string id, OauthClientsGetUsageQuery? query = null, CancellationToken cancellationToken = default) =>
             Req<OauthClientsGetUsageResponse>(HttpVerb.Get, $"/v1/oauth_clients/{Enc(id)}/usage", query: query?.ToQuery(), cancellationToken: cancellationToken);
@@ -2987,10 +3740,52 @@ namespace Atlas.Generated
         public Task<OauthClientsGetWebhookResponse> SetWebhookAsync(string id, OauthClientsSetWebhookBody body, CancellationToken cancellationToken = default) =>
             Req<OauthClientsGetWebhookResponse>(HttpVerb.Put, $"/v1/oauth_clients/{Enc(id)}/webhook", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Create or update the client's event webhook: a signed, retried endpoint that receives events about users who granted the client access, never the instance's own stream. user.updated carries only what the user's granted scopes allow (email with the email scope, name and picture with profile). enabled_events may also name your own types declared with PUT /v1/instance/app_event_types; those reach the client only for users who granted the type's required scope. The signing secret is returned once, on create (201). Audited.</summary>
+        /// <remarks>PUT /v1/oauth_clients/{id}/webhook. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthClientsGetWebhookResponse> SetWebhookAsync(string id, OauthClientsSetWebhookBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OauthClientsGetWebhookResponse>(HttpVerb.Put, $"/v1/oauth_clients/{Enc(id)}/webhook", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove the client's event webhook. 204.</summary>
         /// <remarks>DELETE /v1/oauth_clients/{id}/webhook. Scope: <c>oauth_clients:write</c>.</remarks>
         public Task DeleteWebhookAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(id)}/webhook", cancellationToken: cancellationToken);
+
+        /// <summary>Remove the client's event webhook. 204.</summary>
+        /// <remarks>DELETE /v1/oauth_clients/{id}/webhook. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task DeleteWebhookAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/oauth_clients/{Enc(id)}/webhook", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>OauthConsentRequests</c> operations.</summary>
+    public sealed class OauthConsentRequestsOperations : ResourceBase
+    {
+        internal OauthConsentRequestsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>The signed-in user is not the person who should grant this application access. Returns redirect_to: the application's original authorization request restarted with prompt=login, so the visitor signs in again (as another account) and a fresh consent challenge follows. Needs request_url on the challenge. Audited.</summary>
+        /// <remarks>PUT /v1/oauth_consent_requests/switch_account. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthConsentRequestsSetSwitchAccountResponse> SetSwitchAccountAsync(OauthConsentRequestsSetSwitchAccountQuery? query = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<OauthConsentRequestsSetSwitchAccountResponse>(HttpVerb.Put, $"/v1/oauth_consent_requests/switch_account", query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>OauthDeviceRequests</c> operations.</summary>
+    public sealed class OauthDeviceRequestsOperations : ResourceBase
+    {
+        internal OauthDeviceRequestsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>Read a device challenge: the signed-in user, the code they typed, and the application and scopes the device asks for. Your device_url page receives the challenge after the person enters their code.</summary>
+        /// <remarks>GET /v1/oauth_device_requests. Scope: <c>oauth_clients:read</c>.</remarks>
+        public Task<OauthDeviceRequestsListResponse> ListAsync(OauthDeviceRequestsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<OauthDeviceRequestsListResponse>(HttpVerb.Get, $"/v1/oauth_device_requests", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Approve a device challenge. Following redirect_to (in the same browser) binds the signed-in user to the device code, records the consent and signs the device in. The link is single-use and valid for five minutes. Audited.</summary>
+        /// <remarks>PUT /v1/oauth_device_requests/accept. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthDeviceRequestsSetAcceptResponse> SetAcceptAsync(OauthDeviceRequestsSetAcceptQuery? query = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<OauthDeviceRequestsSetAcceptResponse>(HttpVerb.Put, $"/v1/oauth_device_requests/accept", query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Deny a device challenge. Following redirect_to marks the code denied, so the device's next poll gets access_denied. Audited.</summary>
+        /// <remarks>PUT /v1/oauth_device_requests/reject. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthDeviceRequestsSetAcceptResponse> SetRejectAsync(OauthDeviceRequestsSetRejectQuery? query = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<OauthDeviceRequestsSetAcceptResponse>(HttpVerb.Put, $"/v1/oauth_device_requests/reject", query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>OauthGrants</c> operations.</summary>
@@ -3029,20 +3824,40 @@ namespace Atlas.Generated
         public Task<OauthPublishersListResponseDataItem> UpdateAsync(string id, OauthPublishersUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<OauthPublishersListResponseDataItem>(HttpVerb.Patch, $"/v1/oauth_publishers/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change the name, the shared sector or the consent skip. Send only the fields to change. The domain cannot change: create a new publisher. Turning shared_sector off is refused while apps are attached. Audited; emits oauth_publisher.updated.</summary>
+        /// <remarks>PATCH /v1/oauth_publishers/{id}. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthPublishersListResponseDataItem> UpdateAsync(string id, OauthPublishersUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OauthPublishersListResponseDataItem>(HttpVerb.Patch, $"/v1/oauth_publishers/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a publisher. Its apps stay as they are (a shared-sector app keeps its sector, so no subject identifier changes). Refused with 409 while apps are attached to a shared-sector publisher. Audited; emits oauth_publisher.updated.</summary>
         /// <remarks>DELETE /v1/oauth_publishers/{id}. Scope: <c>oauth_clients:write</c>.</remarks>
         public Task<OauthPublishersDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<OauthPublishersDeleteResponse>(HttpVerb.Delete, $"/v1/oauth_publishers/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a publisher. Its apps stay as they are (a shared-sector app keeps its sector, so no subject identifier changes). Refused with 409 while apps are attached to a shared-sector publisher. Audited; emits oauth_publisher.updated.</summary>
+        /// <remarks>DELETE /v1/oauth_publishers/{id}. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthPublishersDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OauthPublishersDeleteResponse>(HttpVerb.Delete, $"/v1/oauth_publishers/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Attach an app (its public client_id) to a verified publisher. The app's homepage_url must be an https URL on the publisher's domain, and an app belongs to one publisher. With a shared sector the app must be pairwise and takes the publisher's sector; if it already has another sector, send allow_subject_change: true to confirm that users' subject identifiers in it change. Attaching an app already attached returns the publisher unchanged.</summary>
         /// <remarks>PUT /v1/oauth_publishers/{id}/clients/{client_id}. Scope: <c>oauth_clients:write</c>.</remarks>
         public Task<OauthPublishersListResponseDataItem> ReplaceClientAsync(string id, string clientId, OauthPublishersReplaceClientBody body, CancellationToken cancellationToken = default) =>
             Req<OauthPublishersListResponseDataItem>(HttpVerb.Put, $"/v1/oauth_publishers/{Enc(id)}/clients/{Enc(clientId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Attach an app (its public client_id) to a verified publisher. The app's homepage_url must be an https URL on the publisher's domain, and an app belongs to one publisher. With a shared sector the app must be pairwise and takes the publisher's sector; if it already has another sector, send allow_subject_change: true to confirm that users' subject identifiers in it change. Attaching an app already attached returns the publisher unchanged.</summary>
+        /// <remarks>PUT /v1/oauth_publishers/{id}/clients/{client_id}. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthPublishersListResponseDataItem> ReplaceClientAsync(string id, string clientId, OauthPublishersReplaceClientBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OauthPublishersListResponseDataItem>(HttpVerb.Put, $"/v1/oauth_publishers/{Enc(id)}/clients/{Enc(clientId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Detach an app from a publisher. The consent screen stops naming the publisher for it and its repeat consent is no longer shared; a shared sector it already took stays.</summary>
         /// <remarks>DELETE /v1/oauth_publishers/{id}/clients/{client_id}. Scope: <c>oauth_clients:write</c>.</remarks>
         public Task<OauthPublishersListResponseDataItem> DeleteClientAsync(string id, string clientId, CancellationToken cancellationToken = default) =>
             Req<OauthPublishersListResponseDataItem>(HttpVerb.Delete, $"/v1/oauth_publishers/{Enc(id)}/clients/{Enc(clientId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Detach an app from a publisher. The consent screen stops naming the publisher for it and its repeat consent is no longer shared; a shared sector it already took stays.</summary>
+        /// <remarks>DELETE /v1/oauth_publishers/{id}/clients/{client_id}. Scope: <c>oauth_clients:write</c>.</remarks>
+        public Task<OauthPublishersListResponseDataItem> DeleteClientAsync(string id, string clientId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OauthPublishersListResponseDataItem>(HttpVerb.Delete, $"/v1/oauth_publishers/{Enc(id)}/clients/{Enc(clientId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Look up the DNS TXT record and mark the publisher verified when it is there. A record that is gone un-verifies the publisher; a DNS lookup that fails for another reason changes nothing. record_found tells what this check saw. Audited as oauth_publisher.verified when the status changes.</summary>
         /// <remarks>POST /v1/oauth_publishers/{id}/verify. Scope: <c>oauth_clients:write</c>.</remarks>
@@ -3090,6 +3905,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/openfga/stores/{store}/assertions/{model}. Scope: <c>fga:write</c>.</remarks>
         public Task<object> ReplaceStoresAssertionAsync(string store, string model, OpenfgaReplaceStoresAssertionBody? body = null, CancellationToken cancellationToken = default) =>
             Req<object>(HttpVerb.Put, $"/v1/openfga/stores/{Enc(store)}/assertions/{Enc(model)}", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Replace the stored assertions for a model version.</summary>
+        /// <remarks>PUT /v1/openfga/stores/{store}/assertions/{model}. Scope: <c>fga:write</c>.</remarks>
+        public Task<object> ReplaceStoresAssertionAsync(string store, string model, OpenfgaReplaceStoresAssertionBody? body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<object>(HttpVerb.Put, $"/v1/openfga/stores/{Enc(store)}/assertions/{Enc(model)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>OrgRoleSets</c> operations.</summary>
@@ -3126,10 +3946,20 @@ namespace Atlas.Generated
         public Task<OrgRoleSetsListResponseDataItem> UpdateAsync(string id, OrgRoleSetsUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<OrgRoleSetsListResponseDataItem>(HttpVerb.Patch, $"/v1/org_role_sets/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a role set. Members already holding a role the set no longer lists keep it; only new assignments are checked.</summary>
+        /// <remarks>PATCH /v1/org_role_sets/{id}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrgRoleSetsListResponseDataItem> UpdateAsync(string id, OrgRoleSetsUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrgRoleSetsListResponseDataItem>(HttpVerb.Patch, $"/v1/org_role_sets/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a role set. 409 while an organization still uses it.</summary>
         /// <remarks>DELETE /v1/org_role_sets/{id}. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrgRoleSetsDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<OrgRoleSetsDeleteResponse>(HttpVerb.Delete, $"/v1/org_role_sets/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a role set. 409 while an organization still uses it.</summary>
+        /// <remarks>DELETE /v1/org_role_sets/{id}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrgRoleSetsDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrgRoleSetsDeleteResponse>(HttpVerb.Delete, $"/v1/org_role_sets/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>OrgTemplates</c> operations.</summary>
@@ -3166,10 +3996,20 @@ namespace Atlas.Generated
         public Task<OrgTemplatesListResponseDataItem> UpdateAsync(string id, OrgTemplatesUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<OrgTemplatesListResponseDataItem>(HttpVerb.Patch, $"/v1/org_templates/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a template. Organizations already made from it are not touched.</summary>
+        /// <remarks>PATCH /v1/org_templates/{id}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrgTemplatesListResponseDataItem> UpdateAsync(string id, OrgTemplatesUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrgTemplatesListResponseDataItem>(HttpVerb.Patch, $"/v1/org_templates/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a template. Organizations made from it are not touched.</summary>
         /// <remarks>DELETE /v1/org_templates/{id}. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrgTemplatesDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<OrgTemplatesDeleteResponse>(HttpVerb.Delete, $"/v1/org_templates/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a template. Organizations made from it are not touched.</summary>
+        /// <remarks>DELETE /v1/org_templates/{id}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrgTemplatesDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrgTemplatesDeleteResponse>(HttpVerb.Delete, $"/v1/org_templates/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Create an organization from a template. The organization is created the normal way (hooks, slug rules, organization.created), then gets the template's custom roles, policy, role set and default role, seat settings and metadata. `public_metadata` and `private_metadata` merge over the template's. Honours Idempotency-Key.</summary>
         /// <remarks>POST /v1/org_templates/{id}/organizations. Scope: <c>organizations:write</c>.</remarks>
@@ -3197,10 +4037,26 @@ namespace Atlas.Generated
         public Task<OrganizationConnectionsListResponseDataItem> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<OrganizationConnectionsListResponseDataItem>(HttpVerb.Delete, $"/v1/organization_connections/{Enc(id)}", cancellationToken: cancellationToken);
 
+        /// <summary>Revoke a connection (or a pending invitation). The partner organization loses access to the application.</summary>
+        /// <remarks>DELETE /v1/organization_connections/{id}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationConnectionsListResponseDataItem> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationConnectionsListResponseDataItem>(HttpVerb.Delete, $"/v1/organization_connections/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Accept an invitation with its token: the partner organization gains access to the application. The token works once.</summary>
         /// <remarks>POST /v1/organization_connections/{id}/accept. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrganizationConnectionsListResponseDataItem> AcceptAsync(string id, OrganizationConnectionsAcceptBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<OrganizationConnectionsListResponseDataItem>(HttpVerb.Post, $"/v1/organization_connections/{Enc(id)}/accept", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>OrganizationInvitations</c> operations.</summary>
+    public sealed class OrganizationInvitationsOperations : ResourceBase
+    {
+        internal OrganizationInvitationsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>Search organization invitations across every organization of the instance, newest first: by invited `email` (exact, case-insensitive), `status` or `organization_id`. Each row carries the organization name and slug. Secret key only (it is a lookup by address). Pages with `limit` and `starting_after`.</summary>
+        /// <remarks>GET /v1/organization_invitations. Scope: <c>organizations:read</c>.</remarks>
+        public Task<OrganizationInvitationsListResponse> ListAsync(OrganizationInvitationsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<OrganizationInvitationsListResponse>(HttpVerb.Get, $"/v1/organization_invitations", query: query?.ToQuery(), cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Organizations</c> operations.</summary>
@@ -3237,10 +4093,20 @@ namespace Atlas.Generated
         public Task<WebhookEndpointModel> UpdateAppWebhookEndpointAsync(string id, string endpointId, OrganizationsCreateAppWebhookEndpointBody body, CancellationToken cancellationToken = default) =>
             Req<WebhookEndpointModel>(HttpVerb.Patch, $"/v1/organizations/{Enc(id)}/app_webhook_endpoints/{Enc(endpointId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Update the url, subscribed app event types, description or active flag. Setting active: true on an auto-disabled endpoint re-enables it; replay then re-sends what it missed.</summary>
+        /// <remarks>PATCH /v1/organizations/{id}/app_webhook_endpoints/{endpointId}. Scope: <c>webhooks:write</c>.</remarks>
+        public Task<WebhookEndpointModel> UpdateAppWebhookEndpointAsync(string id, string endpointId, OrganizationsCreateAppWebhookEndpointBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<WebhookEndpointModel>(HttpVerb.Patch, $"/v1/organizations/{Enc(id)}/app_webhook_endpoints/{Enc(endpointId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete an application webhook endpoint and its delivery log. An id from another organization is a 404.</summary>
         /// <remarks>DELETE /v1/organizations/{id}/app_webhook_endpoints/{endpointId}. Scope: <c>webhooks:write</c>.</remarks>
         public Task<OrganizationsDeleteAppWebhookEndpointResponse> DeleteAppWebhookEndpointAsync(string id, string endpointId, CancellationToken cancellationToken = default) =>
             Req<OrganizationsDeleteAppWebhookEndpointResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/app_webhook_endpoints/{Enc(endpointId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete an application webhook endpoint and its delivery log. An id from another organization is a 404.</summary>
+        /// <remarks>DELETE /v1/organizations/{id}/app_webhook_endpoints/{endpointId}. Scope: <c>webhooks:write</c>.</remarks>
+        public Task<OrganizationsDeleteAppWebhookEndpointResponse> DeleteAppWebhookEndpointAsync(string id, string endpointId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsDeleteAppWebhookEndpointResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/app_webhook_endpoints/{Enc(endpointId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The endpoint's delivery log: payload, response and retry state for each attempt, filterable by status, app event type and time.</summary>
         /// <remarks>GET /v1/organizations/{id}/app_webhook_endpoints/{endpointId}/deliveries. Scope: <c>webhooks:read</c>.</remarks>
@@ -3291,10 +4157,20 @@ namespace Atlas.Generated
         public Task<OauthClientsListOrganizationsResponseDataItem> ReplaceApplicationAsync(string id, string clientId, OrganizationsReplaceApplicationBody body, CancellationToken cancellationToken = default) =>
             Req<OauthClientsListOrganizationsResponseDataItem>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/applications/{Enc(clientId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Give an organization access to an application (by client id or id), optionally limited to some organization roles. Idempotent; send `enabled: false` to pause access without removing it. Only matters while the application is `restricted`.</summary>
+        /// <remarks>PUT /v1/organizations/{id}/applications/{clientId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OauthClientsListOrganizationsResponseDataItem> ReplaceApplicationAsync(string id, string clientId, OrganizationsReplaceApplicationBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OauthClientsListOrganizationsResponseDataItem>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/applications/{Enc(clientId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Take an organization's access to an application away.</summary>
         /// <remarks>DELETE /v1/organizations/{id}/applications/{clientId}. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrganizationsDeleteApplicationResponse> DeleteApplicationAsync(string id, string clientId, CancellationToken cancellationToken = default) =>
             Req<OrganizationsDeleteApplicationResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/applications/{Enc(clientId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Take an organization's access to an application away.</summary>
+        /// <remarks>DELETE /v1/organizations/{id}/applications/{clientId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsDeleteApplicationResponse> DeleteApplicationAsync(string id, string clientId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsDeleteApplicationResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/applications/{Enc(clientId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The organization's audit trail: actions on the organization or naming it. A page, newest first, or with `format=jsonl` the whole trail as newline-delimited JSON for download (capped at 100000 rows, then a truncated marker). Filter with `action` (exact, or a prefix ending in "."), `from` and `to` (ISO dates).</summary>
         /// <remarks>GET /v1/organizations/{id}/audit_logs. Scope: <c>audit:read</c>.</remarks>
@@ -3359,6 +4235,11 @@ namespace Atlas.Generated
         public Task<OrganizationsReplaceMembershipResponse> ReplaceMembershipAsync(string id, string userId, OrganizationsReplaceMembershipBody body, CancellationToken cancellationToken = default) =>
             Req<OrganizationsReplaceMembershipResponse>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/memberships/{Enc(userId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Create or update a membership. Body: `role` (required), `role_source` (optional, as on PATCH), and the seat's own `public_metadata`, `private_metadata`, `permissions` (extra permission keys that join org_permissions in the session token) and `allowed_sign_in_methods` (a session signed in another way mints without this organization's claims). 201 when it adds the member, 200 when it changes the role. When a directory (SCIM, SSO or LDAP) manages the existing role and `role_source` does not name that same source, nothing changes and the answer is 200 with `unchanged: true` and the current `role_source`. Emits organizationMembership.created or organizationMembership.updated. Accepts Idempotency-Key.</summary>
+        /// <remarks>PUT /v1/organizations/{id}/memberships/{userId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsReplaceMembershipResponse> ReplaceMembershipAsync(string id, string userId, OrganizationsReplaceMembershipBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsReplaceMembershipResponse>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/memberships/{Enc(userId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Does this session meet THIS organization's MFA policy? The same check the token mint runs for the active organization, answered for any organization (Atlas id or external id), so an app that acts in a per-request organization need not make it the active one. A non-member answers `member: false, ok: false`. 404 for an unknown organization or a session of another instance.</summary>
         /// <remarks>GET /v1/organizations/{id}/mfa_status. Scope: <c>organizations:read</c>.</remarks>
         public Task<OrganizationsGetMfaStatusResponse> GetMfaStatusAsync(string id, OrganizationsGetMfaStatusQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -3373,6 +4254,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/organizations/{id}/role_policy. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrganizationsGetRolePolicyResponse> SetRolePolicyAsync(string id, OrganizationsSetRolePolicyBody body, CancellationToken cancellationToken = default) =>
             Req<OrganizationsGetRolePolicyResponse>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/role_policy", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Point an organization at a role set and/or give it its own default role (null clears either). Adding a member, accepting an invitation or changing a role to one outside the set is refused with 422 ROLE_NOT_IN_ROLE_SET; org:admin and the organization's own custom roles are always allowed, and directory syncs report what the directory says. Existing members are not changed.</summary>
+        /// <remarks>PUT /v1/organizations/{id}/role_policy. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsGetRolePolicyResponse> SetRolePolicyAsync(string id, OrganizationsSetRolePolicyBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsGetRolePolicyResponse>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/role_policy", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The roles an organization can assign: the instance-wide roles plus its own custom roles (organization_id set). ?own=true lists only its own.</summary>
         /// <remarks>GET /v1/organizations/{id}/roles. Scope: <c>organizations:read</c>.</remarks>
@@ -3398,10 +4284,20 @@ namespace Atlas.Generated
         public Task<OrganizationsListRolesResponseDataItem> UpdateRoleAsync(string id, string roleId, OrganizationsUpdateRoleBody body, CancellationToken cancellationToken = default) =>
             Req<OrganizationsListRolesResponseDataItem>(HttpVerb.Patch, $"/v1/organizations/{Enc(id)}/roles/{Enc(roleId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Rename one of the organization's own roles or replace its permissions. Emits role.updated.</summary>
+        /// <remarks>PATCH /v1/organizations/{id}/roles/{roleId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsListRolesResponseDataItem> UpdateRoleAsync(string id, string roleId, OrganizationsUpdateRoleBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsListRolesResponseDataItem>(HttpVerb.Patch, $"/v1/organizations/{Enc(id)}/roles/{Enc(roleId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete one of the organization's own roles; ?reassign_to=&lt;role key&gt; moves members and pending invitations first (409 ROLE_IN_USE without it). Emits role.deleted.</summary>
         /// <remarks>DELETE /v1/organizations/{id}/roles/{roleId}. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrganizationsDeleteRoleResponse> DeleteRoleAsync(string id, string roleId, OrganizationsDeleteRoleQuery? query = null, CancellationToken cancellationToken = default) =>
             Req<OrganizationsDeleteRoleResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/roles/{Enc(roleId)}", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Delete one of the organization's own roles; ?reassign_to=&lt;role key&gt; moves members and pending invitations first (409 ROLE_IN_USE without it). Emits role.deleted.</summary>
+        /// <remarks>DELETE /v1/organizations/{id}/roles/{roleId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsDeleteRoleResponse> DeleteRoleAsync(string id, string roleId, OrganizationsDeleteRoleQuery? query, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsDeleteRoleResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/roles/{Enc(roleId)}", query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The requests the organization's directory sent to the SCIM endpoint, newest first, kept 30 days: method, path, resource, the status Atlas answered, why a failed one failed, the source IP and the duration. Never the request body. Includes requests refused by a token's IP allow-list. Filter with status (ok or error), token_id, resource and since; page with limit and starting_after.</summary>
         /// <remarks>GET /v1/organizations/{id}/scim/requests. Scope: <c>scim:read</c>.</remarks>
@@ -3426,6 +4322,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/organizations/{id}/seats. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrganizationsListSeatsResponse> SetSeatsAsync(string id, OrganizationsSetSeatsBody body, CancellationToken cancellationToken = default) =>
             Req<OrganizationsListSeatsResponse>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/seats", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Set the seat limit (max_allowed_memberships; null = unlimited) and the warning level. Lowering the limit below the members already seated removes nobody; new seats are refused. Emits organization.seats_low when used seats reach warn_percent of the limit and organization.seat_limit_reached when the limit is reached or someone is turned away, each once per crossing.</summary>
+        /// <remarks>PUT /v1/organizations/{id}/seats. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsListSeatsResponse> SetSeatsAsync(string id, OrganizationsSetSeatsBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsListSeatsResponse>(HttpVerb.Put, $"/v1/organizations/{Enc(id)}/seats", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>List the organization's teams with member counts. ?user_id= narrows to the teams that user is in.</summary>
         /// <remarks>GET /v1/organizations/{id}/teams. Scope: <c>organizations:read</c>.</remarks>
@@ -3456,10 +4357,20 @@ namespace Atlas.Generated
         public Task<OrganizationsListTeamsResponseDataItem> UpdateTeamAsync(string id, string teamId, OrganizationsUpdateTeamBody body, CancellationToken cancellationToken = default) =>
             Req<OrganizationsListTeamsResponseDataItem>(HttpVerb.Patch, $"/v1/organizations/{Enc(id)}/teams/{Enc(teamId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Rename a team or change its description. Emits team.updated.</summary>
+        /// <remarks>PATCH /v1/organizations/{id}/teams/{teamId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsListTeamsResponseDataItem> UpdateTeamAsync(string id, string teamId, OrganizationsUpdateTeamBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsListTeamsResponseDataItem>(HttpVerb.Patch, $"/v1/organizations/{Enc(id)}/teams/{Enc(teamId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a team (its memberships go with it; the organization memberships stay). Emits team.deleted.</summary>
         /// <remarks>DELETE /v1/organizations/{id}/teams/{teamId}. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrganizationsDeleteTeamResponse> DeleteTeamAsync(string id, string teamId, CancellationToken cancellationToken = default) =>
             Req<OrganizationsDeleteTeamResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/teams/{Enc(teamId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a team (its memberships go with it; the organization memberships stay). Emits team.deleted.</summary>
+        /// <remarks>DELETE /v1/organizations/{id}/teams/{teamId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsDeleteTeamResponse> DeleteTeamAsync(string id, string teamId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsDeleteTeamResponse>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/teams/{Enc(teamId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>List a team's members.</summary>
         /// <remarks>GET /v1/organizations/{id}/teams/{teamId}/members. Scope: <c>organizations:read</c>.</remarks>
@@ -3484,6 +4395,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/organizations/{id}/teams/{teamId}/members/{userId}. Scope: <c>organizations:write</c>.</remarks>
         public Task<OrganizationsListTeamsMembersResponseDataItem> DeleteTeamsMemberAsync(string id, string teamId, string userId, CancellationToken cancellationToken = default) =>
             Req<OrganizationsListTeamsMembersResponseDataItem>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/teams/{Enc(teamId)}/members/{Enc(userId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a user from the team.</summary>
+        /// <remarks>DELETE /v1/organizations/{id}/teams/{teamId}/members/{userId}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<OrganizationsListTeamsMembersResponseDataItem> DeleteTeamsMemberAsync(string id, string teamId, string userId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<OrganizationsListTeamsMembersResponseDataItem>(HttpVerb.Delete, $"/v1/organizations/{Enc(id)}/teams/{Enc(teamId)}/members/{Enc(userId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Redeliver one past delivery as a fresh attempt (same event id). 409 when the event has passed its 90-day retention; a delivery of another endpoint is a 404.</summary>
         /// <remarks>POST /v1/organizations/{id}/webhook_endpoints/{endpointId}/deliveries/{deliveryId}/redeliver. Scope: <c>webhooks:write</c>.</remarks>
@@ -3539,6 +4455,374 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/passkey_campaigns/{id}. Scope: <c>passkey_campaigns:write</c>.</remarks>
         public Task<PasskeyCampaignsListResponseDataItem> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<PasskeyCampaignsListResponseDataItem>(HttpVerb.Delete, $"/v1/passkey_campaigns/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>End a campaign now. The prompt stops at once; the campaign and its numbers stay readable.</summary>
+        /// <remarks>DELETE /v1/passkey_campaigns/{id}. Scope: <c>passkey_campaigns:write</c>.</remarks>
+        public Task<PasskeyCampaignsListResponseDataItem> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PasskeyCampaignsListResponseDataItem>(HttpVerb.Delete, $"/v1/passkey_campaigns/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>Pca</c> operations.</summary>
+    public sealed class PcaOperations : ResourceBase
+    {
+        internal PcaOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>The action registry of the instance: namespaces with their active version and counts, publisher and reviewer keys.</summary>
+        /// <remarks>GET /v1/pca/action-registry. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaGetActionRegistryResponse> GetActionRegistryAsync(CancellationToken cancellationToken = default) =>
+            Req<PcaGetActionRegistryResponse>(HttpVerb.Get, $"/v1/pca/action-registry", cancellationToken: cancellationToken);
+
+        /// <summary>Search the active actions by text, state and namespace.</summary>
+        /// <remarks>GET /v1/pca/action-registry/actions. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListActionRegistryActionsResponse> ListActionRegistryActionsAsync(PcaListActionRegistryActionsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistryActionsResponse>(HttpVerb.Get, $"/v1/pca/action-registry/actions", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>One action: policy card, effective profile, business rules and history.</summary>
+        /// <remarks>GET /v1/pca/action-registry/actions/{verb}. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaGetActionRegistryActionResponse> GetActionRegistryActionAsync(string verb, CancellationToken cancellationToken = default) =>
+            Req<PcaGetActionRegistryActionResponse>(HttpVerb.Get, $"/v1/pca/action-registry/actions/{Enc(verb)}", cancellationToken: cancellationToken);
+
+        /// <summary>Open a published action for review: its active definition and business rules become a draft (409 when one already exists), so an action published unconfirmed can be confirmed. Takes no body. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/actions/{verb}/review. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryActionsReviewResponse> ActionRegistryActionsReviewAsync(string verb, Dictionary<string, object?> body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryActionsReviewResponse>(HttpVerb.Post, $"/v1/pca/action-registry/actions/{Enc(verb)}/review", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The review queue: drafts with their review view, policy card, lint, business rules in plain sentences and the diff against the active version, the riskiest first.</summary>
+        /// <remarks>GET /v1/pca/action-registry/drafts. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListActionRegistryDraftsResponse> ListActionRegistryDraftsAsync(PcaListActionRegistryDraftsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistryDraftsResponse>(HttpVerb.Get, $"/v1/pca/action-registry/drafts", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>One draft with its review view.</summary>
+        /// <remarks>GET /v1/pca/action-registry/drafts/{verb}. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaActionRegistryActionsReviewResponse> GetActionRegistryDraftAsync(string verb, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryActionsReviewResponse>(HttpVerb.Get, $"/v1/pca/action-registry/drafts/{Enc(verb)}", cancellationToken: cancellationToken);
+
+        /// <summary>Edit a draft (title, description, effects, params, reversibility, compensates, traits, business rules). Re-validated; any edit drops a confirmation and a rules review. Audited.</summary>
+        /// <remarks>PATCH /v1/pca/action-registry/drafts/{verb}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryActionsReviewResponse> UpdateActionRegistryDraftAsync(string verb, PcaUpdateActionRegistryDraftBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryActionsReviewResponse>(HttpVerb.Patch, $"/v1/pca/action-registry/drafts/{Enc(verb)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Remove a draft from the review queue. Audited.</summary>
+        /// <remarks>DELETE /v1/pca/action-registry/drafts/{verb}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaDeleteActionRegistryDraftResponse> DeleteActionRegistryDraftAsync(string verb, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaDeleteActionRegistryDraftResponse>(HttpVerb.Delete, $"/v1/pca/action-registry/drafts/{Enc(verb)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Confirm a draft: the reviewer's signed attestation (and, for widened rules, a signed rules review), with a passkey assertion over a challenge committing to exactly those signatures. The passkey must be an active credential of an active reviewer whose pinned reviewer key signed; a publisher key never confirms. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/drafts/{verb}/confirm. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryActionsReviewResponse> ActionRegistryDraftsConfirmAsync(string verb, PcaActionRegistryDraftsConfirmBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryActionsReviewResponse>(HttpVerb.Post, $"/v1/pca/action-registry/drafts/{Enc(verb)}/confirm", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Import actions from a source: a URL the server fetches (https, public addresses only, at most 8 MiB; MCP servers are read with initialize + tools/list) or pasted text. Every result is unreviewed or suggested and lands as a draft; with track, the URL is kept as a source. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/imports. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryImportsResponse> ActionRegistryImportsAsync(PcaActionRegistryImportsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryImportsResponse>(HttpVerb.Post, $"/v1/pca/action-registry/imports", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The semantic diff between two stored versions, and whether the move needs a reviewer.</summary>
+        /// <remarks>GET /v1/pca/action-registry/namespaces/{ns}/diff. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaGetActionRegistryNamespacesDiffResponse> GetActionRegistryNamespacesDiffAsync(string ns, PcaGetActionRegistryNamespacesDiffQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaGetActionRegistryNamespacesDiffResponse>(HttpVerb.Get, $"/v1/pca/action-registry/namespaces/{Enc(ns)}/diff", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Activate and pin a stored version (later publishes are staged). Audited.</summary>
+        /// <remarks>PUT /v1/pca/action-registry/namespaces/{ns}/pin. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaSetActionRegistryNamespacesPinResponse> SetActionRegistryNamespacesPinAsync(string ns, PcaSetActionRegistryNamespacesPinBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaSetActionRegistryNamespacesPinResponse>(HttpVerb.Put, $"/v1/pca/action-registry/namespaces/{Enc(ns)}/pin", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Unpin a namespace (later publishes activate again). Audited.</summary>
+        /// <remarks>DELETE /v1/pca/action-registry/namespaces/{ns}/pin. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaSetActionRegistryNamespacesPinResponse> DeleteActionRegistryNamespacesPinAsync(string ns, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaSetActionRegistryNamespacesPinResponse>(HttpVerb.Delete, $"/v1/pca/action-registry/namespaces/{Enc(ns)}/pin", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The version history of a namespace.</summary>
+        /// <remarks>GET /v1/pca/action-registry/namespaces/{ns}/versions. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListActionRegistryNamespacesVersionsResponse> ListActionRegistryNamespacesVersionsAsync(string ns, PcaListActionRegistryNamespacesVersionsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistryNamespacesVersionsResponse>(HttpVerb.Get, $"/v1/pca/action-registry/namespaces/{Enc(ns)}/versions", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>One stored version: pack, rules, traits, deprecated actions and changes.</summary>
+        /// <remarks>GET /v1/pca/action-registry/namespaces/{ns}/versions/{version}. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaGetActionRegistryNamespacesVersionResponse> GetActionRegistryNamespacesVersionAsync(string ns, string version, CancellationToken cancellationToken = default) =>
+            Req<PcaGetActionRegistryNamespacesVersionResponse>(HttpVerb.Get, $"/v1/pca/action-registry/namespaces/{Enc(ns)}/versions/{Enc(version)}", cancellationToken: cancellationToken);
+
+        /// <summary>Publish a signed pack (with business rules and custom traits) as the next version of its namespace. 409 when it widens without a reviewer. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/packs. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryPacksResponse> ActionRegistryPacksAsync(PcaActionRegistryPacksBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryPacksResponse>(HttpVerb.Post, $"/v1/pca/action-registry/packs", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Publish the drafts of a namespace as its next version: the active actions overlaid with the drafts (removal drafts deprecate their action), the business rules and rules reviews, signed with the instance's publisher key. 409 (reason_code widen_unreviewed) when an action or its rules widen without a reviewer's signature. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/publish. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryPacksResponse> ActionRegistryPublishAsync(PcaActionRegistryPublishBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryPacksResponse>(HttpVerb.Post, $"/v1/pca/action-registry/publish", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Pin a publisher key (kid, Ed25519 public key). Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/publisher-keys. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryPublisherKeysResponse> ActionRegistryPublisherKeysAsync(PcaActionRegistryPublisherKeysBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryPublisherKeysResponse>(HttpVerb.Post, $"/v1/pca/action-registry/publisher-keys", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Revoke a publisher key. Audited.</summary>
+        /// <remarks>DELETE /v1/pca/action-registry/publisher-keys/{kid}. Scope: <c>pca:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> DeleteActionRegistryPublisherKeyAsync(string kid, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/pca/action-registry/publisher-keys/{Enc(kid)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The reviewers who may confirm action definitions, with their keys and passkeys.</summary>
+        /// <remarks>GET /v1/pca/action-registry/reviewers. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListActionRegistryReviewersResponse> ListActionRegistryReviewersAsync(PcaListActionRegistryReviewersQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistryReviewersResponse>(HttpVerb.Get, $"/v1/pca/action-registry/reviewers", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Create a single-use reviewer enrolment link (24 hours). The reviewer creates a passkey and a reviewer key on the hosted page; the key is pinned with the reviewer role. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/reviewers/enrolments. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistryReviewersEnrolmentsResponse> ActionRegistryReviewersEnrolmentsAsync(PcaActionRegistryReviewersEnrolmentsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistryReviewersEnrolmentsResponse>(HttpVerb.Post, $"/v1/pca/action-registry/reviewers/enrolments", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Remove a reviewer: the reviewer key is unpinned (its confirmations stop counting) and every passkey revoked. Audited.</summary>
+        /// <remarks>DELETE /v1/pca/action-registry/reviewers/{id}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListActionRegistryReviewersResponseDataItem> DeleteActionRegistryReviewerAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistryReviewersResponseDataItem>(HttpVerb.Delete, $"/v1/pca/action-registry/reviewers/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The tracked import sources, with their schedule and last sync.</summary>
+        /// <remarks>GET /v1/pca/action-registry/sources. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListActionRegistrySourcesResponse> ListActionRegistrySourcesAsync(PcaListActionRegistrySourcesQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistrySourcesResponse>(HttpVerb.Get, $"/v1/pca/action-registry/sources", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Track a source for manual or scheduled (hourly / daily) sync. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/sources. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListActionRegistrySourcesResponseDataItem> CreateActionRegistrySourceAsync(PcaCreateActionRegistrySourceBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistrySourcesResponseDataItem>(HttpVerb.Post, $"/v1/pca/action-registry/sources", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Change a source: URL, verb (jsonschema) or schedule. Audited.</summary>
+        /// <remarks>PATCH /v1/pca/action-registry/sources/{id}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListActionRegistrySourcesResponseDataItem> UpdateActionRegistrySourceAsync(string id, PcaUpdateActionRegistrySourceBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistrySourcesResponseDataItem>(HttpVerb.Patch, $"/v1/pca/action-registry/sources/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Stop tracking a source (its drafts stay in the queue). Audited.</summary>
+        /// <remarks>DELETE /v1/pca/action-registry/sources/{id}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaDeleteActionRegistrySourceResponse> DeleteActionRegistrySourceAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaDeleteActionRegistrySourceResponse>(HttpVerb.Delete, $"/v1/pca/action-registry/sources/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Sync a source now: added and changed operations become unreviewed drafts, removed ones removal drafts; unchanged ones are left as they are. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/sources/{id}/sync. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaActionRegistrySourcesSyncResponse> ActionRegistrySourcesSyncAsync(string id, Dictionary<string, object?> body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaActionRegistrySourcesSyncResponse>(HttpVerb.Post, $"/v1/pca/action-registry/sources/{Enc(id)}/sync", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The starter packs (e-commerce, fintech, healthcare, SaaS admin, developer tools).</summary>
+        /// <remarks>GET /v1/pca/action-registry/templates. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListActionRegistryTemplatesResponse> ListActionRegistryTemplatesAsync(PcaListActionRegistryTemplatesQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistryTemplatesResponse>(HttpVerb.Get, $"/v1/pca/action-registry/templates", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Add a starter pack's actions (with their business rules and examples) to a namespace as drafts. Never confirmed. Audited.</summary>
+        /// <remarks>POST /v1/pca/action-registry/templates/{id}/apply. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListActionRegistryDraftsResponse> ActionRegistryTemplatesApplyAsync(string id, PcaActionRegistryTemplatesApplyBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListActionRegistryDraftsResponse>(HttpVerb.Post, $"/v1/pca/action-registry/templates/{Enc(id)}/apply", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Approval channel settings of this instance (secrets are reported as set / not set, never returned).</summary>
+        /// <remarks>GET /v1/pca/approvals/settings. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListApprovalsSettingsResponse> ListApprovalsSettingsAsync(CancellationToken cancellationToken = default) =>
+            Req<PcaListApprovalsSettingsResponse>(HttpVerb.Get, $"/v1/pca/approvals/settings", cancellationToken: cancellationToken);
+
+        /// <summary>Update the approval channels (push, email, sms, slack, webhook), default member channels, the Slack webhook and the CIBA identity provider. Omitted fields are kept; null clears. Audited.</summary>
+        /// <remarks>PUT /v1/pca/approvals/settings. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListApprovalsSettingsResponse> SetApprovalsSettingsAsync(PcaSetApprovalsSettingsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListApprovalsSettingsResponse>(HttpVerb.Put, $"/v1/pca/approvals/settings", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>List passkey approvers with their members, devices and quorum.</summary>
+        /// <remarks>GET /v1/pca/approvers. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListApproversResponse> ListApproversAsync(PcaListApproversQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListApproversResponse>(HttpVerb.Get, $"/v1/pca/approvers", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Create a single-use passkey enrolment link (24 hours): a new approver bound to a user / org / machine, a delegate of an existing approver, or another device of a member. Adding to an existing approver needs one of its passkeys on the enrolment page. Audited.</summary>
+        /// <remarks>POST /v1/pca/approvers/enrolments. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaApproversEnrolmentsResponse> ApproversEnrolmentsAsync(PcaApproversEnrolmentsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaApproversEnrolmentsResponse>(HttpVerb.Post, $"/v1/pca/approvers/enrolments", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>One passkey approver with its members, devices and quorum.</summary>
+        /// <remarks>GET /v1/pca/approvers/{id}. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListApproversResponseDataItem> GetApproverAsync(string id, CancellationToken cancellationToken = default) =>
+            Req<PcaListApproversResponseDataItem>(HttpVerb.Get, $"/v1/pca/approvers/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Change an approver: quorum, display name, or disable it (a disabled approver cannot approve). Audited.</summary>
+        /// <remarks>PATCH /v1/pca/approvers/{id}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListApproversResponseDataItem> UpdateApproverAsync(string id, PcaUpdateApproverBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListApproversResponseDataItem>(HttpVerb.Patch, $"/v1/pca/approvers/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Revoke a passkey: its wrapped principal key copy is deleted and it can no longer approve. Audited.</summary>
+        /// <remarks>DELETE /v1/pca/approvers/{id}/credentials/{credentialId}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListApproversResponseDataItem> DeleteApproversCredentialAsync(string id, string credentialId, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListApproversResponseDataItem>(HttpVerb.Delete, $"/v1/pca/approvers/{Enc(id)}/credentials/{Enc(credentialId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Change a member's notification channels, contact details or status. Audited.</summary>
+        /// <remarks>PATCH /v1/pca/approvers/{id}/members/{memberId}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListApproversResponseDataItem> UpdateApproversMemberAsync(string id, string memberId, PcaUpdateApproversMemberBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListApproversResponseDataItem>(HttpVerb.Patch, $"/v1/pca/approvers/{Enc(id)}/members/{Enc(memberId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Issue a dead-man liveness beacon. PRINCIPAL path (no Authorization header): submit `beacon`, a v2 beacon signed with the grant principal's own key (scope = a grant_ref they issued, or '*'): the principal halts their agents just by withholding, without trusting the operator. OPERATOR path (`sk_` + `pca:write`): the server signs with the guardian key (`scope`, `validity_ms`). `seq` must strictly increase per (scope, issuer) (409 on replay); validity is hard-capped at one hour. A pure-PQ or hybrid principal beacon is accepted only under the PQ key pinned for the issuer (POST /v1/pca/pq-pins), and only after the issuer check is it charged to the per-source pqVerifyUnitsPerSourcePerMin budget (429 when exhausted) and verified, Ed25519 half first. Beacons gate adjudication only when `auth_config.pca.beacons` is enabled.</summary>
+        /// <remarks>POST /v1/pca/beacons. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaBeaconsResponse> BeaconsAsync(PcaBeaconsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaBeaconsResponse>(HttpVerb.Post, $"/v1/pca/beacons", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>A bond account's balance (?account=&lt;principal_pub&gt;; also `escrow` and `atlas-treasury`).</summary>
+        /// <remarks>GET /v1/pca/bond-accounts. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListBondAccountsResponse> ListBondAccountsAsync(PcaListBondAccountsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListBondAccountsResponse>(HttpVerb.Get, $"/v1/pca/bond-accounts", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Credit a depositor's bond escrow balance (funds the optimistic fast path). The depositor account is the grant's principal_pub; bonds are sized from server policy exposure and debited atomically at claim open. Audited.</summary>
+        /// <remarks>POST /v1/pca/bond-accounts. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaListBondAccountsResponse> CreateBondAccountAsync(PcaCreateBondAccountBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListBondAccountsResponse>(HttpVerb.Post, $"/v1/pca/bond-accounts", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Register the grant's CONSTITUTION: a principal-signed set of invariants (never / never_unless / cap / rate / never_after / require_prior / require_approval_over) the agent must never violate whatever its permissions say. Verified against the grant principal's key, immutable once set (a different constitution is 409), and enforced on every action inside the admission transaction with a hash-chained, server-persisted monitor state. Public (the signature is the authority) or `sk_` + pca:write (still principal-signed).</summary>
+        /// <remarks>POST /v1/pca/constitutions. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaConstitutionsResponse> ConstitutionsAsync(PcaConstitutionsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaConstitutionsResponse>(HttpVerb.Post, $"/v1/pca/constitutions", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>List registered grants (grant management): filter by principal, agent (holder) and status; keyset pagination.</summary>
+        /// <remarks>GET /v1/pca/grants. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListGrantsResponse> ListGrantsAsync(PcaListGrantsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListGrantsResponse>(HttpVerb.Get, $"/v1/pca/grants", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Inspect a grant: the signed chain, its content digest, remaining trust budget, revoked-capability count and the current signed revocation epoch.</summary>
+        /// <remarks>GET /v1/pca/grants/{grantRef}. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaGetGrantResponse> GetGrantAsync(string grantRef, CancellationToken cancellationToken = default) =>
+            Req<PcaGetGrantResponse>(HttpVerb.Get, $"/v1/pca/grants/{Enc(grantRef)}", cancellationToken: cancellationToken);
+
+        /// <summary>Revoke a grant (scope=grant) or every active grant of its principal and agent (scope=agent, operator only). Operator `sk_` + pca:write, or with no Authorization header the principal's signature (principal_sig) over the root revocation message. The signed revocation epoch is bumped in the same transaction.</summary>
+        /// <remarks>DELETE /v1/pca/grants/{grantRef}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaDeleteGrantResponse> DeleteGrantAsync(string grantRef, PcaDeleteGrantBody body, PcaDeleteGrantQuery? query = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaDeleteGrantResponse>(HttpVerb.Delete, $"/v1/pca/grants/{Enc(grantRef)}", body: body, query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Amend a grant's authority statement. `narrow`, or any change that is provably not wider, is signed by the holder or the principal and revises the grant in place (revision + 1; a signature names the revision, so it cannot be replayed). A change that widens or is incomparable needs the PRINCIPAL's signature, a spent step-up and `new_grant_ref` (a registered active grant of the same principal and agent); it creates that successor's statement (`supersedes`) and kills the old grant. Public (the signature is the authority) or `sk_` + pca:write (still signed).</summary>
+        /// <remarks>POST /v1/pca/grants/{grantRef}/amend. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaGrantsAmendResponse> GrantsAmendAsync(string grantRef, PcaGrantsAmendBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaGrantsAmendResponse>(HttpVerb.Post, $"/v1/pca/grants/{Enc(grantRef)}/amend", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Enrol a grant into management: the principal signs its initial authority statement at revision 0 (the signature covers {grant, rev: 0, action: 'replace', authority digest} under the grant-amend domain). Once; afterwards use amend. Admission then enforces the statement as an extra tighten-only ceiling. Public (the signature is the authority) or `sk_` + pca:write (still principal-signed).</summary>
+        /// <remarks>PUT /v1/pca/grants/{grantRef}/authority. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaSetGrantsAuthorityResponse> SetGrantsAuthorityAsync(string grantRef, PcaSetGrantsAuthorityBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaSetGrantsAuthorityResponse>(HttpVerb.Put, $"/v1/pca/grants/{Enc(grantRef)}/authority", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>A grant's need requests, optionally filtered by status.</summary>
+        /// <remarks>GET /v1/pca/grants/{grantRef}/needs. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListGrantsNeedsResponse> ListGrantsNeedsAsync(string grantRef, PcaListGrantsNeedsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListGrantsNeedsResponse>(HttpVerb.Get, $"/v1/pca/grants/{Enc(grantRef)}/needs", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>File typed needs (incremental authorization). The grant holder signs them at the current revision (need-request domain), or the operator files them. Nothing changes until the principal approves.</summary>
+        /// <remarks>POST /v1/pca/grants/{grantRef}/needs. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaCreateGrantsNeedResponse> CreateGrantsNeedAsync(string grantRef, PcaCreateGrantsNeedBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaCreateGrantsNeedResponse>(HttpVerb.Post, $"/v1/pca/grants/{Enc(grantRef)}/needs", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Issue a single-use step-up challenge for a grant (valid 5 minutes). The principal signs its nonce on its own device; a widening spends one.</summary>
+        /// <remarks>POST /v1/pca/grants/{grantRef}/step-up. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaGrantsStepUpResponse> GrantsStepUpAsync(string grantRef, Dictionary<string, object?> body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaGrantsStepUpResponse>(HttpVerb.Post, $"/v1/pca/grants/{Enc(grantRef)}/step-up", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Approve a step-up challenge with the grant principal's signature over {grant, challenge, nonce} (grant-step-up domain). Once.</summary>
+        /// <remarks>POST /v1/pca/grants/{grantRef}/step-up/{challengeId}/approve. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaGrantsStepUpApproveResponse> GrantsStepUpApproveAsync(string grantRef, string challengeId, PcaGrantsStepUpApproveBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaGrantsStepUpApproveResponse>(HttpVerb.Post, $"/v1/pca/grants/{Enc(grantRef)}/step-up/{Enc(challengeId)}/approve", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Rotate the guardian signing key: a new keypair and epoch + 1; the previous public key is retained so STHs, revocation epochs and receipts signed under it still verify. New signatures use the new epoch. Audited.</summary>
+        /// <remarks>POST /v1/pca/guardian/rotate. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaGuardianRotateResponse> GuardianRotateAsync(Dictionary<string, object?> body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaGuardianRotateResponse>(HttpVerb.Post, $"/v1/pca/guardian/rotate", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>List the runtime observations recorded against a map, oldest first. Paginate with `after` = the previous page `next_cursor`.</summary>
+        /// <remarks>GET /v1/pca/intent/maps/{digest}/observations. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListIntentMapsObservationsResponse> ListIntentMapsObservationsAsync(string digest, PcaListIntentMapsObservationsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListIntentMapsObservationsResponse>(HttpVerb.Get, $"/v1/pca/intent/maps/{Enc(digest)}/observations", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Anchor a site's signed action schema (Intent Layer v2, `pca-action-schema` v1 served at /.well-known/pca-actions.json). The schema is verified against the site's discovery keys (`keys`, the `intent.schema_keys` of its /.well-known/pca-configuration; the suite comes from the key entry), content-addressed (`actionSchemaDigest`) and appended to the instance's intent transparency log (kind `schema`), so a site cannot show different schemas to different users without detection. Audited. 201 anchored, 200 already anchored.</summary>
+        /// <remarks>POST /v1/pca/intent/schemas. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaIntentSchemasResponse> IntentSchemasAsync(PcaIntentSchemasBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaIntentSchemasResponse>(HttpVerb.Post, $"/v1/pca/intent/schemas", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Approve a need request. The principal signs the approved needs at the current revision (need-approve domain); the approved list must name the same verbs and resources in order, and an amount may only be lowered, and only on a need marked adjustable. Needs a spent step-up and `new_grant_ref` (the registered successor); the result is a successor grant with the merged authority.</summary>
+        /// <remarks>POST /v1/pca/needs/{needId}/approve. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaNeedsApproveResponse> NeedsApproveAsync(string needId, PcaNeedsApproveBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaNeedsApproveResponse>(HttpVerb.Post, $"/v1/pca/needs/{Enc(needId)}/approve", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Deny a need request: the principal's signature over the empty approval of this need at the current revision, or the operator key.</summary>
+        /// <remarks>POST /v1/pca/needs/{needId}/deny. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaNeedsDenyResponse> NeedsDenyAsync(string needId, PcaNeedsDenyBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaNeedsDenyResponse>(HttpVerb.Post, $"/v1/pca/needs/{Enc(needId)}/deny", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Remove an identity PQ key pin (the rotation step: delete, then the identity registers a new binding at a HIGHER epoch; the delete leaves a tombstone holding the last epoch, so the removed binding and every older one is refused). Pure-PQ and hybrid artifacts from that identity are refused until it is re-pinned. Audited.</summary>
+        /// <remarks>DELETE /v1/pca/pq-pins/{identity}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaDeletePqPinResponse> DeletePqPinAsync(string identity, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaDeletePqPinResponse>(HttpVerb.Delete, $"/v1/pca/pq-pins/{Enc(identity)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>The instance's enrolled principals (public key, bound subject, status).</summary>
+        /// <remarks>GET /v1/pca/principals. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListPrincipalsResponse> ListPrincipalsAsync(PcaListPrincipalsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListPrincipalsResponse>(HttpVerb.Get, $"/v1/pca/principals", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Enrol a principal public key, binding it to an Atlas identity (user, org, or machine) in this instance. A grant whose issuer is an enrolled active principal registers as the `verified` tier; an unenrolled issuer is accepted only as `unverified`. Audited.</summary>
+        /// <remarks>POST /v1/pca/principals. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaCreatePrincipalResponse> CreatePrincipalAsync(PcaCreatePrincipalBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaCreatePrincipalResponse>(HttpVerb.Post, $"/v1/pca/principals", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Disable an enrolled principal. Its existing verified grants are denied at adjudication and no new verified grant can be registered under it. Audited.</summary>
+        /// <remarks>DELETE /v1/pca/principals/{principalPub}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaDeletePrincipalResponse> DeletePrincipalAsync(string principalPub, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaDeletePrincipalResponse>(HttpVerb.Delete, $"/v1/pca/principals/{Enc(principalPub)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Register an undo record with the hosted undo ledger. The record's receipt chain must verify against the instance's undo signer (auth_config.pca.undoSigner); 409 when none is configured. Idempotent on the record id: the same record again returns the stored one, different content under the same id is a 409. Audited.</summary>
+        /// <remarks>POST /v1/pca/undo/records. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaUndoRecordsResponse> UndoRecordsAsync(PcaUndoRecordsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaUndoRecordsResponse>(HttpVerb.Post, $"/v1/pca/undo/records", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>A stored undo record (without its encoded PCActn) and the veto waiting on it, if any.</summary>
+        /// <remarks>GET /v1/pca/undo/records/{id}. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaUndoRecordsResponse> GetUndoRecordAsync(string id, CancellationToken cancellationToken = default) =>
+            Req<PcaUndoRecordsResponse>(HttpVerb.Get, $"/v1/pca/undo/records/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Replace an undo record after a transition. Accepted only when the new receipt chain verifies, the stored receipts are a prefix of it, the record identity (id, audience, grant, holder, principal, compensation, window, PCActn) is unchanged and `ver` increases. Moving to vetoed, compensated or compensation_failed settles a pending veto; finalizing while a veto is pending is a 409. Audited.</summary>
+        /// <remarks>PUT /v1/pca/undo/records/{id}. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaUndoRecordsResponse> ReplaceUndoRecordAsync(string id, PcaUndoRecordsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaUndoRecordsResponse>(HttpVerb.Put, $"/v1/pca/undo/records/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Vetoes received by the instance that the resource server has not applied yet, oldest first (?limit 1..200, default 100), each with the principal's token. The resource server re-verifies the token as of the veto time, applies the veto and PUTs the signed record.</summary>
+        /// <remarks>GET /v1/pca/undo/vetoes. Scope: <c>pca:read</c>.</remarks>
+        public Task<PcaListUndoVetoesResponse> ListUndoVetoesAsync(PcaListUndoVetoesQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PcaListUndoVetoesResponse>(HttpVerb.Get, $"/v1/pca/undo/vetoes", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Issue a guardian-signed step receipt for a step of a workflow the grant principal committed (K5). The operator reports the outcome and outputs of an executed step; the receipt chains to the earlier receipts and lets a later step be admitted.</summary>
+        /// <remarks>POST /v1/pca/workflow-receipts. Scope: <c>pca:write</c>.</remarks>
+        public Task<PcaWorkflowReceiptsResponse> WorkflowReceiptsAsync(PcaWorkflowReceiptsBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PcaWorkflowReceiptsResponse>(HttpVerb.Post, $"/v1/pca/workflow-receipts", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>PermissionAliases</c> operations.</summary>
+    public sealed class PermissionAliasesOperations : ResourceBase
+    {
+        internal PermissionAliasesOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>List permission aliases: legacy keys that stand for a canonical permission key.</summary>
+        /// <remarks>GET /v1/permission_aliases. Scope: <c>organizations:read</c>.</remarks>
+        public Task<PermissionAliasesListResponse> ListAsync(PermissionAliasesListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<PermissionAliasesListResponse>(HttpVerb.Get, $"/v1/permission_aliases", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Create or repoint a permission alias from a body ({ alias, permission_key }); the same write as PUT /v1/permission_aliases/{alias}.</summary>
+        /// <remarks>POST /v1/permission_aliases. Scope: <c>organizations:write</c>.</remarks>
+        public Task<PermissionAliasesListResponseDataItem> CreateAsync(PermissionAliasesCreateBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PermissionAliasesListResponseDataItem>(HttpVerb.Post, $"/v1/permission_aliases", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Create or repoint an alias. Writes that take permission keys (role grants, seat permissions, invitations, implies) accept the alias and store the canonical key; tokens always carry the canonical key. The alias must not be a permission key, and the target must be an existing permission.</summary>
+        /// <remarks>PUT /v1/permission_aliases/{alias}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<PermissionAliasesListResponseDataItem> ReplaceAsync(string alias, PermissionAliasesReplaceBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PermissionAliasesListResponseDataItem>(HttpVerb.Put, $"/v1/permission_aliases/{Enc(alias)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Remove an alias. Writes that still send it are then refused or dropped as an unknown key.</summary>
+        /// <remarks>DELETE /v1/permission_aliases/{alias}. Scope: <c>organizations:write</c>.</remarks>
+        public Task<PermissionAliasesDeleteResponse> DeleteAsync(string alias, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PermissionAliasesDeleteResponse>(HttpVerb.Delete, $"/v1/permission_aliases/{Enc(alias)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>Permissions</c> operations.</summary>
+    public sealed class PermissionsOperations : ResourceBase
+    {
+        internal PermissionsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>Rename a custom permission. The key moves in one transaction everywhere Atlas stores it (the permission, seats, invitations, implies, aliases; role grants follow by id) and the old key becomes an alias, so code and imports that still send it keep working. Sessions minted before the rename carry the old key until they refresh. System permissions cannot be renamed. permission.updated is sent with previous_key.</summary>
+        /// <remarks>POST /v1/permissions/{id}/rename. Scope: <c>organizations:write</c>.</remarks>
+        public Task<PermissionsRenameResponse> RenameAsync(string id, PermissionsRenameBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PermissionsRenameResponse>(HttpVerb.Post, $"/v1/permissions/{Enc(id)}/rename", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>PlatformApps</c> operations.</summary>
@@ -3575,10 +4859,25 @@ namespace Atlas.Generated
         public Task<PlatformAppsListInstancesClonesResponseDataItem> DeleteInstancesCloneAsync(string id, string instanceId, string cloneId, CancellationToken cancellationToken = default) =>
             Req<PlatformAppsListInstancesClonesResponseDataItem>(HttpVerb.Delete, $"/v1/platform/apps/{Enc(id)}/instances/{Enc(instanceId)}/clones/{Enc(cloneId)}", cancellationToken: cancellationToken);
 
+        /// <summary>Delete a clone or preview together with its instance and everything in it (users, configuration, keys). Only an instance a clone created, under the same app and owner, can be removed this way. Audited. Emits instance_clone.deleted.</summary>
+        /// <remarks>DELETE /v1/platform/apps/{id}/instances/{instanceId}/clones/{cloneId}. Scope: <c>platform:apps:write</c>.</remarks>
+        public Task<PlatformAppsListInstancesClonesResponseDataItem> DeleteInstancesCloneAsync(string id, string instanceId, string cloneId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PlatformAppsListInstancesClonesResponseDataItem>(HttpVerb.Delete, $"/v1/platform/apps/{Enc(id)}/instances/{Enc(instanceId)}/clones/{Enc(cloneId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Bring a completed clone or preview up to date in place (same instance, keys and host); same body and rules as POST /v1/instance/staging_copies/{id}/refresh. Needs platform:apps:write.</summary>
+        /// <remarks>POST /v1/platform/apps/{id}/instances/{instanceId}/clones/{cloneId}/refresh. Scope: <c>platform:apps:write</c>.</remarks>
+        public Task<PlatformAppsListInstancesClonesResponseDataItem> InstancesClonesRefreshAsync(string id, string instanceId, string cloneId, PlatformAppsInstancesClonesRefreshBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PlatformAppsListInstancesClonesResponseDataItem>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/instances/{Enc(instanceId)}/clones/{Enc(cloneId)}/refresh", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Narrow the secret keys of an app after onboarding: a key holding every scope becomes a runtime key, with no new secret.</summary>
         /// <remarks>POST /v1/platform/apps/{id}/narrow_secret_keys. Scope: <c>platform:secrets:write</c>.</remarks>
         public Task<PlatformAppsNarrowSecretKeysResponse> NarrowSecretKeysAsync(string id, PlatformAppsNarrowSecretKeysBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<PlatformAppsNarrowSecretKeysResponse>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/narrow_secret_keys", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Extend the `provisioning` key of an app created with `secret_key_profile: "web_app"` by another 24 hours.</summary>
+        /// <remarks>POST /v1/platform/apps/{id}/provisioning_key/renew. Scope: <c>platform:secrets:write</c>.</remarks>
+        public Task<PlatformAppsProvisioningKeyRenewResponse> ProvisioningKeyRenewAsync(string id, PlatformAppsProvisioningKeyRenewBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<PlatformAppsProvisioningKeyRenewResponse>(HttpVerb.Post, $"/v1/platform/apps/{Enc(id)}/provisioning_key/renew", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>PlatformAtlasIdApps</c> operations.</summary>
@@ -3600,6 +4899,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/platform/atlas_id_apps/{id}/adoption_codes/{codeId}. Scope: <c>platform:atlas_id_apps:write</c>.</remarks>
         public Task<PlatformAtlasIdAppsDeleteAdoptionCodeResponse> DeleteAdoptionCodeAsync(string id, string codeId, CancellationToken cancellationToken = default) =>
             Req<PlatformAtlasIdAppsDeleteAdoptionCodeResponse>(HttpVerb.Delete, $"/v1/platform/atlas_id_apps/{Enc(id)}/adoption_codes/{Enc(codeId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Withdraw an adoption code that has not been redeemed.</summary>
+        /// <remarks>DELETE /v1/platform/atlas_id_apps/{id}/adoption_codes/{codeId}. Scope: <c>platform:atlas_id_apps:write</c>.</remarks>
+        public Task<PlatformAtlasIdAppsDeleteAdoptionCodeResponse> DeleteAdoptionCodeAsync(string id, string codeId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PlatformAtlasIdAppsDeleteAdoptionCodeResponse>(HttpVerb.Delete, $"/v1/platform/atlas_id_apps/{Enc(id)}/adoption_codes/{Enc(codeId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Policies</c> operations.</summary>
@@ -3616,6 +4920,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/policies/{id}/audience. Scope: <c>instance:write</c>.</remarks>
         public Task<PoliciesGetAudienceResponse> SetAudienceAsync(string id, PoliciesSetAudienceBody body, CancellationToken cancellationToken = default) =>
             Req<PoliciesGetAudienceResponse>(HttpVerb.Put, $"/v1/policies/{Enc(id)}/audience", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Set a policy's audience. orgs asks only members of the listed organizations (1-200, all must exist) at their next sign-in, and never at sign-up; everyone (the default) clears the list. A user who is in none of the organizations is not asked and is not blocked.</summary>
+        /// <remarks>PUT /v1/policies/{id}/audience. Scope: <c>instance:write</c>.</remarks>
+        public Task<PoliciesGetAudienceResponse> SetAudienceAsync(string id, PoliciesSetAudienceBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PoliciesGetAudienceResponse>(HttpVerb.Put, $"/v1/policies/{Enc(id)}/audience", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>The policy's versions, newest first, each with acceptance_count.</summary>
         /// <remarks>GET /v1/policies/{id}/versions. Scope: <c>instance:read</c>.</remarks>
@@ -3637,10 +4946,20 @@ namespace Atlas.Generated
         public Task<PoliciesListVersionsResponseDataItem> UpdateVersionAsync(string id, string versionId, PoliciesUpdateVersionBody body, CancellationToken cancellationToken = default) =>
             Req<PoliciesListVersionsResponseDataItem>(HttpVerb.Patch, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Edit a draft (409 for a published version: publish a new version instead).</summary>
+        /// <remarks>PATCH /v1/policies/{id}/versions/{versionId}. Scope: <c>instance:write</c>.</remarks>
+        public Task<PoliciesListVersionsResponseDataItem> UpdateVersionAsync(string id, string versionId, PoliciesUpdateVersionBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PoliciesListVersionsResponseDataItem>(HttpVerb.Patch, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a draft (409 for a published version: retire it instead).</summary>
         /// <remarks>DELETE /v1/policies/{id}/versions/{versionId}. Scope: <c>instance:write</c>.</remarks>
         public Task<PoliciesDeleteVersionResponse> DeleteVersionAsync(string id, string versionId, CancellationToken cancellationToken = default) =>
             Req<PoliciesDeleteVersionResponse>(HttpVerb.Delete, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a draft (409 for a published version: retire it instead).</summary>
+        /// <remarks>DELETE /v1/policies/{id}/versions/{versionId}. Scope: <c>instance:write</c>.</remarks>
+        public Task<PoliciesDeleteVersionResponse> DeleteVersionAsync(string id, string versionId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PoliciesDeleteVersionResponse>(HttpVerb.Delete, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Publish a draft. effective_at (epoch ms or ISO, default now) is when sign-ups must accept it and sign-ins re-ask per the reaccept rule; it can be accepted early once published. Fires policy.version_published.</summary>
         /// <remarks>POST /v1/policies/{id}/versions/{versionId}/publish. Scope: <c>instance:write</c>.</remarks>
@@ -3671,10 +4990,20 @@ namespace Atlas.Generated
         public Task<PoliciesListVersionsTranslationsResponseDataItem> ReplaceVersionsTranslationAsync(string id, string versionId, string locale, PoliciesReplaceVersionsTranslationBody body, CancellationToken cancellationToken = default) =>
             Req<PoliciesListVersionsTranslationsResponseDataItem>(HttpVerb.Put, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}/translations/{Enc(locale)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Add or replace the text of a version in one language (content_markdown or content_html, sanitised like the version itself). GET /v1/client/policies?locale= then serves it, and an acceptance records the hash of the text that was shown. A published version can gain languages but a language already there cannot change (409); a draft can change freely. 400 for an external policy.</summary>
+        /// <remarks>PUT /v1/policies/{id}/versions/{versionId}/translations/{locale}. Scope: <c>instance:write</c>.</remarks>
+        public Task<PoliciesListVersionsTranslationsResponseDataItem> ReplaceVersionsTranslationAsync(string id, string versionId, string locale, PoliciesReplaceVersionsTranslationBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PoliciesListVersionsTranslationsResponseDataItem>(HttpVerb.Put, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}/translations/{Enc(locale)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove a translation from a draft version. A published version's translations stay (409).</summary>
         /// <remarks>DELETE /v1/policies/{id}/versions/{versionId}/translations/{locale}. Scope: <c>instance:write</c>.</remarks>
         public Task<PoliciesDeleteVersionsTranslationResponse> DeleteVersionsTranslationAsync(string id, string versionId, string locale, CancellationToken cancellationToken = default) =>
             Req<PoliciesDeleteVersionsTranslationResponse>(HttpVerb.Delete, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}/translations/{Enc(locale)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a translation from a draft version. A published version's translations stay (409).</summary>
+        /// <remarks>DELETE /v1/policies/{id}/versions/{versionId}/translations/{locale}. Scope: <c>instance:write</c>.</remarks>
+        public Task<PoliciesDeleteVersionsTranslationResponse> DeleteVersionsTranslationAsync(string id, string versionId, string locale, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<PoliciesDeleteVersionsTranslationResponse>(HttpVerb.Delete, $"/v1/policies/{Enc(id)}/versions/{Enc(versionId)}/translations/{Enc(locale)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Provisioning</c> operations.</summary>
@@ -3719,10 +5048,20 @@ namespace Atlas.Generated
         public Task<RateLimitOverridesListResponseDataItem> ReplaceAsync(string subjectType, string subjectId, RateLimitOverridesReplaceBody body, CancellationToken cancellationToken = default) =>
             Req<RateLimitOverridesListResponseDataItem>(HttpVerb.Put, $"/v1/rate_limit_overrides/{Enc(subjectType)}/{Enc(subjectId)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Pin one subject (an API key, user, organization or machine of this instance, or one IP address) to a policy of its kind (policy_id) or to an inline limit (limit with window_seconds, optional burst). An override beats every other rule, including the key's own rate_limit. Replaces any earlier override for the subject; the same content again changes nothing. expires_at ends it on its own. An override pointing at a disabled policy does not apply. Emits rate_limit_policy.updated.</summary>
+        /// <remarks>PUT /v1/rate_limit_overrides/{subject_type}/{subject_id}. Scope: <c>rate_limit:write</c>.</remarks>
+        public Task<RateLimitOverridesListResponseDataItem> ReplaceAsync(string subjectType, string subjectId, RateLimitOverridesReplaceBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<RateLimitOverridesListResponseDataItem>(HttpVerb.Put, $"/v1/rate_limit_overrides/{Enc(subjectType)}/{Enc(subjectId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Remove the override for one subject. Emits rate_limit_policy.updated.</summary>
         /// <remarks>DELETE /v1/rate_limit_overrides/{subject_type}/{subject_id}. Scope: <c>rate_limit:write</c>.</remarks>
         public Task<RateLimitOverridesDeleteResponse> DeleteAsync(string subjectType, string subjectId, CancellationToken cancellationToken = default) =>
             Req<RateLimitOverridesDeleteResponse>(HttpVerb.Delete, $"/v1/rate_limit_overrides/{Enc(subjectType)}/{Enc(subjectId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Remove the override for one subject. Emits rate_limit_policy.updated.</summary>
+        /// <remarks>DELETE /v1/rate_limit_overrides/{subject_type}/{subject_id}. Scope: <c>rate_limit:write</c>.</remarks>
+        public Task<RateLimitOverridesDeleteResponse> DeleteAsync(string subjectType, string subjectId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<RateLimitOverridesDeleteResponse>(HttpVerb.Delete, $"/v1/rate_limit_overrides/{Enc(subjectType)}/{Enc(subjectId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>RateLimitPolicies</c> operations.</summary>
@@ -3755,10 +5094,20 @@ namespace Atlas.Generated
         public Task<RateLimitPoliciesListResponseDataItem> UpdateAsync(string id, RateLimitPoliciesUpdateBody body, CancellationToken cancellationToken = default) =>
             Req<RateLimitPoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/rate_limit_policies/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a policy. Send only the fields to change; the version goes up by one. Sending the same values again changes nothing. subject cannot change. Emits rate_limit_policy.updated with the before and after.</summary>
+        /// <remarks>PATCH /v1/rate_limit_policies/{id}. Scope: <c>rate_limit:write</c>.</remarks>
+        public Task<RateLimitPoliciesListResponseDataItem> UpdateAsync(string id, RateLimitPoliciesUpdateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<RateLimitPoliciesListResponseDataItem>(HttpVerb.Patch, $"/v1/rate_limit_policies/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a policy. Refused with 409 while per-subject overrides still point at it. Emits rate_limit_policy.updated.</summary>
         /// <remarks>DELETE /v1/rate_limit_policies/{id}. Scope: <c>rate_limit:write</c>.</remarks>
         public Task<RateLimitPoliciesDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<RateLimitPoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/rate_limit_policies/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a policy. Refused with 409 while per-subject overrides still point at it. Emits rate_limit_policy.updated.</summary>
+        /// <remarks>DELETE /v1/rate_limit_policies/{id}. Scope: <c>rate_limit:write</c>.</remarks>
+        public Task<RateLimitPoliciesDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<RateLimitPoliciesDeleteResponse>(HttpVerb.Delete, $"/v1/rate_limit_policies/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>ReferralRewardRules</c> operations.</summary>
@@ -3775,6 +5124,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/referral_reward_rules. Scope: <c>billing:write</c>.</remarks>
         public Task<ReferralRewardRulesListResponse> SetAsync(ReferralRewardRulesSetBody body, CancellationToken cancellationToken = default) =>
             Req<ReferralRewardRulesListResponse>(HttpVerb.Put, $"/v1/referral_reward_rules", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Replace the referral reward terms (a field you leave out returns to its default). At least one of `referrer_amount` and `referee_amount` must be above zero to turn rewards on. Rewards are credits on the billing credit ledger; they are created only for referrals Atlas has attributed and not flagged, once the trigger is met, and are granted after `hold_days`.</summary>
+        /// <remarks>PUT /v1/referral_reward_rules. Scope: <c>billing:write</c>.</remarks>
+        public Task<ReferralRewardRulesListResponse> SetAsync(ReferralRewardRulesSetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<ReferralRewardRulesListResponse>(HttpVerb.Put, $"/v1/referral_reward_rules", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>ReferralRewards</c> operations.</summary>
@@ -3843,6 +5197,11 @@ namespace Atlas.Generated
         public Task<RegionListResponse> SetAsync(RegionSetBody body, CancellationToken cancellationToken = default) =>
             Req<RegionListResponse>(HttpVerb.Put, $"/v1/region", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Pin the instance to this stack's region (`pin: true`; there is no unpin, because the data lives there), name its failover region, or set Frontend API origin isolation (`off`, `enforce`, or null for the deployment default). Send only the fields to change. Audited.</summary>
+        /// <remarks>PUT /v1/region. Scope: <c>instance:write</c>.</remarks>
+        public Task<RegionListResponse> SetAsync(RegionSetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<RegionListResponse>(HttpVerb.Put, $"/v1/region", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>The upstreams a path-mounted Frontend API's reverse proxy lists to fail over to the instance's failover region, with ready nginx and Caddy rules. 422 when the instance has no failover region or the region table has no origin for it.</summary>
         /// <remarks>GET /v1/region/failover. Scope: <c>instance:read</c>.</remarks>
         public Task<RegionGetFailoverResponse> GetFailoverAsync(RegionGetFailoverQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -3889,6 +5248,31 @@ namespace Atlas.Generated
             }, query?.StartingAfter, cancellationToken);
     }
 
+    /// <summary>The <c>Revocations</c> operations.</summary>
+    public sealed class RevocationsOperations : ResourceBase
+    {
+        internal RevocationsOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>Long-poll the revocation stream: one ordered list of everything that ended a session, a refresh-token family, an API key, a machine, a machine grant or a person's access, each with ids, reason and actor. Resume by cursor: pass the `next_cursor` of the previous answer as `after`. With neither `after` nor `since` it answers empty with a `next_cursor` that points at "now", so a new consumer starts from this moment. `wait` (seconds, up to 30) holds the request open until an event arrives. Order is commit order: the cursor is a sequence number assigned to what has committed, so a consumer that follows it never skips an event, however late it committed. Retention is the event log's (90 days), and webhook endpoints subscribed to the same event types are its second channel. Delivery is at-least-once and in order; keep your handler idempotent.</summary>
+        /// <remarks>GET /v1/revocations. Scope: <c>events:read</c>.</remarks>
+        public Task<RevocationsListResponse> ListAsync(RevocationsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<RevocationsListResponse>(HttpVerb.Get, $"/v1/revocations", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<RevocationsListResponseDataItem> ListAllAsync(RevocationsListQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<RevocationsListResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new RevocationsListQuery();
+                var _page = await ListAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<RevocationsListResponseDataItem> { Data = _page.Data ?? new List<RevocationsListResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
+
+        /// <summary>Server-Sent Events stream of the revocation stream (the same events as `GET /v1/revocations`). Each `revocation` event carries the frame as JSON and its `seq` as the SSE `id`; resume with `Last-Event-ID` or `after`. A `ready` event carries the cursor the stream started from, a `: keep-alive` comment arrives every 15 seconds, and a `reconnect` event ends a connection after an hour: reconnect with the last id. At most 20 streams may be open per instance (429 beyond). Same `kinds` and `since` filters. `@atlasauth/backend` `revocationStream` and `createRevocationMirror` consume it with reconnect, backoff and resume.</summary>
+        /// <remarks>GET /v1/revocations/stream. Scope: <c>events:read</c>.</remarks>
+        public Task GetStreamAsync(RevocationsGetStreamQuery? query = null, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Get, $"/v1/revocations/stream", query: query?.ToQuery(), cancellationToken: cancellationToken);
+    }
+
     /// <summary>The <c>RiskBasedMfa</c> operations.</summary>
     public sealed class RiskBasedMfaOperations : ResourceBase
     {
@@ -3933,6 +5317,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/risk_signals/{id}. Scope: <c>risk_signals:write</c>.</remarks>
         public Task<RiskSignalsListResponseDataItem> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<RiskSignalsListResponseDataItem>(HttpVerb.Delete, $"/v1/risk_signals/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>End a risk signal now. Its points leave the next evaluation; the row stays readable with status `revoked`.</summary>
+        /// <remarks>DELETE /v1/risk_signals/{id}. Scope: <c>risk_signals:write</c>.</remarks>
+        public Task<RiskSignalsListResponseDataItem> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<RiskSignalsListResponseDataItem>(HttpVerb.Delete, $"/v1/risk_signals/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>RiskyUsers</c> operations.</summary>
@@ -4065,6 +5454,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/scim_resource_types/{id}. Scope: <c>scim:write</c>.</remarks>
         public Task DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/scim_resource_types/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a custom SCIM resource type and every resource of it.</summary>
+        /// <remarks>DELETE /v1/scim_resource_types/{id}. Scope: <c>scim:write</c>.</remarks>
+        public Task DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/scim_resource_types/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>ScimTokens</c> operations.</summary>
@@ -4138,6 +5532,11 @@ namespace Atlas.Generated
                 return new CursorPage<SessionsGetRevokedResponseDataItem> { Data = _page.Data ?? new List<SessionsGetRevokedResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
             }, query?.StartingAfter, cancellationToken);
 
+        /// <summary>Set (or clear, with organization_id null) the active organization of a session from your backend. The user must hold a seat in it (or in an ancestor with role inheritance on) and meet its second-factor policy, as for their own switch: an organization they are not in is 404, a policy that needs a second factor is 403 STEP_UP_REQUIRED. The next token minted for the session (refresh or getToken) carries that organization claims. An ended session is 409; an unknown id, or one of another instance, is 404. Returns the session with last_active_organization_id.</summary>
+        /// <remarks>PUT /v1/sessions/{id}/active_organization. Scope: <c>sessions:write</c>.</remarks>
+        public Task<SessionModel> SetActiveOrganizationAsync(string id, SessionsSetActiveOrganizationBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<SessionModel>(HttpVerb.Put, $"/v1/sessions/{Enc(id)}/active_organization", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Which DPoP key (by thumbprint) a session is bound to, and whether it was attested.</summary>
         /// <remarks>GET /v1/sessions/{id}/binding. Scope: <c>sessions:read</c>.</remarks>
         public Task<SessionsGetBindingResponse> GetBindingAsync(string id, CancellationToken cancellationToken = default) =>
@@ -4147,6 +5546,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/sessions/{id}/binding. Scope: <c>sessions:write</c>.</remarks>
         public Task<SessionsDeleteBindingResponse> DeleteBindingAsync(string id, CancellationToken cancellationToken = default) =>
             Req<SessionsDeleteBindingResponse>(HttpVerb.Delete, $"/v1/sessions/{Enc(id)}/binding", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a session's DPoP binding so it can bind a new key (a user who lost their device key). Audited.</summary>
+        /// <remarks>DELETE /v1/sessions/{id}/binding. Scope: <c>sessions:write</c>.</remarks>
+        public Task<SessionsDeleteBindingResponse> DeleteBindingAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<SessionsDeleteBindingResponse>(HttpVerb.Delete, $"/v1/sessions/{Enc(id)}/binding", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>One session's timeline, oldest first: `created`, `step_up`, `organization_changed`, `risk_elevated`, `revoked` (with the reason). Sessions that predate the timeline get `created` and `revoked` from their own row, marked `synthesized`. 404 for a session of another instance.</summary>
         /// <remarks>GET /v1/sessions/{id}/events. Scope: <c>sessions:read</c>.</remarks>
@@ -4164,10 +5568,50 @@ namespace Atlas.Generated
     {
         internal SsfOperations(AtlasTransport transport) : base(transport) { }
 
+        /// <summary>Add a subject to a stream (8.1.3.2). 200, empty body.</summary>
+        /// <remarks>POST /v1/ssf/add_subject. Scope: <c>pca:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> AddSubjectAsync(SsfAddSubjectBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Post, $"/v1/ssf/add_subject", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Read one stream (?stream_id) or all of the receiver's streams (8.1.1.2). Another receiver's stream is 404.</summary>
+        /// <remarks>GET /v1/ssf/configuration. Scope: <c>pca:read</c>.</remarks>
+        public Task<Dictionary<string, object?>> GetConfigurationAsync(SsfGetConfigurationQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Get, $"/v1/ssf/configuration", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Create an event stream (OpenID SSF 1.0 8.1.1.1). Receiver-supplied members: events_requested, delivery, description. Poll delivery by default (the transmitter assigns the endpoint); push needs an https endpoint_url. One stream per receiver (a second is 409). The stream belongs to the creating API key.</summary>
+        /// <remarks>POST /v1/ssf/configuration. Scope: <c>pca:write</c>.</remarks>
+        public Task<SsfConfigurationResponse> ConfigurationAsync(SsfConfigurationBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<SsfConfigurationResponse>(HttpVerb.Post, $"/v1/ssf/configuration", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Replace a stream (8.1.1.4): a missing receiver-supplied member is deleted.</summary>
+        /// <remarks>PUT /v1/ssf/configuration. Scope: <c>pca:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> SetConfigurationAsync(SsfSetConfigurationBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Put, $"/v1/ssf/configuration", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Update a stream (8.1.1.3): only the members present change; transmitter-supplied members must match; the delivery method cannot change.</summary>
+        /// <remarks>PATCH /v1/ssf/configuration. Scope: <c>pca:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> UpdateConfigurationAsync(SsfSetConfigurationBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Patch, $"/v1/ssf/configuration", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Delete a stream (?stream_id, 8.1.1.5): 204.</summary>
+        /// <remarks>DELETE /v1/ssf/configuration. Scope: <c>pca:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> DeleteConfigurationAsync(Dictionary<string, object?> body, SsfDeleteConfigurationQuery? query = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Delete, $"/v1/ssf/configuration", body: body, query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Raise a Shared Signals event for one of your users: the CAEP and RISC events Atlas has no flow for (opt-in, opt-out-initiated, opt-out-cancelled, opt-out-effective, identifier-recycled, recovery-activated ...). It reaches every stream that asked for the event and whose subject rules allow the user. 202.</summary>
         /// <remarks>POST /v1/ssf/events. Scope: <c>ssf:write</c>.</remarks>
         public Task EventsAsync(SsfEventsBody? body = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Post, $"/v1/ssf/events", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>SSF transmitter configuration metadata (issuer, delivery methods, the five management endpoints).</summary>
+        /// <remarks>GET /v1/ssf/metadata. Scope: <c>pca:read</c>.</remarks>
+        public Task<SsfGetMetadataResponse> GetMetadataAsync(CancellationToken cancellationToken = default) =>
+            Req<SsfGetMetadataResponse>(HttpVerb.Get, $"/v1/ssf/metadata", cancellationToken: cancellationToken);
+
+        /// <summary>Remove a subject from a stream (8.1.3.3). 204; an unknown subject is ignored.</summary>
+        /// <remarks>POST /v1/ssf/remove_subject. Scope: <c>pca:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> RemoveSubjectAsync(SsfRemoveSubjectBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Post, $"/v1/ssf/remove_subject", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>SSF 1.0 stream status endpoint: the status (enabled, paused, disabled) of the stream named by the `stream_id` query parameter.</summary>
         /// <remarks>GET /v1/ssf/status. Scope: <c>ssf:read</c>.</remarks>
@@ -4184,6 +5628,11 @@ namespace Atlas.Generated
         public Task<SsfListStreamsSubjectsResponse> ListStreamsSubjectsAsync(string id, SsfListStreamsSubjectsQuery? query = null, CancellationToken cancellationToken = default) =>
             Req<SsfListStreamsSubjectsResponse>(HttpVerb.Get, $"/v1/ssf/streams/{Enc(id)}/subjects", query: query?.ToQuery(), cancellationToken: cancellationToken);
 
+        /// <summary>Poll a stream (RFC 8936): acknowledge with ack, report invalid SETs with setErrs, receive up to maxEvents unacknowledged SETs.</summary>
+        /// <remarks>POST /v1/ssf/streams/{streamId}/poll. Scope: <c>pca:write</c>.</remarks>
+        public Task<SsfStreamsPollResponse> StreamsPollAsync(string streamId, SsfStreamsPollBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<SsfStreamsPollResponse>(HttpVerb.Post, $"/v1/ssf/streams/{Enc(streamId)}/poll", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>SSF 1.0 add subject: start (or, on an ALL stream, resume) events for one subject on a stream. Subject formats: iss_sub (this issuer), email, phone_number, opaque, account, did, uri. 200 with an empty body.</summary>
         /// <remarks>POST /v1/ssf/subjects/add. Scope: <c>ssf:write</c>.</remarks>
         public Task SubjectsAddAsync(SsfSubjectsAddBody? body = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
@@ -4193,6 +5642,11 @@ namespace Atlas.Generated
         /// <remarks>POST /v1/ssf/subjects/remove. Scope: <c>ssf:write</c>.</remarks>
         public Task SubjectsRemoveAsync(SsfSubjectsRemoveBody? body = null, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Post, $"/v1/ssf/subjects/remove", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Request a verification event (8.1.4.2): 204, and a signed SET carrying the optional state is delivered on the stream (pushed, or retained for polling).</summary>
+        /// <remarks>POST /v1/ssf/verification. Scope: <c>pca:write</c>.</remarks>
+        public Task<Dictionary<string, object?>> VerificationAsync(SsfVerificationBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<Dictionary<string, object?>>(HttpVerb.Post, $"/v1/ssf/verification", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>SSF 1.0 verification endpoint: queue a verification event carrying `state` for the stream named by `stream_id`. 204.</summary>
         /// <remarks>POST /v1/ssf/verify. Scope: <c>ssf:write</c>.</remarks>
@@ -4269,10 +5723,20 @@ namespace Atlas.Generated
         public Task<StepUpListPoliciesResponseDataItem> UpdatePolicyAsync(string id, StepUpUpdatePolicyBody body, CancellationToken cancellationToken = default) =>
             Req<StepUpListPoliciesResponseDataItem>(HttpVerb.Patch, $"/v1/step_up/policies/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a step-up policy. Send only the fields to change. The change applies to the next assertion.</summary>
+        /// <remarks>PATCH /v1/step_up/policies/{id}. Scope: <c>step_up:write</c>.</remarks>
+        public Task<StepUpListPoliciesResponseDataItem> UpdatePolicyAsync(string id, StepUpUpdatePolicyBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<StepUpListPoliciesResponseDataItem>(HttpVerb.Patch, $"/v1/step_up/policies/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a step-up policy. An assertion that names it afterwards answers 404, so a service that still asks fails closed.</summary>
         /// <remarks>DELETE /v1/step_up/policies/{id}. Scope: <c>step_up:write</c>.</remarks>
         public Task<StepUpDeletePolicyResponse> DeletePolicyAsync(string id, CancellationToken cancellationToken = default) =>
             Req<StepUpDeletePolicyResponse>(HttpVerb.Delete, $"/v1/step_up/policies/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a step-up policy. An assertion that names it afterwards answers 404, so a service that still asks fails closed.</summary>
+        /// <remarks>DELETE /v1/step_up/policies/{id}. Scope: <c>step_up:write</c>.</remarks>
+        public Task<StepUpDeletePolicyResponse> DeletePolicyAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<StepUpDeletePolicyResponse>(HttpVerb.Delete, $"/v1/step_up/policies/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Suppressions</c> operations.</summary>
@@ -4308,6 +5772,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/suppressions/{id}. Scope: <c>messaging:write</c>.</remarks>
         public Task<SuppressionsDeleteResponse> DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             Req<SuppressionsDeleteResponse>(HttpVerb.Delete, $"/v1/suppressions/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Take an address off the suppression list; messages to it are sent again. Audited.</summary>
+        /// <remarks>DELETE /v1/suppressions/{id}. Scope: <c>messaging:write</c>.</remarks>
+        public Task<SuppressionsDeleteResponse> DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<SuppressionsDeleteResponse>(HttpVerb.Delete, $"/v1/suppressions/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>TelemetryExport</c> operations.</summary>
@@ -4324,6 +5793,11 @@ namespace Atlas.Generated
         /// <remarks>PUT /v1/telemetry_export. Scope: <c>instance:write</c>.</remarks>
         public Task<TelemetryExportListResponse> SetAsync(TelemetryExportSetBody body, CancellationToken cancellationToken = default) =>
             Req<TelemetryExportListResponse>(HttpVerb.Put, $"/v1/telemetry_export", body: body, cancellationToken: cancellationToken);
+
+        /// <summary>Configure OTLP/HTTP export of gateway tool calls and relay calls as spans and metrics (atlas.calls, atlas.call.duration) to your collector. The endpoint must be https and public; headers (for example an API token) are sealed and never returned. Delivery is batched and best effort.</summary>
+        /// <remarks>PUT /v1/telemetry_export. Scope: <c>instance:write</c>.</remarks>
+        public Task<TelemetryExportListResponse> SetAsync(TelemetryExportSetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<TelemetryExportListResponse>(HttpVerb.Put, $"/v1/telemetry_export", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Send one test span to the configured collector now. Answers ok or the collector's error; never fails the request.</summary>
         /// <remarks>POST /v1/telemetry_export/test. Scope: <c>instance:write</c>.</remarks>
@@ -4375,6 +5849,25 @@ namespace Atlas.Generated
         /// <remarks>POST /v1/users/bulk_actions/{id}/cancel. Scope: <c>users:write</c>.</remarks>
         public Task<UsersListBulkActionsResponseDataItem> BulkActionsCancelAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<UsersListBulkActionsResponseDataItem>(HttpVerb.Post, $"/v1/users/bulk_actions/{Enc(id)}/cancel", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Create-or-update the user keyed by your own id (external_id, the path segment, URL-encoded): 201 with the new user when none holds it (the body is that of POST /v1/users, email_address required, external_id from the path), else 200 with the existing user updated (only first_name, last_name, image_url, public_metadata, private_metadata, unsafe_metadata, password and referral_code apply; email fields and the other create-only fields are ignored). Two calls racing for a new external_id create exactly one user. When nobody holds the id but a user already has the address, the answer is 409 IDENTIFIER_EXISTS with meta.user_id; send link_by_verified_email: true to adopt that user instead (200), which works only when the address is verified in Atlas and the user has no external_id yet (a different id is never overwritten). Emits user.created or user.updated.</summary>
+        /// <remarks>PUT /v1/users/by_external_id/{external_id}. Scope: <c>users:write</c>.</remarks>
+        public Task<UserModel> ReplaceByExternalIdAsync(string externalId, UsersReplaceByExternalIdBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<UserModel>(HttpVerb.Put, $"/v1/users/by_external_id/{Enc(externalId)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Reconcile missed `user.deleted` webhooks: every user deleted at or after `since`, oldest first, as `id`, `external_id` and `deleted_at`. Nothing else about the person is returned. Page with `starting_after` = the previous `next_cursor`. Rows exist until the personal-data scrub (`compliance.retention.deletedUserGraceDays`, default 30 days), so reconcile at least that often; failed deliveries themselves are listed by `GET /v1/webhook_dlq?event_type=user.deleted`.</summary>
+        /// <remarks>GET /v1/users/deleted. Scope: <c>users:read</c>.</remarks>
+        public Task<UsersGetDeletedResponse> GetDeletedAsync(UsersGetDeletedQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<UsersGetDeletedResponse>(HttpVerb.Get, $"/v1/users/deleted", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>GetDeletedAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<UsersGetDeletedResponseDataItem> GetDeletedAllAsync(UsersGetDeletedQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<UsersGetDeletedResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new UsersGetDeletedQuery();
+                var _page = await GetDeletedAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<UsersGetDeletedResponseDataItem> { Data = _page.Data ?? new List<UsersGetDeletedResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
 
         /// <summary>Remember email addresses and E.164 phone numbers of accounts that were deleted before this instance recorded deletions, so deletedUserReturn "block" refuses them. Same keyed, unreadable hash a delete writes. Up to 5000 per call, safe to repeat. The answer counts new, already remembered and invalid entries (with the first invalid positions). Honours Idempotency-Key.</summary>
         /// <remarks>POST /v1/users/deleted_addresses. Scope: <c>users:delete</c>.</remarks>
@@ -4453,6 +5946,16 @@ namespace Atlas.Generated
         public Task<UsersDeleteApprovalDeviceResponse> DeleteApprovalDeviceAsync(string id, string deviceId, CancellationToken cancellationToken = default) =>
             Req<UsersDeleteApprovalDeviceResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/approval_devices/{Enc(deviceId)}", cancellationToken: cancellationToken);
 
+        /// <summary>Stop trusting a device by its `trusted_device_id`. Approvals it already decided keep their receipts; a request that needs a trusted device refuses it from now on. A trusted-device id that is unknown, another user's or already revoked is a 404. Emits approval_trusted_device.revoked. Needs `approvals:write`.</summary>
+        /// <remarks>DELETE /v1/users/{id}/approval_devices/{deviceId}. Scope: <c>approvals:write</c>.</remarks>
+        public Task<UsersDeleteApprovalDeviceResponse> DeleteApprovalDeviceAsync(string id, string deviceId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<UsersDeleteApprovalDeviceResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/approval_devices/{Enc(deviceId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Everything one user has open, in one list: approval requests about them (filter with `status`; `limit` 1 to 100, default 25) and, while `status` is pending or absent, their sign-in "approve in your app" requests (`kind: "sign_in_approval"`, with `purpose`, the shuffled `choices` and `requested_from`; the right number is never included). Replaces keeping your own pointer to the latest request. Needs `approvals:read` (a key with `users:read` keeps working).</summary>
+        /// <remarks>GET /v1/users/{id}/approval_requests. Scope: <c>approvals:read</c>.</remarks>
+        public Task<UsersListApprovalRequestsResponse> ListApprovalRequestsAsync(string id, UsersListApprovalRequestsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<UsersListApprovalRequestsResponse>(HttpVerb.Get, $"/v1/users/{Enc(id)}/approval_requests", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
         /// <summary>Withdraw a pending transaction-approval request so the device can no longer answer it. 404 for a request that is not this user's, 409 once it is approved, denied, expired or already cancelled. Emits approval_request.cancelled.</summary>
         /// <remarks>POST /v1/users/{id}/approval_requests/{approvalId}/cancel. Scope: <c>approvals:write</c>.</remarks>
         public Task<ApprovalRequestsListResponseDataItem> ApprovalRequestsCancelAsync(string id, string approvalId, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
@@ -4467,6 +5970,21 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/users/{id}/cookie_consents. Scope: <c>data_subject_requests:write</c>.</remarks>
         public Task<CookieConsentsDeleteSubjectResponse> DeleteCookieConsentsAsync(string id, CancellationToken cancellationToken = default) =>
             Req<CookieConsentsDeleteSubjectResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/cookie_consents", cancellationToken: cancellationToken);
+
+        /// <summary>Erase the cookie consent records linked to a user. Deleting the user does this too. Audited.</summary>
+        /// <remarks>DELETE /v1/users/{id}/cookie_consents. Scope: <c>data_subject_requests:write</c>.</remarks>
+        public Task<CookieConsentsDeleteSubjectResponse> DeleteCookieConsentsAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<CookieConsentsDeleteSubjectResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/cookie_consents", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Mint a short-lived delegation token so your server can act as this user for one purpose. The token is limited to a named `audience` and a list of `scopes` (both must be on the instance's `delegationTokens` settings), lives at most 300 seconds (default 120), and carries an `act` claim naming `actor.sub`, so a service can see it is not the user themselves. Refused for banned, deleted and impersonation-protected users, and for an `org_id` the user does not belong to. Every mint is audited on the user's trail as `user.delegation_token_issued` (the token itself is never stored). Rate limited per key and per user. Send an Idempotency-Key to make a retry return the same token.</summary>
+        /// <remarks>POST /v1/users/{id}/delegation_tokens. Scope: <c>delegation_tokens:write</c>.</remarks>
+        public Task<UsersDelegationTokensResponse> DelegationTokensAsync(string id, UsersDelegationTokensBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<UsersDelegationTokensResponse>(HttpVerb.Post, $"/v1/users/{Enc(id)}/delegation_tokens", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>Move a scheduled deletion to a new date. Send exactly one of `effective_at` (ISO 8601, not in the past) or `grace_seconds` (from now). The user's deletion date, the in-flight erasure request's scheduled date and the reminder plan all move together; the person is mailed the new date and `user.deletion_rescheduled` is emitted. The `pre_user_deletion` Actions are asked again for the new date (a refusal is 403 ACTION_BLOCKED) and a legal hold refuses the move. 409 when the user has no scheduled deletion, the deletion is paused (resume it with POST /v1/users/{id}/deletion/reconfirm first) or the user is already erased. Returns the user.</summary>
+        /// <remarks>PATCH /v1/users/{id}/deletion. Scope: <c>users:delete</c>.</remarks>
+        public Task<UserModel> UpdateDeletionAsync(string id, UsersUpdateDeletionBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<UserModel>(HttpVerb.Patch, $"/v1/users/{Enc(id)}/deletion", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Resume a PAUSED scheduled deletion: a `pre_user_deletion` Action held it until the person re-confirmed, and your backend confirms on their behalf. The deletion keeps its original schedule and reminder plan, no mail is sent (nothing was cancelled), and user.deletion_resumed is emitted; it then runs on its date. 409 when the user has no scheduled deletion or it is not paused.</summary>
         /// <remarks>POST /v1/users/{id}/deletion/reconfirm. Scope: <c>users:delete</c>.</remarks>
@@ -4502,6 +6020,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/users/{id}/journeys. Scope: <c>users:write</c>.</remarks>
         public Task<UsersDeleteJourneysResponse> DeleteJourneysAsync(string id, UsersDeleteJourneysQuery? query = null, CancellationToken cancellationToken = default) =>
             Req<UsersDeleteJourneysResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/journeys", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Start a user's onboarding over: deletes their runs and the open steps those journeys asked of them, so the journey asks again at the next sign-in. journey_id limits it to one journey. Audited.</summary>
+        /// <remarks>DELETE /v1/users/{id}/journeys. Scope: <c>users:write</c>.</remarks>
+        public Task<UsersDeleteJourneysResponse> DeleteJourneysAsync(string id, UsersDeleteJourneysQuery? query, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<UsersDeleteJourneysResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/journeys", query: query?.ToQuery(), idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>Whether the user is on legal hold, the active hold, and every hold they ever had.</summary>
         /// <remarks>GET /v1/users/{id}/legal_hold. Scope: <c>data_subject_requests:read</c>.</remarks>
@@ -4547,6 +6070,35 @@ namespace Atlas.Generated
         public Task<ContainmentsListResponseDataItem> ReleaseAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
             Req<ContainmentsListResponseDataItem>(HttpVerb.Post, $"/v1/users/{Enc(id)}/release", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
+        /// <summary>The risk signals reported for one user, newest first; `status=active` keeps only live ones. Page with `before`.</summary>
+        /// <remarks>GET /v1/users/{id}/risk_signals. Scope: <c>risk_signals:read</c>.</remarks>
+        public Task<RiskSignalsListResponse> ListRiskSignalsAsync(string id, UsersListRiskSignalsQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<RiskSignalsListResponse>(HttpVerb.Get, $"/v1/users/{Enc(id)}/risk_signals", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListRiskSignalsAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<RiskSignalsListResponseDataItem> ListRiskSignalsAllAsync(string id, UsersListRiskSignalsQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<RiskSignalsListResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new UsersListRiskSignalsQuery();
+                var _page = await ListRiskSignalsAsync(id, _q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<RiskSignalsListResponseDataItem> { Data = _page.Data ?? new List<RiskSignalsListResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
+
+        /// <summary>Raise one user's sign-in risk for a window. The same signal as POST /v1/risk_signals with the user named by the path. While it is live and risk-based MFA is on, it adds points to every sign-in evaluation of that user (low 10, medium 25, high 50, critical 100; the total is capped at 100), which can turn into a second factor, an enrolment or a block under the instance's risk policy. It never lowers friction. ttl_seconds 60 to 2592000, default 3600; it expires by itself. Honours Idempotency-Key. Emits risk_signal.created.</summary>
+        /// <remarks>POST /v1/users/{id}/risk_signals. Scope: <c>risk_signals:write</c>.</remarks>
+        public Task<RiskSignalsListResponseDataItem> CreateRiskSignalAsync(string id, UsersCreateRiskSignalBody body, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<RiskSignalsListResponseDataItem>(HttpVerb.Post, $"/v1/users/{Enc(id)}/risk_signals", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>End every live risk signal on one user now. Their points leave the next evaluation; the rows stay readable with status `revoked`. Recorded once in the audit log. Safe to repeat: with nothing live, it clears nothing.</summary>
+        /// <remarks>DELETE /v1/users/{id}/risk_signals. Scope: <c>risk_signals:write</c>.</remarks>
+        public Task<UsersDeleteRiskSignalsResponse> DeleteRiskSignalsAsync(string id, string? idempotencyKey = null, CancellationToken cancellationToken = default) =>
+            Req<UsersDeleteRiskSignalsResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/risk_signals", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
+        /// <summary>One read of how the account is protected: password and when it last changed, sign-in methods the user can use right now, linked providers, verified second factors, recovery codes left, passkeys, remembered browsers and device keys, and the open sessions (count and the newest). Ids and labels only: never a password hash, second-factor secret, recovery code, credential id or key material.</summary>
+        /// <remarks>GET /v1/users/{id}/security_summary. Scope: <c>users:read</c>.</remarks>
+        public Task<UsersGetSecuritySummaryResponse> GetSecuritySummaryAsync(string id, CancellationToken cancellationToken = default) =>
+            Req<UsersGetSecuritySummaryResponse>(HttpVerb.Get, $"/v1/users/{Enc(id)}/security_summary", cancellationToken: cancellationToken);
+
         /// <summary>The user's active temporary access passes (never the codes).</summary>
         /// <remarks>GET /v1/users/{id}/temporary_access. Scope: <c>users:read</c>.</remarks>
         public Task<UsersGetTemporaryAccessResponse> GetTemporaryAccessAsync(string id, UsersGetTemporaryAccessQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -4570,6 +6122,11 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/users/{id}/temporary_access/{pass_id}. Scope: <c>users:write</c>.</remarks>
         public Task<UsersDeleteTemporaryAccessResponse> DeleteTemporaryAccessAsync(string id, string passId, CancellationToken cancellationToken = default) =>
             Req<UsersDeleteTemporaryAccessResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/temporary_access/{Enc(passId)}", cancellationToken: cancellationToken);
+
+        /// <summary>Revoke a temporary access pass.</summary>
+        /// <remarks>DELETE /v1/users/{id}/temporary_access/{pass_id}. Scope: <c>users:write</c>.</remarks>
+        public Task<UsersDeleteTemporaryAccessResponse> DeleteTemporaryAccessAsync(string id, string passId, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<UsersDeleteTemporaryAccessResponse>(HttpVerb.Delete, $"/v1/users/{Enc(id)}/temporary_access/{Enc(passId)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>The <c>Vc</c> operations.</summary>
@@ -4613,6 +6170,11 @@ namespace Atlas.Generated
         public Task<WebBotAuthListResponse> SetAsync(WebBotAuthSetBody body, CancellationToken cancellationToken = default) =>
             Req<WebBotAuthListResponse>(HttpVerb.Put, $"/v1/web_bot_auth", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set the allow and/or block list (each replaces its list; omit one to keep it). Entries are an https directory URL or host, or { directory, name }. At most 100 per list; a directory cannot be on both.</summary>
+        /// <remarks>PUT /v1/web_bot_auth. Scope: <c>machines:write</c>.</remarks>
+        public Task<WebBotAuthListResponse> SetAsync(WebBotAuthSetBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<WebBotAuthListResponse>(HttpVerb.Put, $"/v1/web_bot_auth", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>The listed directories, one row each with its list (allow or block).</summary>
         /// <remarks>GET /v1/web_bot_auth/directories. Scope: <c>machines:read</c>.</remarks>
         public Task<WebBotAuthListDirectoriesResponse> ListDirectoriesAsync(WebBotAuthListDirectoriesQuery? query = null, CancellationToken cancellationToken = default) =>
@@ -4627,6 +6189,31 @@ namespace Atlas.Generated
         /// <remarks>DELETE /v1/web_bot_auth/directories/{id}. Scope: <c>machines:write</c>.</remarks>
         public Task<WebBotAuthDeleteDirectoryResponse> DeleteDirectoryAsync(string id, CancellationToken cancellationToken = default) =>
             Req<WebBotAuthDeleteDirectoryResponse>(HttpVerb.Delete, $"/v1/web_bot_auth/directories/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Take a directory off both lists.</summary>
+        /// <remarks>DELETE /v1/web_bot_auth/directories/{id}. Scope: <c>machines:write</c>.</remarks>
+        public Task<WebBotAuthDeleteDirectoryResponse> DeleteDirectoryAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<WebBotAuthDeleteDirectoryResponse>(HttpVerb.Delete, $"/v1/web_bot_auth/directories/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>The <c>WebhookDlq</c> operations.</summary>
+    public sealed class WebhookDlqOperations : ResourceBase
+    {
+        internal WebhookDlqOperations(AtlasTransport transport) : base(transport) { }
+
+        /// <summary>The dead-letter queue of the whole instance: deliveries that used every attempt on any endpoint, newest first, each with `endpoint_id`, the payload that was sent, the last response and the error. Narrow it with `event_type` (for example `user.deleted`) to find every failed delivery of one event; acknowledge or requeue per endpoint with the endpoint dlq routes. Cursor: `starting_after` with the `next_cursor` of the previous page.</summary>
+        /// <remarks>GET /v1/webhook_dlq. Scope: <c>webhooks:read</c>.</remarks>
+        public Task<WebhookDlqListResponse> ListAsync(WebhookDlqListQuery? query = null, CancellationToken cancellationToken = default) =>
+            Req<WebhookDlqListResponse>(HttpVerb.Get, $"/v1/webhook_dlq", query: query?.ToQuery(), cancellationToken: cancellationToken);
+
+        /// <summary>Every item across every page of <c>ListAsync</c>, following <c>next_cursor</c>.</summary>
+        public IAsyncEnumerable<WebhookDlqListResponseDataItem> ListAllAsync(WebhookDlqListQuery? query = null, CancellationToken cancellationToken = default) =>
+            AtlasPagination.PaginateAsync<WebhookDlqListResponseDataItem>(async (_c, _ct) =>
+            {
+                var _q = query ?? new WebhookDlqListQuery();
+                var _page = await ListAsync(_q with { StartingAfter = _c }, cancellationToken: _ct).ConfigureAwait(false);
+                return new CursorPage<WebhookDlqListResponseDataItem> { Data = _page.Data ?? new List<WebhookDlqListResponseDataItem>(), HasMore = (bool?)_page.HasMore ?? false, NextCursor = _page.NextCursor };
+            }, query?.StartingAfter, cancellationToken);
     }
 
     /// <summary>The <c>WebhookEndpoints</c> operations.</summary>
@@ -4722,10 +6309,20 @@ namespace Atlas.Generated
         public Task<WorkflowsGetKvResponseDataItem> ReplaceKvAsync(string id, string key, WorkflowsReplaceKvBody body, CancellationToken cancellationToken = default) =>
             Req<WorkflowsGetKvResponseDataItem>(HttpVerb.Put, $"/v1/workflows/{Enc(id)}/kv/{Enc(key)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Set a key in the workflow key-value table.</summary>
+        /// <remarks>PUT /v1/workflows/{id}/kv/{key}. Scope: <c>actions:write</c>.</remarks>
+        public Task<WorkflowsGetKvResponseDataItem> ReplaceKvAsync(string id, string key, WorkflowsReplaceKvBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<WorkflowsGetKvResponseDataItem>(HttpVerb.Put, $"/v1/workflows/{Enc(id)}/kv/{Enc(key)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a key from the workflow key-value table.</summary>
         /// <remarks>DELETE /v1/workflows/{id}/kv/{key}. Scope: <c>actions:write</c>.</remarks>
         public Task<WorkflowsGetKvResponseDataItem> DeleteKvAsync(string id, string key, CancellationToken cancellationToken = default) =>
             Req<WorkflowsGetKvResponseDataItem>(HttpVerb.Delete, $"/v1/workflows/{Enc(id)}/kv/{Enc(key)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a key from the workflow key-value table.</summary>
+        /// <remarks>DELETE /v1/workflows/{id}/kv/{key}. Scope: <c>actions:write</c>.</remarks>
+        public Task<WorkflowsGetKvResponseDataItem> DeleteKvAsync(string id, string key, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<WorkflowsGetKvResponseDataItem>(HttpVerb.Delete, $"/v1/workflows/{Enc(id)}/kv/{Enc(key)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
 
         /// <summary>One run with its per-step log: each step's path, status, attempt, detail and output.</summary>
         /// <remarks>GET /v1/workflows/{id}/runs/{runId}. Scope: <c>actions:read</c>.</remarks>
@@ -4773,10 +6370,20 @@ namespace Atlas.Generated
         public Task<WsfedConnectionsListResponseDataItem> UpdateAsync(string id, WsfedConnectionsCreateBody body, CancellationToken cancellationToken = default) =>
             Req<WsfedConnectionsListResponseDataItem>(HttpVerb.Patch, $"/v1/wsfed_connections/{Enc(id)}", body: body, cancellationToken: cancellationToken);
 
+        /// <summary>Change a WS-Federation connection; sending metadata refreshes the certificates after a provider rollover.</summary>
+        /// <remarks>PATCH /v1/wsfed_connections/{id}. Scope: <c>sso_connections:write</c>.</remarks>
+        public Task<WsfedConnectionsListResponseDataItem> UpdateAsync(string id, WsfedConnectionsCreateBody body, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            Req<WsfedConnectionsListResponseDataItem>(HttpVerb.Patch, $"/v1/wsfed_connections/{Enc(id)}", body: body, idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
+
         /// <summary>Delete a WS-Federation connection.</summary>
         /// <remarks>DELETE /v1/wsfed_connections/{id}. Scope: <c>sso_connections:write</c>.</remarks>
         public Task DeleteAsync(string id, CancellationToken cancellationToken = default) =>
             ReqVoid(HttpVerb.Delete, $"/v1/wsfed_connections/{Enc(id)}", cancellationToken: cancellationToken);
+
+        /// <summary>Delete a WS-Federation connection.</summary>
+        /// <remarks>DELETE /v1/wsfed_connections/{id}. Scope: <c>sso_connections:write</c>.</remarks>
+        public Task DeleteAsync(string id, string idempotencyKey, CancellationToken cancellationToken = default) =>
+            ReqVoid(HttpVerb.Delete, $"/v1/wsfed_connections/{Enc(id)}", idempotencyKey: idempotencyKey, cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -4833,6 +6440,10 @@ namespace Atlas.Generated
         private AllowlistIdentifiersOperations? _allowlistIdentifiers;
         /// <summary>The <c>AllowlistIdentifiers</c> operations.</summary>
         public AllowlistIdentifiersOperations AllowlistIdentifiers => _allowlistIdentifiers ??= new AllowlistIdentifiersOperations(_secret);
+
+        private AnalyticsOperations? _analytics;
+        /// <summary>The <c>Analytics</c> operations.</summary>
+        public AnalyticsOperations Analytics => _analytics ??= new AnalyticsOperations(_secret);
 
         private ApiKeysOperations? _apiKeys;
         /// <summary>The <c>ApiKeys</c> operations.</summary>
@@ -4926,6 +6537,10 @@ namespace Atlas.Generated
         /// <summary>The <c>ConnectionReconnectSettings</c> operations.</summary>
         public ConnectionReconnectSettingsOperations ConnectionReconnectSettings => _connectionReconnectSettings ??= new ConnectionReconnectSettingsOperations(_secret);
 
+        private ConnectionTemplatesOperations? _connectionTemplates;
+        /// <summary>The <c>ConnectionTemplates</c> operations.</summary>
+        public ConnectionTemplatesOperations ConnectionTemplates => _connectionTemplates ??= new ConnectionTemplatesOperations(_secret);
+
         private ConnectionsOperations? _connections;
         /// <summary>The <c>Connections</c> operations.</summary>
         public ConnectionsOperations Connections => _connections ??= new ConnectionsOperations(_secret);
@@ -4969,6 +6584,10 @@ namespace Atlas.Generated
         private DiagnosticsOperations? _diagnostics;
         /// <summary>The <c>Diagnostics</c> operations.</summary>
         public DiagnosticsOperations Diagnostics => _diagnostics ??= new DiagnosticsOperations(_secret);
+
+        private DomainsOperations? _domains;
+        /// <summary>The <c>Domains</c> operations.</summary>
+        public DomainsOperations Domains => _domains ??= new DomainsOperations(_secret);
 
         private DsrConsoleOperations? _dsrConsole;
         /// <summary>The <c>DsrConsole</c> operations.</summary>
@@ -5046,6 +6665,10 @@ namespace Atlas.Generated
         /// <summary>The <c>McpRegistry</c> operations.</summary>
         public McpRegistryOperations McpRegistry => _mcpRegistry ??= new McpRegistryOperations(_secret);
 
+        private MessageLinksOperations? _messageLinks;
+        /// <summary>The <c>MessageLinks</c> operations.</summary>
+        public MessageLinksOperations MessageLinks => _messageLinks ??= new MessageLinksOperations(_secret);
+
         private MessageReceiversOperations? _messageReceivers;
         /// <summary>The <c>MessageReceivers</c> operations.</summary>
         public MessageReceiversOperations MessageReceivers => _messageReceivers ??= new MessageReceiversOperations(_secret);
@@ -5074,6 +6697,10 @@ namespace Atlas.Generated
         /// <summary>The <c>Migrations</c> operations.</summary>
         public MigrationsOperations Migrations => _migrations ??= new MigrationsOperations(_secret);
 
+        private NativeAppsOperations? _nativeApps;
+        /// <summary>The <c>NativeApps</c> operations.</summary>
+        public NativeAppsOperations NativeApps => _nativeApps ??= new NativeAppsOperations(_secret);
+
         private OauthApplicationTypesOperations? _oauthApplicationTypes;
         /// <summary>The <c>OauthApplicationTypes</c> operations.</summary>
         public OauthApplicationTypesOperations OauthApplicationTypes => _oauthApplicationTypes ??= new OauthApplicationTypesOperations(_secret);
@@ -5081,6 +6708,14 @@ namespace Atlas.Generated
         private OauthClientsOperations? _oauthClients;
         /// <summary>The <c>OauthClients</c> operations.</summary>
         public OauthClientsOperations OauthClients => _oauthClients ??= new OauthClientsOperations(_secret);
+
+        private OauthConsentRequestsOperations? _oauthConsentRequests;
+        /// <summary>The <c>OauthConsentRequests</c> operations.</summary>
+        public OauthConsentRequestsOperations OauthConsentRequests => _oauthConsentRequests ??= new OauthConsentRequestsOperations(_secret);
+
+        private OauthDeviceRequestsOperations? _oauthDeviceRequests;
+        /// <summary>The <c>OauthDeviceRequests</c> operations.</summary>
+        public OauthDeviceRequestsOperations OauthDeviceRequests => _oauthDeviceRequests ??= new OauthDeviceRequestsOperations(_secret);
 
         private OauthGrantsOperations? _oauthGrants;
         /// <summary>The <c>OauthGrants</c> operations.</summary>
@@ -5110,6 +6745,10 @@ namespace Atlas.Generated
         /// <summary>The <c>OrganizationConnections</c> operations.</summary>
         public OrganizationConnectionsOperations OrganizationConnections => _organizationConnections ??= new OrganizationConnectionsOperations(_secret);
 
+        private OrganizationInvitationsOperations? _organizationInvitations;
+        /// <summary>The <c>OrganizationInvitations</c> operations.</summary>
+        public OrganizationInvitationsOperations OrganizationInvitations => _organizationInvitations ??= new OrganizationInvitationsOperations(_secret);
+
         private OrganizationsOperations? _organizations;
         /// <summary>The <c>Organizations</c> operations.</summary>
         public OrganizationsOperations Organizations => _organizations ??= new OrganizationsOperations(_secret);
@@ -5117,6 +6756,18 @@ namespace Atlas.Generated
         private PasskeyCampaignsOperations? _passkeyCampaigns;
         /// <summary>The <c>PasskeyCampaigns</c> operations.</summary>
         public PasskeyCampaignsOperations PasskeyCampaigns => _passkeyCampaigns ??= new PasskeyCampaignsOperations(_secret);
+
+        private PcaOperations? _pca;
+        /// <summary>The <c>Pca</c> operations.</summary>
+        public PcaOperations Pca => _pca ??= new PcaOperations(_secret);
+
+        private PermissionAliasesOperations? _permissionAliases;
+        /// <summary>The <c>PermissionAliases</c> operations.</summary>
+        public PermissionAliasesOperations PermissionAliases => _permissionAliases ??= new PermissionAliasesOperations(_secret);
+
+        private PermissionsOperations? _permissions;
+        /// <summary>The <c>Permissions</c> operations.</summary>
+        public PermissionsOperations Permissions => _permissions ??= new PermissionsOperations(_secret);
 
         private PlatformAppsOperations? _platformApps;
         /// <summary>The <c>PlatformApps</c> operations.</summary>
@@ -5169,6 +6820,10 @@ namespace Atlas.Generated
         private ResourceServersOperations? _resourceServers;
         /// <summary>The <c>ResourceServers</c> operations.</summary>
         public ResourceServersOperations ResourceServers => _resourceServers ??= new ResourceServersOperations(_secret);
+
+        private RevocationsOperations? _revocations;
+        /// <summary>The <c>Revocations</c> operations.</summary>
+        public RevocationsOperations Revocations => _revocations ??= new RevocationsOperations(_secret);
 
         private RiskBasedMfaOperations? _riskBasedMfa;
         /// <summary>The <c>RiskBasedMfa</c> operations.</summary>
@@ -5241,6 +6896,10 @@ namespace Atlas.Generated
         private WebBotAuthOperations? _webBotAuth;
         /// <summary>The <c>WebBotAuth</c> operations.</summary>
         public WebBotAuthOperations WebBotAuth => _webBotAuth ??= new WebBotAuthOperations(_secret);
+
+        private WebhookDlqOperations? _webhookDlq;
+        /// <summary>The <c>WebhookDlq</c> operations.</summary>
+        public WebhookDlqOperations WebhookDlq => _webhookDlq ??= new WebhookDlqOperations(_secret);
 
         private WebhookEndpointsOperations? _webhookEndpoints;
         /// <summary>The <c>WebhookEndpoints</c> operations.</summary>

@@ -338,7 +338,11 @@ def emit_record(s, key, hint, mode):
     props, req, _ = merged(s)
     canonical = json.dumps([sorted(props.items(), key=lambda kv: kv[0]), sorted(req)], sort_keys=True)
     shape = (canonical, mode)
-    if shape in SHAPES:
+    # a pinned name HEAD already published must be emitted even when a new op reached this shape first
+    pin = PINS['types'].get(key)
+    if shape in SHAPES and pin and pin in NAME_SHAPE and NAME_SHAPE[pin] == hashlib.sha256(json.dumps(shape).encode()).hexdigest():
+        return pin  # this key's own pinned name wins, so a response and its page item agree
+    if shape in SHAPES and not (pin and pin not in NAME_SHAPE):
         return SHAPES[shape]
     name = claim_type(key, hint)
     h = hashlib.sha256(json.dumps(shape).encode()).hexdigest()
@@ -348,7 +352,8 @@ def emit_record(s, key, hint, mode):
         if name in NAME_SHAPE and NAME_SHAPE[name] != h:
             sys.exit(f'type name {name} maps to two different shapes')
     NAME_SHAPE[name] = h
-    SHAPES[shape] = name
+    if pin and name == pin: SHAPES[shape] = name  # later ops with this shape follow the published name
+    else: SHAPES.setdefault(shape, name)
     used, lines, clears = set(), [], []
     for wire, ps in props.items():
         pn = prop_name(wire, name, used)
@@ -551,12 +556,18 @@ for m, p, o, emit in [(*x, True) for x in ops] + [(*x, False) for x in shape_ops
     qtype = emit_query(cls, mname, query, f'op:{m.upper()} {p}:query') if query else None
     if not emit:
         continue
+    # a header the spec added after release: the shipped method keeps its parameter list and an overload takes the key
+    legacy_idem = bool(idem and m != 'get' and f'{cls}.{mname}' in PINS.get('no_idem', []))
+    if legacy_idem:
+        USED_PINS.add(('no_idem', f'{cls}.{mname}'))
+        idem = False
     sig = list(args)
     if body_arg and body_arg[1]:
         sig.append(f'{body_arg[0]} body')
     if body_arg and not body_arg[1]:
         sig.append(f'{body_arg[0]}? body = null')
-    if qtype:
+    legacy_q = bool(qtype and f'{cls}.{mname}' in PINS.get('no_query', []))  # a query added after release
+    if qtype and not legacy_q:
         sig.append(f'{qtype}? query = null')
     if idem and m != 'get':
         sig.append('string? idempotencyKey = null')
@@ -566,7 +577,7 @@ for m, p, o, emit in [(*x, True) for x in ops] + [(*x, False) for x in shape_ops
     named = []
     if body_arg:
         named.append('body: body')
-    if qtype:
+    if qtype and not legacy_q:
         named.append('query: query?.ToQuery()')
     if idem and m != 'get':
         named.append('idempotencyKey: idempotencyKey')
@@ -584,6 +595,20 @@ for m, p, o, emit in [(*x, True) for x in ops] + [(*x, False) for x in shape_ops
     else:
         src = xdoc + f'        public {ret} {mname}({", ".join(sig)}) =>\n            Req<{rtype}>({inner});\n'
     r['methods'].append(src)
+    if legacy_q or legacy_idem:  # required extras (an optional one would make `M(x)` ambiguous with the shipped overload)
+        def _ov(with_idem):
+            sg = [x.replace(' = null', '') for x in sig[:-1]]
+            nm = list(named[:-1])
+            if legacy_q:
+                sg.append(f'{qtype}? query'); nm.append('query: query?.ToQuery()')
+            if with_idem:
+                sg.append('string idempotencyKey'); nm.append('idempotencyKey: idempotencyKey')
+            sg.append(sig[-1]); nm.append(named[-1])
+            ik = ', '.join(call_args + nm)
+            body_ = f'ReqVoid({ik})' if empty else f'Req<{rtype}>({ik})'
+            r['methods'].append(xdoc + f'        public {ret} {mname}({", ".join(sg)}) =>\n            {body_};\n')
+        if legacy_q: _ov(False)
+        if legacy_idem: _ov(True)
     if page_item and qtype and any(q['name'] in ('starting_after',) for q in query) and any(q['name'] == 'limit' for q in query):
         pname_ = mname[:-5] + 'AllAsync'
         sig2 = [a for a in args]
@@ -662,7 +687,7 @@ for kind in ('methods', 'types'):
             sys.exit(f'stale pin {kind}: {k} (the spec no longer reaches it); remove it from catalog_pins.json')
 if FREEZE:
     live = lambda kind: {k: v for k, v in PINS[kind].items() if (kind, k) in USED_PINS or not PRUNE}
-    merged_pins = {'generate_anyway': PINS['generate_anyway'],
+    merged_pins = {'generate_anyway': PINS['generate_anyway'], 'no_idem': PINS.get('no_idem', []), 'no_query': PINS.get('no_query', []),
                    'methods': {**live('methods'), **PINS_OUT['methods']},
                    'types': {**live('types'), **PINS_OUT['types']}}
     json.dump(merged_pins, open(PINS_FILE, 'w'), indent=1, sort_keys=True)
