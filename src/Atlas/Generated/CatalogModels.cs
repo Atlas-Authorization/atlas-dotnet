@@ -2382,6 +2382,24 @@ namespace Atlas.Generated
         [JsonPropertyName("deleted")] public bool Deleted { get; init; }
     }
 
+    /// <summary>A BillingCheckoutSyncResponse object.</summary>
+    public sealed record BillingCheckoutSyncResponse
+    {
+        /// <summary>One of: billing_checkout_sync.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>One of: synced, pending.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        /// <summary>The subscription the session created or updated (a billing_subscription), null while pending.</summary>
+        [JsonPropertyName("subscription")] public Dictionary<string, object?>? Subscription { get; init; }
+    }
+
+    /// <summary>A BillingCheckoutSyncBody object.</summary>
+    public sealed record BillingCheckoutSyncBody : ClearableBody
+    {
+        /// <summary>A Stripe Checkout Session id (cs_…).</summary>
+        [JsonPropertyName("session_id")] public string? SessionId { get; init; }
+    }
+
     /// <summary>A BillingListConnectAccountsResponseDataItem object.</summary>
     public sealed record BillingListConnectAccountsResponseDataItem
     {
@@ -2854,6 +2872,24 @@ namespace Atlas.Generated
         [JsonPropertyName("plan_id")] public string? PlanId { get; init; }
     }
 
+    /// <summary>A BillingStripeEventsResponse object.</summary>
+    public sealed record BillingStripeEventsResponse
+    {
+        /// <summary>One of: billing_stripe_event.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("type")] public string? Type { get; init; }
+        /// <summary>One of: processed, ignored.</summary>
+        [JsonPropertyName("outcome")] public string Outcome { get; init; } = "";
+    }
+
+    /// <summary>A BillingStripeEventsBody object.</summary>
+    public sealed record BillingStripeEventsBody : ClearableBody
+    {
+        /// <summary>A Stripe event id (evt_…).</summary>
+        [JsonPropertyName("id")] public string? Id { get; init; }
+    }
+
     /// <summary>A BillingSubscriptionsExtendTrialResponse object.</summary>
     public sealed record BillingSubscriptionsExtendTrialResponse
     {
@@ -2881,6 +2917,39 @@ namespace Atlas.Generated
         [JsonPropertyName("trial_end")] public object? TrialEnd { get; init; }
         [JsonPropertyName("reason")] public string? Reason { get; init; }
         [JsonPropertyName("idempotency_key")] public string? IdempotencyKey { get; init; }
+    }
+
+    /// <summary>What an entitlement provider (Autumn, Commet) reports this subscription grants: { features, limits }.</summary>
+    public sealed record SubscriptionEntitlements
+    {
+        [JsonPropertyName("features")] public List<string>? Features { get; init; }
+        [JsonPropertyName("limits")] public Dictionary<string, double>? Limits { get; init; }
+    }
+
+    /// <summary>A Subscription object.</summary>
+    public sealed record Subscription
+    {
+        /// <summary>One of: billing_subscription.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        /// <summary>One of: user, org.</summary>
+        [JsonPropertyName("subject_type")] public string SubjectType { get; init; } = "";
+        [JsonPropertyName("subject_id")] public string SubjectId { get; init; } = "";
+        [JsonPropertyName("plan_id")] public string PlanId { get; init; } = "";
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        [JsonPropertyName("stripe_subscription_id")] public string? StripeSubscriptionId { get; init; }
+        [JsonPropertyName("stripe_customer_id")] public string? StripeCustomerId { get; init; }
+        [JsonPropertyName("current_period_end")] public long? CurrentPeriodEnd { get; init; }
+        [JsonPropertyName("provider")] public string? Provider { get; init; }
+        [JsonPropertyName("cancel_at_period_end")] public bool? CancelAtPeriodEnd { get; init; }
+        /// <summary>What an entitlement provider (Autumn, Commet) reports this subscription grants: { features, limits }.</summary>
+        [JsonPropertyName("entitlements")] public SubscriptionEntitlements? Entitlements { get; init; }
+        /// <summary>FAPI subscription read only: every subscription the subject holds (base + add-ons).</summary>
+        [JsonPropertyName("subscriptions")] public List<Dictionary<string, object?>>? Subscriptions { get; init; }
+        /// <summary>Created (epoch ms).</summary>
+        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
+        /// <summary>Last updated (epoch ms).</summary>
+        [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
     }
 
     /// <summary>A BillingGetUsageResponseByFeatureItem object.</summary>
@@ -7628,6 +7697,8 @@ namespace Atlas.Generated
         [JsonPropertyName("declared_cookies")] public List<InstanceUpdateCookieConsentResponseDeclaredCookiesItem>? DeclaredCookies { get; init; }
         /// <summary>How the Frontend API is served: default (the shared Atlas host), custom_domain (a CNAME), or path_mount (base_path on your own host, routed by Atlas's ingress or by your reverse proxy; the cookies are the same either way).</summary>
         [JsonPropertyName("frontend_mode")] public InstanceUpdateCookieConsentResponseFrontendMode? FrontendMode { get; init; }
+        /// <summary>With session.cookieIsolation on, the suffix every Frontend API cookie name carries (__session_&lt;suffix&gt;); null otherwise. Derived from the publishable key: the SDKs compute it themselves.</summary>
+        [JsonPropertyName("cookie_suffix")] public string? CookieSuffix { get; init; }
         /// <summary>Where the effective setting comes from: manual (PUT, always wins), integration (an enabled integration with a cmp, else a consent manager's outbound partner link), or none. One of: manual, integration, none.</summary>
         [JsonPropertyName("source")] public string? Source { get; init; }
         /// <summary>With source integration: the integration id, or `partner_link:&lt;link id&gt;` when a partner link provides it.</summary>
@@ -8113,6 +8184,30 @@ namespace Atlas.Generated
         [JsonPropertyName("error")] public InstanceHooksBeforeUserCreateTestResponseError? Error { get; init; }
     }
 
+    /// <summary>A InstanceHostedMethodFiltersResponse object.</summary>
+    public sealed record InstanceHostedMethodFiltersResponse
+    {
+        /// <summary>One of: hosted_method_filter.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>The list as stored in the signature: unique, sorted.</summary>
+        [JsonPropertyName("methods")] public List<string> Methods { get; init; } = new();
+        /// <summary>The list, comma-separated. Add as the `allowed_methods` query parameter.</summary>
+        [JsonPropertyName("allowed_methods")] public string AllowedMethods { get; init; } = "";
+        /// <summary>The signature. Add as the `allowed_methods_sig` query parameter.</summary>
+        [JsonPropertyName("allowed_methods_sig")] public string AllowedMethodsSig { get; init; } = "";
+        /// <summary>The list and signature as one value, `&lt;allowed_methods&gt;.&lt;allowed_methods_sig&gt;`: pass it as `allowedMethods` to the React panels or as `methodFilter` to the browser SDK client. Sent in the `X-Atlas-Allowed-Methods` header.</summary>
+        [JsonPropertyName("token")] public string Token { get; init; } = "";
+        /// <summary>Both parameters, URL-encoded, ready to append to the hosted page URL.</summary>
+        [JsonPropertyName("query")] public string Query { get; init; } = "";
+    }
+
+    /// <summary>A InstanceHostedMethodFiltersBody object.</summary>
+    public sealed record InstanceHostedMethodFiltersBody : ClearableBody
+    {
+        /// <summary>The sign-in methods to keep, e.g. ["password", "passkey", "oauth_google"].</summary>
+        [JsonPropertyName("methods")] public List<string>? Methods { get; init; }
+    }
+
     /// <summary>A InstanceGetImpersonationPolicyResponse object.</summary>
     public sealed record InstanceGetImpersonationPolicyResponse
     {
@@ -8172,10 +8267,12 @@ namespace Atlas.Generated
     {
         /// <summary>One of: integration_forwarding.</summary>
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        /// <summary>One of: lucida, hermetica, seolyticize, webhook.</summary>
+        /// <summary>One of: lucida, hermetica, seolyticize, webhook, watchtower.</summary>
         [JsonPropertyName("forwarding")] public string? Forwarding { get; init; }
-        /// <summary>One of: user.created.</summary>
+        /// <summary>The first event delivered: user.created, or for watchtower user.locked.</summary>
         [JsonPropertyName("event")] public string? Event { get; init; }
+        /// <summary>Every event this destination receives: user.created, or for watchtower the security events.</summary>
+        [JsonPropertyName("events")] public List<string>? Events { get; init; }
         /// <summary>The managed webhook endpoint.</summary>
         [JsonPropertyName("id")] public string? Id { get; init; }
         [JsonPropertyName("active")] public bool? Active { get; init; }
@@ -8186,10 +8283,12 @@ namespace Atlas.Generated
     {
         /// <summary>One of: integration_forwarding.</summary>
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        /// <summary>One of: lucida, hermetica, seolyticize, webhook.</summary>
+        /// <summary>One of: lucida, hermetica, seolyticize, webhook, watchtower.</summary>
         [JsonPropertyName("forwarding")] public string? Forwarding { get; init; }
-        /// <summary>One of: user.created.</summary>
+        /// <summary>The first event delivered: user.created, or for watchtower user.locked.</summary>
         [JsonPropertyName("event")] public string? Event { get; init; }
+        /// <summary>Every event this destination receives: user.created, or for watchtower the security events.</summary>
+        [JsonPropertyName("events")] public List<string>? Events { get; init; }
         [JsonPropertyName("created")] public bool? Created { get; init; }
         /// <summary>The managed webhook endpoint.</summary>
         [JsonPropertyName("id")] public string? Id { get; init; }
@@ -8214,7 +8313,31 @@ namespace Atlas.Generated
         [JsonPropertyName("include_pii")] public bool? IncludePii { get; init; }
         /// <summary>webhook: the https receiver.</summary>
         [JsonPropertyName("url")] public string? Url { get; init; }
+        /// <summary>watchtower: your Watchtower ingest host (https). `server_key` is then an ingestion key with the ingest:logs scope.</summary>
+        [JsonPropertyName("endpoint")] public string? Endpoint { get; init; }
         [JsonPropertyName("active")] public bool? Active { get; init; }
+    }
+
+    /// <summary>A InstanceGetIntegrationsHealthResponseDuplicateDeliveryPathsItem object.</summary>
+    public sealed record InstanceGetIntegrationsHealthResponseDuplicateDeliveryPathsItem
+    {
+        /// <summary>One of: forwarding, integration.</summary>
+        [JsonPropertyName("kind")] public string? Kind { get; init; }
+        [JsonPropertyName("destination")] public string? Destination { get; init; }
+        [JsonPropertyName("forwarding_endpoint_id")] public string? ForwardingEndpointId { get; init; }
+        [JsonPropertyName("webhook_endpoint_ids")] public List<string>? WebhookEndpointIds { get; init; }
+    }
+
+    /// <summary>Present when this endpoint is one of two delivery paths to the same destination.</summary>
+    public sealed record InstanceGetIntegrationsHealthResponseDataItemDuplicateDeliveryPath
+    {
+        /// <summary>One of: duplicate_delivery_path.</summary>
+        [JsonPropertyName("code")] public string? Code { get; init; }
+        /// <summary>One of: forwarding, integration.</summary>
+        [JsonPropertyName("kind")] public string? Kind { get; init; }
+        [JsonPropertyName("destination")] public string? Destination { get; init; }
+        [JsonPropertyName("forwarding_endpoint_id")] public string? ForwardingEndpointId { get; init; }
+        [JsonPropertyName("webhook_endpoint_ids")] public List<string>? WebhookEndpointIds { get; init; }
     }
 
     /// <summary>A InstanceGetIntegrationsHealthResponseDataItemLastFailure object.</summary>
@@ -8237,6 +8360,8 @@ namespace Atlas.Generated
         [JsonPropertyName("managed_by")] public string? ManagedBy { get; init; }
         /// <summary>The receiver type: https, a destination such as lucida, events_receiver, tokens_only or case_api.</summary>
         [JsonPropertyName("destination")] public string? Destination { get; init; }
+        /// <summary>Present when this endpoint is one of two delivery paths to the same destination.</summary>
+        [JsonPropertyName("duplicate_delivery_path")] public InstanceGetIntegrationsHealthResponseDataItemDuplicateDeliveryPath? DuplicateDeliveryPath { get; init; }
         /// <summary>One of: healthy, failing, disabled, inactive, no_deliveries, unknown.</summary>
         [JsonPropertyName("state")] public string State { get; init; } = "";
         [JsonPropertyName("last_success_at")] public long? LastSuccessAt { get; init; }
@@ -8251,6 +8376,7 @@ namespace Atlas.Generated
     {
         /// <summary>One of: list.</summary>
         [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("duplicate_delivery_paths")] public List<InstanceGetIntegrationsHealthResponseDuplicateDeliveryPathsItem>? DuplicateDeliveryPaths { get; init; }
         [JsonPropertyName("data")] public List<InstanceGetIntegrationsHealthResponseDataItem> Data { get; init; } = new();
         [JsonPropertyName("has_more")] public bool? HasMore { get; init; }
         [JsonPropertyName("unhealthy_count")] public long UnhealthyCount { get; init; }
@@ -8598,6 +8724,7 @@ namespace Atlas.Generated
         /// <summary>One of: any, verified, certified.</summary>
         [JsonPropertyName("requires_client_level")] public string? RequiresClientLevel { get; init; }
         [JsonPropertyName("owner_exempt")] public bool? OwnerExempt { get; init; }
+        [JsonPropertyName("optional")] public bool? Optional { get; init; }
         [JsonPropertyName("wildcard")] public bool? Wildcard { get; init; }
     }
 
@@ -8640,6 +8767,8 @@ namespace Atlas.Generated
         [JsonPropertyName("requires_client_level")] public string? RequiresClientLevel { get; init; }
         /// <summary>The developer who owns a client may request the scope with it on their own account whatever its level.</summary>
         [JsonPropertyName("owner_exempt")] public bool? OwnerExempt { get; init; }
+        /// <summary>The consent screen lets the user leave this scope out; an app that asked for it must work without it. Never for openid.</summary>
+        [JsonPropertyName("optional")] public bool? Optional { get; init; }
     }
 
     /// <summary>A InstanceSetScopesBody object.</summary>
@@ -8712,6 +8841,10 @@ namespace Atlas.Generated
         /// <summary>Partner admin: the organizations this key is limited to (empty = unrestricted).</summary>
         [JsonPropertyName("organization_ids")] public List<string>? OrganizationIds { get; init; }
         [JsonPropertyName("rotated_from")] public string? RotatedFrom { get; init; }
+        /// <summary>The last call from the application itself (a call from a CLI, an HTTP tool or a browser does not count), so research reads do not hide a dead key. null = none seen.</summary>
+        [JsonPropertyName("last_app_used_at")] public long? LastAppUsedAt { get; init; }
+        /// <summary>The User-Agent of the last call (first 200 characters).</summary>
+        [JsonPropertyName("last_used_user_agent")] public string? LastUsedUserAgent { get; init; }
         /// <summary>Provisioning tags.</summary>
         [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
         /// <summary>The idempotent-create key, if any.</summary>
@@ -8755,7 +8888,7 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
-        /// <summary>A named scope set instead of `scopes[]`. `app-runtime`: what an app server needs to run: read users, read and write sessions, organizations (memberships and policy) and SSO connections, read preflight. No webhook secret reveal or rotation, no instance settings writes, no key management. `web-app`: a web app's server: read and delete users, read and revoke sessions, privacy requests. `provisioning`: a deploy script's key (instance settings, domains, messaging, webhooks, OAuth, branding, keys). `integrations`: the key a connected platform's connect flow needs: instance settings, webhook endpoints, OAuth clients, keys, and the executor scopes `privacy:execute` and `privacy:grants:revoke` it mints its narrower key from. Send either preset or scopes. One of: app-runtime, web-app, provisioning, integrations.</summary>
+        /// <summary>A named scope set instead of `scopes[]`. `app-runtime`: what an app server needs to run: read users, read and write sessions, organizations (memberships and policy) and SSO connections, read preflight. No webhook secret reveal or rotation, no instance settings writes, no key management. `web-app`: a web app's server: read and delete users, read and revoke sessions, privacy requests. `provisioning`: a deploy script's key (instance settings, domains, messaging, webhooks, OAuth, branding, keys). `operator`: instance settings, integrations and forwarding, webhooks and app events, log streams, resource servers, logout notifications and keys, with no user, session, organization or billing data. `end-user-pools`: `end_users:read` and `end_users:write` for an organization's end-user (reader) pool. `oauth-apps`: a backend that runs OAuth apps: `users:read` and `users:write`, `oauth_clients:read` and `oauth_clients:write`, `grants:read` and `grants:write`, `resource_servers:read`. `integrations`: the key a connected platform's connect flow needs: instance settings, webhook endpoints, OAuth clients, keys, and the executor scopes `privacy:execute` and `privacy:grants:revoke` it mints its narrower key from. Send either preset or scopes. One of: app-runtime, web-app, provisioning, operator, end-user-pools, oauth-apps, integrations.</summary>
         [JsonPropertyName("preset")] public string? Preset { get; init; }
         /// <summary>Unix ms or ISO 8601; at most one year away. Default one year from now.</summary>
         [JsonPropertyName("expires_at")] public object? ExpiresAt { get; init; }
@@ -11073,6 +11206,12 @@ namespace Atlas.Generated
         [JsonPropertyName("enabled_events")] public List<string>? EnabledEvents { get; init; }
         [JsonPropertyName("active")] public bool? Active { get; init; }
         [JsonPropertyName("available_events")] public List<string>? AvailableEvents { get; init; }
+        /// <summary>When the webhook was created (epoch ms).</summary>
+        [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
+        /// <summary>When Atlas last attempted a delivery to it (epoch ms), or null if it never has. A read never returns the signing secret.</summary>
+        [JsonPropertyName("last_delivery_at")] public long? LastDeliveryAt { get; init; }
+        /// <summary>Only while a secret rotation overlap is open: when the previous secret stops signing (epoch ms).</summary>
+        [JsonPropertyName("previous_secret_expires_at")] public long? PreviousSecretExpiresAt { get; init; }
         /// <summary>The signing secret, returned once when the webhook is created.</summary>
         [JsonPropertyName("webhook_secret")] public string? WebhookSecret { get; init; }
         [JsonPropertyName("note")] public string? Note { get; init; }
@@ -11085,6 +11224,58 @@ namespace Atlas.Generated
         [JsonPropertyName("url")] public string? Url { get; init; }
         /// <summary>Defaults to all of them.</summary>
         [JsonPropertyName("enabled_events")] public List<string>? EnabledEvents { get; init; }
+    }
+
+    /// <summary>A OauthClientsWebhookRotateSecretResponse object.</summary>
+    public sealed record OauthClientsWebhookRotateSecretResponse
+    {
+        /// <summary>One of: webhook_secret.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        /// <summary>The new signing secret, returned exactly once.</summary>
+        [JsonPropertyName("webhook_secret")] public string WebhookSecret { get; init; } = "";
+        [JsonPropertyName("overlap_seconds")] public long OverlapSeconds { get; init; }
+        /// <summary>When the previous secret stops signing (epoch ms), or null when it already has.</summary>
+        [JsonPropertyName("previous_secret_expires_at")] public long? PreviousSecretExpiresAt { get; init; }
+        [JsonPropertyName("note")] public string? Note { get; init; }
+    }
+
+    /// <summary>A OauthClientsWebhookRotateSecretBody object.</summary>
+    public sealed record OauthClientsWebhookRotateSecretBody : ClearableBody
+    {
+        [JsonPropertyName("overlap_seconds")] public long? OverlapSeconds { get; init; }
+    }
+
+    /// <summary>A OauthClientsWebhookTestResponse object.</summary>
+    public sealed record OauthClientsWebhookTestResponse
+    {
+        /// <summary>One of: webhook_test_result.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("ok")] public bool? Ok { get; init; }
+        [JsonPropertyName("delivery_id")] public string? DeliveryId { get; init; }
+        [JsonPropertyName("event_id")] public string? EventId { get; init; }
+        /// <summary>One of: webhook.test.</summary>
+        [JsonPropertyName("event_type")] public string? EventType { get; init; }
+        [JsonPropertyName("url")] public string? Url { get; init; }
+        /// <summary>One of: success, failed.</summary>
+        [JsonPropertyName("status")] public string? Status { get; init; }
+        /// <summary>The HTTP status your endpoint answered with, or null when it never answered.</summary>
+        [JsonPropertyName("status_code")] public long? StatusCode { get; init; }
+        [JsonPropertyName("http_status")] public long? HttpStatus { get; init; }
+        /// <summary>How long your endpoint took to answer.</summary>
+        [JsonPropertyName("duration_ms")] public long? DurationMs { get; init; }
+        [JsonPropertyName("latency_ms")] public long? LatencyMs { get; init; }
+        [JsonPropertyName("response_snippet")] public string? ResponseSnippet { get; init; }
+        [JsonPropertyName("error")] public string? Error { get; init; }
+        [JsonPropertyName("error_kind")] public string? ErrorKind { get; init; }
+        [JsonPropertyName("signature_header_sent")] public string? SignatureHeaderSent { get; init; }
+        [JsonPropertyName("will_retry")] public bool? WillRetry { get; init; }
+    }
+
+    /// <summary>A OauthClientsWebhookTestBody object.</summary>
+    public sealed record OauthClientsWebhookTestBody : ClearableBody
+    {
+        /// <summary>The Atlas user id, or the sub this client receives for the user.</summary>
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
     }
 
     /// <summary>A OauthConsentRequestsSetSwitchAccountResponse object.</summary>
@@ -12664,6 +12855,58 @@ namespace Atlas.Generated
         [JsonPropertyName("on_existing")] public string? OnExisting { get; init; }
         [JsonPropertyName("invite_missing")] public bool? InviteMissing { get; init; }
         [JsonPropertyName("default_role")] public string? DefaultRole { get; init; }
+    }
+
+    /// <summary>A OrganizationsReplaceMembershipsByExternalIdResponse object.</summary>
+    public sealed record OrganizationsReplaceMembershipsByExternalIdResponse
+    {
+        /// <summary>One of: organization_membership, pending_organization_membership.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("id")] public string? Id { get; init; }
+        [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+        [JsonPropertyName("user_id")] public string? UserId { get; init; }
+        [JsonPropertyName("role")] public string? Role { get; init; }
+        [JsonPropertyName("role_source")] public string? RoleSource { get; init; }
+        /// <summary>The administrator scope (groups, teams, units), or null when organization-wide.</summary>
+        [JsonPropertyName("scope")] public Dictionary<string, object?>? Scope { get; init; }
+        [JsonPropertyName("expires_at")] public long? ExpiresAt { get; init; }
+        /// <summary>Epoch ms.</summary>
+        [JsonPropertyName("created_at")] public long? CreatedAt { get; init; }
+        /// <summary>`active`: the user exists and holds the seat. `pending`: it waits for a user with this external_id. One of: active, pending.</summary>
+        [JsonPropertyName("status")] public string Status { get; init; } = "";
+        [JsonPropertyName("user_external_id")] public string? UserExternalId { get; init; }
+        [JsonPropertyName("unchanged")] public bool? Unchanged { get; init; }
+    }
+
+    /// <summary>A OrganizationsReplaceMembershipsByExternalIdBody object.</summary>
+    public sealed record OrganizationsReplaceMembershipsByExternalIdBody : ClearableBody
+    {
+        [JsonPropertyName("role")] public string? Role { get; init; }
+        /// <summary>Who manages the role (manual, or a directory source of this organization).</summary>
+        [JsonPropertyName("role_source")] public string? RoleSource { get; init; }
+        [JsonPropertyName("public_metadata")] public Dictionary<string, object?>? PublicMetadata { get; init; }
+        /// <summary>Backend only.</summary>
+        [JsonPropertyName("private_metadata")] public Dictionary<string, object?>? PrivateMetadata { get; init; }
+        /// <summary>Permission keys held on top of the role; they join org_permissions.</summary>
+        [JsonPropertyName("permissions")] public List<string>? Permissions { get; init; }
+        [JsonPropertyName("allowed_sign_in_methods")] public List<string>? AllowedSignInMethods { get; init; }
+        /// <summary>When the seat ends (ISO 8601 or epoch ms, in the future).</summary>
+        [JsonPropertyName("expires_at")] public object? ExpiresAt { get; init; }
+        /// <summary>Send <c>null</c> for <c>allowed_sign_in_methods</c>, which clears it.</summary>
+        public OrganizationsReplaceMembershipsByExternalIdBody ClearAllowedSignInMethods() => this with { Cleared = Plus("allowed_sign_in_methods") };
+        /// <summary>Send <c>null</c> for <c>expires_at</c>, which clears it.</summary>
+        public OrganizationsReplaceMembershipsByExternalIdBody ClearExpiresAt() => this with { Cleared = Plus("expires_at") };
+    }
+
+    /// <summary>A OrganizationsDeleteMembershipsByExternalIdResponse object.</summary>
+    public sealed record OrganizationsDeleteMembershipsByExternalIdResponse
+    {
+        /// <summary>One of: pending_organization_membership.</summary>
+        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
+        [JsonPropertyName("organization_id")] public string OrganizationId { get; init; } = "";
+        [JsonPropertyName("user_external_id")] public string UserExternalId { get; init; } = "";
+        /// <summary>One of: True.</summary>
+        [JsonPropertyName("deleted")] public string Deleted { get; init; } = "";
     }
 
     /// <summary>A OrganizationsGetMembershipResponse object.</summary>
@@ -15992,13 +16235,17 @@ namespace Atlas.Generated
     /// <summary>A ResourceServersListRevokedTokensResponseDataItem object.</summary>
     public sealed record ResourceServersListRevokedTokensResponseDataItem
     {
+        /// <summary>`family`: every access token with this `fid`. `jti`: that one access token. `client`: every token of `client_id` issued at or before `revoked_at` (the client was deleted), including client_credentials tokens. One of: family, jti, client.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
         /// <summary>The refresh-token family (the `fid` claim). Null for a single access token.</summary>
         [JsonPropertyName("family_id")] public string? FamilyId { get; init; }
         /// <summary>The `jti` of a single revoked access token. Null for a family.</summary>
         [JsonPropertyName("jti")] public string? Jti { get; init; }
         [JsonPropertyName("user_id")] public string? UserId { get; init; }
-        /// <summary>The OAuth client row id.</summary>
+        /// <summary>The public client_id (client_…), the same value as the client_id claim and the `oauth_tokens.revoked` event.</summary>
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
+        /// <summary>The internal OAuth client id (oac_…) the Backend API paths use.</summary>
+        [JsonPropertyName("oauth_client_id")] public string? OauthClientId { get; init; }
         /// <summary>refresh_token_reuse, client_revoked, admin_revoked, user_revoked, grant_revoked or logout.</summary>
         [JsonPropertyName("reason")] public string Reason { get; init; } = "";
         /// <summary>Epoch ms.</summary>
@@ -24612,6 +24859,10 @@ namespace Atlas.Generated
         /// <summary>One of: flat, per_seat, metered.</summary>
         [JsonPropertyName("pricing_model")] public string PricingModel { get; init; } = "";
         [JsonPropertyName("trial_days")] public long? TrialDays { get; init; }
+        /// <summary>Days a past_due subscription keeps its entitlement (1 to 90); null for none.</summary>
+        [JsonPropertyName("grace_days")] public long? GraceDays { get; init; }
+        /// <summary>The same number as grace_days, under the name that says what it is. Either may be sent.</summary>
+        [JsonPropertyName("past_due_grace_days")] public long? PastDueGraceDays { get; init; }
         /// <summary>A display-only promotion shown on the plan card: { label, percent_off | amount_off (minor units), ends_at (epoch ms), code }. It never changes what the provider charges; on the public list an expired promotion is null.</summary>
         [JsonPropertyName("promotion")] public Dictionary<string, object?>? Promotion { get; init; }
         [JsonPropertyName("stripe_meter_id")] public string? StripeMeterId { get; init; }
@@ -24702,12 +24953,16 @@ namespace Atlas.Generated
         /// <summary>One of: flat, per_seat, metered.</summary>
         [JsonPropertyName("pricing_model")] public string? PricingModel { get; init; }
         [JsonPropertyName("trial_days")] public long? TrialDays { get; init; }
+        /// <summary>Days a past_due subscription keeps its entitlement (1 to 90). Same as grace_days.</summary>
+        [JsonPropertyName("past_due_grace_days")] public long? PastDueGraceDays { get; init; }
         /// <summary>Send <c>null</c> for <c>stripe_price_id</c>, which clears it.</summary>
         public BillingCreatePlanBody ClearStripePriceId() => this with { Cleared = Plus("stripe_price_id") };
         /// <summary>Send <c>null</c> for <c>amount</c>, which clears it.</summary>
         public BillingCreatePlanBody ClearAmount() => this with { Cleared = Plus("amount") };
         /// <summary>Send <c>null</c> for <c>trial_days</c>, which clears it.</summary>
         public BillingCreatePlanBody ClearTrialDays() => this with { Cleared = Plus("trial_days") };
+        /// <summary>Send <c>null</c> for <c>past_due_grace_days</c>, which clears it.</summary>
+        public BillingCreatePlanBody ClearPastDueGraceDays() => this with { Cleared = Plus("past_due_grace_days") };
     }
 
     /// <summary>A BillingUpdatePlanBody object.</summary>
@@ -24726,6 +24981,7 @@ namespace Atlas.Generated
         [JsonPropertyName("pricing_model")] public string? PricingModel { get; init; }
         [JsonPropertyName("trial_days")] public double? TrialDays { get; init; }
         [JsonPropertyName("grace_days")] public double? GraceDays { get; init; }
+        [JsonPropertyName("past_due_grace_days")] public double? PastDueGraceDays { get; init; }
         [JsonPropertyName("description")] public string? Description { get; init; }
         [JsonPropertyName("badge")] public string? Badge { get; init; }
         [JsonPropertyName("sort_order")] public double? SortOrder { get; init; }
@@ -24744,6 +25000,8 @@ namespace Atlas.Generated
         public BillingUpdatePlanBody ClearTrialDays() => this with { Cleared = Plus("trial_days") };
         /// <summary>Send <c>null</c> for <c>grace_days</c>, which clears it.</summary>
         public BillingUpdatePlanBody ClearGraceDays() => this with { Cleared = Plus("grace_days") };
+        /// <summary>Send <c>null</c> for <c>past_due_grace_days</c>, which clears it.</summary>
+        public BillingUpdatePlanBody ClearPastDueGraceDays() => this with { Cleared = Plus("past_due_grace_days") };
         /// <summary>Send <c>null</c> for <c>description</c>, which clears it.</summary>
         public BillingUpdatePlanBody ClearDescription() => this with { Cleared = Plus("description") };
         /// <summary>Send <c>null</c> for <c>badge</c>, which clears it.</summary>
@@ -24789,6 +25047,8 @@ namespace Atlas.Generated
         /// <summary>Register this URL in the provider's dashboard.</summary>
         [JsonPropertyName("webhook_url")] public string WebhookUrl { get; init; } = "";
         [JsonPropertyName("capabilities")] public Dictionary<string, object?>? Capabilities { get; init; }
+        /// <summary>Stripe only: how subscription state reaches Atlas (mode webhook or no_webhook, the checkout return, the re-read cadence and the forwarded-events URL). The webhook secret is optional.</summary>
+        [JsonPropertyName("sync")] public Dictionary<string, object?>? Sync { get; init; }
         [JsonPropertyName("last_verified_at")] public long? LastVerifiedAt { get; init; }
         [JsonPropertyName("last_webhook_at")] public long? LastWebhookAt { get; init; }
         [JsonPropertyName("updated_at")] public long? UpdatedAt { get; init; }
@@ -24905,39 +25165,6 @@ namespace Atlas.Generated
         [JsonPropertyName("subject_type")] public string SubjectType { get; init; } = "";
         [JsonPropertyName("subject_id")] public string SubjectId { get; init; } = "";
         [JsonPropertyName("quantity")] public long Quantity { get; init; }
-    }
-
-    /// <summary>What an entitlement provider (Autumn, Commet) reports this subscription grants: { features, limits }.</summary>
-    public sealed record SubscriptionEntitlements
-    {
-        [JsonPropertyName("features")] public List<string>? Features { get; init; }
-        [JsonPropertyName("limits")] public Dictionary<string, double>? Limits { get; init; }
-    }
-
-    /// <summary>A Subscription object.</summary>
-    public sealed record Subscription
-    {
-        /// <summary>One of: billing_subscription.</summary>
-        [JsonPropertyName("object")] public string ObjectType { get; init; } = "";
-        [JsonPropertyName("id")] public string Id { get; init; } = "";
-        /// <summary>One of: user, org.</summary>
-        [JsonPropertyName("subject_type")] public string SubjectType { get; init; } = "";
-        [JsonPropertyName("subject_id")] public string SubjectId { get; init; } = "";
-        [JsonPropertyName("plan_id")] public string PlanId { get; init; } = "";
-        [JsonPropertyName("status")] public string Status { get; init; } = "";
-        [JsonPropertyName("stripe_subscription_id")] public string? StripeSubscriptionId { get; init; }
-        [JsonPropertyName("stripe_customer_id")] public string? StripeCustomerId { get; init; }
-        [JsonPropertyName("current_period_end")] public long? CurrentPeriodEnd { get; init; }
-        [JsonPropertyName("provider")] public string? Provider { get; init; }
-        [JsonPropertyName("cancel_at_period_end")] public bool? CancelAtPeriodEnd { get; init; }
-        /// <summary>What an entitlement provider (Autumn, Commet) reports this subscription grants: { features, limits }.</summary>
-        [JsonPropertyName("entitlements")] public SubscriptionEntitlements? Entitlements { get; init; }
-        /// <summary>FAPI subscription read only: every subscription the subject holds (base + add-ons).</summary>
-        [JsonPropertyName("subscriptions")] public List<Dictionary<string, object?>>? Subscriptions { get; init; }
-        /// <summary>Created (epoch ms).</summary>
-        [JsonPropertyName("created_at")] public long CreatedAt { get; init; }
-        /// <summary>Last updated (epoch ms).</summary>
-        [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
     }
 
     /// <summary>A BillingListSubscriptionsResponse object.</summary>
@@ -28782,6 +29009,8 @@ namespace Atlas.Generated
         [JsonPropertyName("plan")] public string? Plan { get; init; }
         /// <summary>`internal` marks an owner-account grant that never counts as revenue. One of: plan, override, internal, none.</summary>
         [JsonPropertyName("planSource")] public string PlanSource { get; init; } = "";
+        /// <summary>The subject's entitlement version, the same counter the entitlement.* webhooks carry. 0 when it never changed.</summary>
+        [JsonPropertyName("version")] public long? Version { get; init; }
         [JsonPropertyName("entitlements")] public List<EntitlementsListResponseEntitlementsItem> Entitlements { get; init; } = new();
     }
 
@@ -32230,11 +32459,14 @@ namespace Atlas.Generated
     /// <summary>A AuthConfigExternalJwtIssuersItem object.</summary>
     public sealed record AuthConfigExternalJwtIssuersItem
     {
+        /// <summary>One of: email, none, same_org_only.</summary>
+        [JsonPropertyName("accountLinking")] public string? AccountLinking { get; init; }
         [JsonPropertyName("audience")] public string Audience { get; init; } = "";
         [JsonPropertyName("emailClaim")] public string? EmailClaim { get; init; }
         [JsonPropertyName("id")] public string Id { get; init; } = "";
         [JsonPropertyName("issuer")] public string Issuer { get; init; } = "";
         [JsonPropertyName("jwksUri")] public string JwksUri { get; init; } = "";
+        [JsonPropertyName("organizationId")] public string? OrganizationId { get; init; }
     }
 
     /// <summary>Trust JWTs minted by an EXTERNAL issuer as a sign-in credential (e.g. a legacy IdP or your own token service). The linked identity is stored under provider ext_jwt:&lt;id&gt;.</summary>
@@ -32662,12 +32894,21 @@ namespace Atlas.Generated
         [JsonPropertyName("descriptions")] public Dictionary<string, string>? Descriptions { get; init; }
         [JsonPropertyName("labels")] public Dictionary<string, string>? Labels { get; init; }
         [JsonPropertyName("name")] public string Name { get; init; } = "";
+        [JsonPropertyName("optional")] public bool? Optional { get; init; }
         [JsonPropertyName("ownerExempt")] public bool? OwnerExempt { get; init; }
         [JsonPropertyName("parameters")] public List<string>? Parameters { get; init; }
         /// <summary>One of: any, certified, verified.</summary>
         [JsonPropertyName("requiresClientLevel")] public string? RequiresClientLevel { get; init; }
         [JsonPropertyName("requiresVerifiedClient")] public bool? RequiresVerifiedClient { get; init; }
         [JsonPropertyName("sensitive")] public bool? Sensitive { get; init; }
+    }
+
+    /// <summary>A AuthConfigOauthProviderDynamicRegistrationLimits object.</summary>
+    public sealed record AuthConfigOauthProviderDynamicRegistrationLimits
+    {
+        [JsonPropertyName("maxClients")] public double MaxClients { get; init; }
+        [JsonPropertyName("pruneUnusedAfterDays")] public double? PruneUnusedAfterDays { get; init; }
+        [JsonPropertyName("registrationsPerHourPerIp")] public double RegistrationsPerHourPerIp { get; init; }
     }
 
     /// <summary>A AuthConfigOauthProviderTokenClaimsItem object.</summary>
@@ -32704,6 +32945,7 @@ namespace Atlas.Generated
         [JsonPropertyName("deviceApprovalRequiresStepUp")] public bool DeviceApprovalRequiresStepUp { get; init; }
         [JsonPropertyName("dynamicClientSecretTtlSeconds")] public double DynamicClientSecretTtlSeconds { get; init; }
         [JsonPropertyName("dynamicRegistration")] public bool DynamicRegistration { get; init; }
+        [JsonPropertyName("dynamicRegistrationLimits")] public AuthConfigOauthProviderDynamicRegistrationLimits? DynamicRegistrationLimits { get; init; }
         [JsonPropertyName("loginUrl")] public string? LoginUrl { get; init; }
         [JsonPropertyName("requireInitialAccessToken")] public bool RequireInitialAccessToken { get; init; }
         [JsonPropertyName("requirePkce")] public bool RequirePkce { get; init; }
@@ -33088,6 +33330,8 @@ namespace Atlas.Generated
         [JsonPropertyName("browserHandoff")] public bool BrowserHandoff { get; init; }
         /// <summary>Explicit Domain for the session cookies, for example ".example.com". Needed by a path-mounted instance, where cookies are otherwise host-only. It must cover your sign-in host and can never be a public suffix or Atlas's own domain; an invalid value is refused on write. Default null.</summary>
         [JsonPropertyName("cookieDomain")] public string? CookieDomain { get; init; }
+        /// <summary>Give this instance's Frontend API cookies a short suffix derived from its publishable key (__session_&lt;suffix&gt;, __atlas_rt_&lt;suffix&gt;, ...), so two instances on one host or registrable domain never read, overwrite or clear each other's cookies. Required to share a hostname between two path mounts. Existing browsers sign in again once when it changes. Default false.</summary>
+        [JsonPropertyName("cookieIsolation")] public bool CookieIsolation { get; init; }
         [JsonPropertyName("crossSubdomainCookies")] public bool CrossSubdomainCookies { get; init; }
         /// <summary>Set a readable __atlas_csrf cookie with each session token: a signed token tied to the session, replaced whenever the session token is. Verify it in your backend with the instance JWKS. Default false.</summary>
         [JsonPropertyName("csrfCookie")] public bool CsrfCookie { get; init; }
@@ -33977,11 +34221,14 @@ namespace Atlas.Generated
     /// <summary>A AuthConfigPatchInputExternalJwtIssuersItem object.</summary>
     public sealed record AuthConfigPatchInputExternalJwtIssuersItem : ClearableBody
     {
+        /// <summary>One of: email, none, same_org_only.</summary>
+        [JsonPropertyName("accountLinking")] public string? AccountLinking { get; init; }
         [JsonPropertyName("audience")] public string? Audience { get; init; }
         [JsonPropertyName("emailClaim")] public string? EmailClaim { get; init; }
         [JsonPropertyName("id")] public string? Id { get; init; }
         [JsonPropertyName("issuer")] public string? Issuer { get; init; }
         [JsonPropertyName("jwksUri")] public string? JwksUri { get; init; }
+        [JsonPropertyName("organizationId")] public string? OrganizationId { get; init; }
     }
 
     /// <summary>Trust JWTs minted by an EXTERNAL issuer as a sign-in credential (e.g. a legacy IdP or your own token service). The linked identity is stored under provider ext_jwt:&lt;id&gt;.</summary>
@@ -34416,12 +34663,23 @@ namespace Atlas.Generated
         [JsonPropertyName("descriptions")] public Dictionary<string, string>? Descriptions { get; init; }
         [JsonPropertyName("labels")] public Dictionary<string, string>? Labels { get; init; }
         [JsonPropertyName("name")] public string? Name { get; init; }
+        [JsonPropertyName("optional")] public bool? Optional { get; init; }
         [JsonPropertyName("ownerExempt")] public bool? OwnerExempt { get; init; }
         [JsonPropertyName("parameters")] public List<string>? Parameters { get; init; }
         /// <summary>One of: any, certified, verified.</summary>
         [JsonPropertyName("requiresClientLevel")] public string? RequiresClientLevel { get; init; }
         [JsonPropertyName("requiresVerifiedClient")] public bool? RequiresVerifiedClient { get; init; }
         [JsonPropertyName("sensitive")] public bool? Sensitive { get; init; }
+    }
+
+    /// <summary>A AuthConfigPatchInputOauthProviderDynamicRegistrationLimits object.</summary>
+    public sealed record AuthConfigPatchInputOauthProviderDynamicRegistrationLimits : ClearableBody
+    {
+        [JsonPropertyName("maxClients")] public double? MaxClients { get; init; }
+        [JsonPropertyName("pruneUnusedAfterDays")] public double? PruneUnusedAfterDays { get; init; }
+        [JsonPropertyName("registrationsPerHourPerIp")] public double? RegistrationsPerHourPerIp { get; init; }
+        /// <summary>Send <c>null</c> for <c>pruneUnusedAfterDays</c>, which clears it.</summary>
+        public AuthConfigPatchInputOauthProviderDynamicRegistrationLimits ClearPruneUnusedAfterDays() => this with { Cleared = Plus("pruneUnusedAfterDays") };
     }
 
     /// <summary>A AuthConfigPatchInputOauthProviderTokenClaimsItem object.</summary>
@@ -34458,6 +34716,7 @@ namespace Atlas.Generated
         [JsonPropertyName("deviceApprovalRequiresStepUp")] public bool? DeviceApprovalRequiresStepUp { get; init; }
         [JsonPropertyName("dynamicClientSecretTtlSeconds")] public double? DynamicClientSecretTtlSeconds { get; init; }
         [JsonPropertyName("dynamicRegistration")] public bool? DynamicRegistration { get; init; }
+        [JsonPropertyName("dynamicRegistrationLimits")] public AuthConfigPatchInputOauthProviderDynamicRegistrationLimits? DynamicRegistrationLimits { get; init; }
         [JsonPropertyName("loginUrl")] public string? LoginUrl { get; init; }
         [JsonPropertyName("requireInitialAccessToken")] public bool? RequireInitialAccessToken { get; init; }
         [JsonPropertyName("requirePkce")] public bool? RequirePkce { get; init; }
@@ -34860,6 +35119,8 @@ namespace Atlas.Generated
         [JsonPropertyName("browserHandoff")] public bool? BrowserHandoff { get; init; }
         /// <summary>Explicit Domain for the session cookies, for example ".example.com". Needed by a path-mounted instance, where cookies are otherwise host-only. It must cover your sign-in host and can never be a public suffix or Atlas's own domain; an invalid value is refused on write. Default null.</summary>
         [JsonPropertyName("cookieDomain")] public string? CookieDomain { get; init; }
+        /// <summary>Give this instance's Frontend API cookies a short suffix derived from its publishable key (__session_&lt;suffix&gt;, __atlas_rt_&lt;suffix&gt;, ...), so two instances on one host or registrable domain never read, overwrite or clear each other's cookies. Required to share a hostname between two path mounts. Existing browsers sign in again once when it changes. Default false.</summary>
+        [JsonPropertyName("cookieIsolation")] public bool? CookieIsolation { get; init; }
         [JsonPropertyName("crossSubdomainCookies")] public bool? CrossSubdomainCookies { get; init; }
         /// <summary>Set a readable __atlas_csrf cookie with each session token: a signed token tied to the session, replaced whenever the session token is. Verify it in your backend with the instance JWKS. Default false.</summary>
         [JsonPropertyName("csrfCookie")] public bool? CsrfCookie { get; init; }
@@ -35322,6 +35583,8 @@ namespace Atlas.Generated
         [JsonPropertyName("declared_cookies")] public List<InstanceGetCookieConsentResponseDeclaredCookiesItem>? DeclaredCookies { get; init; }
         /// <summary>How the Frontend API is served: default (the shared Atlas host), custom_domain (a CNAME), or path_mount (base_path on your own host, routed by Atlas's ingress or by your reverse proxy; the cookies are the same either way).</summary>
         [JsonPropertyName("frontend_mode")] public InstanceGetCookieConsentResponseFrontendMode? FrontendMode { get; init; }
+        /// <summary>With session.cookieIsolation on, the suffix every Frontend API cookie name carries (__session_&lt;suffix&gt;); null otherwise. Derived from the publishable key: the SDKs compute it themselves.</summary>
+        [JsonPropertyName("cookie_suffix")] public string? CookieSuffix { get; init; }
         /// <summary>Where the effective setting comes from: manual (PUT, always wins), integration (an enabled integration with a cmp, else a consent manager's outbound partner link), or none. One of: manual, integration, none.</summary>
         [JsonPropertyName("source")] public string? Source { get; init; }
         /// <summary>With source integration: the integration id, or `partner_link:&lt;link id&gt;` when a partner link provides it.</summary>
@@ -35352,6 +35615,8 @@ namespace Atlas.Generated
         [JsonPropertyName("declared_cookies")] public List<InstanceGetCookieConsentResponseDeclaredCookiesItem>? DeclaredCookies { get; init; }
         /// <summary>How the Frontend API is served: default (the shared Atlas host), custom_domain (a CNAME), or path_mount (base_path on your own host, routed by Atlas's ingress or by your reverse proxy; the cookies are the same either way).</summary>
         [JsonPropertyName("frontend_mode")] public InstanceGetCookieConsentResponseFrontendMode? FrontendMode { get; init; }
+        /// <summary>With session.cookieIsolation on, the suffix every Frontend API cookie name carries (__session_&lt;suffix&gt;); null otherwise. Derived from the publishable key: the SDKs compute it themselves.</summary>
+        [JsonPropertyName("cookie_suffix")] public string? CookieSuffix { get; init; }
         /// <summary>Where the effective setting comes from: manual (PUT, always wins), integration (an enabled integration with a cmp, else a consent manager's outbound partner link), or none. One of: manual, integration, none.</summary>
         [JsonPropertyName("source")] public string? Source { get; init; }
         /// <summary>With source integration: the integration id, or `partner_link:&lt;link id&gt;` when a partner link provides it.</summary>
@@ -39680,6 +39945,15 @@ namespace Atlas.Generated
         [JsonPropertyName("message")] public string Message { get; init; } = "";
     }
 
+    /// <summary>A JobModelResultsItemFactorsItem object.</summary>
+    public sealed record JobModelResultsItemFactorsItem
+    {
+        /// <summary>One of: password, totp, hotp, backup_codes.</summary>
+        [JsonPropertyName("kind")] public string Kind { get; init; } = "";
+        [JsonPropertyName("will_verify")] public bool WillVerify { get; init; }
+        [JsonPropertyName("detail")] public string Detail { get; init; } = "";
+    }
+
     /// <summary>A JobModelResultsItem object.</summary>
     public sealed record JobModelResultsItem
     {
@@ -39689,6 +39963,8 @@ namespace Atlas.Generated
         [JsonPropertyName("outcome")] public string Outcome { get; init; } = "";
         /// <summary>About a row that succeeded: password_policy_not_applied, unverified_without_hold or account_claim_not_applied. Absent when there are none.</summary>
         [JsonPropertyName("warnings")] public List<JobModelResultsItemWarningsItem>? Warnings { get; init; }
+        /// <summary>Per credential the row carries (password, totp, hotp, backup_codes): whether it will verify at the next sign-in. A dry run reports what a real run stores.</summary>
+        [JsonPropertyName("factors")] public List<JobModelResultsItemFactorsItem>? Factors { get; init; }
     }
 
     /// <summary>A JobModelWarningsItem object.</summary>
@@ -43487,6 +43763,14 @@ namespace Atlas.Generated
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("logo_url")] public string? LogoUrl { get; init; }
+        /// <summary>The app's homepage (RFC 7591), shown on the consent page.</summary>
+        [JsonPropertyName("client_uri")] public string? ClientUri { get; init; }
+        /// <summary>Alias of client_uri.</summary>
+        [JsonPropertyName("homepage_url")] public string? HomepageUrl { get; init; }
+        /// <summary>The app's privacy policy (RFC 7591), linked from the consent page.</summary>
+        [JsonPropertyName("policy_uri")] public string? PolicyUri { get; init; }
+        /// <summary>The app's terms of service (RFC 7591), linked from the consent page.</summary>
+        [JsonPropertyName("tos_uri")] public string? TosUri { get; init; }
         [JsonPropertyName("redirect_uris")] public List<string>? RedirectUris { get; init; }
         [JsonPropertyName("allowed_scopes")] public List<string>? AllowedScopes { get; init; }
         [JsonPropertyName("grant_types")] public List<string>? GrantTypes { get; init; }
@@ -43527,8 +43811,12 @@ namespace Atlas.Generated
         [JsonPropertyName("refresh_touches_session")] public bool? RefreshTouchesSession { get; init; }
         /// <summary>No authorization code is issued for a user whose primary email is not verified.</summary>
         [JsonPropertyName("require_verified_email")] public bool? RequireVerifiedEmail { get; init; }
+        /// <summary>The consent screen is shown, first-party clients included, until the user approves with remember (prompt=consent asks every time).</summary>
+        [JsonPropertyName("require_consent")] public bool? RequireConsent { get; init; }
+        /// <summary>Consent is kept per organization (null = whenever the request names one; true = always; false = one consent for all).</summary>
+        [JsonPropertyName("consent_per_organization")] public bool? ConsentPerOrganization { get; init; }
         [JsonPropertyName("owner")] public string? Owner { get; init; }
-        /// <summary>Review state. development: only the owner and testers can authorize; suspended: refused at /oauth2/authorize and the token endpoint. One of: development, in_review, approved, suspended.</summary>
+        /// <summary>Review state. development and in_review: only the owner and testers can authorize; suspended: refused at /oauth2/authorize and the token endpoint. One of: development, in_review, approved, suspended.</summary>
         [JsonPropertyName("status")] public string? Status { get; init; }
         /// <summary>User ids besides the owner who may authorize a client in development.</summary>
         [JsonPropertyName("testers")] public List<string>? Testers { get; init; }
@@ -43597,6 +43885,12 @@ namespace Atlas.Generated
         }
     }
 
+    /// <summary>Client public keys (JWK Set) for private_key_jwt and signed request objects.</summary>
+    public sealed record OauthClientsCreateBodyJwks : ClearableBody
+    {
+        [JsonPropertyName("keys")] public List<Dictionary<string, object?>>? Keys { get; init; }
+    }
+
     /// <summary>Token lifetime overrides for this client, in seconds. A field that is absent or null inherits (the API's for an access token issued for an API, else the instance's, else the default). null for the whole object clears every override.</summary>
     public sealed record OauthClientsCreateBodyTokenLifetimes : ClearableBody
     {
@@ -43637,6 +43931,85 @@ namespace Atlas.Generated
     /// <summary>A OauthClientsCreateBody object.</summary>
     public sealed record OauthClientsCreateBody : ClearableBody
     {
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("id_token_signed_response_alg")] public string? IdTokenSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("userinfo_signed_response_alg")] public string? UserinfoSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("authorization_signed_response_alg")] public string? AuthorizationSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("introspection_signed_response_alg")] public string? IntrospectionSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("id_token_encrypted_response_alg")] public string? IdTokenEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("id_token_encrypted_response_enc")] public string? IdTokenEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("userinfo_encrypted_response_alg")] public string? UserinfoEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("userinfo_encrypted_response_enc")] public string? UserinfoEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("authorization_encrypted_response_alg")] public string? AuthorizationEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("authorization_encrypted_response_enc")] public string? AuthorizationEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("introspection_encrypted_response_alg")] public string? IntrospectionEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("introspection_encrypted_response_enc")] public string? IntrospectionEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("request_object_signing_alg")] public string? RequestObjectSigningAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("request_object_encryption_alg")] public string? RequestObjectEncryptionAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("request_object_encryption_enc")] public string? RequestObjectEncryptionEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("initiate_login_uri")] public string? InitiateLoginUri { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("backchannel_token_delivery_mode")] public string? BackchannelTokenDeliveryMode { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("backchannel_client_notification_endpoint")] public string? BackchannelClientNotificationEndpoint { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("backchannel_authentication_request_signing_alg")] public string? BackchannelAuthenticationRequestSigningAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("wimse_workload_id")] public string? WimseWorkloadId { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("min_app_version")] public string? MinAppVersion { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("native_sso_group")] public string? NativeSsoGroup { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("org_selection")] public string? OrgSelection { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("software_id")] public string? SoftwareId { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("software_version")] public string? SoftwareVersion { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_dns")] public string? TlsClientAuthSanDns { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_uri")] public string? TlsClientAuthSanUri { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_ip")] public string? TlsClientAuthSanIp { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_email")] public string? TlsClientAuthSanEmail { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("require_signed_request_object")] public bool? RequireSignedRequestObject { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("require_auth_time")] public bool? RequireAuthTime { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("tls_client_certificate_bound_access_tokens")] public bool? TlsClientCertificateBoundAccessTokens { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("dpop_bound_access_tokens")] public bool? DpopBoundAccessTokens { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("txn_token_unsigned_subject")] public bool? TxnTokenUnsignedSubject { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("backchannel_user_code_parameter")] public bool? BackchannelUserCodeParameter { get; init; }
+        /// <summary>OIDC response types the client may use (default `code`).</summary>
+        [JsonPropertyName("response_types")] public List<string>? ResponseTypes { get; init; }
+        /// <summary>Pre-registered https request object URIs.</summary>
+        [JsonPropertyName("request_uris")] public List<string>? RequestUris { get; init; }
+        /// <summary>Default maximum authentication age in seconds.</summary>
+        [JsonPropertyName("default_max_age")] public long? DefaultMaxAge { get; init; }
+        [JsonPropertyName("default_acr_values")] public List<string>? DefaultAcrValues { get; init; }
+        /// <summary>Contact addresses of the app's developers.</summary>
+        [JsonPropertyName("contacts")] public List<string>? Contacts { get; init; }
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("redirect_uris")] public List<string>? RedirectUris { get; init; }
         [JsonPropertyName("allowed_scopes")] public List<string>? AllowedScopes { get; init; }
@@ -43644,6 +44017,24 @@ namespace Atlas.Generated
         /// <summary>`none` makes it a public (PKCE) client. One of: client_secret_basic, client_secret_post, none, private_key_jwt, workload_jwt.</summary>
         [JsonPropertyName("token_endpoint_auth_method")] public string? TokenEndpointAuthMethod { get; init; }
         [JsonPropertyName("logo_url")] public string? LogoUrl { get; init; }
+        /// <summary>RFC 7591 name for logo_url.</summary>
+        [JsonPropertyName("logo_uri")] public string? LogoUri { get; init; }
+        /// <summary>RFC 7591: the app's homepage (absolute https URL), shown on the consent page. null clears (update).</summary>
+        [JsonPropertyName("client_uri")] public string? ClientUri { get; init; }
+        /// <summary>Alias of client_uri.</summary>
+        [JsonPropertyName("homepage_url")] public string? HomepageUrl { get; init; }
+        /// <summary>RFC 7591: the app's privacy policy (absolute https URL), linked from the consent page. null clears (update).</summary>
+        [JsonPropertyName("policy_uri")] public string? PolicyUri { get; init; }
+        /// <summary>RFC 7591: the app's terms of service (absolute https URL), linked from the consent page. null clears (update).</summary>
+        [JsonPropertyName("tos_uri")] public string? TosUri { get; init; }
+        /// <summary>Provisioning tags (filter lists with ?metadata[key]=value). Update replaces them.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
+        /// <summary>Client public keys (JWK Set) for private_key_jwt and signed request objects.</summary>
+        [JsonPropertyName("jwks")] public OauthClientsCreateBodyJwks? Jwks { get; init; }
+        /// <summary>https URL of the client's JWK Set, instead of jwks.</summary>
+        [JsonPropertyName("jwks_uri")] public string? JwksUri { get; init; }
+        /// <summary>RFC 8705 expected certificate Subject DN for tls_client_auth.</summary>
+        [JsonPropertyName("tls_client_auth_subject_dn")] public string? TlsClientAuthSubjectDn { get; init; }
         /// <summary>Skips the consent screen for a first-party app.</summary>
         [JsonPropertyName("first_party")] public bool? FirstParty { get; init; }
         [JsonPropertyName("post_logout_redirect_uris")] public List<string>? PostLogoutRedirectUris { get; init; }
@@ -43661,9 +44052,13 @@ namespace Atlas.Generated
         [JsonPropertyName("refresh_touches_session")] public bool? RefreshTouchesSession { get; init; }
         /// <summary>When true, /oauth2/authorize issues no code to this client for a user whose primary email is not proven (a sign-up that skipped verification does not count). The first time, the user is sent through the hosted sign-in, which asks them to verify the address with a code, and the authorization then continues; if they come back still unverified, or under prompt=none, or when the account has no email, the application has no email provider, or the client uses its own login_url, the redirect carries error=access_denied with an error_description saying why. Only new authorizations are checked (existing refresh tokens keep working). Default false.</summary>
         [JsonPropertyName("require_verified_email")] public bool? RequireVerifiedEmail { get; init; }
+        /// <summary>When true, /oauth2/authorize shows the consent screen for this client, a first-party client included, until the user approves with remember; a remembered approval (for that organization, under per-organization consent) skips it next time. Send prompt=consent to ask every time. Under prompt=none with no remembered approval the request fails with consent_required. Default false.</summary>
+        [JsonPropertyName("require_consent")] public bool? RequireConsent { get; init; }
+        /// <summary>Keep the user's consent per organization. null (default): per organization whenever the request names one (`organization`, an organization choice, or the request resolves to one), so approving the app for organization A never covers organization B and revoking one organization's consent ends only that organization's tokens. true: always per organization. false: one consent for the user whatever the organization. null clears (update).</summary>
+        [JsonPropertyName("consent_per_organization")] public bool? ConsentPerOrganization { get; init; }
         /// <summary>The developer (an Atlas user or organization id) who owns this client. null clears (update).</summary>
         [JsonPropertyName("owner")] public string? Owner { get; init; }
-        /// <summary>Review state; default approved. development: only the owner and testers can authorize. suspended: new authorizations and refreshes are refused at once and `oauth_client.status_changed` fires on every change. One of: development, in_review, approved, suspended.</summary>
+        /// <summary>Review state; default approved. development and in_review: only the owner and testers can authorize (in_review is a development client awaiting review). suspended: new authorizations and refreshes are refused at once and `oauth_client.status_changed` fires on every change. One of: development, in_review, approved, suspended.</summary>
         [JsonPropertyName("status")] public string? Status { get; init; }
         /// <summary>User ids besides the owner who may authorize a client in development.</summary>
         [JsonPropertyName("testers")] public List<string>? Testers { get; init; }
@@ -43699,16 +44094,114 @@ namespace Atlas.Generated
         [JsonPropertyName("access_token_format")] public string? AccessTokenFormat { get; init; }
         /// <summary>Token lifetime overrides for this client, in seconds. A field that is absent or null inherits (the API's for an access token issued for an API, else the instance's, else the default). null for the whole object clears every override.</summary>
         [JsonPropertyName("token_lifetimes")] public OauthClientsCreateBodyTokenLifetimes? TokenLifetimes { get; init; }
+        /// <summary>A preset for the fields not given (GET /v1/oauth_application_types). One of: web, spa, native, device, mcp.</summary>
+        [JsonPropertyName("application_type")] public string? ApplicationType { get; init; }
+        /// <summary>Idempotent-create key: a second create with the same ref returns the existing client (200, idempotent_replay).</summary>
+        [JsonPropertyName("external_ref")] public string? ExternalRef { get; init; }
         /// <summary>Import: keep the client_id your apps already use (letters, digits and . _ ~ : -; unique on the instance, 409 otherwise). Omit it and Atlas generates one.</summary>
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
         /// <summary>Import: the bcrypt (or base64url SHA-256) hash of the existing secret, instead of client_secret. The first successful authentication verifies it and stores it in Atlas's own format; no secret is returned.</summary>
         [JsonPropertyName("client_secret_hash")] public string? ClientSecretHash { get; init; }
         /// <summary>Your own secret for a confidential client, so a provisioning script can write it into its config before the client exists. 32 to 256 printable ASCII characters (no spaces), random: at least 10 different characters, none more than a quarter of the secret, no repeating pattern (422 otherwise). Generate it with a CSPRNG, e.g. 32 random bytes in base64url. Omit it and Atlas generates one. Refused for a client without a secret (public, key-based or workload auth).</summary>
         [JsonPropertyName("client_secret")] public string? ClientSecret { get; init; }
+        /// <summary>Send <c>null</c> for <c>id_token_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearIdTokenSignedResponseAlg() => this with { Cleared = Plus("id_token_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>userinfo_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearUserinfoSignedResponseAlg() => this with { Cleared = Plus("userinfo_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>authorization_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearAuthorizationSignedResponseAlg() => this with { Cleared = Plus("authorization_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>introspection_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearIntrospectionSignedResponseAlg() => this with { Cleared = Plus("introspection_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>id_token_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearIdTokenEncryptedResponseAlg() => this with { Cleared = Plus("id_token_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>id_token_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearIdTokenEncryptedResponseEnc() => this with { Cleared = Plus("id_token_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>userinfo_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearUserinfoEncryptedResponseAlg() => this with { Cleared = Plus("userinfo_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>userinfo_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearUserinfoEncryptedResponseEnc() => this with { Cleared = Plus("userinfo_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>authorization_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearAuthorizationEncryptedResponseAlg() => this with { Cleared = Plus("authorization_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>authorization_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearAuthorizationEncryptedResponseEnc() => this with { Cleared = Plus("authorization_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>introspection_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearIntrospectionEncryptedResponseAlg() => this with { Cleared = Plus("introspection_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>introspection_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearIntrospectionEncryptedResponseEnc() => this with { Cleared = Plus("introspection_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>request_object_signing_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearRequestObjectSigningAlg() => this with { Cleared = Plus("request_object_signing_alg") };
+        /// <summary>Send <c>null</c> for <c>request_object_encryption_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearRequestObjectEncryptionAlg() => this with { Cleared = Plus("request_object_encryption_alg") };
+        /// <summary>Send <c>null</c> for <c>request_object_encryption_enc</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearRequestObjectEncryptionEnc() => this with { Cleared = Plus("request_object_encryption_enc") };
+        /// <summary>Send <c>null</c> for <c>initiate_login_uri</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearInitiateLoginUri() => this with { Cleared = Plus("initiate_login_uri") };
+        /// <summary>Send <c>null</c> for <c>backchannel_token_delivery_mode</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearBackchannelTokenDeliveryMode() => this with { Cleared = Plus("backchannel_token_delivery_mode") };
+        /// <summary>Send <c>null</c> for <c>backchannel_client_notification_endpoint</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearBackchannelClientNotificationEndpoint() => this with { Cleared = Plus("backchannel_client_notification_endpoint") };
+        /// <summary>Send <c>null</c> for <c>backchannel_authentication_request_signing_alg</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearBackchannelAuthenticationRequestSigningAlg() => this with { Cleared = Plus("backchannel_authentication_request_signing_alg") };
+        /// <summary>Send <c>null</c> for <c>wimse_workload_id</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearWimseWorkloadId() => this with { Cleared = Plus("wimse_workload_id") };
+        /// <summary>Send <c>null</c> for <c>min_app_version</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearMinAppVersion() => this with { Cleared = Plus("min_app_version") };
+        /// <summary>Send <c>null</c> for <c>native_sso_group</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearNativeSsoGroup() => this with { Cleared = Plus("native_sso_group") };
+        /// <summary>Send <c>null</c> for <c>org_selection</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearOrgSelection() => this with { Cleared = Plus("org_selection") };
+        /// <summary>Send <c>null</c> for <c>software_id</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearSoftwareId() => this with { Cleared = Plus("software_id") };
+        /// <summary>Send <c>null</c> for <c>software_version</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearSoftwareVersion() => this with { Cleared = Plus("software_version") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_dns</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTlsClientAuthSanDns() => this with { Cleared = Plus("tls_client_auth_san_dns") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_uri</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTlsClientAuthSanUri() => this with { Cleared = Plus("tls_client_auth_san_uri") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_ip</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTlsClientAuthSanIp() => this with { Cleared = Plus("tls_client_auth_san_ip") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_email</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTlsClientAuthSanEmail() => this with { Cleared = Plus("tls_client_auth_san_email") };
+        /// <summary>Send <c>null</c> for <c>require_signed_request_object</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearRequireSignedRequestObject() => this with { Cleared = Plus("require_signed_request_object") };
+        /// <summary>Send <c>null</c> for <c>require_auth_time</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearRequireAuthTime() => this with { Cleared = Plus("require_auth_time") };
+        /// <summary>Send <c>null</c> for <c>tls_client_certificate_bound_access_tokens</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTlsClientCertificateBoundAccessTokens() => this with { Cleared = Plus("tls_client_certificate_bound_access_tokens") };
+        /// <summary>Send <c>null</c> for <c>dpop_bound_access_tokens</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearDpopBoundAccessTokens() => this with { Cleared = Plus("dpop_bound_access_tokens") };
+        /// <summary>Send <c>null</c> for <c>txn_token_unsigned_subject</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTxnTokenUnsignedSubject() => this with { Cleared = Plus("txn_token_unsigned_subject") };
+        /// <summary>Send <c>null</c> for <c>backchannel_user_code_parameter</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearBackchannelUserCodeParameter() => this with { Cleared = Plus("backchannel_user_code_parameter") };
+        /// <summary>Send <c>null</c> for <c>request_uris</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearRequestUris() => this with { Cleared = Plus("request_uris") };
+        /// <summary>Send <c>null</c> for <c>default_max_age</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearDefaultMaxAge() => this with { Cleared = Plus("default_max_age") };
+        /// <summary>Send <c>null</c> for <c>default_acr_values</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearDefaultAcrValues() => this with { Cleared = Plus("default_acr_values") };
+        /// <summary>Send <c>null</c> for <c>contacts</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearContacts() => this with { Cleared = Plus("contacts") };
+        /// <summary>Send <c>null</c> for <c>client_uri</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearClientUri() => this with { Cleared = Plus("client_uri") };
+        /// <summary>Send <c>null</c> for <c>homepage_url</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearHomepageUrl() => this with { Cleared = Plus("homepage_url") };
+        /// <summary>Send <c>null</c> for <c>policy_uri</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearPolicyUri() => this with { Cleared = Plus("policy_uri") };
+        /// <summary>Send <c>null</c> for <c>tos_uri</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTosUri() => this with { Cleared = Plus("tos_uri") };
+        /// <summary>Send <c>null</c> for <c>jwks</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearJwks() => this with { Cleared = Plus("jwks") };
+        /// <summary>Send <c>null</c> for <c>jwks_uri</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearJwksUri() => this with { Cleared = Plus("jwks_uri") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_subject_dn</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearTlsClientAuthSubjectDn() => this with { Cleared = Plus("tls_client_auth_subject_dn") };
         /// <summary>Send <c>null</c> for <c>backchannel_logout_uri</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearBackchannelLogoutUri() => this with { Cleared = Plus("backchannel_logout_uri") };
         /// <summary>Send <c>null</c> for <c>frontchannel_logout_uri</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearFrontchannelLogoutUri() => this with { Cleared = Plus("frontchannel_logout_uri") };
+        /// <summary>Send <c>null</c> for <c>consent_per_organization</c>, which clears it.</summary>
+        public OauthClientsCreateBody ClearConsentPerOrganization() => this with { Cleared = Plus("consent_per_organization") };
         /// <summary>Send <c>null</c> for <c>owner</c>, which clears it.</summary>
         public OauthClientsCreateBody ClearOwner() => this with { Cleared = Plus("owner") };
         /// <summary>Send <c>null</c> for <c>default_scopes</c>, which clears it.</summary>
@@ -43828,6 +44321,85 @@ namespace Atlas.Generated
     /// <summary>A OauthClientsUpdateBody object.</summary>
     public sealed record OauthClientsUpdateBody : ClearableBody
     {
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("id_token_signed_response_alg")] public string? IdTokenSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("userinfo_signed_response_alg")] public string? UserinfoSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("authorization_signed_response_alg")] public string? AuthorizationSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("introspection_signed_response_alg")] public string? IntrospectionSignedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("id_token_encrypted_response_alg")] public string? IdTokenEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("id_token_encrypted_response_enc")] public string? IdTokenEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("userinfo_encrypted_response_alg")] public string? UserinfoEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("userinfo_encrypted_response_enc")] public string? UserinfoEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("authorization_encrypted_response_alg")] public string? AuthorizationEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("authorization_encrypted_response_enc")] public string? AuthorizationEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("introspection_encrypted_response_alg")] public string? IntrospectionEncryptedResponseAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("introspection_encrypted_response_enc")] public string? IntrospectionEncryptedResponseEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("request_object_signing_alg")] public string? RequestObjectSigningAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("request_object_encryption_alg")] public string? RequestObjectEncryptionAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("request_object_encryption_enc")] public string? RequestObjectEncryptionEnc { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("initiate_login_uri")] public string? InitiateLoginUri { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("backchannel_token_delivery_mode")] public string? BackchannelTokenDeliveryMode { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("backchannel_client_notification_endpoint")] public string? BackchannelClientNotificationEndpoint { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("backchannel_authentication_request_signing_alg")] public string? BackchannelAuthenticationRequestSigningAlg { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("wimse_workload_id")] public string? WimseWorkloadId { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("min_app_version")] public string? MinAppVersion { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("native_sso_group")] public string? NativeSsoGroup { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("org_selection")] public string? OrgSelection { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("software_id")] public string? SoftwareId { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("software_version")] public string? SoftwareVersion { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_dns")] public string? TlsClientAuthSanDns { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_uri")] public string? TlsClientAuthSanUri { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_ip")] public string? TlsClientAuthSanIp { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata (see the OpenID Provider guide).</summary>
+        [JsonPropertyName("tls_client_auth_san_email")] public string? TlsClientAuthSanEmail { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("require_signed_request_object")] public bool? RequireSignedRequestObject { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("require_auth_time")] public bool? RequireAuthTime { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("tls_client_certificate_bound_access_tokens")] public bool? TlsClientCertificateBoundAccessTokens { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("dpop_bound_access_tokens")] public bool? DpopBoundAccessTokens { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("txn_token_unsigned_subject")] public bool? TxnTokenUnsignedSubject { get; init; }
+        /// <summary>OIDC / RFC 7591 client metadata.</summary>
+        [JsonPropertyName("backchannel_user_code_parameter")] public bool? BackchannelUserCodeParameter { get; init; }
+        /// <summary>OIDC response types the client may use (default `code`).</summary>
+        [JsonPropertyName("response_types")] public List<string>? ResponseTypes { get; init; }
+        /// <summary>Pre-registered https request object URIs.</summary>
+        [JsonPropertyName("request_uris")] public List<string>? RequestUris { get; init; }
+        /// <summary>Default maximum authentication age in seconds.</summary>
+        [JsonPropertyName("default_max_age")] public long? DefaultMaxAge { get; init; }
+        [JsonPropertyName("default_acr_values")] public List<string>? DefaultAcrValues { get; init; }
+        /// <summary>Contact addresses of the app's developers.</summary>
+        [JsonPropertyName("contacts")] public List<string>? Contacts { get; init; }
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("redirect_uris")] public List<string>? RedirectUris { get; init; }
         [JsonPropertyName("allowed_scopes")] public List<string>? AllowedScopes { get; init; }
@@ -43835,6 +44407,24 @@ namespace Atlas.Generated
         /// <summary>`none` makes it a public (PKCE) client. One of: client_secret_basic, client_secret_post, none, private_key_jwt, workload_jwt.</summary>
         [JsonPropertyName("token_endpoint_auth_method")] public string? TokenEndpointAuthMethod { get; init; }
         [JsonPropertyName("logo_url")] public string? LogoUrl { get; init; }
+        /// <summary>RFC 7591 name for logo_url.</summary>
+        [JsonPropertyName("logo_uri")] public string? LogoUri { get; init; }
+        /// <summary>RFC 7591: the app's homepage (absolute https URL), shown on the consent page. null clears (update).</summary>
+        [JsonPropertyName("client_uri")] public string? ClientUri { get; init; }
+        /// <summary>Alias of client_uri.</summary>
+        [JsonPropertyName("homepage_url")] public string? HomepageUrl { get; init; }
+        /// <summary>RFC 7591: the app's privacy policy (absolute https URL), linked from the consent page. null clears (update).</summary>
+        [JsonPropertyName("policy_uri")] public string? PolicyUri { get; init; }
+        /// <summary>RFC 7591: the app's terms of service (absolute https URL), linked from the consent page. null clears (update).</summary>
+        [JsonPropertyName("tos_uri")] public string? TosUri { get; init; }
+        /// <summary>Provisioning tags (filter lists with ?metadata[key]=value). Update replaces them.</summary>
+        [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
+        /// <summary>Client public keys (JWK Set) for private_key_jwt and signed request objects.</summary>
+        [JsonPropertyName("jwks")] public OauthClientsCreateBodyJwks? Jwks { get; init; }
+        /// <summary>https URL of the client's JWK Set, instead of jwks.</summary>
+        [JsonPropertyName("jwks_uri")] public string? JwksUri { get; init; }
+        /// <summary>RFC 8705 expected certificate Subject DN for tls_client_auth.</summary>
+        [JsonPropertyName("tls_client_auth_subject_dn")] public string? TlsClientAuthSubjectDn { get; init; }
         /// <summary>Skips the consent screen for a first-party app.</summary>
         [JsonPropertyName("first_party")] public bool? FirstParty { get; init; }
         [JsonPropertyName("post_logout_redirect_uris")] public List<string>? PostLogoutRedirectUris { get; init; }
@@ -43852,9 +44442,13 @@ namespace Atlas.Generated
         [JsonPropertyName("refresh_touches_session")] public bool? RefreshTouchesSession { get; init; }
         /// <summary>When true, /oauth2/authorize issues no code to this client for a user whose primary email is not proven (a sign-up that skipped verification does not count). The first time, the user is sent through the hosted sign-in, which asks them to verify the address with a code, and the authorization then continues; if they come back still unverified, or under prompt=none, or when the account has no email, the application has no email provider, or the client uses its own login_url, the redirect carries error=access_denied with an error_description saying why. Only new authorizations are checked (existing refresh tokens keep working). Default false.</summary>
         [JsonPropertyName("require_verified_email")] public bool? RequireVerifiedEmail { get; init; }
+        /// <summary>When true, /oauth2/authorize shows the consent screen for this client, a first-party client included, until the user approves with remember; a remembered approval (for that organization, under per-organization consent) skips it next time. Send prompt=consent to ask every time. Under prompt=none with no remembered approval the request fails with consent_required. Default false.</summary>
+        [JsonPropertyName("require_consent")] public bool? RequireConsent { get; init; }
+        /// <summary>Keep the user's consent per organization. null (default): per organization whenever the request names one (`organization`, an organization choice, or the request resolves to one), so approving the app for organization A never covers organization B and revoking one organization's consent ends only that organization's tokens. true: always per organization. false: one consent for the user whatever the organization. null clears (update).</summary>
+        [JsonPropertyName("consent_per_organization")] public bool? ConsentPerOrganization { get; init; }
         /// <summary>The developer (an Atlas user or organization id) who owns this client. null clears (update).</summary>
         [JsonPropertyName("owner")] public string? Owner { get; init; }
-        /// <summary>Review state; default approved. development: only the owner and testers can authorize. suspended: new authorizations and refreshes are refused at once and `oauth_client.status_changed` fires on every change. One of: development, in_review, approved, suspended.</summary>
+        /// <summary>Review state; default approved. development and in_review: only the owner and testers can authorize (in_review is a development client awaiting review). suspended: new authorizations and refreshes are refused at once and `oauth_client.status_changed` fires on every change. One of: development, in_review, approved, suspended.</summary>
         [JsonPropertyName("status")] public string? Status { get; init; }
         /// <summary>User ids besides the owner who may authorize a client in development.</summary>
         [JsonPropertyName("testers")] public List<string>? Testers { get; init; }
@@ -43894,10 +44488,104 @@ namespace Atlas.Generated
         [JsonPropertyName("disabled")] public bool? Disabled { get; init; }
         /// <summary>Require PKCE for this confidential client too (OAuth 2.1 posture).</summary>
         [JsonPropertyName("require_pkce")] public bool? RequirePkce { get; init; }
+        /// <summary>Send <c>null</c> for <c>id_token_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearIdTokenSignedResponseAlg() => this with { Cleared = Plus("id_token_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>userinfo_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearUserinfoSignedResponseAlg() => this with { Cleared = Plus("userinfo_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>authorization_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearAuthorizationSignedResponseAlg() => this with { Cleared = Plus("authorization_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>introspection_signed_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearIntrospectionSignedResponseAlg() => this with { Cleared = Plus("introspection_signed_response_alg") };
+        /// <summary>Send <c>null</c> for <c>id_token_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearIdTokenEncryptedResponseAlg() => this with { Cleared = Plus("id_token_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>id_token_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearIdTokenEncryptedResponseEnc() => this with { Cleared = Plus("id_token_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>userinfo_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearUserinfoEncryptedResponseAlg() => this with { Cleared = Plus("userinfo_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>userinfo_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearUserinfoEncryptedResponseEnc() => this with { Cleared = Plus("userinfo_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>authorization_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearAuthorizationEncryptedResponseAlg() => this with { Cleared = Plus("authorization_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>authorization_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearAuthorizationEncryptedResponseEnc() => this with { Cleared = Plus("authorization_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>introspection_encrypted_response_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearIntrospectionEncryptedResponseAlg() => this with { Cleared = Plus("introspection_encrypted_response_alg") };
+        /// <summary>Send <c>null</c> for <c>introspection_encrypted_response_enc</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearIntrospectionEncryptedResponseEnc() => this with { Cleared = Plus("introspection_encrypted_response_enc") };
+        /// <summary>Send <c>null</c> for <c>request_object_signing_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearRequestObjectSigningAlg() => this with { Cleared = Plus("request_object_signing_alg") };
+        /// <summary>Send <c>null</c> for <c>request_object_encryption_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearRequestObjectEncryptionAlg() => this with { Cleared = Plus("request_object_encryption_alg") };
+        /// <summary>Send <c>null</c> for <c>request_object_encryption_enc</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearRequestObjectEncryptionEnc() => this with { Cleared = Plus("request_object_encryption_enc") };
+        /// <summary>Send <c>null</c> for <c>initiate_login_uri</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearInitiateLoginUri() => this with { Cleared = Plus("initiate_login_uri") };
+        /// <summary>Send <c>null</c> for <c>backchannel_token_delivery_mode</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearBackchannelTokenDeliveryMode() => this with { Cleared = Plus("backchannel_token_delivery_mode") };
+        /// <summary>Send <c>null</c> for <c>backchannel_client_notification_endpoint</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearBackchannelClientNotificationEndpoint() => this with { Cleared = Plus("backchannel_client_notification_endpoint") };
+        /// <summary>Send <c>null</c> for <c>backchannel_authentication_request_signing_alg</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearBackchannelAuthenticationRequestSigningAlg() => this with { Cleared = Plus("backchannel_authentication_request_signing_alg") };
+        /// <summary>Send <c>null</c> for <c>wimse_workload_id</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearWimseWorkloadId() => this with { Cleared = Plus("wimse_workload_id") };
+        /// <summary>Send <c>null</c> for <c>min_app_version</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearMinAppVersion() => this with { Cleared = Plus("min_app_version") };
+        /// <summary>Send <c>null</c> for <c>native_sso_group</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearNativeSsoGroup() => this with { Cleared = Plus("native_sso_group") };
+        /// <summary>Send <c>null</c> for <c>org_selection</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearOrgSelection() => this with { Cleared = Plus("org_selection") };
+        /// <summary>Send <c>null</c> for <c>software_id</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearSoftwareId() => this with { Cleared = Plus("software_id") };
+        /// <summary>Send <c>null</c> for <c>software_version</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearSoftwareVersion() => this with { Cleared = Plus("software_version") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_dns</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTlsClientAuthSanDns() => this with { Cleared = Plus("tls_client_auth_san_dns") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_uri</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTlsClientAuthSanUri() => this with { Cleared = Plus("tls_client_auth_san_uri") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_ip</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTlsClientAuthSanIp() => this with { Cleared = Plus("tls_client_auth_san_ip") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_san_email</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTlsClientAuthSanEmail() => this with { Cleared = Plus("tls_client_auth_san_email") };
+        /// <summary>Send <c>null</c> for <c>require_signed_request_object</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearRequireSignedRequestObject() => this with { Cleared = Plus("require_signed_request_object") };
+        /// <summary>Send <c>null</c> for <c>require_auth_time</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearRequireAuthTime() => this with { Cleared = Plus("require_auth_time") };
+        /// <summary>Send <c>null</c> for <c>tls_client_certificate_bound_access_tokens</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTlsClientCertificateBoundAccessTokens() => this with { Cleared = Plus("tls_client_certificate_bound_access_tokens") };
+        /// <summary>Send <c>null</c> for <c>dpop_bound_access_tokens</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearDpopBoundAccessTokens() => this with { Cleared = Plus("dpop_bound_access_tokens") };
+        /// <summary>Send <c>null</c> for <c>txn_token_unsigned_subject</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTxnTokenUnsignedSubject() => this with { Cleared = Plus("txn_token_unsigned_subject") };
+        /// <summary>Send <c>null</c> for <c>backchannel_user_code_parameter</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearBackchannelUserCodeParameter() => this with { Cleared = Plus("backchannel_user_code_parameter") };
+        /// <summary>Send <c>null</c> for <c>request_uris</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearRequestUris() => this with { Cleared = Plus("request_uris") };
+        /// <summary>Send <c>null</c> for <c>default_max_age</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearDefaultMaxAge() => this with { Cleared = Plus("default_max_age") };
+        /// <summary>Send <c>null</c> for <c>default_acr_values</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearDefaultAcrValues() => this with { Cleared = Plus("default_acr_values") };
+        /// <summary>Send <c>null</c> for <c>contacts</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearContacts() => this with { Cleared = Plus("contacts") };
+        /// <summary>Send <c>null</c> for <c>client_uri</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearClientUri() => this with { Cleared = Plus("client_uri") };
+        /// <summary>Send <c>null</c> for <c>homepage_url</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearHomepageUrl() => this with { Cleared = Plus("homepage_url") };
+        /// <summary>Send <c>null</c> for <c>policy_uri</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearPolicyUri() => this with { Cleared = Plus("policy_uri") };
+        /// <summary>Send <c>null</c> for <c>tos_uri</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTosUri() => this with { Cleared = Plus("tos_uri") };
+        /// <summary>Send <c>null</c> for <c>jwks</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearJwks() => this with { Cleared = Plus("jwks") };
+        /// <summary>Send <c>null</c> for <c>jwks_uri</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearJwksUri() => this with { Cleared = Plus("jwks_uri") };
+        /// <summary>Send <c>null</c> for <c>tls_client_auth_subject_dn</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearTlsClientAuthSubjectDn() => this with { Cleared = Plus("tls_client_auth_subject_dn") };
         /// <summary>Send <c>null</c> for <c>backchannel_logout_uri</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearBackchannelLogoutUri() => this with { Cleared = Plus("backchannel_logout_uri") };
         /// <summary>Send <c>null</c> for <c>frontchannel_logout_uri</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearFrontchannelLogoutUri() => this with { Cleared = Plus("frontchannel_logout_uri") };
+        /// <summary>Send <c>null</c> for <c>consent_per_organization</c>, which clears it.</summary>
+        public OauthClientsUpdateBody ClearConsentPerOrganization() => this with { Cleared = Plus("consent_per_organization") };
         /// <summary>Send <c>null</c> for <c>owner</c>, which clears it.</summary>
         public OauthClientsUpdateBody ClearOwner() => this with { Cleared = Plus("owner") };
         /// <summary>Send <c>null</c> for <c>default_scopes</c>, which clears it.</summary>
@@ -44252,6 +44940,14 @@ namespace Atlas.Generated
         [JsonPropertyName("client_id")] public string ClientId { get; init; } = "";
         [JsonPropertyName("name")] public string? Name { get; init; }
         [JsonPropertyName("logo_url")] public string? LogoUrl { get; init; }
+        /// <summary>The app's homepage (RFC 7591), shown on the consent page.</summary>
+        [JsonPropertyName("client_uri")] public string? ClientUri { get; init; }
+        /// <summary>Alias of client_uri.</summary>
+        [JsonPropertyName("homepage_url")] public string? HomepageUrl { get; init; }
+        /// <summary>The app's privacy policy (RFC 7591), linked from the consent page.</summary>
+        [JsonPropertyName("policy_uri")] public string? PolicyUri { get; init; }
+        /// <summary>The app's terms of service (RFC 7591), linked from the consent page.</summary>
+        [JsonPropertyName("tos_uri")] public string? TosUri { get; init; }
         [JsonPropertyName("redirect_uris")] public List<string>? RedirectUris { get; init; }
         [JsonPropertyName("allowed_scopes")] public List<string>? AllowedScopes { get; init; }
         [JsonPropertyName("grant_types")] public List<string>? GrantTypes { get; init; }
@@ -44292,8 +44988,12 @@ namespace Atlas.Generated
         [JsonPropertyName("refresh_touches_session")] public bool? RefreshTouchesSession { get; init; }
         /// <summary>No authorization code is issued for a user whose primary email is not verified.</summary>
         [JsonPropertyName("require_verified_email")] public bool? RequireVerifiedEmail { get; init; }
+        /// <summary>The consent screen is shown, first-party clients included, until the user approves with remember (prompt=consent asks every time).</summary>
+        [JsonPropertyName("require_consent")] public bool? RequireConsent { get; init; }
+        /// <summary>Consent is kept per organization (null = whenever the request names one; true = always; false = one consent for all).</summary>
+        [JsonPropertyName("consent_per_organization")] public bool? ConsentPerOrganization { get; init; }
         [JsonPropertyName("owner")] public string? Owner { get; init; }
-        /// <summary>Review state. development: only the owner and testers can authorize; suspended: refused at /oauth2/authorize and the token endpoint. One of: development, in_review, approved, suspended.</summary>
+        /// <summary>Review state. development and in_review: only the owner and testers can authorize; suspended: refused at /oauth2/authorize and the token endpoint. One of: development, in_review, approved, suspended.</summary>
         [JsonPropertyName("status")] public string? Status { get; init; }
         /// <summary>User ids besides the owner who may authorize a client in development.</summary>
         [JsonPropertyName("testers")] public List<string>? Testers { get; init; }
@@ -44474,6 +45174,8 @@ namespace Atlas.Generated
         [JsonPropertyName("audience")] public string? Audience { get; init; }
         [JsonPropertyName("authorization_details")] public List<Dictionary<string, object?>>? AuthorizationDetails { get; init; }
         [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+        /// <summary>The requested scopes the scope catalogue marks optional: the user may leave them out.</summary>
+        [JsonPropertyName("optional_scopes")] public List<string>? OptionalScopes { get; init; }
         [JsonPropertyName("redirect_uri")] public string? RedirectUri { get; init; }
         /// <summary>The application's original /oauth2/authorize request on this instance, every parameter included (use switch_account to restart it at login). Null when too large to carry.</summary>
         [JsonPropertyName("request_url")] public string? RequestUrl { get; init; }
@@ -44510,9 +45212,13 @@ namespace Atlas.Generated
     /// <summary>A OauthConsentRequestsSetAcceptBody object.</summary>
     public sealed record OauthConsentRequestsSetAcceptBody : ClearableBody
     {
-        /// <summary>The scopes to grant: a subset of requested_scope that includes openid. Default: all requested.</summary>
+        /// <summary>The scopes to grant: a subset of requested_scope that includes openid and every scope that is not in optional_scopes. The token and the grant carry exactly these. Default: all requested.</summary>
+        [JsonPropertyName("granted_scopes")] public List<string>? GrantedScopes { get; init; }
+        /// <summary>Older name for granted_scopes that may drop any scope but openid. Send one of the two.</summary>
         [JsonPropertyName("grant_scope")] public List<string>? GrantScope { get; init; }
-        /// <summary>Record the consent so the user is not asked again. Default true.</summary>
+        /// <summary>The organization to authorize for, when your page lets the user pick one: a member organization the app is enabled for. Default: the one the request resolved to.</summary>
+        [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+        /// <summary>Record the consent so the user is not asked again. Default true. With false the consent is still recorded so its tokens can be revoked, but the user is asked again next time.</summary>
         [JsonPropertyName("remember")] public bool? Remember { get; init; }
         /// <summary>Your own JSON (at most 4 KB) stored on the recorded consent and returned by the grant API and in grant.revoked. Atlas adds `granted_by`, the actor that accepted. Not stored when remember is false.</summary>
         [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
@@ -44803,6 +45509,8 @@ namespace Atlas.Generated
         /// <summary>For a provider whose authorize page can return an id_token (google, apple, microsoft, twitch): sign-in with only the client_id on every platform (native apps, Expo Go, desktop, web), used automatically while the provider has no client secret. `available` says whether that is the case now; `redirect_uri` is the URL to register with the provider for it. Null for other providers.</summary>
         [JsonPropertyName("hosted_id_token")] public OAuthProviderModelHostedIdToken? HostedIdToken { get; init; }
         [JsonPropertyName("configured")] public bool Configured { get; init; }
+        /// <summary>Whether this development instance signs in with Atlas's shared development application (set with PUT { use_shared_dev_credentials }).</summary>
+        [JsonPropertyName("use_shared_dev_credentials")] public bool? UseSharedDevCredentials { get; init; }
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
         [JsonPropertyName("has_secret")] public bool? HasSecret { get; init; }
         /// <summary>Whether the provider is turned on. Saving credentials via PUT does NOT enable it; toggle with POST /v1/oauth_providers/{provider}/enabled.</summary>
@@ -44876,6 +45584,8 @@ namespace Atlas.Generated
         /// <summary>The extra audiences a native app id_token may carry (an iOS bundle or Android client id), as GET returns them: an array, or a comma-separated string. The provider's own client_id is always accepted. Same as settings.native_client_ids; an empty array or "" clears the list.</summary>
         [JsonPropertyName("native_client_ids")] public object? NativeClientIds { get; init; }
         [JsonPropertyName("native")] public bool? Native { get; init; }
+        /// <summary>Development instances only: sign in with Atlas's shared development application for google, github, discord or microsoft, with no OAuth application of your own (the consent screen shows Atlas). Send it alone. A production instance answers 422; saving your own credentials switches it off. GET returns the current value.</summary>
+        [JsonPropertyName("use_shared_dev_credentials")] public bool? UseSharedDevCredentials { get; init; }
         /// <summary>Force the sign-in mode; "" clears the override. Applied together with credentials in one call. One of: native, redirect, .</summary>
         [JsonPropertyName("mode")] public string? Mode { get; init; }
         /// <summary>The brand shown on the button (e.g. 'Discord' for a broker keyed 'restorehub'); empty clears. Honoured on the hosted pages, embedded component, and /v1/client/environment.</summary>
@@ -45394,6 +46104,10 @@ namespace Atlas.Generated
         [JsonPropertyName("user_filter")] public string? UserFilter { get; init; }
         [JsonPropertyName("start_tls")] public bool? StartTls { get; init; }
         [JsonPropertyName("require_consent_screen")] public bool? RequireConsentScreen { get; init; }
+        /// <summary>One of: email, same_org_only, none.</summary>
+        [JsonPropertyName("account_linking")] public string? AccountLinking { get; init; }
+        /// <summary>One of: email, same_org_only, none.</summary>
+        [JsonPropertyName("account_linking_effective")] public string? AccountLinkingEffective { get; init; }
         /// <summary>Directory attribute → Atlas field mapping. `email` is required.</summary>
         [JsonPropertyName("attributes")] public OrgLdapConnectionsListResponseDataItemAttributes? Attributes { get; init; }
         /// <summary>Directory group → organization role. A newly seated member gets the role of the first mapping whose group DN is in their groups attribute (compared case-insensitively), else default_role_id, else org:member. On each later sign-in a member this connection seated moves to the role their groups map to now; groups that map to nothing leave the role unchanged, and a role set through the API or dashboard, or the organization's creator, is never changed. Roles must exist for the organization.</summary>
@@ -45474,6 +46188,8 @@ namespace Atlas.Generated
         /// <summary>Search filter with a {{username}} placeholder.</summary>
         [JsonPropertyName("user_filter")] public string? UserFilter { get; init; }
         [JsonPropertyName("start_tls")] public bool? StartTls { get; init; }
+        /// <summary>Whether a directory sign-in may link to an existing user by shared email. same_org_only (the default) links only to members or end users of the connection's organization, or users at its verified domains; none never links; email links to any user with that verified email. null restores the default. One of: email, same_org_only, none.</summary>
+        [JsonPropertyName("account_linking")] public string? AccountLinking { get; init; }
         /// <summary>Show the person a confirmation ("sign in as ...") before an LDAP sign-in completes. The sign-in response carries consent_required and a consent_token instead of a ticket.</summary>
         [JsonPropertyName("require_consent_screen")] public bool? RequireConsentScreen { get; init; }
         /// <summary>Directory attribute → Atlas field mapping. `email` is required.</summary>
@@ -45483,6 +46199,8 @@ namespace Atlas.Generated
         /// <summary>Service-account password. Write-only; never returned.</summary>
         [JsonPropertyName("bind_password")] public string? BindPassword { get; init; }
         [JsonPropertyName("default_role_id")] public string? DefaultRoleId { get; init; }
+        /// <summary>Send <c>null</c> for <c>account_linking</c>, which clears it.</summary>
+        public OrgLdapConnectionsCreateBody ClearAccountLinking() => this with { Cleared = Plus("account_linking") };
         /// <summary>Send <c>null</c> for <c>default_role_id</c>, which clears it.</summary>
         public OrgLdapConnectionsCreateBody ClearDefaultRoleId() => this with { Cleared = Plus("default_role_id") };
     }
@@ -50009,7 +50727,7 @@ namespace Atlas.Generated
         [JsonPropertyName("scopes")] public List<string>? Scopes { get; init; }
         /// <summary>Presets (read_only, privacy:execute, …) expanded.</summary>
         [JsonPropertyName("effective_scopes")] public List<string>? EffectiveScopes { get; init; }
-        /// <summary>The named key preset (app-runtime, provisioning, integrations) whose scopes are exactly this key's; null otherwise.</summary>
+        /// <summary>The named key preset (app-runtime, web-app, provisioning, operator, end-user-pools, oauth-apps, integrations) whose scopes are exactly this key's; null otherwise.</summary>
         [JsonPropertyName("preset")] public string? Preset { get; init; }
         /// <summary>What this key may hand out through POST /v1/secret_keys: nothing without secret_keys:write; otherwise only scopes it holds itself.</summary>
         [JsonPropertyName("can_mint")] public PlatformWhoamiListResponseKeyCanMint? CanMint { get; init; }
@@ -52104,7 +52822,7 @@ namespace Atlas.Generated
         [JsonPropertyName("overlap_seconds")] public long? OverlapSeconds { get; init; }
         /// <summary>One of: atlas, legacy.</summary>
         [JsonPropertyName("key_format")] public string? KeyFormat { get; init; }
-        /// <summary>Give the replacement this named scope set instead of the old key's scopes. The calling key must hold them. One of: app-runtime, web-app, provisioning, integrations.</summary>
+        /// <summary>Give the replacement this named scope set instead of the old key's scopes. The calling key must hold them. One of: app-runtime, web-app, provisioning, operator, end-user-pools, oauth-apps, integrations.</summary>
         [JsonPropertyName("preset")] public string? Preset { get; init; }
     }
 
@@ -52930,6 +53648,10 @@ namespace Atlas.Generated
         /// <summary>The configured field mapping (only the set keys).</summary>
         [JsonPropertyName("attribute_mapping")] public Dictionary<string, string>? AttributeMapping { get; init; }
         [JsonPropertyName("oidc_scopes")] public List<string>? OidcScopes { get; init; }
+        /// <summary>The explicit linking mode; null = the default for the connection. One of: email, same_org_only, none.</summary>
+        [JsonPropertyName("account_linking")] public string? AccountLinking { get; init; }
+        /// <summary>The linking mode in force: the explicit setting, else same_org_only for an organization-bound connection, else email. One of: email, same_org_only, none.</summary>
+        [JsonPropertyName("account_linking_effective")] public string? AccountLinkingEffective { get; init; }
         /// <summary>Whether later sign-ins also re-role members with no recorded role source when claims map elsewhere.</summary>
         [JsonPropertyName("rerole_on_sign_in")] public bool? ReroleOnSignIn { get; init; }
         /// <summary>Declarative profile mapping from the upstream userinfo / id_token claims to Atlas user fields and metadata. Unmapped fields keep the provider defaults. A remapped `email` is unverified unless `email_verified` is mapped too. null clears it.</summary>
@@ -53067,6 +53789,8 @@ namespace Atlas.Generated
         [JsonPropertyName("oidc_scopes")] public List<string>? OidcScopes { get; init; }
         /// <summary>Opt-in (default off): on every later sign-in, also move the role of an existing member who has no recorded role source (joined by invitation, or before sources were recorded) when their claims now map to a different role. A role set through the API or dashboard, and another source's members, are never touched. null turns it off.</summary>
         [JsonPropertyName("rerole_on_sign_in")] public bool? ReroleOnSignIn { get; init; }
+        /// <summary>Whether a sign-in through this connection may link to an EXISTING user by a shared verified email. same_org_only (the default for an organization-bound connection) links only to a user who is already a member or end user of the connection's organization, or whose email domain is a verified domain of it, and otherwise refuses with 409; none never links (the sign-in gets its own account); email links by verified email as an instance-level connection does (the default for a connection without an organization). null restores the default. same_org_only needs an organization. One of: email, same_org_only, none.</summary>
+        [JsonPropertyName("account_linking")] public string? AccountLinking { get; init; }
         /// <summary>Map an IdP claim value to an org role (first match wins). Sets the role a member is seated with, and on later sign-ins moves the role of a member this connection seated when their claims map elsewhere. Claims that map to nothing leave the role unchanged; a role set through the API or dashboard, and the organization's creator, are never changed.</summary>
         [JsonPropertyName("claim_role_mappings")] public List<SsoConnectionsCreateBodyClaimRoleMappingsItem>? ClaimRoleMappings { get; init; }
         [JsonPropertyName("default_role_id")] public string? DefaultRoleId { get; init; }
@@ -53107,6 +53831,8 @@ namespace Atlas.Generated
         public SsoConnectionsCreateBody ClearOidcScopes() => this with { Cleared = Plus("oidc_scopes") };
         /// <summary>Send <c>null</c> for <c>rerole_on_sign_in</c>, which clears it.</summary>
         public SsoConnectionsCreateBody ClearReroleOnSignIn() => this with { Cleared = Plus("rerole_on_sign_in") };
+        /// <summary>Send <c>null</c> for <c>account_linking</c>, which clears it.</summary>
+        public SsoConnectionsCreateBody ClearAccountLinking() => this with { Cleared = Plus("account_linking") };
         /// <summary>Send <c>null</c> for <c>default_role_id</c>, which clears it.</summary>
         public SsoConnectionsCreateBody ClearDefaultRoleId() => this with { Cleared = Plus("default_role_id") };
         /// <summary>Send <c>null</c> for <c>profile_mapping</c>, which clears it.</summary>
@@ -53572,6 +54298,8 @@ namespace Atlas.Generated
     {
         [JsonPropertyName("users")] public List<Dictionary<string, object?>>? Users { get; init; }
         [JsonPropertyName("upsert")] public bool? Upsert { get; init; }
+        /// <summary>The Unicode form the old system normalised passwords to before hashing. Applied to the typed password before the imported hash is checked, and dropped when the first sign-in rehashes to Argon2id. A row's own password_normalize overrides it. One of: nfkc, nfc, none.</summary>
+        [JsonPropertyName("password_normalize")] public string? PasswordNormalize { get; init; }
         [JsonPropertyName("create_organizations")] public bool? CreateOrganizations { get; init; }
         /// <summary>until_email_verified holds a row's password until an email on the account is proven: a correct password is refused with password_not_yet_usable until then. A row with email_verified true is never held. One of: active, until_email_verified.</summary>
         [JsonPropertyName("password_policy")] public string? PasswordPolicy { get; init; }
@@ -53717,6 +54445,7 @@ namespace Atlas.Generated
         [JsonPropertyName("password_hash_algorithm")] public string? PasswordHashAlgorithm { get; init; }
         [JsonPropertyName("password_hash_params")] public Dictionary<string, object?>? PasswordHashParams { get; init; }
         [JsonPropertyName("password_salt")] public string? PasswordSalt { get; init; }
+        [JsonPropertyName("password_normalize")] public string? PasswordNormalize { get; init; }
         [JsonPropertyName("password_hasher")] public string? PasswordHasher { get; init; }
         [JsonPropertyName("first_name")] public string? FirstName { get; init; }
         [JsonPropertyName("last_name")] public string? LastName { get; init; }
@@ -53742,6 +54471,8 @@ namespace Atlas.Generated
         public UsersCreateBody ClearPasswordHashAlgorithm() => this with { Cleared = Plus("password_hash_algorithm") };
         /// <summary>Send <c>null</c> for <c>password_salt</c>, which clears it.</summary>
         public UsersCreateBody ClearPasswordSalt() => this with { Cleared = Plus("password_salt") };
+        /// <summary>Send <c>null</c> for <c>password_normalize</c>, which clears it.</summary>
+        public UsersCreateBody ClearPasswordNormalize() => this with { Cleared = Plus("password_normalize") };
         /// <summary>Send <c>null</c> for <c>password_hasher</c>, which clears it.</summary>
         public UsersCreateBody ClearPasswordHasher() => this with { Cleared = Plus("password_hasher") };
         /// <summary>Send <c>null</c> for <c>image_url</c>, which clears it.</summary>
@@ -54318,6 +55049,10 @@ namespace Atlas.Generated
         [JsonPropertyName("client_id")] public string? ClientId { get; init; }
         [JsonPropertyName("client_name")] public string? ClientName { get; init; }
         [JsonPropertyName("scopes")] public List<string> Scopes { get; init; } = new();
+        /// <summary>The organization the consent is for; null when it was given outside one.</summary>
+        [JsonPropertyName("organization_id")] public string? OrganizationId { get; init; }
+        /// <summary>false: the user declined to be remembered; the grant exists only so its tokens can be revoked.</summary>
+        [JsonPropertyName("remembered")] public bool? Remembered { get; init; }
         [JsonPropertyName("metadata")] public Dictionary<string, object?>? Metadata { get; init; }
         [JsonPropertyName("granted_at")] public long GrantedAt { get; init; }
         [JsonPropertyName("updated_at")] public long UpdatedAt { get; init; }
@@ -55984,7 +56719,7 @@ namespace Atlas.Generated
         [JsonPropertyName("event_naming")] public string? EventNaming { get; init; }
         /// <summary>A third-party receiver (not on your own origins): preflight does not flag its host.</summary>
         [JsonPropertyName("external")] public bool? External { get; init; }
-        /// <summary>Mark an endpoint you created for a connected platform as that platform's, so config export, plan and preflight treat it like one the platform set up itself. The url must be an https URL on that platform's API host. null clears it. One of: cookiemunch, chatly, forumulate, referalli.</summary>
+        /// <summary>Mark an endpoint you created for a connected platform as that platform's, so config export, plan and preflight treat it like one the platform set up itself. The url must be an https URL on that platform's API host. null clears it. One of: cookiemunch, chatly, forumulate, referalli, seolyticize.</summary>
         [JsonPropertyName("managed_by")] public string? ManagedBy { get; init; }
         /// <summary>Signature entries in atlas-signature: v1 (id.timestamp.body, default) and/or v2 (id.timestamp.url.body).</summary>
         [JsonPropertyName("signature_versions")] public List<string>? SignatureVersions { get; init; }
@@ -56103,7 +56838,7 @@ namespace Atlas.Generated
         [JsonPropertyName("event_naming")] public string? EventNaming { get; init; }
         /// <summary>A third-party receiver (not on your own origins): preflight does not flag its host.</summary>
         [JsonPropertyName("external")] public bool? External { get; init; }
-        /// <summary>Mark an endpoint you created for a connected platform as that platform's, so config export, plan and preflight treat it like one the platform set up itself. The url must be an https URL on that platform's API host. null clears it. One of: cookiemunch, chatly, forumulate, referalli.</summary>
+        /// <summary>Mark an endpoint you created for a connected platform as that platform's, so config export, plan and preflight treat it like one the platform set up itself. The url must be an https URL on that platform's API host. null clears it. One of: cookiemunch, chatly, forumulate, referalli, seolyticize.</summary>
         [JsonPropertyName("managed_by")] public string? ManagedBy { get; init; }
         /// <summary>Signature entries in atlas-signature: v1 (id.timestamp.body, default) and/or v2 (id.timestamp.url.body).</summary>
         [JsonPropertyName("signature_versions")] public List<string>? SignatureVersions { get; init; }
@@ -56153,7 +56888,7 @@ namespace Atlas.Generated
         [JsonPropertyName("event_naming")] public string? EventNaming { get; init; }
         /// <summary>A third-party receiver (not on your own origins): preflight does not flag its host.</summary>
         [JsonPropertyName("external")] public bool? External { get; init; }
-        /// <summary>Mark an endpoint you created for a connected platform as that platform's, so config export, plan and preflight treat it like one the platform set up itself. The url must be an https URL on that platform's API host. null clears it. One of: cookiemunch, chatly, forumulate, referalli.</summary>
+        /// <summary>Mark an endpoint you created for a connected platform as that platform's, so config export, plan and preflight treat it like one the platform set up itself. The url must be an https URL on that platform's API host. null clears it. One of: cookiemunch, chatly, forumulate, referalli, seolyticize.</summary>
         [JsonPropertyName("managed_by")] public string? ManagedBy { get; init; }
         /// <summary>Signature entries in atlas-signature: v1 (id.timestamp.body, default) and/or v2 (id.timestamp.url.body).</summary>
         [JsonPropertyName("signature_versions")] public List<string>? SignatureVersions { get; init; }

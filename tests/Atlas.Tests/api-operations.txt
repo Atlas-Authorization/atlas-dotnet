@@ -1318,6 +1318,7 @@ DELETE /v1/org_role_sets/{id}
 DELETE /v1/org_templates/{id}
 DELETE /v1/organization_connections/{id}
 DELETE /v1/organizations/{id}/applications/{clientId}
+DELETE /v1/organizations/{id}/memberships/by_external_id/{userExternalId}
 DELETE /v1/passkey_campaigns/{id}
 DELETE /v1/pca/action-registry/drafts/{verb}
 DELETE /v1/pca/action-registry/namespaces/{ns}/pin
@@ -1745,6 +1746,7 @@ POST /v1/authz/explain
 POST /v1/authz/rbac/check
 POST /v1/authz/what_if
 POST /v1/authz_decisions/ingest
+POST /v1/billing/checkout/sync
 POST /v1/billing/connect/accounts
 POST /v1/billing/connect/accounts/{id}/onboarding_link
 POST /v1/billing/connect/accounts/{id}/refresh
@@ -1754,7 +1756,9 @@ POST /v1/billing/coupons/validate
 POST /v1/billing/credits
 POST /v1/billing/invoices/{id}/refund
 POST /v1/billing/store_links
+POST /v1/billing/stripe/events
 POST /v1/billing/subscriptions/{id}/extend_trial
+POST /v1/billing/subscriptions/{id}/sync
 POST /v1/billing/usage/batch
 POST /v1/chat_integrations
 POST /v1/chat_integrations/{id}/test
@@ -1832,6 +1836,7 @@ POST /v1/instance/exports
 POST /v1/instance/exports/{id}/download_url
 POST /v1/instance/exports/{id}/revoke_links
 POST /v1/instance/hooks/before_first_session/test
+POST /v1/instance/hosted_method_filters
 POST /v1/instance/imports
 POST /v1/instance/integrations/{product}/test
 POST /v1/instance/op_keys/rotate
@@ -1864,6 +1869,8 @@ POST /v1/migrations/{source}/verify
 POST /v1/native_apps
 POST /v1/oauth_clients/{id}/consents/revoke
 POST /v1/oauth_clients/{id}/token_exchange_profiles
+POST /v1/oauth_clients/{id}/webhook/rotate_secret
+POST /v1/oauth_clients/{id}/webhook/test
 POST /v1/oauth_grants/import
 POST /v1/oauth_publishers
 POST /v1/oauth_publishers/{id}/verify
@@ -2022,6 +2029,7 @@ PUT /v1/oauth_device_requests/reject
 PUT /v1/oauth_publishers/{id}/clients/{client_id}
 PUT /v1/openfga/stores/{store}/assertions/{model}
 PUT /v1/organizations/{id}/applications/{clientId}
+PUT /v1/organizations/{id}/memberships/by_external_id/{userExternalId}
 PUT /v1/organizations/{id}/memberships/{userId}
 PUT /v1/organizations/{id}/role_policy
 PUT /v1/organizations/{id}/seats
